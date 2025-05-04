@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,6 +53,12 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				tattoo: {
+					red: '#ea384c',
+					black: '#0d0d0d',
+					darkgray: '#222222',
+					white: '#ffffff',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -84,11 +91,58 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-red': {
+					'0%, 100%': {
+						opacity: '1',
+					},
+					'50%': {
+						opacity: '0.5',
+					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0)',
+					},
+					'50%': {
+						transform: 'translateY(-10px)',
+					}
+				},
+				'glow': {
+					'0%, 100%': {
+						boxShadow: '0 0 10px rgba(234, 56, 76, 0.7)',
+					},
+					'50%': {
+						boxShadow: '0 0 25px rgba(234, 56, 76, 0.9)',
+					}
+				},
+				'slideRight': {
+					from: {
+						transform: 'translateX(-100%)',
+						opacity: '0',
+					},
+					to: {
+						transform: 'translateX(0)',
+						opacity: '1',
+					}
+				},
+				'fadeIn': {
+					from: {
+						opacity: '0',
+					},
+					to: {
+						opacity: '1',
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-red': 'pulse-red 2s ease-in-out infinite',
+				'float': 'float 4s ease-in-out infinite',
+				'glow': 'glow 3s ease-in-out infinite',
+				'slideRight': 'slideRight 0.7s ease-out forwards',
+				'fadeIn': 'fadeIn 1s ease-out forwards',
 			}
 		}
 	},
