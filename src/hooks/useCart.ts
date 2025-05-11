@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Cart, CartItem, Product } from '@/types';
@@ -191,7 +190,7 @@ export const useCart = () => {
     setTotalPrice(price);
   };
 
-  // Função para adicionar um produto ao carrinho
+  // Updated addToCart function to properly accept a Product object
   const addToCart = async (product: Product, quantity: number = 1) => {
     setIsAdding(true);
     
@@ -253,7 +252,8 @@ export const useCart = () => {
             price: product.price,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            product
+            product,
+            status: 'available'
           });
         }
         

@@ -1,4 +1,3 @@
-
 import { ReactNode, createContext, useContext } from 'react';
 import { CartItem, Product } from '@/types';
 import { useCart as useCartHook } from '@/hooks/useCart';

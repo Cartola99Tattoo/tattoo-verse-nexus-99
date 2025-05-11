@@ -7,7 +7,7 @@ import { Heart, ShoppingCart, Share2, ArrowLeft, Plus, Minus } from "lucide-reac
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { useCart } from "@/contexts/CartContext";
-import { CartItem } from "@/types";
+import { Product } from "@/types";
 
 // Mock data - this would come from Supabase in a real implementation
 const tattoosData = [
@@ -130,20 +130,21 @@ const ProductDetail = () => {
     .filter(Boolean);
 
   const handleAddToCart = () => {
-    const cartItem: Partial<CartItem> = {
+    // Convert the mock data product to a Product type that matches what addToCart expects
+    const productToAdd: Product = {
       id: product.id.toString(),
       name: product.name,
+      description: product.description,
       price: product.price,
       images: product.images,
-      artist: product.artist,
-      product_id: product.id.toString(),
-      quantity: 1,
       status: 'available',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      artist: product.artist,
+      tags: []
     };
     
-    addToCart(cartItem, quantity);
+    addToCart(productToAdd, quantity);
     
     toast({
       title: "Adicionado ao carrinho",

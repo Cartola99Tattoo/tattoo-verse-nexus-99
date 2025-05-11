@@ -30,12 +30,12 @@ export type CartContextType = {
   totalItems: number;
   totalPrice: number;
   isLoading: boolean;
-  addToCart: (product: Partial<CartItem>, quantity: number) => Promise<void>;
+  addToCart: (product: Product, quantity: number) => Promise<void>;
   removeFromCart: (itemId: string) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   getItemCount: () => number;
   getSubtotal: () => number;
-  addItem: (product: Partial<CartItem>, quantity: number) => Promise<void>;
+  addItem: (product: Product, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
 };
