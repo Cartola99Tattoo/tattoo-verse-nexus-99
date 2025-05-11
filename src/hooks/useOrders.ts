@@ -66,13 +66,15 @@ export const useOrder = (id: string) => {
       if (result.scheduling_preferences && 
           Array.isArray(result.scheduling_preferences) && 
           result.scheduling_preferences.length > 0) {
-        // Extract the first scheduling preference from the array
-        result.scheduling_preferences = result.scheduling_preferences[0] as unknown as SchedulingPreference;
+        // The issue is here - we're trying to assign a single element to what TypeScript thinks is an array
+        // Need to properly type-cast the first element from the array
+        const firstPreference = result.scheduling_preferences[0];
+        result.scheduling_preferences = firstPreference as unknown as SchedulingPreference;
       } else {
         result.scheduling_preferences = null;
       }
       
-      return result as unknown as Order;
+      return result as Order;
     },
     enabled: !!user && !!id
   });
