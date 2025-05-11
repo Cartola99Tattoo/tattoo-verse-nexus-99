@@ -66,10 +66,8 @@ export const useOrder = (id: string) => {
       if (result.scheduling_preferences && 
           Array.isArray(result.scheduling_preferences) && 
           result.scheduling_preferences.length > 0) {
-        // Extract the first preference from the array
-        const firstPreference = result.scheduling_preferences[0];
-        // Cast it properly to SchedulingPreference
-        result.scheduling_preferences = firstPreference as SchedulingPreference;
+        // Convert the array to a single object
+        result.scheduling_preferences = result.scheduling_preferences[0] as unknown as SchedulingPreference;
       } else {
         result.scheduling_preferences = null;
       }
