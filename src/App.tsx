@@ -21,6 +21,10 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Checkout from "./pages/Checkout";
 
+// Dashboard do Admin
+import Dashboard from "./pages/admin/Dashboard";
+import Products from "./pages/admin/Products";
+
 // Configuração do React Query com configurações otimizadas
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,19 +63,16 @@ const App = () => (
                   <Route path="/checkout" element={<Checkout />} />
                 </Route>
 
-                {/* Rotas específicas para clientes */}
-                <Route element={<ProtectedRoute requiredRole="cliente" />}>
-                  {/* Adicione aqui rotas específicas para clientes */}
+                {/* Rotas específicas para administração */}
+                <Route element={<ProtectedRoute requiredRole="admin" />}>
+                  <Route path="/admin" element={<Dashboard />} />
+                  <Route path="/admin/products" element={<Products />} />
                 </Route>
 
                 {/* Rotas específicas para artistas */}
                 <Route element={<ProtectedRoute requiredRole="artista" />}>
-                  {/* Adicione aqui rotas específicas para artistas */}
-                </Route>
-
-                {/* Rotas específicas para administradores */}
-                <Route element={<ProtectedRoute requiredRole="admin" />}>
-                  {/* Adicione aqui rotas específicas para administradores */}
+                  <Route path="/admin" element={<Dashboard />} />
+                  <Route path="/admin/products" element={<Products />} />
                 </Route>
 
                 {/* Rota 404 */}

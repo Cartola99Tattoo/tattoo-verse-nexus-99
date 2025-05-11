@@ -1,0 +1,223 @@
+
+import React, { useEffect, useState } from "react";
+import Layout from "@/components/layout/Layout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { BarChart, LineChart, PieChart } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Navigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
+
+// Componentes de Gráficos
+import SalesChart from "@/components/admin/dashboard/SalesChart";
+import OrdersTable from "@/components/admin/dashboard/OrdersTable";
+import AppointmentsWidget from "@/components/admin/dashboard/AppointmentsWidget";
+import RecentCustomers from "@/components/admin/dashboard/RecentCustomers";
+import StatsCards from "@/components/admin/dashboard/StatsCards";
+import AdminSidebar from "@/components/admin/AdminSidebar";
+
+const Dashboard = () => {
+  const { user, profile } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalSales: 0,
+    newCustomers: 0,
+    pendingOrders: 0,
+    upcomingAppointments: 0,
+    blogViews: 0
+  });
+
+  // Verificar se o usuário tem permissão para acessar o painel
+  if (!user || !profile || (profile.role !== "admin" && profile.role !== "artista")) {
+    return <Navigate to="/access-denied" />;
+  }
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      try {
+        // Simulação de busca de dados para o dashboard
+        // Em produção, substituir por chamadas reais ao Supabase
+        
+        // Exemplo de como buscar dados de vendas
+        const { data: salesData, error: salesError } = await supabase
+          .from('orders')
+          .select('total_amount')
+          .gte('created_at', new Date(new Date().setDate(new Date().getDate() - 30)).toISOString());
+        
+        if (salesError) throw salesError;
+        
+        // Calcula o total de vendas
+        const totalSales = salesData?.reduce((acc, order) => acc + (order.total_amount || 0), 0) || 0;
+
+        // Buscar contagem de novos clientes
+        const { count: newCustomers, error: customersError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', new Date(new Date().setDate(new Date().getDate() - 30)).toISOString());
+        
+        if (customersError) throw customersError;
+        
+        // Buscar pedidos pendentes
+        const { count: pendingOrders, error: ordersError } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending');
+          
+        if (ordersError) throw ordersError;
+
+        // Buscar agendamentos futuros
+        const { count: upcomingAppointments, error: appointmentsError } = await supabase
+          .from('appointments')
+          .select('*', { count: 'exact', head: true })
+          .gte('start_date', new Date().toISOString())
+          .eq('status', 'agendado');
+          
+        if (appointmentsError) throw appointmentsError;
+
+        // Buscar visualizações do blog
+        const { data: blogPosts, error: blogError } = await supabase
+          .from('blog_posts')
+          .select('view_count');
+          
+        if (blogError) throw blogError;
+        
+        const blogViews = blogPosts?.reduce((acc, post) => acc + (post.view_count || 0), 0) || 0;
+
+        // Atualizar estatísticas
+        setStats({
+          totalSales,
+          newCustomers: newCustomers || 0,
+          pendingOrders: pendingOrders || 0,
+          upcomingAppointments: upcomingAppointments || 0,
+          blogViews
+        });
+
+      } catch (error) {
+        console.error("Erro ao buscar dados do dashboard:", error);
+        toast({
+          title: "Erro ao carregar dashboard",
+          description: "Não foi possível carregar os dados do dashboard.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  return (
+    <div className="flex min-h-screen">
+      <AdminSidebar />
+      <div className="flex-1 p-6 bg-gray-50">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-500">Bem-vindo ao painel de administração do 99Tattoo</p>
+        </div>
+
+        <StatsCards stats={stats} loading={loading} />
+
+        <Tabs defaultValue="overview" className="mt-6">
+          <TabsList>
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <BarChart className="h-4 w-4" />
+              <span>Visão Geral</span>
+            </TabsTrigger>
+            <TabsTrigger value="sales" className="flex items-center gap-2">
+              <LineChart className="h-4 w-4" />
+              <span>Vendas</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <PieChart className="h-4 w-4" />
+              <span>Análises</span>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+              <Card className="lg:col-span-4">
+                <CardHeader>
+                  <CardTitle>Vendas Recentes</CardTitle>
+                  <CardDescription>Últimos 30 dias</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SalesChart />
+                </CardContent>
+              </Card>
+              
+              <Card className="lg:col-span-3">
+                <CardHeader>
+                  <CardTitle>Agendamentos</CardTitle>
+                  <CardDescription>Próximos agendamentos</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AppointmentsWidget />
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pedidos Recentes</CardTitle>
+                  <CardDescription>Últimos pedidos realizados</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <OrdersTable />
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Novos Clientes</CardTitle>
+                  <CardDescription>Clientes cadastrados recentemente</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <RecentCustomers />
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="sales">
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Análise de Vendas Detalhada</CardTitle>
+                  <CardDescription>Desempenho de vendas por categoria e período</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-center py-8 text-muted-foreground">
+                    Funcionalidade em desenvolvimento
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="analytics">
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Análise de Tendências</CardTitle>
+                  <CardDescription>Insights sobre o desempenho do estúdio</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-center py-8 text-muted-foreground">
+                    Funcionalidade em desenvolvimento
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
