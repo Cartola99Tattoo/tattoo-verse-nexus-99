@@ -8,12 +8,12 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   profile: any | null;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{error?: Error}>;
+  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{error?: Error}>;
   signOut: () => Promise<void>;
   loading: boolean;
-  isLoading: boolean; // Adicionado para compatibilidade
-  refreshProfile: () => Promise<void>; // Adicionado para compatibilidade
+  isLoading: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -94,13 +94,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) {
         throw error;
       }
+      return {};
     } catch (error: any) {
       toast({
         title: "Erro ao fazer login",
         description: error.message,
         variant: "destructive",
       });
-      throw error;
+      return { error };
     }
   };
 
@@ -125,13 +126,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         title: "Cadastro realizado com sucesso!",
         description: "Verifique seu e-mail para confirmar sua conta.",
       });
+      
+      return {};
     } catch (error: any) {
       toast({
         title: "Erro ao criar conta",
         description: error.message,
         variant: "destructive",
       });
-      throw error;
+      return { error };
     }
   };
 
@@ -170,8 +173,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signUp,
     signOut,
     loading,
-    isLoading: loading, // Alias para compatibilidade
-    refreshProfile, // Adicionado para compatibilidade
+    isLoading: loading,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

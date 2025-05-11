@@ -114,7 +114,7 @@ export const useBlogPost = (slug: string) => {
     try {
       await supabase
         .from('blog_posts')
-        .update({ view_count: supabase.rpc('increment', { row_id: postId, table_name: 'blog_posts', column_name: 'view_count' }) })
+        .update({ view_count: supabase.rpc('increment', { row_id: postId }) })
         .eq('id', postId);
     } catch (error) {
       console.error("Erro ao incrementar visualizações:", error);
@@ -186,7 +186,7 @@ export const useBlogCategories = () => {
         throw error;
       }
       
-      return data as BlogCategory[];
+      return data as unknown as BlogCategory[];
     }
   });
   
@@ -231,17 +231,16 @@ export const useBlogComments = (postId: string) => {
           throw repliesError;
         }
         
-        // Inicializar replies para cada comentário se não existir
-        comments.forEach(comment => {
-          if (!comment.replies) {
-            comment.replies = [];
-          }
-        });
-
-        // Organizar respostas por comentário pai
+        // Processamento das respostas
         const repliesData = replies as unknown as BlogComment[];
+        
+        // Garantindo que cada comentário tenha um array de respostas
         comments.forEach(comment => {
-          comment.replies = repliesData.filter(reply => reply.parent_id === comment.id);
+          if (typeof comment === 'object' && comment !== null) {
+            (comment as any).replies = repliesData.filter(reply => 
+              reply.parent_id === comment.id
+            );
+          }
         });
       }
       
@@ -296,7 +295,7 @@ export const useCreateComment = () => {
 export const useBlogAdmin = () => {
   const queryClient = useQueryClient();
   
-  const createPost = async (post: Partial<BlogPost> & { content: string }) => {
+  const createPost = async (post: Pick<BlogPost, 'title' | 'content'> & Partial<Omit<BlogPost, 'title' | 'content'>>) => {
     // Gerar slug a partir do título se não fornecido
     if (!post.slug && post.title) {
       post.slug = post.title
@@ -308,7 +307,21 @@ export const useBlogAdmin = () => {
     
     const { data, error } = await supabase
       .from('blog_posts')
-      .insert(post)
+      .insert({
+        title: post.title,
+        content: post.content,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        meta_description: post.meta_description,
+        meta_keywords: post.meta_keywords,
+        category_id: post.category_id,
+        tags: post.tags,
+        cover_image: post.cover_image,
+        reading_time: post.reading_time,
+        author_id: post.author_id,
+        is_draft: post.is_draft,
+        published_at: post.published_at
+      })
       .select();
       
     if (error) {

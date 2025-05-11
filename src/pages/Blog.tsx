@@ -10,7 +10,7 @@ import { useBlogCategories } from "@/hooks/useBlog";
 const Blog = () => {
   const { categoryId, tag } = useParams();
   const navigate = useNavigate();
-  const { categories } = useBlogCategories();
+  const { categories, isLoading: categoriesLoading } = useBlogCategories();
   const [currentCategory, setCurrentCategory] = useState<string | undefined>(categoryId);
   const [currentTag, setCurrentTag] = useState<string | undefined>(tag);
   
@@ -55,7 +55,7 @@ const Blog = () => {
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Lista de Blog Posts */}
           <div className="lg:w-2/3">
-            <BlogList categoryId={currentCategory} />
+            <BlogList categoryId={currentCategory} tag={currentTag} />
           </div>
           
           {/* Sidebar */}

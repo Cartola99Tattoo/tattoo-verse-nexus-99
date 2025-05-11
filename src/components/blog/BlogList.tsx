@@ -9,17 +9,19 @@ import { Search } from "lucide-react";
 
 interface BlogListProps {
   categoryId?: string;
+  tag?: string;
   limit?: number;
   showSearch?: boolean;
 }
 
-const BlogList = ({ categoryId, limit, showSearch = true }: BlogListProps) => {
+const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) => {
   const [search, setSearch] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
 
   const { posts, isLoading, totalCount } = useBlogPosts({
     category_id: categoryId,
+    tags: tag ? [tag] : undefined,
     search: searchQuery,
     limit: limit || 6,
     page,
