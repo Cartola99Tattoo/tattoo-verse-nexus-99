@@ -40,10 +40,8 @@ export function useBlogPost(postId: number | string) {
       
       try {
         // Increment the view count using RPC
-        // Using type assertion to bypass TypeScript's strict checking
-        // since the function exists in the database but isn't in the TypeScript definitions
         try {
-          await (supabase.rpc as any)("increment_view_count", { post_id: postId });
+          await supabase.rpc("increment_view_count", { post_id: postId });
         } catch (rpcError) {
           console.warn("Failed to increment view count:", rpcError);
           // Continue execution even if view count increment fails
