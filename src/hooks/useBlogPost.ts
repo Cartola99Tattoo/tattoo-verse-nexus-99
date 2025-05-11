@@ -6,10 +6,13 @@ import { BlogPost } from '@/types';
 export const useBlogPost = (slug: string) => {
   const incrementViewCount = async (postId: string) => {
     try {
-      // Fix: Use the update method properly without trying to assign rpc result directly
+      // First, call the RPC function to get the new count
+      const { data: newCount } = await supabase.rpc('increment', { row_id: postId });
+      
+      // Then update the post with the new count value
       await supabase
         .from('blog_posts')
-        .update({ view_count: supabase.rpc('increment', { row_id: postId }) })
+        .update({ view_count: newCount })
         .eq('id', postId);
     } catch (error) {
       console.error("Erro ao incrementar visualizações:", error);
