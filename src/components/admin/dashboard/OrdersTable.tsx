@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +20,7 @@ export default function OrdersTable() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
+        // Buscar pedidos com informações básicas
         const { data, error } = await supabase
           .from('orders')
           .select(`
@@ -34,17 +36,15 @@ export default function OrdersTable() {
 
         if (error) throw error;
 
-        // For each order, buscar o nome do cliente
+        // Processar dados dos pedidos e adicionar nome de cliente padrão
         if (data) {
-          // We'll just set the data initially without customer names
-          // since there seems to be an issue with the customer_id relation
           const ordersWithDefaultNames = data.map(order => ({
             id: order.id,
             reference_code: order.reference_code,
             status: order.status,
             total_amount: order.total_amount,
             created_at: order.created_at,
-            customer_name: 'Cliente' // Default placeholder
+            customer_name: 'Cliente' // Nome padrão até implementarmos busca de clientes
           }));
 
           setOrders(ordersWithDefaultNames);

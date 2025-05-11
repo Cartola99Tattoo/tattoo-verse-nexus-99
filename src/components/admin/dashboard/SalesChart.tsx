@@ -14,7 +14,7 @@ const data = [
   { name: '29', value: 3800 },
 ];
 
-// Fix the config structure to match the ChartConfig type
+// Configuração corrigida para corresponder ao tipo ChartConfig
 const config = {
   sales: {
     label: 'Vendas',

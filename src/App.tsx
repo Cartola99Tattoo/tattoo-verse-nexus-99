@@ -67,6 +67,9 @@ const App = () => (
                 <Route element={<ProtectedRoute requiredRole="admin" />}>
                   <Route path="/admin" element={<Dashboard />} />
                   <Route path="/admin/products" element={<Products />} />
+                  <Route path="/admin/loyalty" element={<Dashboard />} /> {/* Placeholder - usar Dashboard temporariamente */}
+                  <Route path="/admin/analytics" element={<Dashboard />} /> {/* Placeholder - usar Dashboard temporariamente */}
+                  <Route path="/admin/security" element={<Dashboard />} /> {/* Placeholder - usar Dashboard temporariamente */}
                 </Route>
 
                 {/* Rotas específicas para artistas */}

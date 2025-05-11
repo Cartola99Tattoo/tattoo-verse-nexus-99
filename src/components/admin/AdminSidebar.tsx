@@ -10,7 +10,9 @@ import {
   Package, 
   Settings,
   LayoutDashboard,
-  Database
+  Award,
+  Shield,
+  LineChart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -67,6 +69,24 @@ export default function AdminSidebar() {
       title: 'Finanças',
       path: '/admin/finance',
       icon: <BarChart size={20} />,
+      access: isAdmin, // Apenas administradores
+    },
+    {
+      title: 'Programa de Fidelidade',
+      path: '/admin/loyalty',
+      icon: <Award size={20} />,
+      access: isAdmin, // Apenas administradores
+    },
+    {
+      title: 'Analytics',
+      path: '/admin/analytics',
+      icon: <LineChart size={20} />,
+      access: isAdmin, // Apenas administradores
+    },
+    {
+      title: 'Segurança',
+      path: '/admin/security',
+      icon: <Shield size={20} />,
       access: isAdmin, // Apenas administradores
     },
     {
