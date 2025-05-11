@@ -9,8 +9,9 @@ export const useBlogPost = (slug: string) => {
     try {
       // Usar uma chamada para uma função do Supabase para incrementar o contador
       const { error } = await supabase
-        .rpc('increment_view_count', { post_id: postId })
-        .single();
+        .rpc('increment_view_count', { 
+          post_id: postId 
+        })
         
       if (error) {
         console.error("Erro ao incrementar visualizações:", error);
