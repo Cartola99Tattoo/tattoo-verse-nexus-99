@@ -43,13 +43,13 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
   };
 
   console.log("BlogList render:", { 
-    posts: posts?.length, 
+    postsLength: posts?.length, 
     totalCount,
     isLoading, 
     error, 
     categoryId, 
     tag,
-    posts 
+    postsData: posts 
   });
 
   return (
