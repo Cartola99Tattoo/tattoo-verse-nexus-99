@@ -7,10 +7,11 @@ export const useBlogPost = (slug: string) => {
   const incrementViewCount = async (postId: string) => {
     try {
       // First, call the RPC function to get the new count
-      // We need to completely bypass type checking for this call since the RPC function expects a different type
+      // The TypeScript error happens because the RPC function has incorrect type definitions
+      // We'll use type assertions to work around this issue
       const { data: newCount } = await supabase.rpc(
         'increment', 
-        { row_id: postId } as unknown as Record<string, never>
+        { row_id: postId } as any
       );
       
       // Then update the post with the new count value
