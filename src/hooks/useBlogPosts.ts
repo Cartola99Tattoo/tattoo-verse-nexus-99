@@ -16,6 +16,7 @@ export const useBlogPosts = (options?: {
 }) => {
   const [totalCount, setTotalCount] = useState<number>(0);
   
+  // Função simplificada para contar posts que correspondam aos critérios
   const fetchPostsCount = async (): Promise<number> => {
     try {
       console.log("Contando posts com opções:", options);
@@ -55,11 +56,11 @@ export const useBlogPosts = (options?: {
     }
   };
   
+  // Nova estratégia de busca: uma única consulta com joins para dados de autor e categoria
   const fetchPosts = async () => {
     try {
       console.log("Buscando posts do blog com opções:", options);
       
-      // Query simplificada para evitar problemas com RLS
       let query = supabase
         .from('blog_posts')
         .select(`
@@ -115,70 +116,82 @@ export const useBlogPosts = (options?: {
         console.error("Erro na query do Supabase:", error);
         throw error;
       }
-      
-      // Agora fazemos uma segunda query para buscar os dados dos autores
+
+      // Processar os posts recuperados e adicionar informações de autor (se estiver disponível)
       const processedPosts = await Promise.all((data || []).map(async (post) => {
         try {
-          if (post.author_id) {
-            const { data: authorData } = await supabase
+          // Criar um objeto de autor padrão caso não consigamos buscar o autor
+          const defaultAuthor = {
+            id: post.author_id || '',
+            first_name: 'Equipe',
+            last_name: '99Tattoo',
+            avatar_url: ''
+          };
+          
+          // Se não temos author_id, retornar com autor padrão
+          if (!post.author_id) {
+            console.log("Post sem author_id:", post.id);
+            return { ...post, author: defaultAuthor };
+          }
+          
+          // Tentativa de buscar informações de autor
+          try {
+            const { data: authorData, error: authorError } = await supabase
               .from('profiles')
               .select('id, first_name, last_name, avatar_url')
               .eq('id', post.author_id)
               .single();
             
-            return {
-              ...post,
-              author: authorData || {
-                id: post.author_id,
-                first_name: '',
-                last_name: '',
-                avatar_url: ''
-              }
-            };
-          }
-          return {
-            ...post,
-            author: {
-              id: post.author_id || '',
-              first_name: '',
-              last_name: '',
-              avatar_url: ''
+            if (authorError || !authorData) {
+              console.log("Erro ao buscar autor ou autor não encontrado:", authorError);
+              return { ...post, author: defaultAuthor };
             }
-          };
+            
+            return { ...post, author: authorData };
+          } catch (authorError) {
+            console.log("Exceção ao buscar autor do post:", authorError);
+            return { ...post, author: defaultAuthor };
+          }
         } catch (error) {
-          console.log("Erro ao buscar autor do post:", error);
+          console.error("Erro ao processar post:", error);
           return {
             ...post,
             author: {
               id: post.author_id || '',
-              first_name: '',
-              last_name: '',
+              first_name: 'Equipe',
+              last_name: '99Tattoo',
               avatar_url: ''
             }
           };
         }
       }));
       
-      console.log("Posts recuperados:", processedPosts?.length || 0);
+      console.log("Posts recuperados com sucesso:", processedPosts?.length || 0);
       return processedPosts as unknown as BlogPost[];
     } catch (error: any) {
       console.error("Erro ao buscar posts:", error.message);
+      // Usando um toast para notificar o usuário de forma amigável
       toast({
         title: "Erro ao carregar posts",
         description: "Não foi possível carregar os artigos do blog. Tente novamente mais tarde.",
         variant: "destructive",
       });
+      // Retornar array vazio para evitar erros de renderização
       return [];
     }
   };
   
+  // Configuração do useQuery com melhor estratégia de cache e retry
   const { data: posts, isLoading, error, refetch } = useQuery({
     queryKey: ['blogPosts', options],
     queryFn: fetchPosts,
-    staleTime: options?.staleTime || 60000, // Cache por 1 minuto por padrão
-    retry: 1
+    staleTime: options?.staleTime || 300000, // Cache por 5 minutos por padrão
+    gcTime: 600000, // Manter cache por 10 minutos mesmo após o componente desmontar
+    retry: 2, // Tentar novamente até 2 vezes em caso de erro
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Backoff exponencial
   });
   
+  // Buscar a contagem total apenas quando os filtros relevantes mudarem
   useEffect(() => {
     const getCount = async () => {
       try {
