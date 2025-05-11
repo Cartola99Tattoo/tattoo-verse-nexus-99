@@ -50,15 +50,9 @@ export function useBlogPost(postId: number | string) {
       setError(null);
       
       try {
-        // Increment the view count using RPC
-        try {
-          await supabase.rpc("increment_view_count", { post_id: postId });
-        } catch (rpcError) {
-          console.warn("Failed to increment view count:", rpcError);
-          // Continue execution even if view count increment fails
-        }
+        console.log("Fetching post with ID:", postId);
         
-        // Then fetch the post data with author and category information
+        // Primeiro, vamos apenas buscar o post
         const { data: postData, error: postError } = await supabase
           .from("blog_posts")
           .select(`
@@ -67,7 +61,7 @@ export function useBlogPost(postId: number | string) {
             blog_categories:category_id(*)
           `)
           .eq("id", postId)
-          .single();
+          .maybeSingle(); // Usando maybeSingle ao invés de single para evitar erro quando não encontrar
 
         if (postError) {
           console.error("Database error:", postError);
@@ -77,14 +71,32 @@ export function useBlogPost(postId: number | string) {
           };
         }
 
-        if (postData) {
-          console.log("Post data fetched:", postData);
-          setPost(postData as unknown as BlogPost);
-        } else {
+        if (!postData) {
           throw {
             message: "Artigo não encontrado",
             details: "O artigo que você está procurando não existe ou foi removido."
           };
+        }
+
+        console.log("Post data fetched:", postData);
+        setPost(postData as unknown as BlogPost);
+        
+        // Depois de buscar com sucesso, incrementamos a contagem de visualizações
+        try {
+          // Verifica se o post existe antes de incrementar a visualização
+          if (postData) {
+            const { error: updateError } = await supabase
+              .from("blog_posts")
+              .update({ view_count: (postData.view_count || 0) + 1 })
+              .eq("id", postId);
+            
+            if (updateError) {
+              console.warn("Failed to increment view count:", updateError);
+            }
+          }
+        } catch (rpcError) {
+          console.warn("Failed to increment view count:", rpcError);
+          // Continue execution even if view count increment fails
         }
       } catch (error) {
         console.error("Error fetching blog post:", error);

@@ -1,5 +1,6 @@
+
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -132,54 +133,56 @@ const BlogPost = () => {
   return (
     <Layout>
       {/* SEO Optimization */}
-      <Helmet>
-        <title>{`${post.title} | Blog 99Tattoo`}</title>
-        <meta name="description" content={metaDescription} />
-        <meta name="keywords" content={metaKeywords} />
-        {/* Open Graph tags for social sharing */}
-        <meta property="og:title" content={`${post.title} | Blog 99Tattoo`} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={window.location.href} />
-        {post.cover_image && <meta property="og:image" content={post.cover_image} />}
-        {/* Twitter Card tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${post.title} | Blog 99Tattoo`} />
-        <meta name="twitter:description" content={metaDescription} />
-        {post.cover_image && <meta name="twitter:image" content={post.cover_image} />}
-        {/* Article specific metadata */}
-        {post.published_at && <meta property="article:published_time" content={post.published_at} />}
-        <link rel="canonical" href={window.location.href} />
-        {/* Structured Data (JSON-LD) */}
-        <script type="application/ld+json">
-          {`
-            {
-              "@context": "https://schema.org",
-              "@type": "BlogPosting",
-              "headline": "${post.title}",
-              "image": "${post.cover_image || ''}",
-              "datePublished": "${post.published_at || ''}",
-              "description": "${metaDescription}",
-              "author": {
-                "@type": "Person",
-                "name": "${authorName}"
-              },
-              "publisher": {
-                "@type": "Organization",
-                "name": "99Tattoo",
-                "logo": {
-                  "@type": "ImageObject",
-                  "url": "https://99tattoo.com/logo.png"
+      <HelmetProvider>
+        <Helmet>
+          <title>{`${post.title} | Blog 99Tattoo`}</title>
+          <meta name="description" content={metaDescription} />
+          <meta name="keywords" content={metaKeywords} />
+          {/* Open Graph tags for social sharing */}
+          <meta property="og:title" content={`${post.title} | Blog 99Tattoo`} />
+          <meta property="og:description" content={metaDescription} />
+          <meta property="og:type" content="article" />
+          <meta property="og:url" content={window.location.href} />
+          {post.cover_image && <meta property="og:image" content={post.cover_image} />}
+          {/* Twitter Card tags */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={`${post.title} | Blog 99Tattoo`} />
+          <meta name="twitter:description" content={metaDescription} />
+          {post.cover_image && <meta name="twitter:image" content={post.cover_image} />}
+          {/* Article specific metadata */}
+          {post.published_at && <meta property="article:published_time" content={post.published_at} />}
+          <link rel="canonical" href={window.location.href} />
+          {/* Structured Data (JSON-LD) */}
+          <script type="application/ld+json">
+            {`
+              {
+                "@context": "https://schema.org",
+                "@type": "BlogPosting",
+                "headline": "${post.title}",
+                "image": "${post.cover_image || ''}",
+                "datePublished": "${post.published_at || ''}",
+                "description": "${metaDescription}",
+                "author": {
+                  "@type": "Person",
+                  "name": "${authorName}"
+                },
+                "publisher": {
+                  "@type": "Organization",
+                  "name": "99Tattoo",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://99tattoo.com/logo.png"
+                  }
+                },
+                "mainEntityOfPage": {
+                  "@type": "WebPage",
+                  "@id": "${window.location.href}"
                 }
-              },
-              "mainEntityOfPage": {
-                "@type": "WebPage",
-                "@id": "${window.location.href}"
               }
-            }
-          `}
-        </script>
-      </Helmet>
+            `}
+          </script>
+        </Helmet>
+      </HelmetProvider>
 
       {/* Hero section */}
       <div className="w-full h-96 relative">
