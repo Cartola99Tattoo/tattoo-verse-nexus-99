@@ -6,6 +6,7 @@ import { BlogPost } from '@/types';
 export const useBlogPost = (slug: string) => {
   const incrementViewCount = async (postId: string) => {
     try {
+      // Fix: Use the update method properly without trying to assign rpc result directly
       await supabase
         .from('blog_posts')
         .update({ view_count: supabase.rpc('increment', { row_id: postId }) })
