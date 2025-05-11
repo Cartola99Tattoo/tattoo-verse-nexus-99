@@ -59,7 +59,16 @@ export const useOrder = (id: string) => {
         
       if (error) throw error;
       
-      return data as Order;
+      // Transform the scheduling_preferences array to a single object or null
+      // as expected by the type
+      const result = { ...data };
+      if (result.scheduling_preferences && Array.isArray(result.scheduling_preferences) && result.scheduling_preferences.length > 0) {
+        result.scheduling_preferences = result.scheduling_preferences[0];
+      } else {
+        result.scheduling_preferences = null;
+      }
+      
+      return result as Order;
     },
     enabled: !!user && !!id
   });

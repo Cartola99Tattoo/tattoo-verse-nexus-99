@@ -8,8 +8,8 @@ import { useCart } from "@/contexts/CartContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { getItemCount } = useCart();
-  const cartCount = getItemCount();
+  const { totalItems } = useCart();
+  const cartCount = totalItems;
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

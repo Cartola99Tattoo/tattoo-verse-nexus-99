@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -34,7 +33,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { UserEdit, Package, CreditCard, LogOut, Loader2 } from "lucide-react";
+import { User, Edit, CreditCard, MapPin, Package, Loader2 } from "lucide-react";
 
 // Esquema de validação para perfil
 const profileSchema = z.object({
@@ -175,7 +174,7 @@ export default function Profile() {
               className="w-full justify-start" 
               onClick={handleLogout}
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <Edit className="mr-2 h-4 w-4" />
               Sair da Conta
             </Button>
           </div>
@@ -185,7 +184,7 @@ export default function Profile() {
             <Tabs defaultValue="profile">
               <TabsList className="mb-6">
                 <TabsTrigger value="profile">
-                  <UserEdit className="mr-2 h-4 w-4" />
+                  <User className="mr-2 h-4 w-4" />
                   Perfil
                 </TabsTrigger>
                 <TabsTrigger value="orders">

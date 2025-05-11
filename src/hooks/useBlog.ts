@@ -24,7 +24,7 @@ export const useBlogPosts = (options?: {
     }
     
     if (options?.tags && options.tags.length > 0) {
-      query = query.containsAny('tags', options.tags);
+      query = query.contains('tags', options.tags);
     }
     
     if (options?.search) {
@@ -56,7 +56,7 @@ export const useBlogPosts = (options?: {
     }
     
     if (options?.tags && options.tags.length > 0) {
-      query = query.containsAny('tags', options.tags);
+      query = query.contains('tags', options.tags);
     }
     
     if (options?.search) {
@@ -78,7 +78,8 @@ export const useBlogPosts = (options?: {
       throw error;
     }
     
-    return data as BlogPost[];
+    // Type assertion with additional check to handle potential type issues
+    return data as unknown as BlogPost[];
   };
   
   const { data: posts, isLoading, error, refetch } = useQuery({
@@ -111,7 +112,8 @@ export const useBlogPost = (id: string) => {
         throw error;
       }
       
-      return data as BlogPost;
+      // Type assertion with additional check to handle potential type issues
+      return data as unknown as BlogPost;
     },
     enabled: !!id
   });

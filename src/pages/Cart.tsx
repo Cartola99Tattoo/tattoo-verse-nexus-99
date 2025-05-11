@@ -7,9 +7,9 @@ import { Trash2, ShoppingCart, ArrowRight, Plus, Minus } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 
 const Cart = () => {
-  const { items, removeItem, updateQuantity, clearCart, getSubtotal } = useCart();
+  const { items, removeCartItem, updateCartItemQuantity, totalPrice } = useCart();
   
-  const subtotal = getSubtotal();
+  const subtotal = totalPrice;
   const shipping = items.length > 0 ? 0 : 0; // Free shipping in this example
   const total = subtotal + shipping;
   
@@ -38,20 +38,28 @@ const Cart = () => {
                       {/* Product Info */}
                       <div className="md:col-span-6 flex items-center gap-4">
                         <div className="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden">
-                          <img 
-                            src={item.image} 
-                            alt={item.name} 
-                            className="w-full h-full object-cover"
-                          />
+                          {item.product && item.product.images && item.product.images.length > 0 ? (
+                            <img 
+                              src={item.product.images[0]} 
+                              alt={item.product.name} 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-gray-500 text-xs">Sem imagem</span>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <Link 
-                            to={`/shop/${item.productId}`}
+                            to={`/shop/${item.product_id}`}
                             className="font-medium hover:text-red-500 transition-colors"
                           >
-                            {item.name}
+                            {item.product ? item.product.name : 'Produto indisponível'}
                           </Link>
-                          <p className="text-gray-500 text-sm">Por {item.artist}</p>
+                          {item.product && item.product.artist && (
+                            <p className="text-gray-500 text-sm">Por {item.product.artist.name}</p>
+                          )}
                         </div>
                       </div>
                       
@@ -69,7 +77,7 @@ const Cart = () => {
                             variant="outline" 
                             size="icon" 
                             className="h-8 w-8"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() => updateCartItemQuantity(item.id, item.quantity - 1)}
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
@@ -78,7 +86,7 @@ const Cart = () => {
                             variant="outline" 
                             size="icon" 
                             className="h-8 w-8"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -93,7 +101,7 @@ const Cart = () => {
                           variant="ghost" 
                           size="icon" 
                           className="ml-2 text-gray-400 hover:text-red-500"
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeCartItem(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -109,7 +117,7 @@ const Cart = () => {
                       Continuar Comprando
                     </Link>
                   </Button>
-                  <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={clearCart}>
+                  <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => useCart().clearCart()}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Limpar Carrinho
                   </Button>

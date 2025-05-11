@@ -26,7 +26,7 @@ export const useProducts = (options?: {
     }
     
     if (options?.tags && options.tags.length > 0) {
-      query = query.containsAny('tags', options.tags);
+      query = query.contains('tags', options.tags);
     }
     
     if (options?.search) {
@@ -57,7 +57,7 @@ export const useProducts = (options?: {
     }
     
     if (options?.tags && options.tags.length > 0) {
-      query = query.containsAny('tags', options.tags);
+      query = query.contains('tags', options.tags);
     }
     
     if (options?.search) {

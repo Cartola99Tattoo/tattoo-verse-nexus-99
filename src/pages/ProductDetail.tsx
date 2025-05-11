@@ -108,7 +108,7 @@ const ProductDetail = () => {
   const product = tattoosData.find(item => item.id === productId);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
   
   if (!product) {
     return (
@@ -129,15 +129,16 @@ const ProductDetail = () => {
     .filter(Boolean);
 
   const handleAddToCart = () => {
-    addItem({
-      id: Date.now(),
-      productId: product.id,
+    addToCart({
+      id: product.id,
       name: product.name,
       artist: product.artist,
       price: product.price,
-      image: product.images[0],
-      quantity: quantity
-    });
+      images: product.images,
+      status: 'available',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }, quantity);
     
     toast({
       title: "Adicionado ao carrinho",

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -117,6 +116,32 @@ export default function Checkout() {
       payment_method: "credit_card",
     },
   });
+
+  // Fix the saveAddress function to include country
+  const saveAddress = async (addressData: Omit<Address, "id" | "created_at" | "updated_at" | "customer_id">) => {
+    if (!user) return null;
+
+    try {
+      // Add country to the address data
+      const completeAddressData = {
+        ...addressData,
+        country: "Brasil", // Default country
+      };
+
+      const { data, error } = await supabase
+        .from(addressData.is_default ? 'shipping_addresses' : 'billing_addresses')
+        .insert({ ...completeAddressData, customer_id: user.id })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error(`Error saving ${addressData.is_default ? 'shipping' : 'billing'} address:`, error);
+      return null;
+    }
+  };
 
   // Redirecionar se não estiver logado
   useEffect(() => {
