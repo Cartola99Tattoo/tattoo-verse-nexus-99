@@ -94,9 +94,9 @@ const Blog = () => {
     (searchQuery === "" || 
       post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.profiles?.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.profiles?.last_name?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+      (post.profiles && typeof post.profiles === 'object' && 
+        ((post.profiles.first_name && post.profiles.first_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (post.profiles.last_name && post.profiles.last_name.toLowerCase().includes(searchQuery.toLowerCase()))))
   );
   
   // Formatar os dados dos posts para o formato esperado pelo BlogCard
