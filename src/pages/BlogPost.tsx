@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -32,9 +33,9 @@ const BlogPost = () => {
   return (
     <Layout>
       <Helmet>
-        <title>{post.meta_title || post.title} | 99Tattoo</title>
-        <meta name="description" content={post.meta_description || post.excerpt} />
-        <meta name="keywords" content={post.meta_keywords} />
+        <title>{post.title} | 99Tattoo</title>
+        <meta name="description" content={post.meta_description || post.excerpt || ''} />
+        <meta name="keywords" content={post.meta_keywords || ''} />
       </Helmet>
       
       <div className="container mx-auto px-4 py-12">
@@ -89,7 +90,11 @@ const BlogPost = () => {
               {/* <BlogCommentForm postId={post.id} /> */}
               
               {/* Lista de Comentários */}
-              <BlogComments postId={post.id} comments={comments as BlogComment[]} loading={commentsLoading} />
+              <BlogComments 
+                postId={post.id} 
+                loading={commentsLoading}
+                commentList={comments as BlogComment[]} 
+              />
             </section>
           </div>
           

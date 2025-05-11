@@ -6,7 +6,7 @@ export const useCartTotals = () => {
   const { items } = useCart();
   
   const cartTotalPrice = useMemo(() => {
-    if (!items || !items.length) return 0;
+    if (!items || items.length === 0) return 0;
     
     return items.reduce((total, item) => {
       return total + (item.price * item.quantity);
@@ -14,7 +14,7 @@ export const useCartTotals = () => {
   }, [items]);
   
   const cartTotalItems = useMemo(() => {
-    if (!items || !items.length) return 0;
+    if (!items || items.length === 0) return 0;
     
     return items.reduce((total, item) => {
       return total + item.quantity;

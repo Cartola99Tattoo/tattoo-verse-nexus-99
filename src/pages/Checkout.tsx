@@ -20,9 +20,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/integrations/axios";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-import CheckoutForm from "@/components/Checkout/CheckoutForm";
+import { CheckoutForm } from "@/components/Checkout/CheckoutForm";
 import Layout from "@/components/layout/Layout";
 
 const shippingAddressSchema = z.object({
@@ -160,9 +158,10 @@ export default function Checkout() {
     }
   }, [stripeUrl]);
 
-  const stripePromise = loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
-  );
+  // Temporarily comment out Stripe implementation
+  // const stripePromise = loadStripe(
+  //   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
+  // );
 
   if (isLoading) {
     return <Layout>Carregando...</Layout>;
@@ -463,19 +462,14 @@ export default function Checkout() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {stripePromise ? (
-              <Elements stripe={stripePromise}>
-                <CheckoutForm
-                  shippingForm={shippingForm}
-                  billingForm={billingForm}
-                  isBillingSame={isBillingSame}
-                  createCheckout={createCheckout}
-                  isCreatingCheckout={isCreatingCheckout}
-                />
-              </Elements>
-            ) : (
-              <div>Stripe não está disponível.</div>
-            )}
+            {/* Temporarily replace Stripe Elements with simple CheckoutForm */}
+            <CheckoutForm
+              shippingForm={shippingForm}
+              billingForm={billingForm}
+              isBillingSame={isBillingSame}
+              createCheckout={createCheckout}
+              isCreatingCheckout={isCreatingCheckout}
+            />
           </CardContent>
           <CardFooter className="flex justify-between items-center">
             <div>

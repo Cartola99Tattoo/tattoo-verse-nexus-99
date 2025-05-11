@@ -10,7 +10,7 @@ import { useBlogCategories } from "@/hooks/useBlog";
 const Blog = () => {
   const { categoryId, tag } = useParams();
   const navigate = useNavigate();
-  const { data: categories, isLoading: categoriesLoading } = useBlogCategories();
+  const { categories, isLoading: categoriesLoading } = useBlogCategories();
   const [currentCategory, setCurrentCategory] = useState<string | undefined>(categoryId);
   const [currentTag, setCurrentTag] = useState<string | undefined>(tag);
   

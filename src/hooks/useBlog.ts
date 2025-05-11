@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -294,7 +295,7 @@ export const useCreateComment = () => {
 export const useBlogAdmin = () => {
   const queryClient = useQueryClient();
   
-  const createPost = async (post: Pick<BlogPost, 'title' | 'content'> & Partial<Omit<BlogPost, 'title' | 'content'>>) => {
+  const createPost = async (post: { title: string; content: string } & Partial<Omit<BlogPost, 'title' | 'content'>>) => {
     // Gerar slug a partir do título se não fornecido
     if (!post.slug && post.title) {
       post.slug = post.title
