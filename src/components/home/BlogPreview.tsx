@@ -40,13 +40,18 @@ const BlogPreview = () => {
             cover_image,
             published_at,
             slug,
-            profiles:author_id(*),
-            blog_categories:category_id(*)
+            profiles:author_id(first_name, last_name),
+            blog_categories:category_id(name)
           `)
           .order('published_at', { ascending: false })
           .limit(3);
         
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching latest blog posts:", error);
+          throw error;
+        }
+        
+        console.log("Blog preview data:", data);
         
         // Garantir que os dados atendem à interface BlogPostPreview
         if (data) {

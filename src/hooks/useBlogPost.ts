@@ -86,7 +86,7 @@ export function useBlogPost(postIdOrSlug: string) {
         }
 
         console.log("Post data fetched:", postData);
-        setPost(postData as unknown as BlogPost);
+        setPost(postData as BlogPost);
         
         // Depois de buscar com sucesso, incrementamos a contagem de visualizações
         try {

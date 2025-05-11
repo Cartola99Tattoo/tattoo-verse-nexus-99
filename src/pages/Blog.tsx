@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import BlogCard, { BlogPostSummary } from "@/components/blog/BlogCard"; // Importando o tipo do BlogCard
+import BlogCard, { BlogPostSummary } from "@/components/blog/BlogCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,9 +16,14 @@ const fetchBlogPosts = async (category: string = "Todos") => {
   let query = supabase
     .from("blog_posts")
     .select(`
-      *,
-      profiles:author_id(*),
-      blog_categories:category_id(*)
+      id,
+      title,
+      excerpt,
+      cover_image,
+      published_at,
+      slug,
+      profiles:author_id(first_name, last_name),
+      blog_categories:category_id(name)
     `)
     .order('published_at', { ascending: false });
     
@@ -31,9 +36,10 @@ const fetchBlogPosts = async (category: string = "Todos") => {
   
   if (error) {
     console.error("Error fetching blog posts:", error);
-    throw new Error("Failed to fetch blog posts");
+    throw error;
   }
   
+  console.log("Blog posts data:", data);
   return data || [];
 };
 
@@ -59,14 +65,18 @@ const Blog = () => {
         .select("name")
         .order('name');
       
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Error fetching categories:", error);
+        throw error;
+      }
+      console.log("Categories data:", data);
+      return data || [];
     },
     staleTime: 60 * 60 * 1000, // 1 hora
   });
   
   // Transformar os dados das categorias
-  const categories = ["Todos", ...categoriesData.map(cat => cat.name)].filter(Boolean);
+  const categories = ["Todos", ...categoriesData.map(cat => cat.name || "")].filter(Boolean);
   
   // Handle category change with URL params
   const handleCategoryChange = (category: string) => {
@@ -93,13 +103,13 @@ const Blog = () => {
   const formatPosts = (posts: any[]): BlogPostSummary[] => {
     return posts.map(post => ({
       id: post.id,
-      title: post.title,
+      title: post.title || "Sem título",
       excerpt: post.excerpt || "Sem descrição disponível",
       cover_image: post.cover_image || "https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop",
       published_at: post.published_at,
-      slug: post.slug,
-      profiles: post.profiles,
-      blog_categories: post.blog_categories
+      slug: post.slug || post.id,
+      profiles: post.profiles || null,
+      blog_categories: post.blog_categories || null
     }));
   };
 
