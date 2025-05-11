@@ -13,6 +13,7 @@ export interface UserProfile {
   phone: string | null;
   email: string | null; // Adicionando o campo email ao tipo UserProfile
   role: "cliente" | "artista" | "admin";
+  tattoo_preferences?: any; // Campo para armazenar as preferências de tatuagem
 }
 
 interface AuthContextType {
