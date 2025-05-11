@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -97,6 +96,7 @@ const Blog = () => {
       (post.profiles && typeof post.profiles === 'object' && 
         ((post.profiles.first_name && post.profiles.first_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (post.profiles.last_name && post.profiles.last_name.toLowerCase().includes(searchQuery.toLowerCase()))))
+    )
   );
   
   // Formatar os dados dos posts para o formato esperado pelo BlogCard
