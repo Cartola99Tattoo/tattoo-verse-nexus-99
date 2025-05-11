@@ -1,82 +1,45 @@
 
 import { Link } from "react-router-dom";
-import { format, isValid, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { BlogPost } from "@/types";
 
 interface BlogCardProps {
-  post: BlogPost;
+  post: {
+    id: number;
+    title: string;
+    excerpt: string;
+    image: string;
+    date: string;
+    category: string;
+    author: string;
+  };
 }
 
 const BlogCard = ({ post }: BlogCardProps) => {
-  if (!post) {
-    return null;
-  }
-
-  // Format date in Portuguese with validation
-  const formattedDate = post.published_at && isValid(parseISO(post.published_at))
-    ? format(new Date(post.published_at), "dd 'de' MMMM, yyyy", { locale: ptBR })
-    : "";
-
-  // Construct author name with fallbacks
-  const authorName = post.author 
-    ? `${post.author.first_name || ""} ${post.author.last_name || ""}`.trim() || "Equipe 99Tattoo"
-    : "Equipe 99Tattoo";
-
-  // Use cover image or placeholder
-  const imageUrl = post.cover_image && post.cover_image.trim() !== "" 
-    ? post.cover_image 
-    : "/placeholder.svg";
-
-  // Extract excerpt from content or use excerpt field
-  const getExcerpt = () => {
-    if (post.excerpt && post.excerpt.trim() !== "") {
-      return post.excerpt.replace(/<[^>]*>/g, "").substring(0, 150);
-    }
-    if (post.content) {
-      return post.content.replace(/<[^>]*>/g, "").substring(0, 150);
-    }
-    return "Leia mais sobre este artigo...";
-  };
-  
-  const excerpt = getExcerpt();
-
-  // Generate safe link using slug or ID
-  const postLink = `/blog/${post.slug || post.id}`;
-
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-      <Link to={postLink} className="block h-48 overflow-hidden">
+    <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
+      <Link to={`/blog/${post.id}`} className="block h-48 overflow-hidden">
         <img
-          src={imageUrl}
+          src={post.image}
           alt={post.title}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = "/placeholder.svg";
-          }}
         />
       </Link>
-      <div className="p-6 flex flex-col flex-grow">
+      <div className="p-6">
         <div className="flex justify-between items-center mb-2">
-          {post.category && (
-            <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded">
-              {post.category.name || "Sem categoria"}
-            </span>
-          )}
-          <span className="text-xs text-gray-500">{formattedDate}</span>
+          <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded">
+            {post.category}
+          </span>
+          <span className="text-xs text-gray-500">{post.date}</span>
         </div>
-        <Link to={postLink} className="flex-grow">
+        <Link to={`/blog/${post.id}`}>
           <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors">
-            {post.title || "Sem título"}
+            {post.title}
           </h3>
         </Link>
-        <p className="text-gray-600 mb-4 line-clamp-3">
-          {excerpt}...
-        </p>
-        <div className="flex justify-between items-center mt-auto">
-          <span className="text-sm text-gray-500">Por {authorName}</span>
+        <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-500">Por {post.author}</span>
           <Link
-            to={postLink}
+            to={`/blog/${post.id}`}
             className="text-red-500 hover:text-red-700 transition-colors text-sm flex items-center"
           >
             Ler mais
