@@ -5,21 +5,21 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Tipo para os posts
+// Atualizar o tipo para corresponder ao formato do Supabase
 type BlogPostPreview = {
   id: string;
   title: string;
-  excerpt: string;
-  cover_image: string;
-  published_at: string;
-  slug?: string;
+  excerpt: string | null;
+  cover_image: string | null;
+  published_at: string | null;
+  slug?: string | null;
   profiles?: {
-    first_name?: string;
-    last_name?: string;
-  };
+    first_name?: string | null;
+    last_name?: string | null;
+  } | null;
   blog_categories?: {
-    name?: string;
-  };
+    name?: string | null;
+  } | null;
 };
 
 const BlogPreview = () => {
@@ -48,7 +48,10 @@ const BlogPreview = () => {
         
         if (error) throw error;
         
-        setPosts(data || []);
+        // Garantir que os dados atendem à interface BlogPostPreview
+        if (data) {
+          setPosts(data as BlogPostPreview[]);
+        }
       } catch (error) {
         console.error("Error fetching latest blog posts:", error);
       } finally {
@@ -60,7 +63,7 @@ const BlogPreview = () => {
   }, []);
 
   // Função para formatar a data
-  const formatDate = (dateString?: string) => {
+  const formatDate = (dateString?: string | null) => {
     if (!dateString) return "";
     return new Date(dateString).toLocaleDateString('pt-BR');
   };

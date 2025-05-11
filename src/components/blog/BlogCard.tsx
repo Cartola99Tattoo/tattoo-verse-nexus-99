@@ -1,6 +1,21 @@
 
 import { Link } from "react-router-dom";
-import type { BlogPostSummary } from "@/pages/Blog"; 
+
+export interface BlogPostSummary {
+  id: string;
+  title: string;
+  excerpt: string | null;
+  cover_image: string | null;
+  published_at: string | null;
+  slug?: string | null;
+  profiles?: {
+    first_name?: string | null;
+    last_name?: string | null;
+  } | null;
+  blog_categories?: {
+    name?: string | null;
+  } | null;
+}
 
 interface BlogCardProps {
   post: BlogPostSummary;
@@ -27,7 +42,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
     <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
       <Link to={postLink} className="block h-48 overflow-hidden">
         <img
-          src={post.cover_image}
+          src={post.cover_image || "https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop"}
           alt={post.title}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
           loading="lazy"
@@ -38,7 +53,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
           <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded">
             {categoryName}
           </span>
-          <time className="text-xs text-gray-500" dateTime={post.published_at}>{formattedDate}</time>
+          <time className="text-xs text-gray-500" dateTime={post.published_at || ''}>{formattedDate}</time>
         </div>
         <Link to={postLink}>
           <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors line-clamp-2">
