@@ -89,23 +89,29 @@ const Blog = () => {
     setSearchParams(searchParams);
   };
 
+  // Função auxiliar para verificar se o nome do autor contém a consulta de pesquisa
+  const checkAuthorName = (post: any, query: string): boolean => {
+    if (!post.profiles) return false;
+    
+    if (Array.isArray(post.profiles)) {
+      return post.profiles.some(profile => {
+        const firstName = profile?.first_name?.toLowerCase() || '';
+        const lastName = profile?.last_name?.toLowerCase() || '';
+        return firstName.includes(query) || lastName.includes(query);
+      });
+    } else {
+      const firstName = post.profiles?.first_name?.toLowerCase() || '';
+      const lastName = post.profiles?.last_name?.toLowerCase() || '';
+      return firstName.includes(query) || lastName.includes(query);
+    }
+  };
+
   // Filtrar os posts com base na pesquisa
   const filteredPosts = posts.filter(post => 
     (searchQuery === "" || 
       post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (post.profiles && 
-        // Check if profiles is an array and handle accordingly
-        (Array.isArray(post.profiles) 
-          ? post.profiles.some(profile => 
-              (profile.first_name && profile.first_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-              (profile.last_name && profile.last_name.toLowerCase().includes(searchQuery.toLowerCase()))
-            )
-          : // Handle if profiles is a single object
-            ((post.profiles.first_name && post.profiles.first_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-             (post.profiles.last_name && post.profiles.last_name.toLowerCase().includes(searchQuery.toLowerCase())))
-        )
-      )
+      checkAuthorName(post, searchQuery.toLowerCase())
     )
   );
   
@@ -135,6 +141,18 @@ const Blog = () => {
   }, [error]);
 
   const formattedPosts = formatPosts(filteredPosts);
+
+  // Função para formatar o nome do autor com segurança
+  const getAuthorName = (profiles: any): string => {
+    if (!profiles) return 'Equipe 99Tattoo';
+    
+    if (Array.isArray(profiles) && profiles.length > 0) {
+      const profile = profiles[0];
+      return `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Equipe 99Tattoo';
+    } else {
+      return `${profiles?.first_name || ''} ${profiles?.last_name || ''}`.trim() || 'Equipe 99Tattoo';
+    }
+  };
 
   return (
     <Layout>
@@ -219,7 +237,7 @@ const Blog = () => {
                     <p className="text-gray-600 mb-6">{formattedPosts[0].excerpt}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">
-                        Por {formattedPosts[0].profiles?.first_name || ''} {formattedPosts[0].profiles?.last_name || 'Equipe 99Tattoo'}
+                        Por {getAuthorName(formattedPosts[0].profiles)}
                       </span>
                       <Button asChild variant="outline" className="border-black text-black hover:bg-black hover:text-white">
                         <a href={`/blog/${formattedPosts[0].slug || formattedPosts[0].id}`}>Ler artigo</a>
