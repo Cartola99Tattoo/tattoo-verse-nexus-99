@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Trash2, ShoppingCart, ArrowRight, Plus, Minus } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 
 const Cart = () => {
-  const { items, removeCartItem, updateCartItemQuantity, totalPrice } = useCart();
+  const { items, removeCartItem, updateCartItemQuantity, totalPrice, clearCart } = useCart();
   
   const subtotal = totalPrice;
   const shipping = items.length > 0 ? 0 : 0; // Free shipping in this example
@@ -120,7 +119,7 @@ const Cart = () => {
                       Continuar Comprando
                     </Link>
                   </Button>
-                  <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => useCart().clearCart()}>
+                  <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => clearCart()}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Limpar Carrinho
                   </Button>

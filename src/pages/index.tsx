@@ -1,15 +1,16 @@
 
-import Layout from "@/components/layout/Layout";
-import Hero from "@/components/home/Hero";
-import AboutSection from "@/components/home/AboutSection";
-import ArtistsSection from "@/components/home/ArtistsSection";
-import FeaturedTattoos from "@/components/home/FeaturedTattoos";
-import TestimonialsSection from "@/components/home/TestimonialsSection";
-import BlogPreview from "@/components/home/BlogPreview";
-import CTASection from "@/components/home/CTASection";
-import InstagramFeed from "@/components/home/InstagramFeed";
+import React from 'react';
+import Layout from '@/components/layout/Layout';
+import Hero from '@/components/home/Hero';
+import AboutSection from '@/components/home/AboutSection';
+import FeaturedTattoos from '@/components/home/FeaturedTattoos';
+import ArtistsSection from '@/components/home/ArtistsSection';
+import TestimonialsSection from '@/components/home/TestimonialsSection';
+import BlogPreview from '@/components/home/BlogPreview';
+import CTASection from '@/components/home/CTASection';
+import InstagramFeed from '@/components/home/InstagramFeed';
 
-const Index = () => {
+const Home = () => {
   return (
     <Layout>
       <Hero />
@@ -24,4 +25,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Home;

@@ -28,8 +28,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     isLoading,
     isAdding,
     addToCart,
-    updateCartItemQuantity: updateQuantity,
-    removeCartItem: removeItem,
+    updateCartItemQuantity,
+    removeCartItem,
     clearCart
   } = useCartHook();
 
@@ -42,8 +42,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAdding,
         addToCart,
-        updateCartItemQuantity: updateQuantity,
-        removeCartItem: removeItem,
+        updateCartItemQuantity,
+        removeCartItem,
         clearCart
       }}
     >
