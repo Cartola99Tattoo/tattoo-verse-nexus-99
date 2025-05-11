@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BlogPost } from "@/types";
 
@@ -13,21 +13,34 @@ const BlogCard = ({ post }: BlogCardProps) => {
     return null;
   }
 
-  // Formatação de data em português ou exibe data atual se não houver data de publicação
-  const formattedDate = post.published_at 
+  // Formatação de data em português com verificação de validade
+  const formattedDate = post.published_at && isValid(parseISO(post.published_at))
     ? format(new Date(post.published_at), "dd 'de' MMMM, yyyy", { locale: ptBR })
     : "";
 
-  // Nome do autor completo, parcial ou default
+  // Nome do autor completo, parcial ou default com verificação mais robusta
   const authorName = post.author 
     ? `${post.author.first_name || ""} ${post.author.last_name || ""}`.trim() || "Equipe 99Tattoo"
     : "Equipe 99Tattoo";
 
-  // Calcular se deve usar imagem de capa ou placeholder
-  const imageUrl = post.cover_image || "/placeholder.svg";
+  // Calcular se deve usar imagem de capa ou placeholder com verificação
+  const imageUrl = post.cover_image && post.cover_image.trim() !== "" 
+    ? post.cover_image 
+    : "/placeholder.svg";
 
   // Garantir que temos um trecho de texto mesmo quando o excerpt estiver vazio
-  const excerpt = post.excerpt || post.content?.substring(0, 150).replace(/<[^>]*>/g, "") || "";
+  // Limitar o número de caracteres e remover tags HTML
+  const getExcerpt = () => {
+    if (post.excerpt && post.excerpt.trim() !== "") {
+      return post.excerpt.replace(/<[^>]*>/g, "").substring(0, 150);
+    }
+    if (post.content) {
+      return post.content.replace(/<[^>]*>/g, "").substring(0, 150);
+    }
+    return "Leia mais sobre este artigo...";
+  };
+  
+  const excerpt = getExcerpt();
 
   // Gerar um slug seguro para o link
   const postLink = `/blog/${post.slug || post.id}`;
@@ -55,7 +68,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
         </div>
         <Link to={postLink} className="flex-grow">
           <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors">
-            {post.title}
+            {post.title || "Sem título"}
           </h3>
         </Link>
         <p className="text-gray-600 mb-4 line-clamp-3">

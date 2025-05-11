@@ -12,6 +12,7 @@ export const useBlogPosts = (options?: {
   limit?: number;
   page?: number;
   published_only?: boolean;
+  staleTime?: number;
 }) => {
   const [totalCount, setTotalCount] = useState<number>(0);
   
@@ -93,11 +94,39 @@ export const useBlogPosts = (options?: {
       
       if (error) {
         console.error("Erro na query do Supabase:", error);
+        
+        // Tratamento mais específico para erros de permissão
+        if (error.message.includes("permission denied")) {
+          toast({
+            title: "Erro de permissão",
+            description: "Não foi possível acessar os dados do blog. Verifique as permissões no banco de dados.",
+            variant: "destructive",
+          });
+          throw new Error("Erro de permissão: " + error.message);
+        }
+        
         throw error;
       }
       
-      console.log("Posts recuperados:", data?.length || 0, data);
-      return data as unknown as BlogPost[];
+      // Processar posts para garantir que dados de autor sejam sempre válidos
+      const processedPosts = (data || []).map(post => {
+        // Se o autor não estiver disponível, fornecer valores padrão
+        if (!post.author) {
+          return {
+            ...post,
+            author: {
+              id: post.author_id || '',
+              first_name: '',
+              last_name: '',
+              avatar_url: ''
+            }
+          };
+        }
+        return post;
+      });
+      
+      console.log("Posts recuperados:", processedPosts?.length || 0, processedPosts);
+      return processedPosts as unknown as BlogPost[];
     } catch (error: any) {
       console.error("Erro ao buscar posts:", error.message);
       toast({
@@ -111,7 +140,8 @@ export const useBlogPosts = (options?: {
   
   const { data: posts, isLoading, error, refetch } = useQuery({
     queryKey: ['blogPosts', options],
-    queryFn: fetchPosts
+    queryFn: fetchPosts,
+    staleTime: options?.staleTime || 60000 // Cache por 1 minuto por padrão, ou valor personalizado
   });
   
   useEffect(() => {

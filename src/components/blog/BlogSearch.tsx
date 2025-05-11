@@ -1,50 +1,61 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 interface BlogSearchProps {
+  value?: string;
   onSearch: (query: string) => void;
   onClear: () => void;
 }
 
-const BlogSearch = ({ onSearch, onClear }: BlogSearchProps) => {
-  const [searchInput, setSearchInput] = useState("");
+const BlogSearch = ({ value = '', onSearch, onClear }: BlogSearchProps) => {
+  const [searchQuery, setSearchQuery] = useState(value);
+  
+  useEffect(() => {
+    setSearchQuery(value);
+  }, [value]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(searchInput);
+    onSearch(searchQuery.trim());
   };
 
   const handleClear = () => {
-    setSearchInput("");
+    setSearchQuery('');
     onClear();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+    <div className="w-full">
+      <form onSubmit={handleSubmit} className="relative">
         <Input
           type="text"
-          placeholder="Buscar no blog..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="pl-10"
+          placeholder="Pesquisar no blog..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pr-20"
         />
-      </div>
-      <Button type="submit">Buscar</Button>
-      {searchInput && (
-        <Button 
-          variant="outline" 
-          type="button" 
-          onClick={handleClear}
-        >
-          Limpar
-        </Button>
-      )}
-    </form>
+        <div className="absolute right-1 top-1 flex items-center">
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              onClick={handleClear}
+              className="h-8 w-8"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Limpar pesquisa</span>
+            </Button>
+          )}
+          <Button type="submit" variant="ghost" size="sm" className="h-8">
+            <Search className="h-4 w-4 mr-1" />
+            Buscar
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useBlogPosts } from "@/hooks/useBlog";
 import BlogSearch from "./BlogSearch";
 import BlogGrid from "./BlogGrid";
@@ -19,7 +19,9 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
   const [search, setSearch] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [retryCount, setRetryCount] = useState(0);
 
+  // Adicionar uma propriedade staleTime maior para reduzir consultas
   const { posts, isLoading, totalCount, error, refetch } = useBlogPosts({
     category_id: categoryId,
     tags: tag ? [tag] : undefined,
@@ -27,12 +29,14 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     limit: limit,
     page,
     published_only: true,
+    staleTime: 300000 // Cache por 5 minutos
   });
 
   const totalPages = Math.max(Math.ceil((totalCount || 0) / limit), 1);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setSearch(query);
     setPage(1);
   };
 
@@ -48,6 +52,23 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Função para lidar com erros e tentar novamente
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    refetch();
+  };
+
+  useEffect(() => {
+    // Recarregar automaticamente uma vez se a página é carregada sem dados
+    if (!isLoading && posts.length === 0 && retryCount === 0 && !error && totalCount > 0) {
+      const timer = setTimeout(() => {
+        handleRetry();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, posts.length, retryCount, error, totalCount]);
+
   console.log("BlogList render:", { 
     postsLength: posts?.length, 
     totalCount,
@@ -55,7 +76,8 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     error, 
     categoryId, 
     tag,
-    postsData: posts 
+    postsData: posts,
+    retryCount
   });
 
   return (
@@ -63,6 +85,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
       {/* Search Component */}
       {showSearch && (
         <BlogSearch 
+          value={search}
           onSearch={handleSearch}
           onClear={handleClearSearch}
         />
@@ -70,7 +93,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
 
       {/* Error State */}
       {error ? (
-        <BlogErrorState onRetry={refetch} />
+        <BlogErrorState onRetry={handleRetry} />
       ) : isLoading ? (
         /* Loading State */
         <BlogLoadingState count={limit} />
