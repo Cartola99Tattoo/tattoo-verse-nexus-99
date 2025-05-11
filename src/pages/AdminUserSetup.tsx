@@ -34,7 +34,7 @@ const AdminUserSetup = () => {
   useEffect(() => {
     // Verificar a configuração do Supabase ao carregar a página
     console.log("AdminUserSetup: Verificando configuração do Supabase...");
-    console.log("AdminUserSetup: URL do Supabase:", supabase.supabaseUrl);
+    // Remover a referência direta ao supabaseUrl que estava causando o erro
   }, []);
   
   const form = useForm<z.infer<typeof adminSetupSchema>>({
@@ -88,6 +88,13 @@ const AdminUserSetup = () => {
         
         console.log("AdminUserSetup: Senha atualizada com sucesso");
         setSuccess(`Senha atualizada com sucesso para ${values.email}. Você pode fazer login agora.`);
+        
+        // Adicionar um toast para melhor feedback visual
+        toast({
+          title: "Senha atualizada",
+          description: `A senha para ${values.email} foi atualizada com sucesso.`,
+        });
+        
         setTimeout(() => navigate('/auth'), 3000);
       } else {
         console.log("AdminUserSetup: Usuário não existe, criando novo...");
@@ -107,11 +114,26 @@ const AdminUserSetup = () => {
         
         console.log("AdminUserSetup: Usuário administrador criado com sucesso");
         setSuccess(`Usuário administrador criado com sucesso: ${values.email}. Você pode fazer login agora.`);
+        
+        // Adicionar um toast para melhor feedback visual
+        toast({
+          title: "Administrador criado",
+          description: `O usuário administrador ${values.email} foi criado com sucesso.`,
+        });
+        
         setTimeout(() => navigate('/auth'), 3000);
       }
     } catch (err: any) {
       console.error("AdminUserSetup: Erro completo:", err);
-      setError(`Erro ao configurar usuário administrador: ${err.message || "Erro desconhecido"}`);
+      const errorMessage = err.message || "Erro desconhecido";
+      setError(`Erro ao configurar usuário administrador: ${errorMessage}`);
+      
+      // Adicionar um toast para melhor feedback visual
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: `Falha ao configurar administrador: ${errorMessage}`
+      });
     } finally {
       setIsSubmitting(false);
     }
