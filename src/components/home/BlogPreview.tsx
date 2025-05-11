@@ -13,6 +13,7 @@ type BlogPostPreview = {
   cover_image: string | null;
   published_at: string | null;
   slug?: string | null;
+  author_id?: string | null;
   profiles?: {
     first_name?: string | null;
     last_name?: string | null;
@@ -31,7 +32,8 @@ const BlogPreview = () => {
       try {
         setIsLoading(true);
         
-        const { data, error } = await supabase
+        // Buscar posts primeiro
+        const { data: postsData, error: postsError } = await supabase
           .from('blog_posts')
           .select(`
             id,
@@ -40,23 +42,40 @@ const BlogPreview = () => {
             cover_image,
             published_at,
             slug,
-            profiles:author_id(first_name, last_name),
+            author_id,
             blog_categories:category_id(name)
           `)
+          .not('published_at', 'is', null)
           .order('published_at', { ascending: false })
           .limit(3);
         
-        if (error) {
-          console.error("Error fetching latest blog posts:", error);
-          throw error;
+        if (postsError) {
+          console.error("Error fetching latest blog posts:", postsError);
+          throw postsError;
         }
         
-        console.log("Blog preview data:", data);
+        // Para cada post, buscar o perfil do autor separadamente (se houver author_id)
+        const postsWithProfiles = await Promise.all((postsData || []).map(async post => {
+          if (!post.author_id) return { ...post, profiles: null };
+          
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("first_name, last_name")
+            .eq("id", post.author_id)
+            .single();
+            
+          if (profileError) {
+            console.warn(`Could not fetch profile for author ${post.author_id}:`, profileError);
+            return { ...post, profiles: null };
+          }
+          
+          return { ...post, profiles: profile };
+        }));
+        
+        console.log("Blog preview data:", postsWithProfiles);
         
         // Garantir que os dados atendem à interface BlogPostPreview
-        if (data) {
-          setPosts(data as BlogPostPreview[]);
-        }
+        setPosts(postsWithProfiles as BlogPostPreview[]);
       } catch (error) {
         console.error("Error fetching latest blog posts:", error);
       } finally {
@@ -76,7 +95,10 @@ const BlogPreview = () => {
   // Função para formatar o nome do autor
   const getAuthorName = (post: BlogPostPreview) => {
     if (!post.profiles) return "Equipe 99Tattoo";
-    return `${post.profiles.first_name || ''} ${post.profiles.last_name || ''}`.trim() || "Equipe 99Tattoo";
+    
+    const firstName = post.profiles.first_name || '';
+    const lastName = post.profiles.last_name || '';
+    return `${firstName} ${lastName}`.trim() || "Equipe 99Tattoo";
   };
 
   return (

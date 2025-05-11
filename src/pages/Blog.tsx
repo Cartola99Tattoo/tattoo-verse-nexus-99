@@ -13,6 +13,8 @@ import { useQuery } from "@tanstack/react-query";
 const fetchBlogPosts = async (category: string = "Todos") => {
   console.log("Fetching blog posts for category:", category);
   
+  // Modificar a consulta para não fazer join com a tabela users
+  // Em vez disso, buscar diretamente os blog_posts e associar o author_id com os profiles
   let query = supabase
     .from("blog_posts")
     .select(`
@@ -22,9 +24,10 @@ const fetchBlogPosts = async (category: string = "Todos") => {
       cover_image,
       published_at,
       slug,
-      profiles:author_id(first_name, last_name),
+      author_id,
       blog_categories:category_id(name)
     `)
+    .not('published_at', 'is', null) // Garantir que apenas posts publicados sejam mostrados
     .order('published_at', { ascending: false });
     
   if (category !== "Todos") {
@@ -32,15 +35,34 @@ const fetchBlogPosts = async (category: string = "Todos") => {
     query = query.eq('blog_categories.name', category);
   }
   
-  const { data, error } = await query;
+  const { data: posts, error } = await query;
   
   if (error) {
     console.error("Error fetching blog posts:", error);
     throw error;
   }
   
-  console.log("Blog posts data:", data);
-  return data || [];
+  console.log("Blog posts data:", posts);
+  
+  // Para cada post, buscar o perfil do autor separadamente (se houver author_id)
+  const postsWithProfiles = await Promise.all(posts.map(async post => {
+    if (!post.author_id) return { ...post, profiles: null };
+    
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", post.author_id)
+      .single();
+      
+    if (profileError) {
+      console.warn(`Could not fetch profile for author ${post.author_id}:`, profileError);
+      return { ...post, profiles: null };
+    }
+    
+    return { ...post, profiles: profile };
+  }));
+  
+  return postsWithProfiles || [];
 };
 
 const Blog = () => {
