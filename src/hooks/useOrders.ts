@@ -66,15 +66,14 @@ export const useOrder = (id: string) => {
       if (result.scheduling_preferences && 
           Array.isArray(result.scheduling_preferences) && 
           result.scheduling_preferences.length > 0) {
-        // Extract the first preference from the array and assign it
+        // Extract the first preference from the array
         const firstPreference = result.scheduling_preferences[0];
-        // We need to cast to unknown first, then to SchedulingPreference
-        result.scheduling_preferences = firstPreference as unknown as SchedulingPreference;
+        // Cast it properly to SchedulingPreference
+        result.scheduling_preferences = firstPreference as SchedulingPreference;
       } else {
         result.scheduling_preferences = null;
       }
       
-      // Properly cast the result to Order type through unknown
       return result as unknown as Order;
     },
     enabled: !!user && !!id
