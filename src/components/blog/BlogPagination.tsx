@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
 import {
   Pagination,
   PaginationContent,
@@ -8,6 +7,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  PaginationEllipsis,
 } from "@/components/ui/pagination";
 
 interface BlogPaginationProps {
@@ -75,6 +75,12 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
             </PaginationItem>
           );
         }
+        // Use PaginationEllipsis instead of disabled PaginationLink
+        items.push(
+          <PaginationItem key="ellipsis-1">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
         items.push(
           <PaginationItem key="last">
             <PaginationLink
@@ -90,9 +96,10 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
       }
       // If current page is close to the end
       else if (currentPage > totalPages - 3) {
+        // Use PaginationEllipsis instead of disabled PaginationLink
         items.push(
           <PaginationItem key="ellipsis-1">
-            <PaginationLink disabled>...</PaginationLink>
+            <PaginationEllipsis />
           </PaginationItem>
         );
         for (let i = totalPages - 3; i < totalPages; i++) {
@@ -126,9 +133,10 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
       }
       // If current page is in the middle
       else {
+        // Use PaginationEllipsis instead of disabled PaginationLink
         items.push(
           <PaginationItem key="ellipsis-1">
-            <PaginationLink disabled>...</PaginationLink>
+            <PaginationEllipsis />
           </PaginationItem>
         );
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
@@ -146,9 +154,10 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
             </PaginationItem>
           );
         }
+        // Use PaginationEllipsis instead of disabled PaginationLink
         items.push(
           <PaginationItem key="ellipsis-2">
-            <PaginationLink disabled>...</PaginationLink>
+            <PaginationEllipsis />
           </PaginationItem>
         );
         items.push(
