@@ -68,21 +68,12 @@ export const useOrder = (id: string) => {
         // Extract the first scheduling preference
         const preference = result.scheduling_preferences[0];
         // Set it as a single object, not an array
-        result.scheduling_preferences = {
-          id: preference.id,
-          order_id: preference.order_id,
-          preferred_date_1: preference.preferred_date_1,
-          preferred_date_2: preference.preferred_date_2,
-          preferred_date_3: preference.preferred_date_3,
-          notes: preference.notes,
-          created_at: preference.created_at,
-          updated_at: preference.updated_at
-        };
+        result.scheduling_preferences = preference;
       } else {
         result.scheduling_preferences = null;
       }
       
-      return result as unknown as Order;
+      return result as Order;
     },
     enabled: !!user && !!id
   });

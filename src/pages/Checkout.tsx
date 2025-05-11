@@ -144,11 +144,16 @@ export default function Checkout() {
     }
   };
 
-  // Update handleAddAddress to include country and make number required
+  // Update handleAddAddress to ensure all required fields are present
   const handleAddAddress = async (data: AddressFormValues) => {
     const addressData = {
-      ...data,
-      number: data.number || "", // Make sure number is not undefined
+      street: data.street,
+      number: data.number,
+      city: data.city,
+      state: data.state,
+      zip_code: data.zip_code,
+      complement: data.complement || "",
+      is_default: data.is_default,
       country: "Brasil" // Always add the country field
     };
     
