@@ -143,6 +143,21 @@ export default function Checkout() {
     }
   };
 
+  // Update handleAddAddress to include country
+  const handleAddAddress = async (data: AddressFormValues) => {
+    const addressData = {
+      ...data,
+      country: "Brasil" // Always add the country field
+    };
+    
+    const newAddress = await addShippingAddress(addressData);
+    
+    if (newAddress) {
+      setAddingNewAddress(false);
+      setSelectedShippingAddress(newAddress.id);
+    }
+  };
+
   // Redirecionar se não estiver logado
   useEffect(() => {
     if (!authLoading && !user) {
@@ -173,16 +188,6 @@ export default function Checkout() {
       loadAddresses();
     }
   }, [user]);
-
-  // Método para adicionar um novo endereço
-  const handleAddAddress = async (data: AddressFormValues) => {
-    const newAddress = await addShippingAddress(data);
-    
-    if (newAddress) {
-      setAddingNewAddress(false);
-      setSelectedShippingAddress(newAddress.id);
-    }
-  };
 
   // Método para avançar para o próximo passo
   const nextStep = () => {

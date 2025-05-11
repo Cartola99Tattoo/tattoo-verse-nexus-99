@@ -13,7 +13,7 @@ export type Order = {
   items?: OrderItem[];
   shipping_address?: Address;
   billing_address?: Address;
-  scheduling_preferences?: SchedulingPreference;
+  scheduling_preferences?: SchedulingPreference | null;
 };
 
 export type OrderItem = {
@@ -36,7 +36,7 @@ export type Address = {
   city: string;
   state: string;
   zip_code: string;
-  country: string;
+  country: string; // This is required
   is_default: boolean;
   created_at: string;
   updated_at: string;

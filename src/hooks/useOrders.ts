@@ -62,13 +62,27 @@ export const useOrder = (id: string) => {
       // Transform the scheduling_preferences array to a single object or null
       // as expected by the type
       const result = { ...data };
+      
+      // Check if scheduling_preferences exists and is an array
       if (result.scheduling_preferences && Array.isArray(result.scheduling_preferences) && result.scheduling_preferences.length > 0) {
-        result.scheduling_preferences = result.scheduling_preferences[0];
+        // Extract the first scheduling preference
+        const preference = result.scheduling_preferences[0];
+        // Set it as a single object, not an array
+        result.scheduling_preferences = {
+          id: preference.id,
+          order_id: preference.order_id,
+          preferred_date_1: preference.preferred_date_1,
+          preferred_date_2: preference.preferred_date_2,
+          preferred_date_3: preference.preferred_date_3,
+          notes: preference.notes,
+          created_at: preference.created_at,
+          updated_at: preference.updated_at
+        };
       } else {
         result.scheduling_preferences = null;
       }
       
-      return result as Order;
+      return result as unknown as Order;
     },
     enabled: !!user && !!id
   });

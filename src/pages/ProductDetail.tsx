@@ -130,11 +130,13 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     addToCart({
-      id: product.id,
+      id: product.id.toString(), // Convert number to string
       name: product.name,
-      artist: product.artist,
       price: product.price,
       images: product.images,
+      artist: product.artist, // Make sure artist is correctly typed
+      product_id: product.id.toString(), // Add this line to match the CartItem type
+      quantity: 1, // Initialize with quantity 1
       status: 'available',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

@@ -1,21 +1,32 @@
 
-export type Cart = {
-  id: string;
-  customer_id?: string;
-  created_at: string;
-  updated_at: string;
-  items?: CartItem[];
-};
+import { Artist, Product } from './product';
 
 export type CartItem = {
   id: string;
-  cart_id: string;
-  product_id: string;
-  quantity: number;
+  product_id: string; // Make sure this is a string
+  name?: string;
   price: number;
+  quantity: number;
+  images?: string[];
+  product?: Product;
+  artist?: Artist | string; // Allow both Artist object or string
+  status: string;
   created_at: string;
   updated_at: string;
-  product?: Product;
 };
 
-import { Product } from './product';
+export type CartContextType = {
+  cart: string | null;
+  items: CartItem[];
+  totalItems: number;
+  totalPrice: number;
+  isLoading: boolean;
+  addToCart: (product: Partial<CartItem>, quantity: number) => Promise<void>;
+  removeFromCart: (itemId: string) => Promise<void>;
+  updateQuantity: (itemId: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  getItemCount: () => number;
+  getSubtotal: () => number;
+  addItem: (product: Partial<CartItem>, quantity: number) => Promise<void>;
+  removeItem: (itemId: string) => Promise<void>;
+};
