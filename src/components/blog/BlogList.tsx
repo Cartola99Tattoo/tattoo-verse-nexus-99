@@ -25,7 +25,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
 
-  // Configurações para o hook useBlogPosts com parâmetros aprimorados
+  // Configurações para o hook useBlogPosts
   const { posts, isLoading, totalCount, error, refetch } = useBlogPosts({
     category_id: categoryId,
     tags: tag ? [tag] : undefined,
@@ -33,7 +33,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     limit: limit,
     page,
     published_only: true,
-    staleTime: 300000 // Cache por 5 minutos
+    staleTime: 180000 // Cache por 3 minutos
   });
 
   const totalPages = Math.max(Math.ceil((totalCount || 0) / limit), 1);
@@ -70,17 +70,17 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Função aprimorada para lidar com erros e tentar novamente
+  // Função para lidar com erros e tentar novamente
   const handleRetry = async () => {
     setIsRetrying(true);
     setRetryCount(prev => prev + 1);
     
     try {
-      await refetch();
       toast({
         title: "Recarregando artigos",
         description: "Tentando carregar os artigos novamente...",
       });
+      await refetch();
     } catch (e) {
       console.error("Erro ao tentar recarregar:", e);
     } finally {
@@ -88,14 +88,14 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     }
   };
 
-  // Efeito para monitorar mudanças nos parâmetros e registrar informações úteis para debugging
+  // Efeito para monitorar mudanças nos parâmetros e registrar informações úteis
   useEffect(() => {
     // Debug logs mais detalhados
     console.log("BlogList render:", { 
       postsLength: posts?.length, 
       totalCount,
       isLoading, 
-      error, 
+      errorExists: !!error, 
       categoryId, 
       tag,
       searchQuery,
@@ -104,7 +104,6 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     });
     
     // Tentar recarregar automaticamente uma vez se a página é carregada sem dados
-    // mas apenas se houver posts no banco de dados (totalCount > 0)
     if (!isLoading && posts.length === 0 && retryCount === 0 && !error && totalCount > 0) {
       console.log("Tentando recarregar dados automaticamente...");
       const timer = setTimeout(() => {
@@ -115,7 +114,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     }
   }, [isLoading, posts, retryCount, error, totalCount, categoryId, tag, searchQuery, page]);
 
-  // Renderização principal com tratamento de estados melhorado
+  // Renderização principal com tratamento de estados
   return (
     <div className="space-y-6">
       {/* Componente de busca */}

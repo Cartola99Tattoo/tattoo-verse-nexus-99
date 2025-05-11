@@ -56,7 +56,7 @@ export const useBlogPosts = (options?: {
     }
   };
   
-  // Nova estratégia de busca: uma única consulta com joins para dados de autor e categoria
+  // Nova estratégia: Uma única consulta sem necessidade de acessar a tabela users
   const fetchPosts = async () => {
     try {
       console.log("Buscando posts do blog com opções:", options);
@@ -81,7 +81,8 @@ export const useBlogPosts = (options?: {
           view_count, 
           created_at, 
           updated_at,
-          category:blog_categories(id, name, description)
+          category:blog_categories(id, name, description),
+          author:profiles(id, first_name, last_name, avatar_url)
         `)
         .order('published_at', { ascending: false });
         
@@ -117,56 +118,29 @@ export const useBlogPosts = (options?: {
         throw error;
       }
 
-      // Processar os posts recuperados e adicionar informações de autor (se estiver disponível)
-      const processedPosts = await Promise.all((data || []).map(async (post) => {
-        try {
-          // Criar um objeto de autor padrão caso não consigamos buscar o autor
-          const defaultAuthor = {
+      // Processar posts para garantir dados consistentes mesmo se o autor não estiver disponível
+      const processedPosts = (data || []).map((post) => {
+        // Criar um objeto de autor padrão se não houver informações
+        if (!post.author || Object.keys(post.author).length === 0) {
+          post.author = {
             id: post.author_id || '',
             first_name: 'Equipe',
             last_name: '99Tattoo',
             avatar_url: ''
           };
-          
-          // Se não temos author_id, retornar com autor padrão
-          if (!post.author_id) {
-            console.log("Post sem author_id:", post.id);
-            return { ...post, author: defaultAuthor };
-          }
-          
-          // Tentativa de buscar informações de autor
-          try {
-            const { data: authorData, error: authorError } = await supabase
-              .from('profiles')
-              .select('id, first_name, last_name, avatar_url')
-              .eq('id', post.author_id)
-              .single();
-            
-            if (authorError || !authorData) {
-              console.log("Erro ao buscar autor ou autor não encontrado:", authorError);
-              return { ...post, author: defaultAuthor };
-            }
-            
-            return { ...post, author: authorData };
-          } catch (authorError) {
-            console.log("Exceção ao buscar autor do post:", authorError);
-            return { ...post, author: defaultAuthor };
-          }
-        } catch (error) {
-          console.error("Erro ao processar post:", error);
-          return {
-            ...post,
-            author: {
-              id: post.author_id || '',
-              first_name: 'Equipe',
-              last_name: '99Tattoo',
-              avatar_url: ''
-            }
-          };
         }
-      }));
+        
+        // Se o autor existe mas está faltando alguns dados, completar com valores padrão
+        if (post.author) {
+          post.author.first_name = post.author.first_name || 'Equipe';
+          post.author.last_name = post.author.last_name || '99Tattoo';
+        }
+        
+        return post;
+      });
       
       console.log("Posts recuperados com sucesso:", processedPosts?.length || 0);
+      console.log("Primeiro post (se existir):", processedPosts[0] ? processedPosts[0].title : "Nenhum post");
       return processedPosts as unknown as BlogPost[];
     } catch (error: any) {
       console.error("Erro ao buscar posts:", error.message);

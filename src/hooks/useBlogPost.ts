@@ -31,7 +31,7 @@ export const useBlogPost = (slug: string) => {
       try {
         console.log("Buscando post com slug:", slug);
         
-        // Primeiro, tente obter por slug
+        // Usando uma única consulta para obter post, autor e categoria
         let query = supabase
           .from('blog_posts')
           .select(`
@@ -74,6 +74,16 @@ export const useBlogPost = (slug: string) => {
         const post = data[0] as unknown as BlogPost;
         console.log("Post encontrado:", post.title);
         
+        // Garantir que sempre tenhamos dados de autor, mesmo que seja um autor padrão
+        if (!post.author || Object.keys(post.author).length === 0) {
+          post.author = {
+            id: post.author_id || '',
+            first_name: 'Equipe',
+            last_name: '99Tattoo',
+            avatar_url: ''
+          };
+        }
+        
         // Incrementar a contagem de visualizações
         if (post && post.id) {
           await incrementViewCount(post.id);
@@ -91,6 +101,7 @@ export const useBlogPost = (slug: string) => {
       }
     },
     enabled: !!slug,
-    retry: 1
+    retry: 1,
+    staleTime: 300000, // Cache por 5 minutos
   });
 };
