@@ -1,3 +1,4 @@
+
 import { ReactNode, createContext, useContext } from 'react';
 import { CartItem, Product } from '@/types';
 import { useCart as useCartHook } from '@/hooks/useCart';
@@ -27,8 +28,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     isLoading,
     isAdding,
     addToCart,
-    updateCartItemQuantity,
-    removeCartItem,
+    updateCartItemQuantity: updateQuantity,
+    removeCartItem: removeItem,
     clearCart
   } = useCartHook();
 
@@ -41,8 +42,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAdding,
         addToCart,
-        updateCartItemQuantity,
-        removeCartItem,
+        updateCartItemQuantity: updateQuantity,
+        removeCartItem: removeItem,
         clearCart
       }}
     >

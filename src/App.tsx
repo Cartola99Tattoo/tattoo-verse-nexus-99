@@ -1,6 +1,7 @@
 
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
+import { CartProvider } from "./contexts/CartContext";
 import { Toaster } from "@/components/ui/toaster";
 
 import Home from "./pages/index";
@@ -23,31 +24,33 @@ import "./App.css";
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/shop/:id" element={<ProductDetail />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/orders/:id" element={<OrderDetail />} />
-        <Route path="/order-success/:id" element={<OrderSuccess />} />
-        
-        {/* Rotas do Blog */}
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/categoria/:categoryId" element={<Blog />} />
-        <Route path="/blog/tag/:tag" element={<Blog />} />
-        <Route path="/blog/:slug" element={<BlogPost />} />
-        <Route path="/blog/admin" element={<BlogAdmin />} />
-        <Route path="/blog/admin/:action" element={<BlogAdmin />} />
-        <Route path="/blog/admin/:action/:id" element={<BlogAdmin />} />
-        
-        <Route path="/404" element={<NotFound />} />
-        <Route path="*" element={<Navigate to="/404" replace />} />
-      </Routes>
-      <Toaster />
+      <CartProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/shop/:id" element={<ProductDetail />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/orders/:id" element={<OrderDetail />} />
+          <Route path="/order-success/:id" element={<OrderSuccess />} />
+          
+          {/* Rotas do Blog */}
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/categoria/:categoryId" element={<Blog />} />
+          <Route path="/blog/tag/:tag" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/blog/admin" element={<BlogAdmin />} />
+          <Route path="/blog/admin/:action" element={<BlogAdmin />} />
+          <Route path="/blog/admin/:action/:id" element={<BlogAdmin />} />
+          
+          <Route path="/404" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
+        </Routes>
+        <Toaster />
+      </CartProvider>
     </AuthProvider>
   );
 }
