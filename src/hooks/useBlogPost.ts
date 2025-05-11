@@ -21,7 +21,7 @@ export const useBlogPost = (slug: string) => {
         body: JSON.stringify({ post_id: postId })
       });
     } catch (error) {
-      console.error("Erro ao incrementar visualizações:", error);
+      console.error("[useBlogPost] Erro ao incrementar visualizações:", error);
     }
   };
 
@@ -29,69 +29,93 @@ export const useBlogPost = (slug: string) => {
     queryKey: ['blogPost', slug],
     queryFn: async () => {
       try {
-        console.log("Buscando post com slug:", slug);
+        console.log("[useBlogPost] Buscando post com slug:", slug);
         
-        // Usando uma única consulta para obter post, autor e categoria
-        let query = supabase
+        // Buscar o post principal primeiro
+        let { data: postData, error: postError } = await supabase
           .from('blog_posts')
-          .select(`
-            *,
-            author:profiles(id, first_name, last_name, avatar_url),
-            category:blog_categories(id, name, description)
-          `)
-          .eq('slug', slug);
-        
-        let { data, error } = await query;
+          .select('*')
+          .eq('slug', slug)
+          .single();
         
         // Se não encontrar por slug, tente por id
-        if (!data || data.length === 0) {
-          console.log("Post não encontrado pelo slug, tentando pelo ID");
+        if (postError || !postData) {
+          console.log("[useBlogPost] Post não encontrado pelo slug, tentando pelo ID");
           
-          query = supabase
+          const result = await supabase
             .from('blog_posts')
-            .select(`
-              *,
-              author:profiles(id, first_name, last_name, avatar_url),
-              category:blog_categories(id, name, description)
-            `)
-            .eq('id', slug);
-          
-          const result = await query;
-          data = result.data;
-          error = result.error;
+            .select('*')
+            .eq('id', slug)
+            .single();
+            
+          postData = result.data;
+          postError = result.error;
         }
         
-        if (error) {
-          console.error("Erro na query do Supabase:", error);
-          throw error;
+        if (postError) {
+          console.error("[useBlogPost] Erro na query do post:", postError);
+          throw postError;
         }
         
-        if (!data || data.length === 0) {
-          console.error("Post não encontrado");
+        if (!postData) {
+          console.error("[useBlogPost] Post não encontrado");
           throw new Error('Post não encontrado');
         }
         
-        const post = data[0] as unknown as BlogPost;
-        console.log("Post encontrado:", post.title);
+        console.log("[useBlogPost] Post encontrado:", postData.title);
         
-        // Garantir que sempre tenhamos dados de autor, mesmo que seja um autor padrão
-        if (!post.author || Object.keys(post.author).length === 0) {
-          post.author = {
-            id: post.author_id || '',
+        // Buscar categoria do post
+        let category = null;
+        if (postData.category_id) {
+          const { data: categoryData } = await supabase
+            .from('blog_categories')
+            .select('id, name, description')
+            .eq('id', postData.category_id)
+            .single();
+            
+          if (categoryData) {
+            category = categoryData;
+          }
+        }
+        
+        // Buscar autor do post (da tabela profiles)
+        let author = null;
+        if (postData.author_id) {
+          const { data: authorData } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name, avatar_url')
+            .eq('id', postData.author_id)
+            .single();
+            
+          if (authorData) {
+            author = authorData;
+          }
+        }
+        
+        // Construir o objeto completo do post
+        const post: BlogPost = {
+          ...postData,
+          category: category || {
+            id: postData.category_id || '',
+            name: 'Sem categoria',
+            description: ''
+          },
+          author: author || {
+            id: postData.author_id || '',
             first_name: 'Equipe',
             last_name: '99Tattoo',
             avatar_url: ''
-          };
-        }
+          }
+        };
         
         // Incrementar a contagem de visualizações
-        if (post && post.id) {
+        if (post.id) {
           await incrementViewCount(post.id);
         }
         
         return post;
       } catch (error: any) {
-        console.error("Erro ao buscar post:", error.message);
+        console.error("[useBlogPost] Erro ao buscar post:", error.message);
         toast({
           title: "Erro ao carregar artigo",
           description: error.message || "Não foi possível carregar o artigo solicitado.",

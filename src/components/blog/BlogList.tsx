@@ -91,7 +91,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
   // Efeito para monitorar mudanças nos parâmetros e registrar informações úteis
   useEffect(() => {
     // Debug logs mais detalhados
-    console.log("BlogList render:", { 
+    console.log("[BlogList] Renderização:", { 
       postsLength: posts?.length, 
       totalCount,
       isLoading, 
@@ -102,10 +102,22 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
       page,
       retryCount
     });
+
+    // Verificar posts
+    if (posts && posts.length > 0) {
+      console.log("[BlogList] Exemplo do primeiro post:", {
+        id: posts[0].id,
+        title: posts[0].title,
+        authorExists: !!posts[0].author,
+        authorName: posts[0].author ? `${posts[0].author.first_name || ''} ${posts[0].author.last_name || ''}` : 'Sem autor',
+        categoryExists: !!posts[0].category,
+        categoryName: posts[0].category?.name || 'Sem categoria'
+      });
+    }
     
     // Tentar recarregar automaticamente uma vez se a página é carregada sem dados
     if (!isLoading && posts.length === 0 && retryCount === 0 && !error && totalCount > 0) {
-      console.log("Tentando recarregar dados automaticamente...");
+      console.log("[BlogList] Tentando recarregar dados automaticamente...");
       const timer = setTimeout(() => {
         handleRetry();
       }, 1000);

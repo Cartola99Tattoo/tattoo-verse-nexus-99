@@ -19,7 +19,7 @@ export const useBlogPosts = (options?: {
   // Função simplificada para contar posts que correspondam aos critérios
   const fetchPostsCount = async (): Promise<number> => {
     try {
-      console.log("Contando posts com opções:", options);
+      console.log("[useBlogPosts] Contando posts com opções:", options);
       
       let query = supabase
         .from('blog_posts')
@@ -44,23 +44,24 @@ export const useBlogPosts = (options?: {
       const { count, error } = await query;
       
       if (error) {
-        console.error("Erro ao buscar contagem de posts:", error);
+        console.error("[useBlogPosts] Erro ao buscar contagem de posts:", error);
         return 0;
       }
       
-      console.log("Total de posts encontrados:", count);
+      console.log("[useBlogPosts] Total de posts encontrados:", count);
       return count || 0;
     } catch (error) {
-      console.error("Erro ao buscar contagem de posts:", error);
+      console.error("[useBlogPosts] Erro ao buscar contagem de posts:", error);
       return 0;
     }
   };
   
-  // Nova estratégia: Uma única consulta sem necessidade de acessar a tabela users
+  // Nova abordagem: Duas consultas separadas para evitar problemas de permissão
   const fetchPosts = async () => {
     try {
-      console.log("Buscando posts do blog com opções:", options);
+      console.log("[useBlogPosts] Buscando posts do blog com opções:", options);
       
+      // 1. Primeiro, buscar os posts básicos sem joins
       let query = supabase
         .from('blog_posts')
         .select(`
@@ -80,9 +81,7 @@ export const useBlogPosts = (options?: {
           meta_keywords, 
           view_count, 
           created_at, 
-          updated_at,
-          category:blog_categories(id, name, description),
-          author:profiles(id, first_name, last_name, avatar_url)
+          updated_at
         `)
         .order('published_at', { ascending: false });
         
@@ -111,17 +110,80 @@ export const useBlogPosts = (options?: {
         query = query.range(from, from + options.limit - 1);
       }
       
-      const { data, error } = await query;
+      const { data: postsData, error: postsError } = await query;
       
-      if (error) {
-        console.error("Erro na query do Supabase:", error);
-        throw error;
+      if (postsError) {
+        console.error("[useBlogPosts] Erro na query de posts:", postsError);
+        throw postsError;
       }
 
-      // Processar posts para garantir dados consistentes mesmo se o autor não estiver disponível
-      const processedPosts = (data || []).map((post) => {
-        // Criar um objeto de autor padrão se não houver informações
-        if (!post.author || Object.keys(post.author).length === 0) {
+      if (!postsData || postsData.length === 0) {
+        console.log("[useBlogPosts] Nenhum post encontrado");
+        return [];
+      }
+
+      console.log("[useBlogPosts] Posts recuperados com sucesso:", postsData.length);
+      
+      // 2. Buscar categorias dos posts encontrados
+      const categoryIds = [...new Set(postsData.filter(post => post.category_id).map(post => post.category_id))];
+      
+      let categories = {};
+      if (categoryIds.length > 0) {
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from('blog_categories')
+          .select('id, name, description')
+          .in('id', categoryIds);
+          
+        if (categoriesError) {
+          console.error("[useBlogPosts] Erro ao buscar categorias:", categoriesError);
+        } else if (categoriesData) {
+          categories = categoriesData.reduce((acc, cat) => {
+            acc[cat.id] = cat;
+            return acc;
+          }, {});
+          console.log("[useBlogPosts] Categorias encontradas:", Object.keys(categories).length);
+        }
+      }
+      
+      // 3. Buscar autores dos posts encontrados (da tabela profiles, não auth.users)
+      const authorIds = [...new Set(postsData.filter(post => post.author_id).map(post => post.author_id))];
+      
+      let authors = {};
+      if (authorIds.length > 0) {
+        const { data: authorsData, error: authorsError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, avatar_url')
+          .in('id', authorIds);
+          
+        if (authorsError) {
+          console.error("[useBlogPosts] Erro ao buscar autores:", authorsError);
+        } else if (authorsData) {
+          authors = authorsData.reduce((acc, author) => {
+            acc[author.id] = author;
+            return acc;
+          }, {});
+          console.log("[useBlogPosts] Autores encontrados:", Object.keys(authors).length);
+        }
+      }
+      
+      // 4. Combinar os dados em um único objeto para cada post
+      const processedPosts = postsData.map((post) => {
+        // Adicionar categoria ao post
+        if (post.category_id && categories[post.category_id]) {
+          post.category = categories[post.category_id];
+        } else {
+          post.category = {
+            id: post.category_id || '',
+            name: 'Sem categoria',
+            description: ''
+          };
+        }
+        
+        // Adicionar autor ao post
+        if (post.author_id && authors[post.author_id]) {
+          post.author = authors[post.author_id];
+        } else {
+          // Autor padrão se não encontrado
           post.author = {
             id: post.author_id || '',
             first_name: 'Equipe',
@@ -130,20 +192,20 @@ export const useBlogPosts = (options?: {
           };
         }
         
-        // Se o autor existe mas está faltando alguns dados, completar com valores padrão
-        if (post.author) {
-          post.author.first_name = post.author.first_name || 'Equipe';
-          post.author.last_name = post.author.last_name || '99Tattoo';
-        }
-        
         return post;
       });
       
-      console.log("Posts recuperados com sucesso:", processedPosts?.length || 0);
-      console.log("Primeiro post (se existir):", processedPosts[0] ? processedPosts[0].title : "Nenhum post");
+      console.log("[useBlogPosts] Posts processados com sucesso:", processedPosts.length);
+      console.log("[useBlogPosts] Exemplo de post processado:", processedPosts[0] ? {
+        id: processedPosts[0].id,
+        title: processedPosts[0].title,
+        author: processedPosts[0].author,
+        category: processedPosts[0].category
+      } : "Nenhum post");
+      
       return processedPosts as unknown as BlogPost[];
     } catch (error: any) {
-      console.error("Erro ao buscar posts:", error.message);
+      console.error("[useBlogPosts] Erro ao buscar posts:", error.message);
       // Usando um toast para notificar o usuário de forma amigável
       toast({
         title: "Erro ao carregar posts",
@@ -172,7 +234,7 @@ export const useBlogPosts = (options?: {
         const count = await fetchPostsCount();
         setTotalCount(count);
       } catch (error) {
-        console.error("Erro ao buscar contagem de posts:", error);
+        console.error("[useBlogPosts] Erro ao buscar contagem de posts:", error);
       }
     };
     
