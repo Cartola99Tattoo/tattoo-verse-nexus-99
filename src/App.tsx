@@ -13,6 +13,7 @@ import BlogPost from "./pages/BlogPost";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
+import UserProfile from "./pages/UserProfile";
 import AccessDenied from "./pages/AccessDenied";
 import NotFound from "./pages/NotFound";
 import { CartProvider } from "./contexts/CartContext";
@@ -54,6 +55,7 @@ const App = () => (
                 {/* Rotas protegidas (requer login) */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/user-profile" element={<UserProfile />} />
                   <Route path="/checkout" element={<Checkout />} />
                 </Route>
 
