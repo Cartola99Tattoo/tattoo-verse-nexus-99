@@ -69,7 +69,7 @@ export const useBlogPost = (slug: string) => {
         if (postData.category_id) {
           const { data: categoryData } = await supabase
             .from('blog_categories')
-            .select('id, name, description')
+            .select('id, name, description, created_at, updated_at')
             .eq('id', postData.category_id)
             .single();
             
@@ -98,7 +98,9 @@ export const useBlogPost = (slug: string) => {
           category: category || {
             id: postData.category_id || '',
             name: 'Sem categoria',
-            description: ''
+            description: '',
+            created_at: postData.created_at,
+            updated_at: postData.updated_at
           },
           author: author || {
             id: postData.author_id || '',

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { BlogPost } from '@/types';
+import { BlogPost, BlogCategory } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 
 export const useBlogPosts = (options?: {
@@ -56,8 +56,8 @@ export const useBlogPosts = (options?: {
     }
   };
   
-  // Nova abordagem: Duas consultas separadas para evitar problemas de permissão
-  const fetchPosts = async () => {
+  // Nova abordagem: Três consultas separadas para evitar problemas de permissão
+  const fetchPosts = async (): Promise<BlogPost[]> => {
     try {
       console.log("[useBlogPosts] Buscando posts do blog com opções:", options);
       
@@ -127,11 +127,11 @@ export const useBlogPosts = (options?: {
       // 2. Buscar categorias dos posts encontrados
       const categoryIds = [...new Set(postsData.filter(post => post.category_id).map(post => post.category_id))];
       
-      let categories = {};
+      let categories: Record<string, BlogCategory> = {};
       if (categoryIds.length > 0) {
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('blog_categories')
-          .select('id, name, description')
+          .select('id, name, description, created_at, updated_at')
           .in('id', categoryIds);
           
         if (categoriesError) {
@@ -140,7 +140,7 @@ export const useBlogPosts = (options?: {
           categories = categoriesData.reduce((acc, cat) => {
             acc[cat.id] = cat;
             return acc;
-          }, {});
+          }, {} as Record<string, BlogCategory>);
           console.log("[useBlogPosts] Categorias encontradas:", Object.keys(categories).length);
         }
       }
@@ -148,7 +148,7 @@ export const useBlogPosts = (options?: {
       // 3. Buscar autores dos posts encontrados (da tabela profiles, não auth.users)
       const authorIds = [...new Set(postsData.filter(post => post.author_id).map(post => post.author_id))];
       
-      let authors = {};
+      let authors: Record<string, { id: string; first_name?: string; last_name?: string; avatar_url?: string }> = {};
       if (authorIds.length > 0) {
         const { data: authorsData, error: authorsError } = await supabase
           .from('profiles')
@@ -161,49 +161,54 @@ export const useBlogPosts = (options?: {
           authors = authorsData.reduce((acc, author) => {
             acc[author.id] = author;
             return acc;
-          }, {});
+          }, {} as Record<string, { id: string; first_name?: string; last_name?: string; avatar_url?: string }>);
           console.log("[useBlogPosts] Autores encontrados:", Object.keys(authors).length);
         }
       }
       
       // 4. Combinar os dados em um único objeto para cada post
-      const processedPosts = postsData.map((post) => {
-        // Adicionar categoria ao post
-        if (post.category_id && categories[post.category_id]) {
-          post.category = categories[post.category_id];
-        } else {
-          post.category = {
-            id: post.category_id || '',
-            name: 'Sem categoria',
-            description: ''
-          };
-        }
+      const processedPosts = postsData.map((post): BlogPost => {
+        // Criar um objeto completo do tipo BlogPost
+        const processedPost: BlogPost = {
+          ...post,
+          // Adicionar categoria ao post
+          category: post.category_id && categories[post.category_id] 
+            ? categories[post.category_id] 
+            : {
+                id: post.category_id || '',
+                name: 'Sem categoria',
+                description: '',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              },
+          
+          // Adicionar autor ao post
+          author: post.author_id && authors[post.author_id]
+            ? authors[post.author_id]
+            : {
+                id: post.author_id || '',
+                first_name: 'Equipe',
+                last_name: '99Tattoo',
+                avatar_url: ''
+              }
+        };
         
-        // Adicionar autor ao post
-        if (post.author_id && authors[post.author_id]) {
-          post.author = authors[post.author_id];
-        } else {
-          // Autor padrão se não encontrado
-          post.author = {
-            id: post.author_id || '',
-            first_name: 'Equipe',
-            last_name: '99Tattoo',
-            avatar_url: ''
-          };
-        }
-        
-        return post;
+        return processedPost;
       });
       
       console.log("[useBlogPosts] Posts processados com sucesso:", processedPosts.length);
-      console.log("[useBlogPosts] Exemplo de post processado:", processedPosts[0] ? {
-        id: processedPosts[0].id,
-        title: processedPosts[0].title,
-        author: processedPosts[0].author,
-        category: processedPosts[0].category
-      } : "Nenhum post");
+      if (processedPosts.length > 0) {
+        console.log("[useBlogPosts] Exemplo de post processado:", {
+          id: processedPosts[0].id,
+          title: processedPosts[0].title,
+          author: processedPosts[0].author,
+          category: processedPosts[0].category
+        });
+      } else {
+        console.log("[useBlogPosts] Nenhum post processado");
+      }
       
-      return processedPosts as unknown as BlogPost[];
+      return processedPosts;
     } catch (error: any) {
       console.error("[useBlogPosts] Erro ao buscar posts:", error.message);
       // Usando um toast para notificar o usuário de forma amigável
