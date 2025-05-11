@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -195,6 +194,18 @@ const Auth = () => {
                     </Button>
                   </form>
                 </Form>
+                
+                <div className="mt-4 border-t pt-4">
+                  <Button 
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      loginForm.setValue("email", "adm99tattoo@gmail.com");
+                    }}
+                  >
+                    Preencher como Administrador
+                  </Button>
+                </div>
               </CardContent>
               <CardFooter className="flex-col space-y-2">
                 <div className="text-sm text-center">
@@ -215,6 +226,11 @@ const Auth = () => {
                   >
                     Esqueceu sua senha?
                   </Button>
+                </div>
+                <div className="text-sm text-center">
+                  <Link to="/admin-setup" className="text-blue-600 hover:underline">
+                    Configurar usuário administrador
+                  </Link>
                 </div>
               </CardFooter>
             </Card>

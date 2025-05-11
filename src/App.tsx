@@ -20,6 +20,7 @@ import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Checkout from "./pages/Checkout";
+import AdminUserSetup from "./pages/AdminUserSetup";
 
 // Dashboard do Admin
 import Dashboard from "./pages/admin/Dashboard";
@@ -55,6 +56,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
+                <Route path="/admin-setup" element={<AdminUserSetup />} />
 
                 {/* Rotas protegidas (requer login) */}
                 <Route element={<ProtectedRoute />}>
