@@ -11,6 +11,7 @@ export interface UserProfile {
   last_name: string | null;
   avatar_url: string | null;
   phone: string | null;
+  email: string | null; // Adicionando o campo email ao tipo UserProfile
   role: "cliente" | "artista" | "admin";
 }
 
@@ -98,7 +99,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      setProfile(data as UserProfile);
+      // Adicionar o email do usuário ao objeto de perfil
+      const userProfile = {
+        ...data,
+        email: user?.email || null
+      } as UserProfile;
+      
+      setProfile(userProfile);
     } catch (error) {
       console.error("Erro ao buscar perfil:", error);
     }
