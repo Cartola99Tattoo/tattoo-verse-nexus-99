@@ -11,7 +11,10 @@ export interface BlogPostSummary {
   profiles?: {
     first_name?: string | null;
     last_name?: string | null;
-  } | null;
+  } | {
+    first_name?: string | null;
+    last_name?: string | null;
+  }[] | null;
   blog_categories?: {
     name?: string | null;
   } | null;
@@ -31,9 +34,16 @@ const BlogCard = ({ post }: BlogCardProps) => {
     "Sem data";
   
   // Formatação do nome do autor
-  const authorName = post.profiles ? 
-    `${post.profiles.first_name || ''} ${post.profiles.last_name || ''}`.trim() || 'Equipe 99Tattoo' : 
-    'Equipe 99Tattoo';
+  let authorName = 'Equipe 99Tattoo';
+  
+  if (post.profiles) {
+    if (Array.isArray(post.profiles) && post.profiles.length > 0) {
+      const profile = post.profiles[0];
+      authorName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Equipe 99Tattoo';
+    } else if (!Array.isArray(post.profiles)) {
+      authorName = `${post.profiles.first_name || ''} ${post.profiles.last_name || ''}`.trim() || 'Equipe 99Tattoo';
+    }
+  }
 
   // Usar slug se disponível, senão usar id
   const postLink = `/blog/${post.slug || post.id}`;

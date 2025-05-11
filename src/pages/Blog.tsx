@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -93,9 +94,18 @@ const Blog = () => {
     (searchQuery === "" || 
       post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (post.profiles && typeof post.profiles === 'object' && 
-        ((post.profiles.first_name && post.profiles.first_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (post.profiles.last_name && post.profiles.last_name.toLowerCase().includes(searchQuery.toLowerCase()))))
+      (post.profiles && 
+        // Check if profiles is an array and handle accordingly
+        (Array.isArray(post.profiles) 
+          ? post.profiles.some(profile => 
+              (profile.first_name && profile.first_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+              (profile.last_name && profile.last_name.toLowerCase().includes(searchQuery.toLowerCase()))
+            )
+          : // Handle if profiles is a single object
+            ((post.profiles.first_name && post.profiles.first_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+             (post.profiles.last_name && post.profiles.last_name.toLowerCase().includes(searchQuery.toLowerCase())))
+        )
+      )
     )
   );
   
