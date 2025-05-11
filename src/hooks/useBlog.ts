@@ -94,7 +94,16 @@ export const useBlogPosts = (options?: {
   });
   
   useEffect(() => {
-    fetchPostsCount().then(count => setTotalCount(count));
+    const getCount = async () => {
+      try {
+        const count = await fetchPostsCount();
+        setTotalCount(count);
+      } catch (error) {
+        console.error("Erro ao buscar contagem de posts:", error);
+      }
+    };
+    
+    getCount();
   }, [options?.category_id, options?.tags, options?.search, options?.published_only]);
   
   return { posts, isLoading, error, refetch, totalCount };
@@ -102,10 +111,14 @@ export const useBlogPosts = (options?: {
 
 export const useBlogPost = (slug: string) => {
   const incrementViewCount = async (postId: string) => {
-    await supabase
-      .from('blog_posts')
-      .update({ view_count: supabase.rpc('increment', { row_id: postId, table_name: 'blog_posts', column_name: 'view_count' }) })
-      .eq('id', postId);
+    try {
+      await supabase
+        .from('blog_posts')
+        .update({ view_count: supabase.rpc('increment', { row_id: postId, table_name: 'blog_posts', column_name: 'view_count' }) })
+        .eq('id', postId);
+    } catch (error) {
+      console.error("Erro ao incrementar visualizações:", error);
+    }
   };
 
   return useQuery({
@@ -147,10 +160,12 @@ export const useBlogPost = (slug: string) => {
         throw new Error('Post não encontrado');
       }
       
-      const post = data[0] as BlogPost;
+      const post = data[0] as unknown as BlogPost;
       
       // Incrementar a contagem de visualizações
-      incrementViewCount(post.id);
+      if (post && post.id) {
+        incrementViewCount(post.id);
+      }
       
       return post;
     },
@@ -159,7 +174,7 @@ export const useBlogPost = (slug: string) => {
 };
 
 export const useBlogCategories = () => {
-  return useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['blogCategories'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -174,6 +189,8 @@ export const useBlogCategories = () => {
       return data as BlogCategory[];
     }
   });
+  
+  return { categories: data, isLoading, error };
 };
 
 export const useBlogComments = (postId: string) => {
@@ -196,7 +213,8 @@ export const useBlogComments = (postId: string) => {
       }
       
       // Buscar respostas para cada comentário
-      const commentIds = data.map(comment => comment.id);
+      const comments = data as unknown as BlogComment[];
+      const commentIds = comments.map(comment => comment.id);
       
       if (commentIds.length > 0) {
         const { data: replies, error: repliesError } = await supabase
@@ -213,13 +231,21 @@ export const useBlogComments = (postId: string) => {
           throw repliesError;
         }
         
+        // Inicializar replies para cada comentário se não existir
+        comments.forEach(comment => {
+          if (!comment.replies) {
+            comment.replies = [];
+          }
+        });
+
         // Organizar respostas por comentário pai
-        data.forEach(comment => {
-          comment.replies = replies.filter(reply => reply.parent_id === comment.id);
+        const repliesData = replies as unknown as BlogComment[];
+        comments.forEach(comment => {
+          comment.replies = repliesData.filter(reply => reply.parent_id === comment.id);
         });
       }
       
-      return data as unknown as BlogComment[];
+      return comments;
     },
     enabled: !!postId
   });
@@ -270,7 +296,7 @@ export const useCreateComment = () => {
 export const useBlogAdmin = () => {
   const queryClient = useQueryClient();
   
-  const createPost = async (post: Partial<BlogPost>) => {
+  const createPost = async (post: Partial<BlogPost> & { content: string }) => {
     // Gerar slug a partir do título se não fornecido
     if (!post.slug && post.title) {
       post.slug = post.title

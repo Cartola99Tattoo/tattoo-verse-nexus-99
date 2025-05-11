@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBlogAdmin, useBlogCategories, useUploadBlogImage } from "@/hooks/useBlog";
@@ -137,9 +136,9 @@ const BlogEditor = ({ post, mode }: BlogEditorProps) => {
       }
       
       // Preparar os dados do post
-      const postData: Partial<BlogPost> = {
+      const postData = {
         title: formData.title,
-        content: formData.content,
+        content: formData.content || " ", // Garantir que content não seja vazio
         excerpt: formData.excerpt,
         meta_description: formData.meta_description,
         meta_keywords: formData.meta_keywords,

@@ -12,6 +12,8 @@ interface AuthContextType {
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
+  isLoading: boolean; // Adicionado para compatibilidade
+  refreshProfile: () => Promise<void>; // Adicionado para compatibilidade
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -148,6 +150,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const refreshProfile = async () => {
+    if (user) {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      
+      setProfile(data);
+    }
+  };
+
   const value = {
     session,
     user,
@@ -156,6 +170,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signUp,
     signOut,
     loading,
+    isLoading: loading, // Alias para compatibilidade
+    refreshProfile, // Adicionado para compatibilidade
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

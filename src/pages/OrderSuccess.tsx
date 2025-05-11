@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -11,17 +10,17 @@ import { CheckCircle, Clock, ShoppingBag } from "lucide-react";
 
 export default function OrderSuccess() {
   const { id } = useParams<{ id: string }>();
-  const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { data: order, isLoading, error } = useOrder(id || "");
+  const { session, user, isLoading } = useAuth();
+  const { data: order, isLoading: isLoadingOrder, error } = useOrder(id || "");
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!isLoading && !user) {
       navigate("/auth");
     }
-  }, [user, authLoading, navigate]);
+  }, [user, isLoading, navigate]);
 
-  if (isLoading || authLoading) {
+  if (isLoading || isLoadingOrder) {
     return (
       <Layout>
         <div className="container py-12 flex items-center justify-center">
