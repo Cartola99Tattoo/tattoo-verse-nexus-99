@@ -8,9 +8,10 @@ export const useBlogPost = (slug: string) => {
     try {
       // First, call the RPC function to get the new count
       // We need to completely bypass type checking for this call since the RPC function expects a different type
-      const { data: newCount } = await supabase.rpc('increment', { 
-        row_id: postId 
-      } as any);
+      const { data: newCount } = await supabase.rpc(
+        'increment', 
+        { row_id: postId } as unknown as Record<string, never>
+      );
       
       // Then update the post with the new count value
       await supabase
