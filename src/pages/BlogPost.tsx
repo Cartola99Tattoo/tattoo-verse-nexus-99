@@ -4,7 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { TattooCard } from "@/components/shop/TattooCard";
+import TattooCard from "@/components/shop/TattooCard";
 import { toast } from "@/components/ui/use-toast";
 
 type BlogPost = {
