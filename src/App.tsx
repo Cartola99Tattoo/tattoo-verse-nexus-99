@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/index";
 import Shop from "./pages/Shop";
+import ProductDetail from "./pages/ProductDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Auth from "./pages/Auth";
@@ -43,6 +44,7 @@ const App = () => (
                 {/* Rotas públicas */}
                 <Route path="/" element={<Index />} />
                 <Route path="/shop" element={<Shop />} />
+                <Route path="/shop/:id" element={<ProductDetail />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/auth" element={<Auth />} />
