@@ -5,7 +5,7 @@ import { toast } from "@/components/ui/use-toast";
 
 // Define proper types
 export type BlogPost = {
-  id: number | string;
+  id: string;
   title: string;
   content: string;
   excerpt?: string;
@@ -37,31 +37,38 @@ type FetchBlogPostError = {
   details?: string;
 };
 
-export function useBlogPost(postId: number | string) {
+export function useBlogPost(postIdOrSlug: string) {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<FetchBlogPostError | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
-      if (!postId) return;
+      if (!postIdOrSlug) return;
       
       setIsLoading(true);
       setError(null);
       
       try {
-        console.log("Fetching post with ID:", postId);
+        console.log("Fetching post with identifier:", postIdOrSlug);
         
-        // Primeiro, vamos apenas buscar o post
-        const { data: postData, error: postError } = await supabase
+        // Determinar se estamos buscando por id ou slug
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(postIdOrSlug);
+        
+        // Primeiro, vamos buscar o post
+        const query = supabase
           .from("blog_posts")
           .select(`
             *,
             profiles:author_id(*),
             blog_categories:category_id(*)
-          `)
-          .eq("id", postId)
-          .maybeSingle(); // Usando maybeSingle ao invés de single para evitar erro quando não encontrar
+          `);
+        
+        // Aplicar o filtro correto com base no identificador
+        const { data: postData, error: postError } = await (isUuid 
+          ? query.eq("id", postIdOrSlug) 
+          : query.eq("slug", postIdOrSlug))
+          .maybeSingle();
 
         if (postError) {
           console.error("Database error:", postError);
@@ -88,7 +95,7 @@ export function useBlogPost(postId: number | string) {
             const { error: updateError } = await supabase
               .from("blog_posts")
               .update({ view_count: (postData.view_count || 0) + 1 })
-              .eq("id", postId);
+              .eq("id", postData.id);
             
             if (updateError) {
               console.warn("Failed to increment view count:", updateError);
@@ -117,10 +124,10 @@ export function useBlogPost(postId: number | string) {
       }
     };
 
-    if (postId) {
+    if (postIdOrSlug) {
       fetchPost();
     }
-  }, [postId]);
+  }, [postIdOrSlug]);
 
   return { post, isLoading, error };
 }

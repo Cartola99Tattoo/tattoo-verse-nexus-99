@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -6,80 +7,54 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 // Define the post type for consistency across components
 export type BlogPostSummary = {
-  id: number;
+  id: string;
   title: string;
   excerpt: string;
-  image: string;
-  date: string;
-  category: string;
-  author: string;
+  cover_image: string;
+  published_at: string;
+  slug?: string;
+  author_id?: string;
+  category_id?: string;
+  profiles?: {
+    first_name?: string;
+    last_name?: string;
+  };
+  blog_categories?: {
+    name?: string;
+  };
 };
 
-const blogPosts = [
-  {
-    id: 1,
-    title: "Como Cuidar da Sua Tatuagem nos Primeiros Dias",
-    excerpt: "Dicas essenciais para garantir a cicatrização perfeita da sua nova tatuagem e manter as cores vibrantes por mais tempo. Aprenda sobre os cuidados necessários durante a recuperação.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras porttitor metus velit, ut aliquam ipsum congue ut. Sed faucibus risus eu dui tincidunt, et porttitor risus sodales.",
-    image: "https://images.unsplash.com/photo-1541127397299-0db99bb5edb3?q=80&w=2070&auto=format&fit=crop",
-    date: "10 Mai 2023",
-    category: "Cuidados",
-    author: "Mariana Silva",
-  },
-  {
-    id: 2,
-    title: "Os Estilos de Tatuagem Mais Populares em 2023",
-    excerpt: "Conheça as tendências de tatuagem que estão em alta este ano, desde o minimalismo até os designs geométricos complexos. Descubra qual estilo combina mais com você.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras porttitor metus velit, ut aliquam ipsum congue ut. Sed faucibus risus eu dui tincidunt, et porttitor risus sodales.",
-    image: "https://images.unsplash.com/photo-1494797262163-102fae527c62?q=80&w=1964&auto=format&fit=crop",
-    date: "22 Abr 2023",
-    category: "Tendências",
-    author: "Rafael Costa",
-  },
-  {
-    id: 3,
-    title: "Mitos e Verdades Sobre Tatuagem",
-    excerpt: "Desmistificamos as crenças mais comuns sobre tatuagens e explicamos o que realmente acontece durante o processo. Conheça os fatos e deixe os mitos para trás.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras porttitor metus velit, ut aliquam ipsum congue ut. Sed faucibus risus eu dui tincidunt, et porttitor risus sodales.",
-    image: "https://images.unsplash.com/photo-1522096491219-a2ae6199959c?q=80&w=2000&auto=format&fit=crop",
-    date: "05 Mar 2023",
-    category: "Informação",
-    author: "Juliana Mendes",
-  },
-  {
-    id: 4,
-    title: "Qual o Melhor Local para sua Primeira Tatuagem?",
-    excerpt: "Está pensando em fazer sua primeira tatuagem, mas n��o sabe onde? Neste artigo, abordamos os melhores locais para iniciantes, considerando dor, visibilidade e cicatrização.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras porttitor metus velit, ut aliquam ipsum congue ut. Sed faucibus risus eu dui tincidunt, et porttitor risus sodales.",
-    image: "https://images.unsplash.com/photo-1606811856475-5e6fcbfe0a6c?q=80&w=1974&auto=format&fit=crop",
-    date: "18 Fev 2023",
-    category: "Dicas",
-    author: "Rafael Costa",
-  },
-  {
-    id: 5,
-    title: "A História da Arte da Tatuagem Através dos Séculos",
-    excerpt: "Uma jornada fascinante pela história das tatuagens, desde as civilizações antigas até os dias de hoje. Descubra como essa arte evoluiu e se tornou parte da cultura global.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras porttitor metus velit, ut aliquam ipsum congue ut. Sed faucibus risus eu dui tincidunt, et porttitor risus sodales.",
-    image: "https://images.unsplash.com/photo-1599006273138-b87f29a7bdca?q=80&w=1776&auto=format&fit=crop",
-    date: "01 Jan 2023",
-    category: "História",
-    author: "Mariana Silva",
-  },
-  {
-    id: 6,
-    title: "Tatuagem e Expressão Pessoal: Como Escolher o Design Perfeito",
-    excerpt: "Aprenda como escolher uma tatuagem que realmente represente quem você é e o que valoriza. Dicas para transformar suas ideias em arte significativa e duradoura.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras porttitor metus velit, ut aliquam ipsum congue ut. Sed faucibus risus eu dui tincidunt, et porttitor risus sodales.",
-    image: "https://images.unsplash.com/photo-1562962230-16e4623d36e7?q=80&w=1974&auto=format&fit=crop",
-    date: "12 Dez 2022",
-    category: "Inspiração",
-    author: "Juliana Mendes",
-  },
-];
+const fetchBlogPosts = async (category: string = "Todos") => {
+  console.log("Fetching blog posts for category:", category);
+  
+  let query = supabase
+    .from("blog_posts")
+    .select(`
+      *,
+      profiles:author_id(*),
+      blog_categories:category_id(*)
+    `)
+    .order('published_at', { ascending: false });
+    
+  if (category !== "Todos") {
+    // Se tivermos uma categoria selecionada, filtramos pelo nome da categoria
+    query = query.eq('blog_categories.name', category);
+  }
+  
+  const { data, error } = await query;
+  
+  if (error) {
+    console.error("Error fetching blog posts:", error);
+    throw new Error("Failed to fetch blog posts");
+  }
+  
+  return data || [];
+};
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -87,36 +62,30 @@ const Blog = () => {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState(initialCategory);
-  const [posts, setPosts] = useState<BlogPostSummary[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   
-  const categories = ["Todos", "Cuidados", "Tendências", "Informação", "Dicas", "História", "Inspiração"];
+  const { data: posts = [], isLoading, error } = useQuery({
+    queryKey: ['blog-posts', activeCategory],
+    queryFn: () => fetchBlogPosts(activeCategory),
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
   
-  // Fetch posts from mock data - in a real app, this would be from Supabase
-  useEffect(() => {
-    // Simulating API fetch with setTimeout
-    const fetchPosts = async () => {
-      setIsLoading(true);
-      try {
-        // In a real implementation, replace this with Supabase query
-        // For now, we'll use the mock data
-        setTimeout(() => {
-          setPosts(blogPosts);
-          setIsLoading(false);
-        }, 500);
-      } catch (error) {
-        console.error("Error fetching blog posts:", error);
-        toast({
-          title: "Erro ao carregar artigos",
-          description: "Ocorreu um erro ao carregar os artigos do blog. Por favor, tente novamente.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-      }
-    };
-    
-    fetchPosts();
-  }, []);
+  // Buscar categorias do Supabase
+  const { data: categoriesData = [] } = useQuery({
+    queryKey: ['blog-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_categories")
+        .select("name")
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 60 * 60 * 1000, // 1 hora
+  });
+  
+  // Transformar os dados das categorias
+  const categories = ["Todos", ...categoriesData.map(cat => cat.name)].filter(Boolean);
   
   // Handle category change with URL params
   const handleCategoryChange = (category: string) => {
@@ -129,14 +98,42 @@ const Blog = () => {
     setSearchParams(searchParams);
   };
 
+  // Filtrar os posts com base na pesquisa
   const filteredPosts = posts.filter(post => 
-    (activeCategory === "Todos" || post.category === activeCategory) &&
     (searchQuery === "" || 
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.author.toLowerCase().includes(searchQuery.toLowerCase())
+      post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.profiles?.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.profiles?.last_name?.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
+  
+  // Formatar os dados dos posts para o formato esperado pelo BlogCard
+  const formatPosts = (posts: any[]): BlogPostSummary[] => {
+    return posts.map(post => ({
+      id: post.id,
+      title: post.title,
+      excerpt: post.excerpt || "Sem descrição disponível",
+      cover_image: post.cover_image || "https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop",
+      published_at: post.published_at,
+      slug: post.slug,
+      author_id: post.author_id,
+      category_id: post.category_id,
+      profiles: post.profiles,
+      blog_categories: post.blog_categories
+    }));
+  };
+
+  // Mostrar erro se houver problemas ao carregar os posts
+  if (error) {
+    toast({
+      title: "Erro ao carregar artigos",
+      description: "Ocorreu um erro ao carregar os artigos do blog. Por favor, tente novamente.",
+      variant: "destructive",
+    });
+  }
+
+  const formattedPosts = formatPosts(filteredPosts);
 
   return (
     <Layout>
@@ -188,50 +185,41 @@ const Blog = () => {
       {/* Blog content with loading state */}
       <div className="container mx-auto px-4 py-12">
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="bg-white rounded-lg overflow-hidden shadow-md">
-                <div className="h-48 bg-gray-200 animate-pulse"></div>
-                <div className="p-6 space-y-3">
-                  <div className="flex justify-between">
-                    <div className="h-4 bg-gray-200 animate-pulse w-20 rounded"></div>
-                    <div className="h-4 bg-gray-200 animate-pulse w-16 rounded"></div>
-                  </div>
-                  <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                    <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-12 w-12 animate-spin text-red-500 mb-4" />
+            <p className="text-lg text-gray-600">Carregando artigos...</p>
           </div>
-        ) : filteredPosts.length > 0 ? (
+        ) : formattedPosts.length > 0 ? (
           <>
             {/* Featured post */}
-            {activeCategory === "Todos" && searchQuery === "" && (
+            {activeCategory === "Todos" && searchQuery === "" && formattedPosts.length > 0 && (
               <div className="mb-12">
                 <div className="bg-white rounded-lg overflow-hidden shadow-lg mb-12 lg:flex">
                   <div className="lg:w-1/2">
                     <img
-                      src={posts[0].image}
-                      alt={posts[0].title}
+                      src={formattedPosts[0].cover_image}
+                      alt={formattedPosts[0].title}
                       className="w-full h-full object-cover"
+                      loading="eager"
                     />
                   </div>
                   <div className="lg:w-1/2 p-8 flex flex-col justify-center">
                     <div className="flex items-center mb-4">
                       <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded mr-2">
-                        {posts[0].category}
+                        {formattedPosts[0].blog_categories?.name || "Sem categoria"}
                       </span>
-                      <span className="text-sm text-gray-500">{posts[0].date}</span>
+                      <span className="text-sm text-gray-500">
+                        {new Date(formattedPosts[0].published_at).toLocaleDateString('pt-BR')}
+                      </span>
                     </div>
-                    <h2 className="text-3xl font-bold mb-4">{posts[0].title}</h2>
-                    <p className="text-gray-600 mb-6">{posts[0].excerpt}</p>
+                    <h2 className="text-3xl font-bold mb-4">{formattedPosts[0].title}</h2>
+                    <p className="text-gray-600 mb-6">{formattedPosts[0].excerpt}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">Por {posts[0].author}</span>
+                      <span className="text-sm text-gray-500">
+                        Por {formattedPosts[0].profiles?.first_name || ''} {formattedPosts[0].profiles?.last_name || 'Equipe 99Tattoo'}
+                      </span>
                       <Button asChild variant="outline" className="border-black text-black hover:bg-black hover:text-white">
-                        <a href={`/blog/${posts[0].id}`}>Ler artigo</a>
+                        <a href={`/blog/${formattedPosts[0].slug || formattedPosts[0].id}`}>Ler artigo</a>
                       </Button>
                     </div>
                   </div>
@@ -241,7 +229,7 @@ const Blog = () => {
 
             {/* Blog grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPosts.slice(activeCategory === "Todos" && searchQuery === "" ? 1 : 0).map((post) => (
+              {formattedPosts.slice(activeCategory === "Todos" && searchQuery === "" ? 1 : 0).map((post) => (
                 <BlogCard key={post.id} post={post} />
               ))}
             </div>

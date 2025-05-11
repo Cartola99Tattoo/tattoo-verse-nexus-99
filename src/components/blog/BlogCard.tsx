@@ -7,11 +7,27 @@ interface BlogCardProps {
 }
 
 const BlogCard = ({ post }: BlogCardProps) => {
+  // Formatação do nome da categoria
+  const categoryName = post.blog_categories?.name || "Geral";
+  
+  // Formatação da data
+  const formattedDate = post.published_at ? 
+    new Date(post.published_at).toLocaleDateString('pt-BR') : 
+    "Sem data";
+  
+  // Formatação do nome do autor
+  const authorName = post.profiles ? 
+    `${post.profiles.first_name || ''} ${post.profiles.last_name || ''}`.trim() || 'Equipe 99Tattoo' : 
+    'Equipe 99Tattoo';
+
+  // Usar slug se disponível, senão usar id
+  const postLink = `/blog/${post.slug || post.id}`;
+  
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
-      <Link to={`/blog/${post.id}`} className="block h-48 overflow-hidden">
+      <Link to={postLink} className="block h-48 overflow-hidden">
         <img
-          src={post.image}
+          src={post.cover_image}
           alt={post.title}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
           loading="lazy"
@@ -20,20 +36,20 @@ const BlogCard = ({ post }: BlogCardProps) => {
       <div className="p-6">
         <div className="flex justify-between items-center mb-2">
           <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded">
-            {post.category}
+            {categoryName}
           </span>
-          <time className="text-xs text-gray-500" dateTime={post.date}>{post.date}</time>
+          <time className="text-xs text-gray-500" dateTime={post.published_at}>{formattedDate}</time>
         </div>
-        <Link to={`/blog/${post.id}`}>
+        <Link to={postLink}>
           <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors line-clamp-2">
             {post.title}
           </h3>
         </Link>
         <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-500">Por {post.author}</span>
+          <span className="text-sm text-gray-500">Por {authorName}</span>
           <Link
-            to={`/blog/${post.id}`}
+            to={postLink}
             className="text-red-500 hover:text-red-700 transition-colors text-sm flex items-center"
             aria-label={`Ler mais sobre ${post.title}`}
           >

@@ -1,58 +1,65 @@
 
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Helmet, HelmetProvider } from "react-helmet-async";
+import { Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useBlogPost, BlogPost as BlogPostType } from "@/hooks/useBlogPost";
 import TattooCard from "@/components/shop/TattooCard";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Share2, Twitter, Facebook, Bookmark, ArrowLeft } from "lucide-react";
+import { Share2, Twitter, Facebook, Bookmark, ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-// Mock data for related tattoos (we'll keep this for now, but it would be better to fetch from API)
-const relatedTattoos = [
-  {
-    id: 1,
-    name: "Dragão Oriental",
-    artist: "Mariana Silva",
-    category: "Colorido",
-    image: "https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=2070&auto=format&fit=crop",
-    price: 750,
-    rating: 4.9,
-  },
-  {
-    id: 5,
-    name: "Flor de Cerejeira",
-    artist: "Juliana Mendes",
-    category: "Aquarela",
-    image: "https://images.unsplash.com/photo-1542727365-19732c00842f?q=80&w=1976&auto=format&fit=crop",
-    price: 450,
-    rating: 4.7,
-  },
-  {
-    id: 7,
-    name: "Rosa Realista",
-    artist: "Mariana Silva",
-    category: "Realismo",
-    image: "https://images.unsplash.com/photo-1524012435847-659cf8c3dee9?q=80&w=1974&auto=format&fit=crop",
-    price: 600,
-    rating: 4.9,
-  },
-];
+// Buscar tatuagens relacionadas com base nas tags ou categoria do post
+const fetchRelatedTattoos = async (categoryId?: string, tags?: string[]) => {
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("status", "available")
+      .limit(3);
+    
+    if (error) throw error;
+    
+    // Formatar os produtos para o formato esperado pelo TattooCard
+    return data.map(product => ({
+      id: product.id,
+      name: product.name,
+      artist: "Artista 99Tattoo",
+      category: "Tatuagem",
+      image: product.images && product.images.length > 0 ? product.images[0] : 
+        "https://images.unsplash.com/photo-1541127397299-0db99bb5edb3?q=80&w=2070&auto=format&fit=crop",
+      price: product.price,
+      rating: 4.8,
+    }));
+  } catch (error) {
+    console.error("Error fetching related tattoos:", error);
+    return [];
+  }
+};
 
 const BlogPost = () => {
-  const { id } = useParams<{ id: string }>();
-  const { post, isLoading, error } = useBlogPost(id || "");
+  const { slug } = useParams<{ slug: string }>();
+  const { post, isLoading, error } = useBlogPost(slug || "");
   const navigate = useNavigate();
+
+  // Buscar tatuagens relacionadas
+  const { data: relatedTattoos = [], isLoading: loadingTattoos } = useQuery({
+    queryKey: ['related-tattoos', post?.id],
+    queryFn: () => fetchRelatedTattoos(post?.category_id, post?.tags),
+    enabled: !!post?.id,
+    staleTime: 10 * 60 * 1000, // 10 minutos
+  });
 
   // Format date function
   const formatDate = (dateString?: string) => {
     if (!dateString) return "";
     try {
-      return format(new Date(dateString), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+      return format(parseISO(dateString), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
     } catch (error) {
       console.error("Error formatting date:", error);
       return dateString;
@@ -79,15 +86,9 @@ const BlogPost = () => {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-12 flex justify-center">
-          <div className="animate-pulse space-y-4 w-full max-w-4xl">
-            <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-64 bg-gray-200 rounded w-full"></div>
-            <div className="space-y-2">
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-            </div>
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-12 w-12 animate-spin text-red-500 mb-4" />
+            <p className="text-lg text-gray-600">Carregando artigo...</p>
           </div>
         </div>
       </Layout>
@@ -107,7 +108,7 @@ const BlogPost = () => {
           </Alert>
           
           <div className="text-center mt-8">
-            <Button asChild variant="outline" className="mr-2" onClick={() => navigate(-1)}>
+            <Button variant="outline" className="mr-2" onClick={() => navigate(-1)}>
               <span className="flex items-center">
                 <ArrowLeft size={16} className="mr-1" />
                 Voltar
@@ -133,56 +134,54 @@ const BlogPost = () => {
   return (
     <Layout>
       {/* SEO Optimization */}
-      <HelmetProvider>
-        <Helmet>
-          <title>{`${post.title} | Blog 99Tattoo`}</title>
-          <meta name="description" content={metaDescription} />
-          <meta name="keywords" content={metaKeywords} />
-          {/* Open Graph tags for social sharing */}
-          <meta property="og:title" content={`${post.title} | Blog 99Tattoo`} />
-          <meta property="og:description" content={metaDescription} />
-          <meta property="og:type" content="article" />
-          <meta property="og:url" content={window.location.href} />
-          {post.cover_image && <meta property="og:image" content={post.cover_image} />}
-          {/* Twitter Card tags */}
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={`${post.title} | Blog 99Tattoo`} />
-          <meta name="twitter:description" content={metaDescription} />
-          {post.cover_image && <meta name="twitter:image" content={post.cover_image} />}
-          {/* Article specific metadata */}
-          {post.published_at && <meta property="article:published_time" content={post.published_at} />}
-          <link rel="canonical" href={window.location.href} />
-          {/* Structured Data (JSON-LD) */}
-          <script type="application/ld+json">
-            {`
-              {
-                "@context": "https://schema.org",
-                "@type": "BlogPosting",
-                "headline": "${post.title}",
-                "image": "${post.cover_image || ''}",
-                "datePublished": "${post.published_at || ''}",
-                "description": "${metaDescription}",
-                "author": {
-                  "@type": "Person",
-                  "name": "${authorName}"
-                },
-                "publisher": {
-                  "@type": "Organization",
-                  "name": "99Tattoo",
-                  "logo": {
-                    "@type": "ImageObject",
-                    "url": "https://99tattoo.com/logo.png"
-                  }
-                },
-                "mainEntityOfPage": {
-                  "@type": "WebPage",
-                  "@id": "${window.location.href}"
+      <Helmet>
+        <title>{`${post.title} | Blog 99Tattoo`}</title>
+        <meta name="description" content={metaDescription} />
+        <meta name="keywords" content={metaKeywords} />
+        {/* Open Graph tags for social sharing */}
+        <meta property="og:title" content={`${post.title} | Blog 99Tattoo`} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={window.location.href} />
+        {post.cover_image && <meta property="og:image" content={post.cover_image} />}
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${post.title} | Blog 99Tattoo`} />
+        <meta name="twitter:description" content={metaDescription} />
+        {post.cover_image && <meta name="twitter:image" content={post.cover_image} />}
+        {/* Article specific metadata */}
+        {post.published_at && <meta property="article:published_time" content={post.published_at} />}
+        <link rel="canonical" href={window.location.href} />
+        {/* Structured Data (JSON-LD) */}
+        <script type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              "headline": "${post.title}",
+              "image": "${post.cover_image || ''}",
+              "datePublished": "${post.published_at || ''}",
+              "description": "${metaDescription}",
+              "author": {
+                "@type": "Person",
+                "name": "${authorName}"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "99Tattoo",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://99tattoo.com/logo.png"
                 }
+              },
+              "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": "${window.location.href}"
               }
-            `}
-          </script>
-        </Helmet>
-      </HelmetProvider>
+            }
+          `}
+        </script>
+      </Helmet>
 
       {/* Hero section */}
       <div className="w-full h-96 relative">
@@ -345,9 +344,24 @@ const BlogPost = () => {
                 Tatuagens Relacionadas
               </h3>
               <div className="space-y-6 mt-4">
-                {relatedTattoos.map(tattoo => (
-                  <TattooCard key={tattoo.id} tattoo={tattoo} />
-                ))}
+                {loadingTattoos ? (
+                  // Loading state for tattoos
+                  Array(3).fill(0).map((_, i) => (
+                    <div key={i} className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-gray-200 rounded-md animate-pulse"></div>
+                      <div className="space-y-2 flex-1">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))
+                ) : relatedTattoos.length > 0 ? (
+                  relatedTattoos.map(tattoo => (
+                    <TattooCard key={tattoo.id} tattoo={tattoo} />
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center py-4">Nenhuma tatuagem relacionada disponível</p>
+                )}
               </div>
               <Button asChild variant="outline" className="w-full mt-4 border-black text-black hover:bg-black hover:text-white">
                 <Link to="/shop">Ver Mais Tatuagens</Link>
