@@ -42,6 +42,7 @@ const Auth = () => {
 
   // Se o usuário já estiver autenticado, redirecione para a página inicial
   if (user) {
+    console.log("Auth: Usuário já autenticado, redirecionando...", user);
     return <Navigate to="/" />;
   }
 
@@ -78,15 +79,19 @@ const Auth = () => {
     setIsSubmitting(true);
     setLoginError("");
     
+    console.log("Auth: Tentando fazer login com:", values.email);
+    
     const { error } = await signIn(values.email, values.password);
     
     if (error) {
+      console.error("Auth: Erro ao fazer login:", error);
       setLoginError(
         error.message === "Invalid login credentials"
           ? "E-mail ou senha inválidos"
-          : "Erro ao fazer login. Tente novamente."
+          : `Erro ao fazer login: ${error.message}`
       );
     } else {
+      console.log("Auth: Login bem-sucedido, redirecionando...");
       navigate("/");
     }
     
@@ -200,6 +205,7 @@ const Auth = () => {
                     variant="outline"
                     className="w-full"
                     onClick={() => {
+                      console.log("Auth: Preenchendo como Administrador");
                       loginForm.setValue("email", "adm99tattoo@gmail.com");
                     }}
                   >

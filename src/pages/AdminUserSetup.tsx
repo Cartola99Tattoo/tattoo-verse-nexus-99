@@ -31,6 +31,12 @@ const AdminUserSetup = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
   
+  useEffect(() => {
+    // Verificar a configuração do Supabase ao carregar a página
+    console.log("AdminUserSetup: Verificando configuração do Supabase...");
+    console.log("AdminUserSetup: URL do Supabase:", supabase.supabaseUrl);
+  }, []);
+  
   const form = useForm<z.infer<typeof adminSetupSchema>>({
     resolver: zodResolver(adminSetupSchema),
     defaultValues: {
@@ -46,7 +52,10 @@ const AdminUserSetup = () => {
     setSuccess(null);
     
     try {
+      console.log("AdminUserSetup: Iniciando configuração do administrador...");
+      
       // Utilizando a função customizada do Edge Function para verificar se o usuário existe
+      console.log("AdminUserSetup: Verificando se o usuário existe...");
       const { data: userCheck, error: checkError } = await supabase.functions.invoke("manage-admin", {
         body: {
           email: values.email,
@@ -54,9 +63,15 @@ const AdminUserSetup = () => {
         }
       });
       
-      if (checkError) throw checkError;
+      console.log("AdminUserSetup: Resposta da verificação:", userCheck);
+      
+      if (checkError) {
+        console.error("AdminUserSetup: Erro ao verificar usuário:", checkError);
+        throw checkError;
+      }
       
       if (userCheck?.exists) {
+        console.log("AdminUserSetup: Usuário existe, atualizando senha...");
         // Usuário existe, atualizar a senha
         const { error: updateError } = await supabase.functions.invoke("manage-admin", {
           body: {
@@ -66,11 +81,16 @@ const AdminUserSetup = () => {
           }
         });
         
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error("AdminUserSetup: Erro ao atualizar senha:", updateError);
+          throw updateError;
+        }
         
+        console.log("AdminUserSetup: Senha atualizada com sucesso");
         setSuccess(`Senha atualizada com sucesso para ${values.email}. Você pode fazer login agora.`);
         setTimeout(() => navigate('/auth'), 3000);
       } else {
+        console.log("AdminUserSetup: Usuário não existe, criando novo...");
         // Usuário não existe, criar novo
         const { error: createError } = await supabase.functions.invoke("manage-admin", {
           body: {
@@ -80,14 +100,18 @@ const AdminUserSetup = () => {
           }
         });
         
-        if (createError) throw createError;
+        if (createError) {
+          console.error("AdminUserSetup: Erro ao criar usuário:", createError);
+          throw createError;
+        }
         
+        console.log("AdminUserSetup: Usuário administrador criado com sucesso");
         setSuccess(`Usuário administrador criado com sucesso: ${values.email}. Você pode fazer login agora.`);
         setTimeout(() => navigate('/auth'), 3000);
       }
     } catch (err: any) {
+      console.error("AdminUserSetup: Erro completo:", err);
       setError(`Erro ao configurar usuário administrador: ${err.message || "Erro desconhecido"}`);
-      console.error("Erro na configuração do admin:", err);
     } finally {
       setIsSubmitting(false);
     }

@@ -40,19 +40,25 @@ serve(async (req) => {
     }
 
     if (action === "check") {
+      // Verificar se o usuário existe pela listagem de usuários
       const { data, error } = await supabaseClient.auth.admin.listUsers({
         filter: {
           email: email
         }
       })
       
+      // Adicionar logs para depuração
+      console.log("Check user results:", JSON.stringify({ data, error }))
+      
+      const userExists = data && data.users && data.users.length > 0
+      
       return new Response(
-        JSON.stringify({ exists: data && data.users && data.users.length > 0 }),
+        JSON.stringify({ exists: userExists }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       )
     } 
     else if (action === "create") {
-      // Criar usuário admin
+      // Criar usuário admin com confirmação de email
       const { data: userData, error: createError } = await supabaseClient.auth.admin.createUser({
         email,
         password,
@@ -63,6 +69,9 @@ serve(async (req) => {
         }
       })
 
+      // Adicionar logs para depuração
+      console.log("Create user result:", JSON.stringify({ userData, createError }))
+
       if (createError) throw createError
 
       // Atualizar o perfil para ser admin
@@ -72,7 +81,12 @@ serve(async (req) => {
           .update({ role: 'admin' })
           .eq('id', userData.user.id)
 
-        if (updateError) throw updateError
+        if (updateError) {
+          console.log("Error updating profile:", updateError)
+          throw updateError
+        } else {
+          console.log("Profile updated successfully to admin role")
+        }
       }
 
       return new Response(
@@ -88,6 +102,9 @@ serve(async (req) => {
         }
       })
 
+      // Adicionar logs para depuração
+      console.log("Find user for password update:", JSON.stringify({ users, listError }))
+
       if (listError) throw listError
 
       if (!users || !users.users || users.users.length === 0) {
@@ -102,6 +119,9 @@ serve(async (req) => {
         { password }
       )
 
+      // Adicionar logs para depuração
+      console.log("Password update result:", updateError ? JSON.stringify(updateError) : "Success")
+
       if (updateError) throw updateError
 
       return new Response(
@@ -113,6 +133,7 @@ serve(async (req) => {
       throw new Error("Ação inválida")
     }
   } catch (error) {
+    console.error("Erro na função manage-admin:", error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }

@@ -38,18 +38,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Autenticação inicial e configuração do listener para mudanças de auth
   useEffect(() => {
+    console.log("Iniciando AuthProvider...");
+    
     // Configurar o listener de mudanças de estado de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
+        console.log("Auth state changed event:", event);
         setSession(newSession);
         setUser(newSession?.user ?? null);
 
         // Carregar o perfil apenas se o usuário estiver autenticado
         if (newSession?.user) {
+          console.log("Usuário autenticado, carregando perfil...");
           setTimeout(() => {
             fetchProfile(newSession.user.id);
           }, 0);
         } else {
+          console.log("Usuário não autenticado, limpando perfil");
           setProfile(null);
         }
 
@@ -70,11 +75,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Verificar a sessão atual
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("Session check result:", currentSession ? "Session found" : "No session");
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
 
       // Carregar o perfil do usuário se estiver logado
       if (currentSession?.user) {
+        console.log("Carregando perfil do usuário da sessão atual...");
         fetchProfile(currentSession.user.id);
       }
       
@@ -89,6 +96,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Função para buscar o perfil do usuário
   const fetchProfile = async (userId: string) => {
     try {
+      console.log("Buscando perfil para o userId:", userId);
+      
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -100,6 +109,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      console.log("Perfil recebido:", data);
+
       // Adicionar o email do usuário ao objeto de perfil
       const userProfile = {
         ...data,
@@ -107,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } as UserProfile;
       
       setProfile(userProfile);
+      console.log("Perfil atualizado no estado:", userProfile);
     } catch (error) {
       console.error("Erro ao buscar perfil:", error);
     }
