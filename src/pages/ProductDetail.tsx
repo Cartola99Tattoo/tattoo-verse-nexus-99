@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -134,7 +135,7 @@ const ProductDetail = () => {
       name: product.name,
       price: product.price,
       images: product.images,
-      artist: product.artist, // Make sure artist is correctly typed
+      artist: product.artist as string, // Cast to string to resolve the type error
       product_id: product.id.toString(), // Add this line to match the CartItem type
       quantity: 1, // Initialize with quantity 1
       status: 'available',

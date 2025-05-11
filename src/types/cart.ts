@@ -1,9 +1,18 @@
 
 import { Artist, Product } from './product';
 
+export type Cart = {
+  id: string;
+  customer_id?: string;
+  created_at: string;
+  updated_at: string;
+  items?: CartItem[];
+};
+
 export type CartItem = {
   id: string;
   product_id: string; // Make sure this is a string
+  cart_id?: string;
   name?: string;
   price: number;
   quantity: number;

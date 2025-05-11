@@ -31,6 +31,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { cn } from "@/lib/utils";
 import { Address } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
 
 // Esquema de validação para endereço
 const addressSchema = z.object({
@@ -143,10 +144,11 @@ export default function Checkout() {
     }
   };
 
-  // Update handleAddAddress to include country
+  // Update handleAddAddress to include country and make number required
   const handleAddAddress = async (data: AddressFormValues) => {
     const addressData = {
       ...data,
+      number: data.number || "", // Make sure number is not undefined
       country: "Brasil" // Always add the country field
     };
     

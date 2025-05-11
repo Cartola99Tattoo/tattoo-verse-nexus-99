@@ -169,8 +169,14 @@ export const useCart = () => {
         
       if (error) throw error;
       
-      setItems(data as CartItem[]);
-      calculateTotals(data as CartItem[]);
+      // Convert the data to the expected type
+      const cartItems = data.map(item => ({
+        ...item,
+        status: 'available', // Add the missing status property
+      })) as CartItem[];
+      
+      setItems(cartItems);
+      calculateTotals(cartItems);
     } catch (error) {
       console.error('Error fetching cart items:', error);
     }
