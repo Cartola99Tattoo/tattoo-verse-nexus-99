@@ -2,6 +2,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "@/components/ui/use-toast";
 
 interface TattooCardProps {
   tattoo: {
@@ -16,6 +18,19 @@ interface TattooCardProps {
 }
 
 const TattooCard = ({ tattoo }: TattooCardProps) => {
+  const { addToCart } = useCart();
+  
+  const handleAddToCart = () => {
+    addToCart({
+      id: tattoo.id,
+      name: tattoo.name,
+      price: tattoo.price,
+      image: tattoo.image,
+      artist: tattoo.artist,
+      category: tattoo.category,
+    });
+  };
+
   return (
     <div className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
       <div className="relative h-64 overflow-hidden">
@@ -49,7 +64,13 @@ const TattooCard = ({ tattoo }: TattooCardProps) => {
             <Button asChild size="sm" variant="outline" className="text-black border-black hover:bg-black hover:text-white">
               <Link to={`/shop/${tattoo.id}`}>Ver</Link>
             </Button>
-            <Button size="sm" className="bg-red-500 hover:bg-red-600">Comprar</Button>
+            <Button 
+              size="sm" 
+              className="bg-red-500 hover:bg-red-600"
+              onClick={handleAddToCart}
+            >
+              Comprar
+            </Button>
           </div>
         </div>
       </div>
