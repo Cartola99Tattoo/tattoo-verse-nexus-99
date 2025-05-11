@@ -60,20 +60,19 @@ export const useOrder = (id: string) => {
       if (error) throw error;
       
       // Create a new object to avoid modifying the original data
-      const result = { ...data };
+      const result: any = { ...data };
       
       // Check if scheduling_preferences exists and is an array
       if (result.scheduling_preferences && 
           Array.isArray(result.scheduling_preferences) && 
           result.scheduling_preferences.length > 0) {
-        // We need to convert the first item in the array to a single SchedulingPreference object
-        const firstPreference = result.scheduling_preferences[0];
-        result.scheduling_preferences = firstPreference;
+        // Extract the first preference from the array and cast it to the correct type
+        result.scheduling_preferences = result.scheduling_preferences[0] as unknown as SchedulingPreference;
       } else {
         result.scheduling_preferences = null;
       }
       
-      return result as Order;
+      return result as unknown as Order;
     },
     enabled: !!user && !!id
   });

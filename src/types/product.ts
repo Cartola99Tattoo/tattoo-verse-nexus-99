@@ -11,7 +11,7 @@ export type Product = {
   status: 'available' | 'sold' | 'unavailable';
   created_at: string;
   updated_at: string;
-  artist?: Artist;
+  artist?: Artist | string;
   category?: ProductCategory;
 };
 
