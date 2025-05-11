@@ -282,6 +282,13 @@ export type Database = {
             referencedRelation: "blog_categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_blog_posts_author"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       cart_items: {

@@ -9,46 +9,52 @@ interface BlogCardProps {
 }
 
 const BlogCard = ({ post }: BlogCardProps) => {
-  // Formatação de data em português
+  // Formatação de data em português ou exibe data atual se não houver data de publicação
   const formattedDate = post.published_at 
     ? format(new Date(post.published_at), "dd 'de' MMMM, yyyy", { locale: ptBR })
     : "";
 
-  // Nome do autor completo ou parcial
+  // Nome do autor completo, parcial ou default
   const authorName = post.author 
-    ? `${post.author.first_name || ""} ${post.author.last_name || ""}`.trim() 
-    : "Admin";
+    ? `${post.author.first_name || ""} ${post.author.last_name || ""}`.trim() || "Equipe 99Tattoo"
+    : "Equipe 99Tattoo";
 
   // Calcular se deve usar imagem de capa ou placeholder
   const imageUrl = post.cover_image || "/placeholder.svg";
 
+  // Garantir que temos um trecho de texto mesmo quando o excertp estiver vazio
+  const excerpt = post.excerpt || post.content?.substring(0, 150).replace(/<[^>]*>/g, "") || "";
+
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
+    <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col">
       <Link to={`/blog/${post.slug || post.id}`} className="block h-48 overflow-hidden">
         <img
           src={imageUrl}
           alt={post.title}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/placeholder.svg";
+          }}
         />
       </Link>
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-grow">
         <div className="flex justify-between items-center mb-2">
           {post.category && (
             <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded">
-              {post.category.name}
+              {post.category.name || "Sem categoria"}
             </span>
           )}
           <span className="text-xs text-gray-500">{formattedDate}</span>
         </div>
-        <Link to={`/blog/${post.slug || post.id}`}>
+        <Link to={`/blog/${post.slug || post.id}`} className="flex-grow">
           <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors">
             {post.title}
           </h3>
         </Link>
         <p className="text-gray-600 mb-4 line-clamp-3">
-          {post.excerpt || post.content.substring(0, 150).replace(/<[^>]*>/g, "")}...
+          {excerpt}...
         </p>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mt-auto">
           <span className="text-sm text-gray-500">Por {authorName}</span>
           <Link
             to={`/blog/${post.slug || post.id}`}

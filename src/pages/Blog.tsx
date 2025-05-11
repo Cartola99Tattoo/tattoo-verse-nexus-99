@@ -43,23 +43,23 @@ const Blog = () => {
         <meta name="description" content="Confira as últimas novidades, dicas e informações sobre tatuagens no blog da 99Tattoo." />
       </Helmet>
       
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold">{getPageTitle()}</h1>
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <div className="text-center mb-8 md:mb-12">
+          <h1 className="text-3xl md:text-4xl font-bold">{getPageTitle()}</h1>
           <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
             Confira as últimas novidades, dicas e informações sobre tatuagens, 
             estilos, cuidados e muito mais no blog da 99Tattoo.
           </p>
         </div>
         
-        <div className="flex flex-col lg:flex-row gap-10">
+        <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
           {/* Lista de Blog Posts */}
-          <div className="lg:w-2/3">
+          <div className="w-full lg:w-2/3">
             <BlogList categoryId={currentCategory} tag={currentTag} />
           </div>
           
           {/* Sidebar */}
-          <div className="lg:w-1/3">
+          <div className="w-full lg:w-1/3 mt-8 lg:mt-0">
             <BlogSidebar />
           </div>
         </div>

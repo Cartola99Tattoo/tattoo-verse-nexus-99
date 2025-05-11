@@ -19,7 +19,7 @@ const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) 
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
 
-  const { posts, isLoading, totalCount } = useBlogPosts({
+  const { posts, isLoading, totalCount, error } = useBlogPosts({
     category_id: categoryId,
     tags: tag ? [tag] : undefined,
     search: searchQuery,
@@ -27,7 +27,7 @@ const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) 
     page,
   });
 
-  const totalPages = Math.ceil((totalCount || 0) / (limit || 6));
+  const totalPages = Math.max(Math.ceil((totalCount || 0) / (limit || 6)), 1);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,10 +35,16 @@ const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) 
     setPage(1);
   };
 
+  const handleClearSearch = () => {
+    setSearch("");
+    setSearchQuery("");
+    setPage(1);
+  };
+
   return (
     <div className="space-y-6">
       {showSearch && (
-        <form onSubmit={handleSearch} className="flex gap-2">
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             <Input
@@ -53,7 +59,20 @@ const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) 
         </form>
       )}
 
-      {isLoading ? (
+      {error ? (
+        <div className="text-center py-6">
+          <p className="text-red-500">
+            Ocorreu um erro ao carregar os artigos. Por favor, tente novamente mais tarde.
+          </p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => window.location.reload()}
+          >
+            Tentar novamente
+          </Button>
+        </div>
+      ) : isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array(limit || 6).fill(0).map((_, index) => (
             <div key={index} className="bg-white rounded-lg overflow-hidden shadow-md">
@@ -82,7 +101,7 @@ const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) 
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
+            <div className="text-center py-12 bg-white rounded-lg shadow-md">
               <h3 className="text-lg font-medium text-gray-700">
                 Nenhum artigo encontrado
               </h3>
@@ -94,10 +113,7 @@ const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) 
               <Button 
                 variant="outline" 
                 className="mt-4"
-                onClick={() => {
-                  setSearch("");
-                  setSearchQuery("");
-                }}
+                onClick={handleClearSearch}
               >
                 Ver todos os artigos
               </Button>
@@ -107,34 +123,73 @@ const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) 
       )}
 
       {/* Paginação */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-8 gap-2">
+      {totalPages > 1 && posts && posts.length > 0 && (
+        <div className="flex justify-center mt-8 gap-2 flex-wrap">
           <Button
             variant="outline"
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
             disabled={page === 1}
+            size="sm"
           >
             Anterior
           </Button>
           
-          <div className="flex items-center gap-1">
-            {Array.from({ length: totalPages }).map((_, index) => (
-              <Button
-                key={index}
-                variant={page === index + 1 ? "default" : "outline"}
-                size="sm"
-                className="w-10 h-10"
-                onClick={() => setPage(index + 1)}
-              >
-                {index + 1}
-              </Button>
-            ))}
+          <div className="flex items-center gap-1 flex-wrap justify-center">
+            {Array.from({ length: Math.min(totalPages, 5) }).map((_, index) => {
+              let pageNumber;
+              
+              // Lógica para mostrar páginas relevantes quando houver muitas
+              if (totalPages <= 5) {
+                // Se tiver 5 ou menos páginas, mostra todas
+                pageNumber = index + 1;
+              } else {
+                // Se estiver nas primeiras páginas
+                if (page <= 3) {
+                  if (index < 4) {
+                    pageNumber = index + 1;
+                  } else {
+                    pageNumber = totalPages;
+                  }
+                } 
+                // Se estiver nas últimas páginas
+                else if (page > totalPages - 3) {
+                  if (index === 0) {
+                    pageNumber = 1;
+                  } else {
+                    pageNumber = totalPages - (4 - index);
+                  }
+                }
+                // Se estiver no meio
+                else {
+                  if (index === 0) {
+                    pageNumber = 1;
+                  } else if (index === 4) {
+                    pageNumber = totalPages;
+                  } else {
+                    pageNumber = page + (index - 2);
+                  }
+                }
+              }
+              
+              return (
+                <Button
+                  key={pageNumber}
+                  variant={page === pageNumber ? "default" : "outline"}
+                  size="sm"
+                  className="w-8 h-8 p-0"
+                  onClick={() => setPage(pageNumber)}
+                >
+                  {pageNumber}
+                </Button>
+              );
+            })}
           </div>
           
           <Button
             variant="outline"
             onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={page === totalPages}
+            size="sm"
           >
             Próxima
           </Button>

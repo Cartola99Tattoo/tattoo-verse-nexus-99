@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const BlogPreview = () => {
-  const { posts, isLoading } = useBlogPosts({ limit: 3 });
+  const { posts, isLoading, error } = useBlogPosts({ limit: 3 });
 
   return (
     <section className="bg-white py-16">
@@ -18,7 +18,13 @@ const BlogPreview = () => {
           </p>
         </div>
 
-        {isLoading ? (
+        {error ? (
+          <div className="text-center py-6">
+            <p className="text-red-500">
+              Ocorreu um erro ao carregar os artigos. Por favor, tente novamente mais tarde.
+            </p>
+          </div>
+        ) : isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white rounded-lg overflow-hidden shadow-md">
