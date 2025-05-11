@@ -4,20 +4,31 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
 // Define proper types
-type BlogPost = {
+export type BlogPost = {
   id: number | string;
   title: string;
   content: string;
   excerpt?: string;
-  image?: string;
-  date?: string;
-  category?: string;
-  author?: string;
+  cover_image?: string;
+  published_at?: string;
+  category_id?: string;
+  author_id?: string;
+  reading_time?: number;
+  tags?: string[];
   view_count?: number;
+  slug?: string;
+  meta_description?: string;
+  meta_keywords?: string;
   profiles?: {
     first_name?: string;
     last_name?: string;
     avatar_url?: string;
+    id?: string;
+  };
+  blog_categories?: {
+    name?: string;
+    id?: string;
+    description?: string;
   };
 };
 
@@ -47,25 +58,31 @@ export function useBlogPost(postId: number | string) {
           // Continue execution even if view count increment fails
         }
         
-        // Then fetch the post data
-        const { data, error } = await supabase
+        // Then fetch the post data with author and category information
+        const { data: postData, error: postError } = await supabase
           .from("blog_posts")
-          .select("*, profiles(first_name, last_name, avatar_url)")
+          .select(`
+            *,
+            profiles:author_id(*),
+            blog_categories:category_id(*)
+          `)
           .eq("id", postId)
           .single();
 
-        if (error) {
+        if (postError) {
+          console.error("Database error:", postError);
           throw {
-            message: "Error fetching blog post",
-            details: error.message
+            message: "Erro ao buscar artigo",
+            details: postError.message
           };
         }
 
-        if (data) {
-          setPost(data as unknown as BlogPost);
+        if (postData) {
+          console.log("Post data fetched:", postData);
+          setPost(postData as unknown as BlogPost);
         } else {
           throw {
-            message: "Post não encontrado",
+            message: "Artigo não encontrado",
             details: "O artigo que você está procurando não existe ou foi removido."
           };
         }

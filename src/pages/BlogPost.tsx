@@ -1,32 +1,15 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import TattooCard from "@/components/shop/TattooCard";
-import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { useBlogPost } from "@/hooks/useBlogPost";
-
-type BlogPost = {
-  id: number;
-  title: string;
-  content: string;
-  excerpt: string;
-  image: string;
-  date: string;
-  category: string;
-  author: string;
-};
-
-type Tattoo = {
-  id: number;
-  name: string;
-  artist: string;
-  category: string;
-  image: string;
-  price: number;
-  rating: number;
-};
+import { useBlogPost, BlogPost as BlogPostType } from "@/hooks/useBlogPost";
+import TattooCard from "@/components/shop/TattooCard";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Share2, Twitter, Facebook, Bookmark, ArrowLeft } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 // Mock data for related tattoos (we'll keep this for now, but it would be better to fetch from API)
 const relatedTattoos = [
@@ -61,8 +44,34 @@ const relatedTattoos = [
 
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
-  // Use our improved hook
   const { post, isLoading, error } = useBlogPost(id || "");
+  const navigate = useNavigate();
+
+  // Format date function
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "";
+    try {
+      return format(new Date(dateString), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
+  };
+
+  // Get author full name
+  const getAuthorName = (post: BlogPostType) => {
+    if (post.profiles) {
+      const firstName = post.profiles.first_name || "";
+      const lastName = post.profiles.last_name || "";
+      return `${firstName} ${lastName}`.trim() || "Equipe 99Tattoo";
+    }
+    return "Equipe 99Tattoo";
+  };
+
+  // Get category name
+  const getCategoryName = (post: BlogPostType) => {
+    return post.blog_categories?.name || "Sem categoria";
+  };
 
   // Show loading state
   if (isLoading) {
@@ -90,15 +99,21 @@ const BlogPost = () => {
       <Layout>
         <div className="container mx-auto px-4 py-12">
           <Alert variant="destructive" className="mb-6">
-            <AlertTitle>Artigo não encontrado</AlertTitle>
+            <AlertTitle>{error?.message || "Artigo não encontrado"}</AlertTitle>
             <AlertDescription>
               {error?.details || "O artigo que você está procurando não existe ou foi removido."}
             </AlertDescription>
           </Alert>
           
           <div className="text-center mt-8">
+            <Button asChild variant="outline" className="mr-2" onClick={() => navigate(-1)}>
+              <span className="flex items-center">
+                <ArrowLeft size={16} className="mr-1" />
+                Voltar
+              </span>
+            </Button>
             <Button asChild>
-              <Link to="/blog">Voltar para o Blog</Link>
+              <Link to="/blog">Ver todos os artigos</Link>
             </Button>
           </div>
         </div>
@@ -106,15 +121,74 @@ const BlogPost = () => {
     );
   }
 
+  const formattedDate = formatDate(post.published_at);
+  const authorName = getAuthorName(post);
+  const categoryName = getCategoryName(post);
+
+  // Meta tags content
+  const metaDescription = post.meta_description || post.excerpt || `${post.title} - Leia mais sobre tatuagens e arte no Blog da 99Tattoo`;
+  const metaKeywords = post.meta_keywords || "tatuagem, arte, 99tattoo";
+
   return (
     <Layout>
+      {/* SEO Optimization */}
+      <Helmet>
+        <title>{`${post.title} | Blog 99Tattoo`}</title>
+        <meta name="description" content={metaDescription} />
+        <meta name="keywords" content={metaKeywords} />
+        {/* Open Graph tags for social sharing */}
+        <meta property="og:title" content={`${post.title} | Blog 99Tattoo`} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={window.location.href} />
+        {post.cover_image && <meta property="og:image" content={post.cover_image} />}
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${post.title} | Blog 99Tattoo`} />
+        <meta name="twitter:description" content={metaDescription} />
+        {post.cover_image && <meta name="twitter:image" content={post.cover_image} />}
+        {/* Article specific metadata */}
+        {post.published_at && <meta property="article:published_time" content={post.published_at} />}
+        <link rel="canonical" href={window.location.href} />
+        {/* Structured Data (JSON-LD) */}
+        <script type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              "headline": "${post.title}",
+              "image": "${post.cover_image || ''}",
+              "datePublished": "${post.published_at || ''}",
+              "description": "${metaDescription}",
+              "author": {
+                "@type": "Person",
+                "name": "${authorName}"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "99Tattoo",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://99tattoo.com/logo.png"
+                }
+              },
+              "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": "${window.location.href}"
+              }
+            }
+          `}
+        </script>
+      </Helmet>
+
       {/* Hero section */}
       <div className="w-full h-96 relative">
         <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10"></div>
         <img 
-          src={post.image} 
+          src={post.cover_image || 'https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop'} 
           alt={post.title} 
           className="w-full h-full object-cover"
+          loading="eager" // Load hero image eagerly for LCP optimization
         />
         <div className="container mx-auto px-4 absolute bottom-0 left-0 right-0 z-20 pb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -122,13 +196,13 @@ const BlogPost = () => {
               Blog
             </Link>
             <span className="text-white">/</span>
-            <span className="text-gray-300">{post.category}</span>
+            <span className="text-gray-300">{categoryName}</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{post.title}</h1>
           <div className="flex items-center text-white">
-            <span className="mr-4">{post.date}</span>
+            <span className="mr-4">{formattedDate}</span>
             <span className="mr-4">|</span>
-            <span>Por {post.author}</span>
+            <span>Por {authorName}</span>
           </div>
         </div>
       </div>
@@ -138,36 +212,108 @@ const BlogPost = () => {
           {/* Main content */}
           <div className="lg:w-2/3">
             <div className="bg-white rounded-lg shadow-md p-8">
-              <div 
-                className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: post.content }}
-              />
+              {/* Reading time and view count */}
+              <div className="flex justify-between items-center mb-6 text-sm text-gray-500">
+                <div className="flex items-center">
+                  <span className="mr-4">{post.reading_time || 5} min de leitura</span>
+                </div>
+                <div className="flex items-center">
+                  <span>{post.view_count || 0} visualizações</span>
+                </div>
+              </div>
+              
+              {/* Optional featured image inside content if different from hero */}
+              {post.cover_image && (
+                <figure className="my-6">
+                  <img 
+                    src={post.cover_image} 
+                    alt={`Imagem ilustrativa para ${post.title}`} 
+                    className="w-full rounded-lg"
+                    width="800"
+                    height="400"
+                    loading="lazy"
+                  />
+                  <figcaption className="text-sm text-gray-500 mt-2 text-center">
+                    Imagem ilustrativa: {post.title}
+                  </figcaption>
+                </figure>
+              )}
+
+              {/* Article content with rich text */}
+              <article className="prose max-w-none">
+                <div 
+                  className="prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
+              </article>
+
+              {/* Tags section if available */}
+              {post.tags && post.tags.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-2">Tags:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {post.tags.map((tag, index) => (
+                      <Link 
+                        key={index} 
+                        to={`/blog?tag=${tag}`}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm transition-colors"
+                      >
+                        {tag}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <Separator className="my-8" />
 
               {/* Author info */}
               <div className="flex items-center">
-                <div className="w-12 h-12 rounded-full bg-gray-300 mr-4"></div>
+                <div className="w-12 h-12 rounded-full bg-gray-300 overflow-hidden mr-4">
+                  {post.profiles?.avatar_url ? (
+                    <img 
+                      src={post.profiles.avatar_url} 
+                      alt={authorName}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-red-500 text-white text-lg font-bold">
+                      {authorName.charAt(0)}
+                    </div>
+                  )}
+                </div>
                 <div>
-                  <p className="font-bold">{post.author}</p>
+                  <p className="font-bold">{authorName}</p>
                   <p className="text-sm text-gray-600">Artista Tatuador na 99Tattoo</p>
                 </div>
               </div>
             </div>
 
             {/* Share buttons */}
-            <div className="mt-8 flex gap-4">
-              <Button variant="outline" className="flex gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z"/>
-                </svg>
-                Compartilhar no Twitter
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Button variant="outline" className="flex gap-2" onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast({ title: "Link copiado!", description: "Link do artigo copiado para a área de transferência" });
+              }}>
+                <Share2 size={16} />
+                Compartilhar
+              </Button>
+              <Button variant="outline" className="flex gap-2" onClick={() => {
+                window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.title)}`, '_blank');
+              }}>
+                <Twitter size={16} />
+                Twitter
+              </Button>
+              <Button variant="outline" className="flex gap-2" onClick={() => {
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+              }}>
+                <Facebook size={16} />
+                Facebook
               </Button>
               <Button variant="outline" className="flex gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
-                </svg>
-                Compartilhar no Facebook
+                <Bookmark size={16} />
+                Salvar
               </Button>
             </div>
 
@@ -178,6 +324,7 @@ const BlogPost = () => {
                 <textarea 
                   placeholder="Deixe seu comentário..." 
                   className="w-full border rounded-md p-3 h-24"
+                  aria-label="Área de comentário"
                 ></textarea>
                 <Button className="mt-4 bg-red-500 hover:bg-red-600">Comentar</Button>
               </div>
