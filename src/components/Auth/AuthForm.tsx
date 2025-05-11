@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -113,10 +112,7 @@ export default function AuthForm() {
   const onRegisterSubmit = async (values: RegisterFormValues) => {
     setIsLoading(true);
     try {
-      const { error } = await signUp(values.email, values.password, {
-        firstName: values.firstName,
-        lastName: values.lastName,
-      });
+      const { error } = await signUp(values.email, values.password, values.firstName, values.lastName);
       
       if (error) {
         throw error;

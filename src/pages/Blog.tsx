@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
 import BlogList from "@/components/blog/BlogList";
 import BlogSidebar from "@/components/blog/BlogSidebar";
@@ -10,7 +10,7 @@ import { useBlogCategories } from "@/hooks/useBlog";
 const Blog = () => {
   const { categoryId, tag } = useParams();
   const navigate = useNavigate();
-  const { categories, isLoading: categoriesLoading } = useBlogCategories();
+  const { data: categories, isLoading: categoriesLoading } = useBlogCategories();
   const [currentCategory, setCurrentCategory] = useState<string | undefined>(categoryId);
   const [currentTag, setCurrentTag] = useState<string | undefined>(tag);
   

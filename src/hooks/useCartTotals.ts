@@ -3,23 +3,23 @@ import { useMemo } from 'react';
 import { useCart } from './useCart';
 
 export const useCartTotals = () => {
-  const { cart } = useCart();
+  const { items } = useCart();
   
   const cartTotalPrice = useMemo(() => {
-    if (!cart || !cart.length) return 0;
+    if (!items || !items.length) return 0;
     
-    return cart.reduce((total, item) => {
+    return items.reduce((total, item) => {
       return total + (item.price * item.quantity);
     }, 0);
-  }, [cart]);
+  }, [items]);
   
   const cartTotalItems = useMemo(() => {
-    if (!cart || !cart.length) return 0;
+    if (!items || !items.length) return 0;
     
-    return cart.reduce((total, item) => {
+    return items.reduce((total, item) => {
       return total + item.quantity;
     }, 0);
-  }, [cart]);
+  }, [items]);
   
   const cartSubtotal = cartTotalPrice;
   

@@ -1,7 +1,6 @@
-
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
 import { useAuth } from "@/hooks/useAuth";
 import { useBlogPost, useBlogPosts, useBlogAdmin } from "@/hooks/useBlog";

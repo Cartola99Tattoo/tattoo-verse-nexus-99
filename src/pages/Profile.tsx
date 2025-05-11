@@ -2,14 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useAuth } from "@/hooks/useAuth";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
-import Layout from "@/components/layout/Layout";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import Layout from "@/components/layout/Layout";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
