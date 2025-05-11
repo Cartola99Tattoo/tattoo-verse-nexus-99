@@ -53,12 +53,14 @@ export const useBlogPosts = (options?: {
   
   const fetchPosts = async () => {
     try {
+      console.log("Fetching blog posts with options:", options);
+      
       let query = supabase
         .from('blog_posts')
         .select(`
           *,
-          author:profiles!blog_posts_author_id_fkey(*),
-          category:blog_categories(*)
+          author:profiles(id, first_name, last_name, avatar_url),
+          category:blog_categories(id, name, description)
         `)
         .order('published_at', { ascending: false });
         
@@ -90,9 +92,11 @@ export const useBlogPosts = (options?: {
       const { data, error } = await query;
       
       if (error) {
+        console.error("Erro na query do Supabase:", error);
         throw error;
       }
       
+      console.log("Posts recuperados:", data?.length || 0);
       return data as unknown as BlogPost[];
     } catch (error: any) {
       console.error("Erro ao buscar posts:", error.message);

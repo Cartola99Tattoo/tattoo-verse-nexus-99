@@ -7,27 +7,14 @@ import { toast } from '@/components/ui/use-toast';
 export const useBlogPost = (slug: string) => {
   const incrementViewCount = async (postId: string) => {
     try {
-      // First, call the RPC function to get the new count
-      // The TypeScript error happens because the RPC function has incorrect type definitions
-      // We need to fully bypass the type checking for this RPC call
-      const { data: newCount, error: rpcError } = await (supabase.rpc as any)(
-        'increment', 
-        { row_id: postId }
-      );
-      
-      if (rpcError) {
-        console.error("Erro ao incrementar visualizações (RPC):", rpcError);
-        return;
-      }
-      
-      // Then update the post with the new count value
-      const { error: updateError } = await supabase
+      // Atualizar diretamente o contador de visualizações
+      const { error } = await supabase
         .from('blog_posts')
-        .update({ view_count: newCount })
+        .update({ view_count: supabase.rpc('increment_counter', { row_id: postId }) })
         .eq('id', postId);
         
-      if (updateError) {
-        console.error("Erro ao atualizar contagem de visualizações:", updateError);
+      if (error) {
+        console.error("Erro ao incrementar visualizações:", error);
       }
     } catch (error) {
       console.error("Erro ao incrementar visualizações:", error);
@@ -38,13 +25,15 @@ export const useBlogPost = (slug: string) => {
     queryKey: ['blogPost', slug],
     queryFn: async () => {
       try {
+        console.log("Buscando post com slug:", slug);
+        
         // Primeiro, tente obter por slug
         let query = supabase
           .from('blog_posts')
           .select(`
             *,
-            author:profiles!blog_posts_author_id_fkey(*),
-            category:blog_categories(*)
+            author:profiles(id, first_name, last_name, avatar_url),
+            category:blog_categories(id, name, description)
           `)
           .eq('slug', slug);
         
@@ -52,12 +41,14 @@ export const useBlogPost = (slug: string) => {
         
         // Se não encontrar por slug, tente por id
         if (!data || data.length === 0) {
+          console.log("Post não encontrado pelo slug, tentando pelo ID");
+          
           query = supabase
             .from('blog_posts')
             .select(`
               *,
-              author:profiles!blog_posts_author_id_fkey(*),
-              category:blog_categories(*)
+              author:profiles(id, first_name, last_name, avatar_url),
+              category:blog_categories(id, name, description)
             `)
             .eq('id', slug);
           
@@ -67,14 +58,17 @@ export const useBlogPost = (slug: string) => {
         }
         
         if (error) {
+          console.error("Erro na query do Supabase:", error);
           throw error;
         }
         
         if (!data || data.length === 0) {
+          console.error("Post não encontrado");
           throw new Error('Post não encontrado');
         }
         
         const post = data[0] as unknown as BlogPost;
+        console.log("Post encontrado:", post.title);
         
         // Incrementar a contagem de visualizações
         if (post && post.id) {

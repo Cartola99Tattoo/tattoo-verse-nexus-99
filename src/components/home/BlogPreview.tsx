@@ -4,9 +4,10 @@ import { useBlogPosts } from "@/hooks/useBlog";
 import BlogCard from "@/components/blog/BlogCard";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshCw } from "lucide-react";
 
 const BlogPreview = () => {
-  const { posts, isLoading, error } = useBlogPosts({ limit: 3 });
+  const { posts, isLoading, error, refetch } = useBlogPosts({ limit: 3 });
 
   return (
     <section className="bg-white py-16">
@@ -19,10 +20,18 @@ const BlogPreview = () => {
         </div>
 
         {error ? (
-          <div className="text-center py-6">
-            <p className="text-red-500">
-              Ocorreu um erro ao carregar os artigos. Por favor, tente novamente mais tarde.
+          <div className="text-center py-10">
+            <p className="text-red-500 mb-4">
+              Ocorreu um erro ao carregar os artigos. Por favor, tente novamente.
             </p>
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => refetch()}
+            >
+              <RefreshCw size={16} />
+              Tentar novamente
+            </Button>
           </div>
         ) : isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -55,6 +64,13 @@ const BlogPreview = () => {
             ) : (
               <div className="text-center py-10">
                 <p className="text-gray-600">Ainda não há posts publicados.</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => refetch()}
+                >
+                  Verificar novamente
+                </Button>
               </div>
             )}
           </>

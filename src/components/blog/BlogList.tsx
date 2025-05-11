@@ -5,7 +5,7 @@ import BlogCard from "./BlogCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, RefreshCw } from "lucide-react";
 
 interface BlogListProps {
   categoryId?: string;
@@ -14,20 +14,20 @@ interface BlogListProps {
   showSearch?: boolean;
 }
 
-const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) => {
+const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListProps) => {
   const [search, setSearch] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
 
-  const { posts, isLoading, totalCount, error } = useBlogPosts({
+  const { posts, isLoading, totalCount, error, refetch } = useBlogPosts({
     category_id: categoryId,
     tags: tag ? [tag] : undefined,
     search: searchQuery,
-    limit: limit || 6,
+    limit: limit,
     page,
   });
 
-  const totalPages = Math.max(Math.ceil((totalCount || 0) / (limit || 6)), 1);
+  const totalPages = Math.max(Math.ceil((totalCount || 0) / limit), 1);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +40,8 @@ const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) 
     setSearchQuery("");
     setPage(1);
   };
+
+  console.log("BlogList render:", { posts: posts?.length, isLoading, error, categoryId, tag });
 
   return (
     <div className="space-y-6">
@@ -60,21 +62,22 @@ const BlogList = ({ categoryId, tag, limit, showSearch = true }: BlogListProps) 
       )}
 
       {error ? (
-        <div className="text-center py-6">
-          <p className="text-red-500">
-            Ocorreu um erro ao carregar os artigos. Por favor, tente novamente mais tarde.
+        <div className="text-center py-8 bg-white rounded-lg shadow-md">
+          <p className="text-red-500 mb-4">
+            Ocorreu um erro ao carregar os artigos. Por favor, tente novamente.
           </p>
           <Button 
             variant="outline" 
-            className="mt-4"
-            onClick={() => window.location.reload()}
+            className="mt-2 flex items-center gap-2"
+            onClick={() => refetch()}
           >
+            <RefreshCw size={16} />
             Tentar novamente
           </Button>
         </div>
       ) : isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array(limit || 6).fill(0).map((_, index) => (
+          {Array(limit).fill(0).map((_, index) => (
             <div key={index} className="bg-white rounded-lg overflow-hidden shadow-md">
               <Skeleton className="h-48 w-full" />
               <div className="p-6 space-y-4">

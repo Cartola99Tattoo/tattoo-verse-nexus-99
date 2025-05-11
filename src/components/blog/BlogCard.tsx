@@ -9,6 +9,10 @@ interface BlogCardProps {
 }
 
 const BlogCard = ({ post }: BlogCardProps) => {
+  if (!post) {
+    return null;
+  }
+
   // Formatação de data em português ou exibe data atual se não houver data de publicação
   const formattedDate = post.published_at 
     ? format(new Date(post.published_at), "dd 'de' MMMM, yyyy", { locale: ptBR })
@@ -25,9 +29,12 @@ const BlogCard = ({ post }: BlogCardProps) => {
   // Garantir que temos um trecho de texto mesmo quando o excertp estiver vazio
   const excerpt = post.excerpt || post.content?.substring(0, 150).replace(/<[^>]*>/g, "") || "";
 
+  // Gerar um slug seguro para o link
+  const postLink = `/blog/${post.slug || post.id}`;
+
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-      <Link to={`/blog/${post.slug || post.id}`} className="block h-48 overflow-hidden">
+      <Link to={postLink} className="block h-48 overflow-hidden">
         <img
           src={imageUrl}
           alt={post.title}
@@ -46,7 +53,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
           )}
           <span className="text-xs text-gray-500">{formattedDate}</span>
         </div>
-        <Link to={`/blog/${post.slug || post.id}`} className="flex-grow">
+        <Link to={postLink} className="flex-grow">
           <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors">
             {post.title}
           </h3>
@@ -57,7 +64,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
         <div className="flex justify-between items-center mt-auto">
           <span className="text-sm text-gray-500">Por {authorName}</span>
           <Link
-            to={`/blog/${post.slug || post.id}`}
+            to={postLink}
             className="text-red-500 hover:text-red-700 transition-colors text-sm flex items-center"
           >
             Ler mais
