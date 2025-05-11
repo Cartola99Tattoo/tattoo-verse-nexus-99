@@ -13,23 +13,22 @@ const BlogCard = ({ post }: BlogCardProps) => {
     return null;
   }
 
-  // Formatação de data em português com verificação de validade
+  // Format date in Portuguese with validation
   const formattedDate = post.published_at && isValid(parseISO(post.published_at))
     ? format(new Date(post.published_at), "dd 'de' MMMM, yyyy", { locale: ptBR })
     : "";
 
-  // Nome do autor completo, parcial ou default com verificação mais robusta
+  // Construct author name with fallbacks
   const authorName = post.author 
     ? `${post.author.first_name || ""} ${post.author.last_name || ""}`.trim() || "Equipe 99Tattoo"
     : "Equipe 99Tattoo";
 
-  // Calcular se deve usar imagem de capa ou placeholder com verificação
+  // Use cover image or placeholder
   const imageUrl = post.cover_image && post.cover_image.trim() !== "" 
     ? post.cover_image 
     : "/placeholder.svg";
 
-  // Garantir que temos um trecho de texto mesmo quando o excerpt estiver vazio
-  // Limitar o número de caracteres e remover tags HTML
+  // Extract excerpt from content or use excerpt field
   const getExcerpt = () => {
     if (post.excerpt && post.excerpt.trim() !== "") {
       return post.excerpt.replace(/<[^>]*>/g, "").substring(0, 150);
@@ -42,7 +41,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
   
   const excerpt = getExcerpt();
 
-  // Gerar um slug seguro para o link
+  // Generate safe link using slug or ID
   const postLink = `/blog/${post.slug || post.id}`;
 
   return (

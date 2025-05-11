@@ -14,6 +14,7 @@ const BlogSearch = ({ value = '', onSearch, onClear }: BlogSearchProps) => {
   const [searchQuery, setSearchQuery] = useState(value);
   const [isSearching, setIsSearching] = useState(false);
   
+  // Update local state when prop changes
   useEffect(() => {
     setSearchQuery(value);
   }, [value]);
@@ -26,7 +27,7 @@ const BlogSearch = ({ value = '', onSearch, onClear }: BlogSearchProps) => {
       setIsSearching(true);
       onSearch(trimmedQuery);
       
-      // Simulação de "busca" para melhor feedback do usuário
+      // Simulated "search" for better user feedback
       setTimeout(() => setIsSearching(false), 500);
     }
   };

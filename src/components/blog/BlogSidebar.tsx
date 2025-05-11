@@ -11,7 +11,7 @@ const BlogSidebar = () => {
     page: 1,
   });
 
-  // Extrair tags únicas de todos os posts recentes
+  // Extract unique tags from all recent posts
   const allTags = recentPosts?.reduce((tags, post) => {
     if (post.tags && Array.isArray(post.tags)) {
       return [...tags, ...post.tags];
@@ -23,7 +23,7 @@ const BlogSidebar = () => {
 
   return (
     <div className="space-y-8">
-      {/* Categorias */}
+      {/* Categories */}
       <div>
         <h4 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">
           Categorias
@@ -50,7 +50,7 @@ const BlogSidebar = () => {
         )}
       </div>
 
-      {/* Posts recentes */}
+      {/* Recent Posts */}
       <div>
         <h4 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">
           Posts Recentes
@@ -76,6 +76,9 @@ const BlogSidebar = () => {
                     src={post.cover_image || "/placeholder.svg"}
                     alt={post.title}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/placeholder.svg";
+                    }}
                   />
                 </Link>
                 <div>
@@ -88,7 +91,7 @@ const BlogSidebar = () => {
                   <span className="text-xs text-gray-500 block mt-1">
                     {post.published_at 
                       ? new Date(post.published_at).toLocaleDateString('pt-BR')
-                      : ''}
+                      : new Date(post.created_at).toLocaleDateString('pt-BR')}
                   </span>
                 </div>
               </li>
@@ -98,20 +101,22 @@ const BlogSidebar = () => {
       </div>
 
       {/* Tags */}
-      <div>
-        <h4 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">
-          Tags
-        </h4>
-        <div className="flex flex-wrap gap-2">
-          {uniqueTags.map((tag) => (
-            <Link to={`/blog/tag/${encodeURIComponent(tag)}`} key={tag}>
-              <Badge variant="outline" className="hover:bg-red-50 hover:text-red-500 cursor-pointer">
-                {tag}
-              </Badge>
-            </Link>
-          ))}
+      {uniqueTags.length > 0 && (
+        <div>
+          <h4 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">
+            Tags
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {uniqueTags.map((tag) => (
+              <Link to={`/blog/tag/${encodeURIComponent(tag)}`} key={tag}>
+                <Badge variant="outline" className="hover:bg-red-50 hover:text-red-500 cursor-pointer">
+                  {tag}
+                </Badge>
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

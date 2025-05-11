@@ -14,13 +14,13 @@ const Blog = () => {
   const [currentCategory, setCurrentCategory] = useState<string | undefined>(categoryId);
   const [currentTag, setCurrentTag] = useState<string | undefined>(tag);
   
-  // Atualizar estado quando os parâmetros mudarem
+  // Update state when params change
   useEffect(() => {
     setCurrentCategory(categoryId);
     setCurrentTag(tag);
   }, [categoryId, tag]);
   
-  // Título da página baseado na categoria ou tag
+  // Get page title based on current filters
   const getPageTitle = () => {
     if (currentCategory && categories) {
       const category = categories.find(cat => cat.id === currentCategory);
@@ -53,7 +53,7 @@ const Blog = () => {
         </div>
         
         <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
-          {/* Lista de Blog Posts */}
+          {/* Blog Post List */}
           <div className="w-full lg:w-2/3">
             <BlogList categoryId={currentCategory} tag={currentTag} />
           </div>

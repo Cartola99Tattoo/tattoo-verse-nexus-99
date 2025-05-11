@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BlogPost, BlogCategory } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 
-export const useBlogPosts = (options?: {
+export interface BlogPostsOptions {
   category_id?: string;
   tags?: string[];
   search?: string;
@@ -13,13 +13,15 @@ export const useBlogPosts = (options?: {
   page?: number;
   published_only?: boolean;
   staleTime?: number;
-}) => {
+}
+
+export const useBlogPosts = (options?: BlogPostsOptions) => {
   const [totalCount, setTotalCount] = useState<number>(0);
   
-  // Função simplificada para contar posts que correspondam aos critérios
+  // Function to count posts based on filters
   const fetchPostsCount = async (): Promise<number> => {
     try {
-      console.log("[useBlogPosts] Contando posts com opções:", options);
+      console.log("[useBlogPosts] Counting posts with options:", options);
       
       let query = supabase
         .from('blog_posts')
@@ -44,45 +46,27 @@ export const useBlogPosts = (options?: {
       const { count, error } = await query;
       
       if (error) {
-        console.error("[useBlogPosts] Erro ao buscar contagem de posts:", error);
+        console.error("[useBlogPosts] Error counting posts:", error);
         return 0;
       }
       
-      console.log("[useBlogPosts] Total de posts encontrados:", count);
+      console.log("[useBlogPosts] Total posts count:", count);
       return count || 0;
     } catch (error) {
-      console.error("[useBlogPosts] Erro ao buscar contagem de posts:", error);
+      console.error("[useBlogPosts] Error counting posts:", error);
       return 0;
     }
   };
   
-  // Nova abordagem: Três consultas separadas para evitar problemas de permissão
+  // Main function to fetch blog posts
   const fetchPosts = async (): Promise<BlogPost[]> => {
     try {
-      console.log("[useBlogPosts] Buscando posts do blog com opções:", options);
+      console.log("[useBlogPosts] Fetching posts with options:", options);
       
-      // 1. Primeiro, buscar os posts básicos sem joins
+      // Step 1: Fetch posts with basic data
       let query = supabase
         .from('blog_posts')
-        .select(`
-          id, 
-          title, 
-          slug, 
-          content, 
-          excerpt, 
-          cover_image, 
-          author_id,
-          category_id, 
-          tags, 
-          published_at, 
-          is_draft, 
-          reading_time, 
-          meta_description, 
-          meta_keywords, 
-          view_count, 
-          created_at, 
-          updated_at
-        `)
+        .select('*')
         .order('published_at', { ascending: false });
         
       if (options?.published_only !== false) {
@@ -113,76 +97,86 @@ export const useBlogPosts = (options?: {
       const { data: postsData, error: postsError } = await query;
       
       if (postsError) {
-        console.error("[useBlogPosts] Erro na query de posts:", postsError);
+        console.error("[useBlogPosts] Error fetching posts:", postsError);
         throw postsError;
       }
 
       if (!postsData || postsData.length === 0) {
-        console.log("[useBlogPosts] Nenhum post encontrado");
+        console.log("[useBlogPosts] No posts found");
         return [];
       }
 
-      console.log("[useBlogPosts] Posts recuperados com sucesso:", postsData.length);
+      console.log("[useBlogPosts] Posts fetched successfully:", postsData.length);
       
-      // 2. Buscar categorias dos posts encontrados
-      const categoryIds = [...new Set(postsData.filter(post => post.category_id).map(post => post.category_id))];
+      // Step 2: Fetch categories for these posts
+      const categoryIds = postsData
+        .filter(post => post.category_id)
+        .map(post => post.category_id as string);
       
       let categories: Record<string, BlogCategory> = {};
       if (categoryIds.length > 0) {
+        const uniqueCategoryIds = [...new Set(categoryIds)];
+        console.log("[useBlogPosts] Fetching categories with IDs:", uniqueCategoryIds);
+        
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('blog_categories')
-          .select('id, name, description, created_at, updated_at')
-          .in('id', categoryIds);
+          .select('*')
+          .in('id', uniqueCategoryIds);
           
         if (categoriesError) {
-          console.error("[useBlogPosts] Erro ao buscar categorias:", categoriesError);
+          console.error("[useBlogPosts] Error fetching categories:", categoriesError);
         } else if (categoriesData) {
           categories = categoriesData.reduce((acc, cat) => {
             acc[cat.id] = cat;
             return acc;
           }, {} as Record<string, BlogCategory>);
-          console.log("[useBlogPosts] Categorias encontradas:", Object.keys(categories).length);
+          console.log("[useBlogPosts] Categories fetched:", Object.keys(categories).length);
         }
       }
       
-      // 3. Buscar autores dos posts encontrados (da tabela profiles, não auth.users)
-      const authorIds = [...new Set(postsData.filter(post => post.author_id).map(post => post.author_id))];
+      // Step 3: Fetch authors (from profiles table, not auth.users)
+      const authorIds = postsData
+        .filter(post => post.author_id)
+        .map(post => post.author_id as string);
       
       let authors: Record<string, { id: string; first_name?: string; last_name?: string; avatar_url?: string }> = {};
       if (authorIds.length > 0) {
+        const uniqueAuthorIds = [...new Set(authorIds)];
+        console.log("[useBlogPosts] Fetching authors with IDs:", uniqueAuthorIds);
+        
         const { data: authorsData, error: authorsError } = await supabase
           .from('profiles')
           .select('id, first_name, last_name, avatar_url')
-          .in('id', authorIds);
+          .in('id', uniqueAuthorIds);
           
         if (authorsError) {
-          console.error("[useBlogPosts] Erro ao buscar autores:", authorsError);
+          console.error("[useBlogPosts] Error fetching authors:", authorsError);
         } else if (authorsData) {
           authors = authorsData.reduce((acc, author) => {
             acc[author.id] = author;
             return acc;
           }, {} as Record<string, { id: string; first_name?: string; last_name?: string; avatar_url?: string }>);
-          console.log("[useBlogPosts] Autores encontrados:", Object.keys(authors).length);
+          console.log("[useBlogPosts] Authors fetched:", Object.keys(authors).length);
         }
       }
       
-      // 4. Combinar os dados em um único objeto para cada post
-      const processedPosts = postsData.map((post): BlogPost => {
-        // Criar um objeto completo do tipo BlogPost
+      // Step 4: Combine data into blog post objects
+      const processedPosts: BlogPost[] = postsData.map((post): BlogPost => {
+        // For each post, construct a complete BlogPost object
         const processedPost: BlogPost = {
           ...post,
-          // Adicionar categoria ao post
+          // Add category data
           category: post.category_id && categories[post.category_id] 
             ? categories[post.category_id] 
             : {
                 id: post.category_id || '',
                 name: 'Sem categoria',
                 description: '',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
+                created_at: post.created_at,
+                updated_at: post.updated_at
               },
           
-          // Adicionar autor ao post
+          // Add author data
           author: post.author_id && authors[post.author_id]
             ? authors[post.author_id]
             : {
@@ -196,50 +190,47 @@ export const useBlogPosts = (options?: {
         return processedPost;
       });
       
-      console.log("[useBlogPosts] Posts processados com sucesso:", processedPosts.length);
+      console.log("[useBlogPosts] Posts processed successfully:", processedPosts.length);
+      
       if (processedPosts.length > 0) {
-        console.log("[useBlogPosts] Exemplo de post processado:", {
+        console.log("[useBlogPosts] Sample processed post:", {
           id: processedPosts[0].id,
           title: processedPosts[0].title,
           author: processedPosts[0].author,
           category: processedPosts[0].category
         });
-      } else {
-        console.log("[useBlogPosts] Nenhum post processado");
       }
       
       return processedPosts;
     } catch (error: any) {
-      console.error("[useBlogPosts] Erro ao buscar posts:", error.message);
-      // Usando um toast para notificar o usuário de forma amigável
+      console.error("[useBlogPosts] Error fetching posts:", error.message);
       toast({
         title: "Erro ao carregar posts",
         description: "Não foi possível carregar os artigos do blog. Tente novamente mais tarde.",
         variant: "destructive",
       });
-      // Retornar array vazio para evitar erros de renderização
       return [];
     }
   };
   
-  // Configuração do useQuery com melhor estratégia de cache e retry
+  // Set up useQuery with caching strategy
   const { data: posts, isLoading, error, refetch } = useQuery({
     queryKey: ['blogPosts', options],
     queryFn: fetchPosts,
-    staleTime: options?.staleTime || 300000, // Cache por 5 minutos por padrão
-    gcTime: 600000, // Manter cache por 10 minutos mesmo após o componente desmontar
-    retry: 2, // Tentar novamente até 2 vezes em caso de erro
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Backoff exponencial
+    staleTime: options?.staleTime || 300000, // 5 minutes cache by default
+    gcTime: 600000, // Keep cache for 10 minutes after component unmounts
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
   });
   
-  // Buscar a contagem total apenas quando os filtros relevantes mudarem
+  // Fetch total count when relevant filters change
   useEffect(() => {
     const getCount = async () => {
       try {
         const count = await fetchPostsCount();
         setTotalCount(count);
       } catch (error) {
-        console.error("[useBlogPosts] Erro ao buscar contagem de posts:", error);
+        console.error("[useBlogPosts] Error fetching count:", error);
       }
     };
     

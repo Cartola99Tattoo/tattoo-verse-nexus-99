@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useBlogPosts } from "@/hooks/useBlog";
+import { useBlogPosts, BlogPostsOptions } from "@/hooks/useBlogPosts";
 import BlogSearch from "./BlogSearch";
 import BlogGrid from "./BlogGrid";
 import BlogPagination from "./BlogPagination";
@@ -25,16 +25,19 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
 
-  // Configurações para o hook useBlogPosts
-  const { posts, isLoading, totalCount, error, refetch } = useBlogPosts({
+  // Configure options for useBlogPosts
+  const options: BlogPostsOptions = {
     category_id: categoryId,
     tags: tag ? [tag] : undefined,
     search: searchQuery,
-    limit: limit,
+    limit,
     page,
     published_only: true,
-    staleTime: 180000 // Cache por 3 minutos
-  });
+    staleTime: 180000 // 3 minutes cache
+  };
+
+  // Fetch blog posts
+  const { posts, isLoading, totalCount, error, refetch } = useBlogPosts(options);
 
   const totalPages = Math.max(Math.ceil((totalCount || 0) / limit), 1);
 
@@ -43,13 +46,10 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     setSearch(query);
     setPage(1);
     
-    // Feedback visual para pesquisa
-    if (query) {
-      toast({
-        title: "Buscando artigos",
-        description: `Pesquisando por "${query}"...`,
-      });
-    }
+    toast({
+      title: "Buscando artigos",
+      description: `Pesquisando por "${query}"...`,
+    });
   };
 
   const handleClearSearch = () => {
@@ -57,7 +57,6 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     setSearchQuery("");
     setPage(1);
     
-    // Feedback visual para limpeza da pesquisa
     toast({
       title: "Busca limpa",
       description: "Mostrando todos os artigos disponíveis.",
@@ -66,11 +65,11 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    // Scroll to top when changing page with smooth behavior
+    // Smooth scroll to top when changing page
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Função para lidar com erros e tentar novamente
+  // Handle retry on error
   const handleRetry = async () => {
     setIsRetrying(true);
     setRetryCount(prev => prev + 1);
@@ -82,20 +81,19 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
       });
       await refetch();
     } catch (e) {
-      console.error("Erro ao tentar recarregar:", e);
+      console.error("[BlogList] Retry error:", e);
     } finally {
       setIsRetrying(false);
     }
   };
 
-  // Efeito para monitorar mudanças nos parâmetros e registrar informações úteis
+  // Log debug info and auto-retry
   useEffect(() => {
-    // Debug logs mais detalhados
-    console.log("[BlogList] Renderização:", { 
+    console.log("[BlogList] Debug info:", { 
       postsLength: posts?.length, 
       totalCount,
       isLoading, 
-      errorExists: !!error, 
+      hasError: !!error, 
       categoryId, 
       tag,
       searchQuery,
@@ -103,21 +101,23 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
       retryCount
     });
 
-    // Verificar posts
+    // Log sample post data if available
     if (posts && posts.length > 0) {
-      console.log("[BlogList] Exemplo do primeiro post:", {
+      console.log("[BlogList] First post sample:", {
         id: posts[0].id,
         title: posts[0].title,
-        authorExists: !!posts[0].author,
-        authorName: posts[0].author ? `${posts[0].author.first_name || ''} ${posts[0].author.last_name || ''}` : 'Sem autor',
-        categoryExists: !!posts[0].category,
-        categoryName: posts[0].category?.name || 'Sem categoria'
+        hasAuthor: !!posts[0].author,
+        authorName: posts[0].author 
+          ? `${posts[0].author.first_name || ''} ${posts[0].author.last_name || ''}`.trim() || 'Unnamed' 
+          : 'No author',
+        hasCategory: !!posts[0].category,
+        categoryName: posts[0].category?.name || 'No category'
       });
     }
     
-    // Tentar recarregar automaticamente uma vez se a página é carregada sem dados
-    if (!isLoading && posts.length === 0 && retryCount === 0 && !error && totalCount > 0) {
-      console.log("[BlogList] Tentando recarregar dados automaticamente...");
+    // Auto-retry once if no data but totalCount > 0
+    if (!isLoading && posts?.length === 0 && retryCount === 0 && !error && totalCount > 0) {
+      console.log("[BlogList] Auto-retrying fetch...");
       const timer = setTimeout(() => {
         handleRetry();
       }, 1000);
@@ -126,10 +126,9 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     }
   }, [isLoading, posts, retryCount, error, totalCount, categoryId, tag, searchQuery, page]);
 
-  // Renderização principal com tratamento de estados
   return (
     <div className="space-y-6">
-      {/* Componente de busca */}
+      {/* Search component */}
       {showSearch && (
         <BlogSearch 
           value={search}
@@ -138,7 +137,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
         />
       )}
 
-      {/* Componente de diagnóstico - visível apenas em desenvolvimento */}
+      {/* Diagnostic info - development only */}
       {process.env.NODE_ENV !== 'production' && (
         <div className="p-3 mb-4 bg-yellow-50 border border-yellow-200 rounded text-sm">
           <h4 className="font-medium text-yellow-800 mb-1">Diagnóstico</h4>
@@ -164,15 +163,13 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
         </div>
       )}
 
-      {/* Estado de erro */}
+      {/* Content states */}
       {error ? (
         <BlogErrorState onRetry={handleRetry} />
       ) : isLoading ? (
-        /* Estado de carregamento */
         <BlogLoadingState count={limit} />
       ) : (
         <>
-          {/* Posts Grid ou Estado vazio */}
           {posts && posts.length > 0 ? (
             <BlogGrid posts={posts} />
           ) : (
@@ -184,7 +181,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
         </>
       )}
 
-      {/* Componente de paginação */}
+      {/* Pagination */}
       {totalPages > 1 && posts && posts.length > 0 && (
         <BlogPagination
           currentPage={page}
@@ -193,7 +190,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
         />
       )}
 
-      {/* Feedback adicional para usuários */}
+      {/* Additional feedback */}
       {!isLoading && !error && posts?.length === 0 && totalCount > 0 && (
         <div className="text-center py-4">
           <p className="text-gray-500 mb-3">

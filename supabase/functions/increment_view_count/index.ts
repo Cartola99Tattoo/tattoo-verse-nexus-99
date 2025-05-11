@@ -1,6 +1,6 @@
 
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,22 +30,23 @@ serve(async (req) => {
       );
     }
 
+    console.log(`Incrementing view count for post: ${post_id}`);
+
     // Create a Supabase client with the service role key
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get the current value
-    const { data: post, error: fetchError } = await supabaseClient
-      .from('blog_posts')
-      .select('view_count')
-      .eq('id', post_id)
-      .single();
+    // Use the RPC function to increment view count
+    const { data, error } = await supabaseClient.rpc('increment_view_count', {
+      post_id: post_id
+    });
 
-    if (fetchError) {
+    if (error) {
+      console.error('Error incrementing view count:', error.message);
       return new Response(
-        JSON.stringify({ error: fetchError.message }),
+        JSON.stringify({ error: error.message }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 500,
@@ -53,33 +54,16 @@ serve(async (req) => {
       );
     }
 
-    const currentCount = post?.view_count || 0;
-    const newCount = currentCount + 1;
-
-    // Update the counter
-    const { error: updateError } = await supabaseClient
-      .from('blog_posts')
-      .update({ view_count: newCount })
-      .eq('id', post_id);
-
-    if (updateError) {
-      return new Response(
-        JSON.stringify({ error: updateError.message }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500,
-        }
-      );
-    }
-
+    console.log(`View count incremented for post: ${post_id}`);
     return new Response(
-      JSON.stringify({ success: true, new_count: newCount }),
+      JSON.stringify({ success: true }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
     );
   } catch (error) {
+    console.error('Unexpected error:', error.message);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

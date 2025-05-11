@@ -1,5 +1,5 @@
 
-// Arquivo de índice para facilitar importações
+// Index file to simplify imports
 
 export * from './useBlogPosts';
 export * from './useBlogPost';

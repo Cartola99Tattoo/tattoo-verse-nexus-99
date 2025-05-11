@@ -35,17 +35,6 @@ const BlogComments = ({ postId }: BlogCommentsProps) => {
       {
         onSuccess: () => {
           setContent("");
-          toast({
-            title: "Comentário enviado com sucesso!",
-            description: "Seu comentário será exibido após aprovação.",
-          });
-        },
-        onError: (error) => {
-          toast({
-            title: "Erro ao enviar comentário",
-            description: error.message,
-            variant: "destructive",
-          });
         },
       }
     );
@@ -64,17 +53,6 @@ const BlogComments = ({ postId }: BlogCommentsProps) => {
         onSuccess: () => {
           setReplyTo(null);
           setReplyContent("");
-          toast({
-            title: "Resposta enviada com sucesso!",
-            description: "Sua resposta será exibida após aprovação.",
-          });
-        },
-        onError: (error) => {
-          toast({
-            title: "Erro ao enviar resposta",
-            description: error.message,
-            variant: "destructive",
-          });
         },
       }
     );
@@ -93,7 +71,7 @@ const BlogComments = ({ postId }: BlogCommentsProps) => {
     <div className="mt-8">
       <h3 className="text-2xl font-bold mb-6">Comentários</h3>
       
-      {/* Formulário para novo comentário */}
+      {/* New comment form */}
       {session ? (
         <form onSubmit={handleSubmitComment} className="mb-8">
           <Textarea
@@ -120,7 +98,7 @@ const BlogComments = ({ postId }: BlogCommentsProps) => {
         </div>
       )}
 
-      {/* Lista de comentários */}
+      {/* Comments list */}
       {comments?.length ? (
         <div className="space-y-6">
           {comments.map((comment) => (
@@ -137,7 +115,7 @@ const BlogComments = ({ postId }: BlogCommentsProps) => {
                     <div>
                       <h4 className="font-medium">
                         {comment.user 
-                          ? `${comment.user.first_name || ''} ${comment.user.last_name || ''}`.trim() 
+                          ? `${comment.user.first_name || ''} ${comment.user.last_name || ''}`.trim() || 'Usuário'
                           : 'Usuário'}
                       </h4>
                       <p className="text-xs text-gray-500">
@@ -157,7 +135,7 @@ const BlogComments = ({ postId }: BlogCommentsProps) => {
                   </div>
                   <p className="mt-2 text-gray-700">{comment.content}</p>
                   
-                  {/* Formulário de resposta */}
+                  {/* Reply form */}
                   {replyTo === comment.id && (
                     <div className="mt-4">
                       <Textarea
@@ -181,7 +159,7 @@ const BlogComments = ({ postId }: BlogCommentsProps) => {
                     </div>
                   )}
 
-                  {/* Respostas */}
+                  {/* Replies */}
                   {comment.replies && comment.replies.length > 0 && (
                     <div className="mt-4 pl-6 border-l-2 border-gray-200 space-y-4">
                       {comment.replies.map((reply) => (
@@ -197,7 +175,7 @@ const BlogComments = ({ postId }: BlogCommentsProps) => {
                               <div>
                                 <span className="font-medium text-sm">
                                   {reply.user 
-                                    ? `${reply.user.first_name || ''} ${reply.user.last_name || ''}`.trim() 
+                                    ? `${reply.user.first_name || ''} ${reply.user.last_name || ''}`.trim() || 'Usuário'
                                     : 'Usuário'}
                                 </span>
                                 <span className="text-xs text-gray-500 ml-2">

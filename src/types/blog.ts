@@ -1,5 +1,5 @@
 
-export type BlogPost = {
+export interface BlogPost {
   id: string;
   title: string;
   slug?: string;
@@ -24,17 +24,18 @@ export type BlogPost = {
     avatar_url?: string;
   };
   category?: BlogCategory;
-};
+}
 
-export type BlogCategory = {
+export interface BlogCategory {
   id: string;
   name: string;
   description?: string;
+  slug?: string;
   created_at: string;
   updated_at: string;
-};
+}
 
-export type BlogComment = {
+export interface BlogComment {
   id: string;
   post_id: string;
   user_id: string;
@@ -50,4 +51,4 @@ export type BlogComment = {
     avatar_url?: string;
   };
   replies?: BlogComment[];
-};
+}

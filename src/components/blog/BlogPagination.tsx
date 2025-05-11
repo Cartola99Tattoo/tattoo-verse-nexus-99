@@ -20,11 +20,11 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
   // Don't render pagination if there's only one page
   if (totalPages <= 1) return null;
 
-  // Generate the pagination items based on the current page and total pages
+  // Generate pagination items based on current page and total pages
   const generatePaginationItems = () => {
     const items = [];
     
-    // Logic for showing relevant page numbers when there are many pages
+    // Logic for showing relevant page numbers
     if (totalPages <= 5) {
       // If 5 or fewer pages, show all
       for (let i = 1; i <= totalPages; i++) {
@@ -58,8 +58,9 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
         </PaginationItem>
       );
 
-      // If current page is close to the beginning
+      // Logic for different positions in pagination
       if (currentPage <= 3) {
+        // Near the beginning
         for (let i = 2; i <= 4; i++) {
           items.push(
             <PaginationItem key={i}>
@@ -75,14 +76,13 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
             </PaginationItem>
           );
         }
-        // Use PaginationEllipsis instead of disabled PaginationLink
         items.push(
           <PaginationItem key="ellipsis-1">
             <PaginationEllipsis />
           </PaginationItem>
         );
         items.push(
-          <PaginationItem key="last">
+          <PaginationItem key={totalPages}>
             <PaginationLink
               onClick={(e) => {
                 e.preventDefault();
@@ -93,10 +93,8 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
             </PaginationLink>
           </PaginationItem>
         );
-      }
-      // If current page is close to the end
-      else if (currentPage > totalPages - 3) {
-        // Use PaginationEllipsis instead of disabled PaginationLink
+      } else if (currentPage > totalPages - 3) {
+        // Near the end
         items.push(
           <PaginationItem key="ellipsis-1">
             <PaginationEllipsis />
@@ -130,10 +128,8 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
             </PaginationLink>
           </PaginationItem>
         );
-      }
-      // If current page is in the middle
-      else {
-        // Use PaginationEllipsis instead of disabled PaginationLink
+      } else {
+        // In the middle
         items.push(
           <PaginationItem key="ellipsis-1">
             <PaginationEllipsis />
@@ -154,7 +150,6 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
             </PaginationItem>
           );
         }
-        // Use PaginationEllipsis instead of disabled PaginationLink
         items.push(
           <PaginationItem key="ellipsis-2">
             <PaginationEllipsis />

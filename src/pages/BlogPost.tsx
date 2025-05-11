@@ -3,24 +3,25 @@ import { useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
-import { useBlogPost, useBlogComments } from "@/hooks/useBlog";
+import { useBlogPost } from "@/hooks/useBlog";
 import BlogSidebar from "@/components/blog/BlogSidebar";
 import BlogComments from "@/components/blog/BlogComments";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const BlogPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { data: post, isLoading, error } = useBlogPost(slug || '');
-  const { data: comments, isLoading: commentsLoading } = useBlogComments(post?.id || '');
   
+  // Scroll to top when post changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
   
+  // Loading state
   if (isLoading) {
     return (
       <Layout>
@@ -52,6 +53,7 @@ const BlogPost = () => {
     );
   }
   
+  // Error state
   if (error || !post) {
     return (
       <Layout>
@@ -64,12 +66,12 @@ const BlogPost = () => {
     );
   }
   
-  // Formatação da data
-  const formattedDate = post.published_at 
+  // Format date
+  const formattedDate = post.published_at && isValid(parseISO(post.published_at))
     ? format(new Date(post.published_at), "dd 'de' MMMM, yyyy", { locale: ptBR })
     : format(new Date(post.created_at), "dd 'de' MMMM, yyyy", { locale: ptBR });
 
-  // Nome do autor completo ou parcial
+  // Get author name
   const authorName = post.author 
     ? `${post.author.first_name || ""} ${post.author.last_name || ""}`.trim() || "Equipe 99Tattoo"
     : "Equipe 99Tattoo";
@@ -85,12 +87,12 @@ const BlogPost = () => {
       
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="flex flex-col lg:flex-row gap-8 md:gap-10">
-          {/* Conteúdo do Blog Post */}
+          {/* Blog Post Content */}
           <div className="lg:w-2/3">
-            {/* Título do Post */}
+            {/* Post Title */}
             <h1 className="text-3xl md:text-4xl font-bold mb-4">{post.title}</h1>
             
-            {/* Imagem de Capa */}
+            {/* Cover Image */}
             {post.cover_image && (
               <img 
                 src={post.cover_image} 
@@ -102,7 +104,7 @@ const BlogPost = () => {
               />
             )}
             
-            {/* Meta Informações */}
+            {/* Meta Info */}
             <div className="flex flex-col sm:flex-row sm:items-center text-gray-500 mb-6 text-sm">
               <span className="mb-1 sm:mb-0 sm:mr-2">
                 Publicado em: {formattedDate}
@@ -121,7 +123,7 @@ const BlogPost = () => {
               )}
             </div>
             
-            {/* Conteúdo do Post */}
+            {/* Post Content */}
             <div 
               className="blog-content prose prose-lg max-w-none" 
               dangerouslySetInnerHTML={{ __html: post.content }} 
@@ -145,14 +147,9 @@ const BlogPost = () => {
               </div>
             )}
             
-            {/* Seção de Comentários */}
+            {/* Comments Section */}
             <section className="mt-12">
-              <h3 className="text-2xl font-semibold mb-4">Comentários</h3>
-              
-              {/* Lista de Comentários */}
-              <BlogComments 
-                postId={post.id}
-              />
+              <BlogComments postId={post.id} />
             </section>
           </div>
           

@@ -4,21 +4,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { BlogCategory } from '@/types';
 
 export const useBlogCategories = () => {
-  const { data, isLoading, error } = useQuery({
+  return useQuery({
     queryKey: ['blogCategories'],
     queryFn: async () => {
+      console.log('Fetching blog categories');
       const { data, error } = await supabase
         .from('blog_categories')
         .select('*')
         .order('name');
         
       if (error) {
+        console.error('Error fetching blog categories:', error);
         throw error;
       }
       
-      return data as unknown as BlogCategory[];
-    }
+      console.log('Fetched blog categories:', data?.length);
+      return data as BlogCategory[];
+    },
+    staleTime: 300000, // 5 minutes
   });
-  
-  return { categories: data, isLoading, error };
 };
