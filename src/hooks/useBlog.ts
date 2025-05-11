@@ -13,7 +13,7 @@ export const useBlogPosts = (options?: {
 }) => {
   const [totalCount, setTotalCount] = useState<number>(0);
   
-  const fetchPostsCount = async () => {
+  const fetchPostsCount = async (): Promise<number> => {
     let query = supabase
       .from('blog_posts')
       .select('*', { count: 'exact', head: true });
