@@ -14,15 +14,12 @@ const data = [
   { name: '29', value: 3800 },
 ];
 
+// Fix the config structure to match the ChartConfig type
 const config = {
-  value: {
+  sales: {
     label: 'Vendas',
-    color: '#8B5CF6',
-    theme: {
-      light: '#8B5CF6',
-      dark: '#8B5CF6',
-    },
-  },
+    color: '#8B5CF6'
+  }
 };
 
 export default function SalesChart() {
@@ -56,7 +53,7 @@ export default function SalesChart() {
           <Bar
             dataKey="value"
             radius={[4, 4, 0, 0]}
-            fill="var(--color-value)"
+            fill="#8B5CF6"
           />
           <ChartTooltip
             content={
