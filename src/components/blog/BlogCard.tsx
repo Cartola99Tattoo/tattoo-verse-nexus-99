@@ -26,7 +26,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
   // Calcular se deve usar imagem de capa ou placeholder
   const imageUrl = post.cover_image || "/placeholder.svg";
 
-  // Garantir que temos um trecho de texto mesmo quando o excertp estiver vazio
+  // Garantir que temos um trecho de texto mesmo quando o excerpt estiver vazio
   const excerpt = post.excerpt || post.content?.substring(0, 150).replace(/<[^>]*>/g, "") || "";
 
   // Gerar um slug seguro para o link

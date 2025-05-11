@@ -96,7 +96,7 @@ export const useBlogPosts = (options?: {
         throw error;
       }
       
-      console.log("Posts recuperados:", data?.length || 0);
+      console.log("Posts recuperados:", data?.length || 0, data);
       return data as unknown as BlogPost[];
     } catch (error: any) {
       console.error("Erro ao buscar posts:", error.message);

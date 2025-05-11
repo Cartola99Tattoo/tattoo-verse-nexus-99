@@ -25,6 +25,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     search: searchQuery,
     limit: limit,
     page,
+    published_only: true, // Garantir que só posts publicados sejam exibidos
   });
 
   const totalPages = Math.max(Math.ceil((totalCount || 0) / limit), 1);
@@ -41,7 +42,15 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     setPage(1);
   };
 
-  console.log("BlogList render:", { posts: posts?.length, isLoading, error, categoryId, tag });
+  console.log("BlogList render:", { 
+    posts: posts?.length, 
+    totalCount,
+    isLoading, 
+    error, 
+    categoryId, 
+    tag,
+    posts 
+  });
 
   return (
     <div className="space-y-6">
