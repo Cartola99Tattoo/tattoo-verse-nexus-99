@@ -20,7 +20,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/integrations/axios";
-import { CheckoutForm } from "@/components/Checkout/CheckoutForm";
+import CheckoutForm from "@/components/Checkout/CheckoutForm";
 import Layout from "@/components/layout/Layout";
 
 const shippingAddressSchema = z.object({

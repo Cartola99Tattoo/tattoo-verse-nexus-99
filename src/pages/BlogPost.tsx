@@ -86,14 +86,9 @@ const BlogPost = () => {
             <section className="mt-8">
               <h3 className="text-2xl font-semibold mb-4">Comentários</h3>
               
-              {/* Formulário de Comentário */}
-              {/* <BlogCommentForm postId={post.id} /> */}
-              
               {/* Lista de Comentários */}
               <BlogComments 
-                postId={post.id} 
-                loading={commentsLoading}
-                commentList={comments as BlogComment[]} 
+                postId={post.id}
               />
             </section>
           </div>

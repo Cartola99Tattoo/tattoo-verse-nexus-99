@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -295,7 +294,7 @@ export const useCreateComment = () => {
 export const useBlogAdmin = () => {
   const queryClient = useQueryClient();
   
-  const createPost = async (post: { title: string; content: string } & Partial<Omit<BlogPost, 'title' | 'content'>>) => {
+  const createPost = async (post: Partial<BlogPost> & { title: string; content: string }) => {
     // Gerar slug a partir do título se não fornecido
     if (!post.slug && post.title) {
       post.slug = post.title
@@ -307,21 +306,7 @@ export const useBlogAdmin = () => {
     
     const { data, error } = await supabase
       .from('blog_posts')
-      .insert({
-        title: post.title,
-        content: post.content,
-        slug: post.slug,
-        excerpt: post.excerpt,
-        meta_description: post.meta_description,
-        meta_keywords: post.meta_keywords,
-        category_id: post.category_id,
-        tags: post.tags,
-        cover_image: post.cover_image,
-        reading_time: post.reading_time,
-        author_id: post.author_id,
-        is_draft: post.is_draft,
-        published_at: post.published_at
-      })
+      .insert(post)
       .select();
       
     if (error) {
