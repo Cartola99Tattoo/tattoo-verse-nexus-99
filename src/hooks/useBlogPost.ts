@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { BlogPost } from '@/types';
@@ -10,10 +9,11 @@ export const useBlogPost = (slug: string) => {
     try {
       console.log("[useBlogPost] Incrementing view count for post:", postId);
       
-      // Call the Supabase RPC function with explicit typing
+      // Call the Supabase RPC function with type assertion
+      // TypeScript doesn't know about this function in its type definitions
       const { error } = await supabase.rpc('increment_view_count', {
         post_id: postId
-      } as any); // Use type assertion to bypass TypeScript error
+      } as unknown as Record<string, any>); // More explicit type assertion
       
       if (error) {
         console.error("[useBlogPost] Error incrementing view count:", error);
