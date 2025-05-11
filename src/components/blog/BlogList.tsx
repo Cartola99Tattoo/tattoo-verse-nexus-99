@@ -21,7 +21,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
   const [page, setPage] = useState(1);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Adicionar uma propriedade staleTime maior para reduzir consultas
+  // Configuração do hook com opções melhoradas
   const { posts, isLoading, totalCount, error, refetch } = useBlogPosts({
     category_id: categoryId,
     tags: tag ? [tag] : undefined,
@@ -29,7 +29,7 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
     limit: limit,
     page,
     published_only: true,
-    staleTime: 300000 // Cache por 5 minutos
+    staleTime: 180000 // Cache por 3 minutos
   });
 
   const totalPages = Math.max(Math.ceil((totalCount || 0) / limit), 1);
@@ -59,26 +59,29 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
   };
 
   useEffect(() => {
+    // Debug logs
+    console.log("BlogList render:", { 
+      postsLength: posts?.length, 
+      totalCount,
+      isLoading, 
+      error, 
+      categoryId, 
+      tag,
+      searchQuery,
+      page,
+      retryCount
+    });
+    
     // Recarregar automaticamente uma vez se a página é carregada sem dados
     if (!isLoading && posts.length === 0 && retryCount === 0 && !error && totalCount > 0) {
+      console.log("Tentando recarregar dados automaticamente...");
       const timer = setTimeout(() => {
         handleRetry();
       }, 1000);
       
       return () => clearTimeout(timer);
     }
-  }, [isLoading, posts.length, retryCount, error, totalCount]);
-
-  console.log("BlogList render:", { 
-    postsLength: posts?.length, 
-    totalCount,
-    isLoading, 
-    error, 
-    categoryId, 
-    tag,
-    postsData: posts,
-    retryCount
-  });
+  }, [isLoading, posts, retryCount, error, totalCount, categoryId, tag, searchQuery, page]);
 
   return (
     <div className="space-y-6">
@@ -101,7 +104,20 @@ const BlogList = ({ categoryId, tag, limit = 6, showSearch = true }: BlogListPro
         <>
           {/* Posts Grid or Empty State */}
           {posts && posts.length > 0 ? (
-            <BlogGrid posts={posts} />
+            <>
+              <BlogGrid posts={posts} />
+              {/* Detalhes para depuração - visível apenas em desenvolvimento */}
+              {process.env.NODE_ENV !== 'production' && (
+                <div className="mt-4 p-3 bg-gray-100 rounded text-xs">
+                  <p>Posts carregados: {posts.length}</p>
+                  <p>Total de posts: {totalCount}</p>
+                  <p>Página atual: {page} de {totalPages}</p>
+                  <p>Categoria ID: {categoryId || 'Todas'}</p>
+                  <p>Tag: {tag || 'Todas'}</p>
+                  <p>Busca: {searchQuery || 'Nenhuma'}</p>
+                </div>
+              )}
+            </>
           ) : (
             <BlogEmptyState 
               searchQuery={searchQuery} 

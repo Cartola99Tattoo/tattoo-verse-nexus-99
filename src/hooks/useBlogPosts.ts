@@ -18,6 +18,8 @@ export const useBlogPosts = (options?: {
   
   const fetchPostsCount = async (): Promise<number> => {
     try {
+      console.log("Contando posts com opções:", options);
+      
       let query = supabase
         .from('blog_posts')
         .select('*', { count: 'exact', head: true });
@@ -45,6 +47,7 @@ export const useBlogPosts = (options?: {
         return 0;
       }
       
+      console.log("Total de posts encontrados:", count);
       return count || 0;
     } catch (error) {
       console.error("Erro ao buscar contagem de posts:", error);
@@ -54,13 +57,29 @@ export const useBlogPosts = (options?: {
   
   const fetchPosts = async () => {
     try {
-      console.log("Fetching blog posts with options:", options);
+      console.log("Buscando posts do blog com opções:", options);
       
+      // Query simplificada para evitar problemas com RLS
       let query = supabase
         .from('blog_posts')
         .select(`
-          *,
-          author:profiles(id, first_name, last_name, avatar_url),
+          id, 
+          title, 
+          slug, 
+          content, 
+          excerpt, 
+          cover_image, 
+          author_id,
+          category_id, 
+          tags, 
+          published_at, 
+          is_draft, 
+          reading_time, 
+          meta_description, 
+          meta_keywords, 
+          view_count, 
+          created_at, 
+          updated_at,
           category:blog_categories(id, name, description)
         `)
         .order('published_at', { ascending: false });
@@ -94,24 +113,40 @@ export const useBlogPosts = (options?: {
       
       if (error) {
         console.error("Erro na query do Supabase:", error);
-        
-        // Tratamento mais específico para erros de permissão
-        if (error.message.includes("permission denied")) {
-          toast({
-            title: "Erro de permissão",
-            description: "Não foi possível acessar os dados do blog. Verifique as permissões no banco de dados.",
-            variant: "destructive",
-          });
-          throw new Error("Erro de permissão: " + error.message);
-        }
-        
         throw error;
       }
       
-      // Processar posts para garantir que dados de autor sejam sempre válidos
-      const processedPosts = (data || []).map(post => {
-        // Se o autor não estiver disponível, fornecer valores padrão
-        if (!post.author) {
+      // Agora fazemos uma segunda query para buscar os dados dos autores
+      const processedPosts = await Promise.all((data || []).map(async (post) => {
+        try {
+          if (post.author_id) {
+            const { data: authorData } = await supabase
+              .from('profiles')
+              .select('id, first_name, last_name, avatar_url')
+              .eq('id', post.author_id)
+              .single();
+            
+            return {
+              ...post,
+              author: authorData || {
+                id: post.author_id,
+                first_name: '',
+                last_name: '',
+                avatar_url: ''
+              }
+            };
+          }
+          return {
+            ...post,
+            author: {
+              id: post.author_id || '',
+              first_name: '',
+              last_name: '',
+              avatar_url: ''
+            }
+          };
+        } catch (error) {
+          console.log("Erro ao buscar autor do post:", error);
           return {
             ...post,
             author: {
@@ -122,16 +157,15 @@ export const useBlogPosts = (options?: {
             }
           };
         }
-        return post;
-      });
+      }));
       
-      console.log("Posts recuperados:", processedPosts?.length || 0, processedPosts);
+      console.log("Posts recuperados:", processedPosts?.length || 0);
       return processedPosts as unknown as BlogPost[];
     } catch (error: any) {
       console.error("Erro ao buscar posts:", error.message);
       toast({
         title: "Erro ao carregar posts",
-        description: "Não foi possível carregar os artigos do blog.",
+        description: "Não foi possível carregar os artigos do blog. Tente novamente mais tarde.",
         variant: "destructive",
       });
       return [];
@@ -141,7 +175,8 @@ export const useBlogPosts = (options?: {
   const { data: posts, isLoading, error, refetch } = useQuery({
     queryKey: ['blogPosts', options],
     queryFn: fetchPosts,
-    staleTime: options?.staleTime || 60000 // Cache por 1 minuto por padrão, ou valor personalizado
+    staleTime: options?.staleTime || 60000, // Cache por 1 minuto por padrão
+    retry: 1
   });
   
   useEffect(() => {
@@ -157,5 +192,11 @@ export const useBlogPosts = (options?: {
     getCount();
   }, [options?.category_id, options?.tags, options?.search, options?.published_only]);
   
-  return { posts: posts || [], isLoading, error, refetch, totalCount };
+  return { 
+    posts: posts || [], 
+    isLoading, 
+    error, 
+    refetch, 
+    totalCount 
+  };
 };
