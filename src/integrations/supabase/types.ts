@@ -168,39 +168,111 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_approved: boolean | null
+          parent_id: string | null
+          post_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          parent_id?: string | null
+          post_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          parent_id?: string | null
+          post_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "blog_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author_id: string | null
           category_id: string | null
           content: string
+          cover_image: string | null
           created_at: string
+          excerpt: string | null
           id: string
+          is_draft: boolean | null
+          meta_description: string | null
+          meta_keywords: string | null
           published_at: string | null
+          reading_time: number | null
+          slug: string | null
           tags: string[] | null
           title: string
           updated_at: string
+          view_count: number | null
         }
         Insert: {
           author_id?: string | null
           category_id?: string | null
           content: string
+          cover_image?: string | null
           created_at?: string
+          excerpt?: string | null
           id?: string
+          is_draft?: boolean | null
+          meta_description?: string | null
+          meta_keywords?: string | null
           published_at?: string | null
+          reading_time?: number | null
+          slug?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
+          view_count?: number | null
         }
         Update: {
           author_id?: string | null
           category_id?: string | null
           content?: string
+          cover_image?: string | null
           created_at?: string
+          excerpt?: string | null
           id?: string
+          is_draft?: boolean | null
+          meta_description?: string | null
+          meta_keywords?: string | null
           published_at?: string | null
+          reading_time?: number | null
+          slug?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
+          view_count?: number | null
         }
         Relationships: [
           {
