@@ -1,11 +1,11 @@
-
-import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import TattooCard from "@/components/shop/TattooCard";
 import { toast } from "@/components/ui/use-toast";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useBlogPost } from "@/hooks/useBlogPost";
 
 type BlogPost = {
   id: number;
@@ -28,7 +28,7 @@ type Tattoo = {
   rating: number;
 };
 
-// Mock data for related tattoos
+// Mock data for related tattoos (we'll keep this for now, but it would be better to fetch from API)
 const relatedTattoos = [
   {
     id: 1,
@@ -59,112 +59,12 @@ const relatedTattoos = [
   },
 ];
 
-// Mock data for blog posts (this should be fetched from an API in a real application)
-const blogPosts = [
-  {
-    id: 1,
-    title: "Como Cuidar da Sua Tatuagem nos Primeiros Dias",
-    excerpt: "Dicas essenciais para garantir a cicatrização perfeita da sua nova tatuagem e manter as cores vibrantes por mais tempo. Aprenda sobre os cuidados necessários durante a recuperação.",
-    content: `<p>Parabéns pela sua nova tatuagem! Agora que você tem essa obra de arte na sua pele, é essencial saber como cuidar dela corretamente, especialmente nos primeiros dias após a sessão. Uma boa cicatrização não só garante que sua tatuagem mantenha as cores vibrantes e os detalhes nítidos, mas também previne infecções e complicações.</p>
-    
-    <h2>Os Primeiros Cuidados (24-48 horas)</h2>
-    
-    <p>Nas primeiras 24 a 48 horas, sua tatuagem é essencialmente uma ferida aberta. Siga estas recomendações:</p>
-    
-    <ul>
-      <li><strong>Mantenha o curativo inicial:</strong> Seu tatuador aplicou um curativo protetor. Deixe-o no local pelo tempo recomendado (geralmente entre 2 a 24 horas, dependendo do tipo de curativo).</li>
-      <li><strong>Lave delicadamente:</strong> Ao remover o curativo, lave a área com água morna e sabão neutro. Use apenas as pontas dos dedos, sem esfregar.</li>
-      <li><strong>Seque com cuidado:</strong> Não esfregue com a toalha. Dê leves batidinhas com uma toalha limpa ou deixe secar naturalmente.</li>
-      <li><strong>Aplique pomada cicatrizante:</strong> Use uma fina camada de pomada recomendada pelo seu tatuador.</li>
-    </ul>
-    
-    <h2>Cuidados nos Primeiros Dias (Dias 3-7)</h2>
-    
-    <p>Nesta fase, sua tatuagem começará o processo de cicatrização:</p>
-    
-    <ul>
-      <li><strong>Lave regularmente:</strong> Continue lavando a tatuagem 2-3 vezes por dia.</li>
-      <li><strong>Hidratação leve:</strong> Aplique uma fina camada de creme hidratante específico para tatuagens após cada lavagem.</li>
-      <li><strong>Não coce:</strong> A pele começará a descamar naturalmente. Resistir à tentação de coçar é fundamental.</li>
-      <li><strong>Evite exposição solar:</strong> Mantenha sua tatuagem nova longe do sol direto.</li>
-      <li><strong>Nada de piscinas, mar ou banheiras:</strong> Evite submergir a tatuagem em água por longos períodos.</li>
-    </ul>
-    
-    <h2>Sinais de Alerta</h2>
-    
-    <p>Fique atento a estes sinais que podem indicar problemas na cicatrização:</p>
-    
-    <ul>
-      <li>Vermelhidão excessiva ou que se espalha além da área tatuada</li>
-      <li>Inchaço que piora em vez de melhorar</li>
-      <li>Secreção de pus ou líquido com odor</li>
-      <li>Febre</li>
-      <li>Dor intensa e persistente</li>
-    </ul>
-    
-    <p>Se notar qualquer um desses sinais, entre em contato com seu tatuador ou procure atendimento médico.</p>
-    
-    <h2>Cuidados a Longo Prazo</h2>
-    
-    <p>Mesmo após a cicatrização completa (geralmente 2-4 semanas), sua tatuagem precisa de cuidados constantes:</p>
-    
-    <ul>
-      <li>Use sempre protetor solar (mínimo FPS 30) na área tatuada quando exposta ao sol</li>
-      <li>Mantenha a pele hidratada</li>
-      <li>Evite bronzeamento artificial</li>
-    </ul>
-    
-    <p>Seguindo essas dicas, você garantirá que sua tatuagem permaneça vibrante e bonita por muitos anos. Lembre-se de que cada pele reage de forma diferente, então não hesite em consultar seu tatuador se tiver dúvidas específicas sobre os cuidados com a sua arte.</p>`,
-    image: "https://images.unsplash.com/photo-1541127397299-0db99bb5edb3?q=80&w=2070&auto=format&fit=crop",
-    date: "10 Mai 2023",
-    category: "Cuidados",
-    author: "Mariana Silva",
-  },
-  {
-    id: 2,
-    title: "Os Estilos de Tatuagem Mais Populares em 2023",
-    excerpt: "Conheça as tendências de tatuagem que estão em alta este ano, desde o minimalismo até os designs geométricos complexos. Descubra qual estilo combina mais com você.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras porttitor metus velit, ut aliquam ipsum congue ut. Sed faucibus risus eu dui tincidunt, et porttitor risus sodales.",
-    image: "https://images.unsplash.com/photo-1494797262163-102fae527c62?q=80&w=1964&auto=format&fit=crop",
-    date: "22 Abr 2023",
-    category: "Tendências",
-    author: "Rafael Costa",
-  },
-  {
-    id: 3,
-    title: "Mitos e Verdades Sobre Tatuagem",
-    excerpt: "Desmistificamos as crenças mais comuns sobre tatuagens e explicamos o que realmente acontece durante o processo. Conheça os fatos e deixe os mitos para trás.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras porttitor metus velit, ut aliquam ipsum congue ut. Sed faucibus risus eu dui tincidunt, et porttitor risus sodales.",
-    image: "https://images.unsplash.com/photo-1522096491219-a2ae6199959c?q=80&w=2000&auto=format&fit=crop",
-    date: "05 Mar 2023",
-    category: "Informação",
-    author: "Juliana Mendes",
-  },
-];
-
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Use our improved hook
+  const { post, isLoading, error } = useBlogPost(id || "");
 
-  useEffect(() => {
-    // Simulate API call to get post data
-    setIsLoading(true);
-    setTimeout(() => {
-      const foundPost = blogPosts.find(post => post.id === Number(id));
-      if (foundPost) {
-        setPost(foundPost);
-      } else {
-        toast({
-          title: "Post não encontrado",
-          description: "O artigo que você está procurando não existe ou foi removido.",
-          variant: "destructive",
-        });
-      }
-      setIsLoading(false);
-    }, 500);
-  }, [id]);
-
+  // Show loading state
   if (isLoading) {
     return (
       <Layout>
@@ -184,15 +84,23 @@ const BlogPost = () => {
     );
   }
 
-  if (!post) {
+  // Show error state
+  if (error || !post) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="text-3xl font-bold mb-4">Artigo não encontrado</h1>
-          <p className="text-gray-600 mb-6">O artigo que você está procurando não existe ou foi removido.</p>
-          <Button asChild>
-            <Link to="/blog">Voltar para o Blog</Link>
-          </Button>
+        <div className="container mx-auto px-4 py-12">
+          <Alert variant="destructive" className="mb-6">
+            <AlertTitle>Artigo não encontrado</AlertTitle>
+            <AlertDescription>
+              {error?.details || "O artigo que você está procurando não existe ou foi removido."}
+            </AlertDescription>
+          </Alert>
+          
+          <div className="text-center mt-8">
+            <Button asChild>
+              <Link to="/blog">Voltar para o Blog</Link>
+            </Button>
+          </div>
         </div>
       </Layout>
     );

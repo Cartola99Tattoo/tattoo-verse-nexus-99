@@ -1,16 +1,9 @@
 
 import { Link } from "react-router-dom";
+import type { BlogPostSummary } from "@/pages/Blog"; 
 
 interface BlogCardProps {
-  post: {
-    id: number;
-    title: string;
-    excerpt: string;
-    image: string;
-    date: string;
-    category: string;
-    author: string;
-  };
+  post: BlogPostSummary;
 }
 
 const BlogCard = ({ post }: BlogCardProps) => {
@@ -21,6 +14,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
           src={post.image}
           alt={post.title}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+          loading="lazy"
         />
       </Link>
       <div className="p-6">
@@ -28,10 +22,10 @@ const BlogCard = ({ post }: BlogCardProps) => {
           <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded">
             {post.category}
           </span>
-          <span className="text-xs text-gray-500">{post.date}</span>
+          <time className="text-xs text-gray-500" dateTime={post.date}>{post.date}</time>
         </div>
         <Link to={`/blog/${post.id}`}>
-          <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors">
+          <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors line-clamp-2">
             {post.title}
           </h3>
         </Link>
@@ -41,6 +35,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
           <Link
             to={`/blog/${post.id}`}
             className="text-red-500 hover:text-red-700 transition-colors text-sm flex items-center"
+            aria-label={`Ler mais sobre ${post.title}`}
           >
             Ler mais
             <svg
@@ -49,6 +44,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
