@@ -7,11 +7,10 @@ import { toast } from '@/components/ui/use-toast';
 export const useBlogPost = (slug: string) => {
   const incrementViewCount = async (postId: string) => {
     try {
-      // Atualizar diretamente o contador de visualizações
+      // Usar uma chamada para uma função do Supabase para incrementar o contador
       const { error } = await supabase
-        .from('blog_posts')
-        .update({ view_count: supabase.rpc('increment_counter', { row_id: postId }) })
-        .eq('id', postId);
+        .rpc('increment_view_count', { post_id: postId })
+        .single();
         
       if (error) {
         console.error("Erro ao incrementar visualizações:", error);
