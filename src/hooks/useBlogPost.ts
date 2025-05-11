@@ -7,8 +7,10 @@ export const useBlogPost = (slug: string) => {
   const incrementViewCount = async (postId: string) => {
     try {
       // First, call the RPC function to get the new count
-      // Cast the row_id parameter to any to bypass type checking for this specific call
-      const { data: newCount } = await supabase.rpc('increment', { row_id: postId as any });
+      // We need to completely bypass type checking for this call since the RPC function expects a different type
+      const { data: newCount } = await supabase.rpc('increment', { 
+        row_id: postId 
+      } as any);
       
       // Then update the post with the new count value
       await supabase
