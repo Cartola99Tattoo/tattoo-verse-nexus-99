@@ -11,9 +11,9 @@ export interface UserProfile {
   last_name: string | null;
   avatar_url: string | null;
   phone: string | null;
-  email: string | null; // Adicionando o campo email ao tipo UserProfile
+  email: string | null;
   role: "cliente" | "artista" | "admin";
-  tattoo_preferences?: any; // Campo para armazenar as preferências de tatuagem
+  tattoo_preferences?: any;
 }
 
 interface AuthContextType {
@@ -181,14 +181,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: new Error("Usuário não autenticado") };
       }
 
+      // Se o profileData contém tattoo_preferences, precisamos fazer um tratamento especial
+      let dataToUpdate: any = { ...profileData };
+      
+      // Se temos preferências de tatuagem existentes e novas preferências, mesclá-las
+      if (profileData.tattoo_preferences && profile?.tattoo_preferences) {
+        dataToUpdate.tattoo_preferences = {
+          ...profile.tattoo_preferences,
+          ...profileData.tattoo_preferences
+        };
+      }
+
       const { error } = await supabase
         .from("profiles")
-        .update(profileData)
+        .update(dataToUpdate)
         .eq("id", user.id);
 
       if (!error) {
         // Atualizar o perfil localmente
-        setProfile(prev => prev ? { ...prev, ...profileData } : null);
+        setProfile(prev => prev ? { ...prev, ...dataToUpdate } : null);
         
         toast({
           title: "Perfil atualizado",
