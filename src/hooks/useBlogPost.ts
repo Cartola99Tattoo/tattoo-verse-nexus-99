@@ -8,28 +8,28 @@ export type BlogPost = {
   id: string;
   title: string;
   content: string;
-  excerpt?: string;
-  cover_image?: string;
-  published_at?: string;
+  excerpt?: string | null;
+  cover_image?: string | null;
+  published_at?: string | null;
   category_id?: string;
   author_id?: string;
-  reading_time?: number;
-  tags?: string[];
-  view_count?: number;
-  slug?: string;
-  meta_description?: string;
-  meta_keywords?: string;
+  reading_time?: number | null;
+  tags?: string[] | null;
+  view_count?: number | null;
+  slug?: string | null;
+  meta_description?: string | null;
+  meta_keywords?: string | null;
   profiles?: {
-    first_name?: string;
-    last_name?: string;
-    avatar_url?: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    avatar_url?: string | null;
     id?: string;
-  };
+  } | null;
   blog_categories?: {
-    name?: string;
+    name?: string | null;
     id?: string;
-    description?: string;
-  };
+    description?: string | null;
+  } | null;
 };
 
 type FetchBlogPostError = {
@@ -111,7 +111,9 @@ export function useBlogPost(postIdOrSlug: string) {
         
         setError({
           message: "Erro ao carregar artigo",
-          details: errorMessage
+          details: typeof error === 'object' && error !== null && 'details' in error
+            ? (error as any).details
+            : errorMessage
         });
         
         toast({

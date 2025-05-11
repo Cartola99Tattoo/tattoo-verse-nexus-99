@@ -15,7 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 // Buscar tatuagens relacionadas com base nas tags ou categoria do post
-const fetchRelatedTattoos = async (categoryId?: string, tags?: string[]) => {
+const fetchRelatedTattoos = async (categoryId?: string, tags?: string[] | null) => {
   try {
     const { data, error } = await supabase
       .from("products")
@@ -56,7 +56,7 @@ const BlogPost = () => {
   });
 
   // Format date function
-  const formatDate = (dateString?: string) => {
+  const formatDate = (dateString?: string | null) => {
     if (!dateString) return "";
     try {
       return format(parseISO(dateString), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
@@ -136,18 +136,18 @@ const BlogPost = () => {
       {/* SEO Optimization */}
       <Helmet>
         <title>{`${post.title} | Blog 99Tattoo`}</title>
-        <meta name="description" content={metaDescription} />
+        <meta name="description" content={metaDescription || ''} />
         <meta name="keywords" content={metaKeywords} />
         {/* Open Graph tags for social sharing */}
         <meta property="og:title" content={`${post.title} | Blog 99Tattoo`} />
-        <meta property="og:description" content={metaDescription} />
+        <meta property="og:description" content={metaDescription || ''} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={window.location.href} />
         {post.cover_image && <meta property="og:image" content={post.cover_image} />}
         {/* Twitter Card tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${post.title} | Blog 99Tattoo`} />
-        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:description" content={metaDescription || ''} />
         {post.cover_image && <meta name="twitter:image" content={post.cover_image} />}
         {/* Article specific metadata */}
         {post.published_at && <meta property="article:published_time" content={post.published_at} />}
@@ -161,7 +161,7 @@ const BlogPost = () => {
               "headline": "${post.title}",
               "image": "${post.cover_image || ''}",
               "datePublished": "${post.published_at || ''}",
-              "description": "${metaDescription}",
+              "description": "${metaDescription || ''}",
               "author": {
                 "@type": "Person",
                 "name": "${authorName}"

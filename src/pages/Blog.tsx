@@ -2,32 +2,13 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import BlogCard from "@/components/blog/BlogCard";
+import BlogCard, { BlogPostSummary } from "@/components/blog/BlogCard"; // Importando o tipo do BlogCard
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-
-// Define the post type for consistency across components
-export type BlogPostSummary = {
-  id: string;
-  title: string;
-  excerpt: string;
-  cover_image: string;
-  published_at: string;
-  slug?: string;
-  author_id?: string;
-  category_id?: string;
-  profiles?: {
-    first_name?: string;
-    last_name?: string;
-  };
-  blog_categories?: {
-    name?: string;
-  };
-};
 
 const fetchBlogPosts = async (category: string = "Todos") => {
   console.log("Fetching blog posts for category:", category);
@@ -117,21 +98,21 @@ const Blog = () => {
       cover_image: post.cover_image || "https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop",
       published_at: post.published_at,
       slug: post.slug,
-      author_id: post.author_id,
-      category_id: post.category_id,
       profiles: post.profiles,
       blog_categories: post.blog_categories
     }));
   };
 
   // Mostrar erro se houver problemas ao carregar os posts
-  if (error) {
-    toast({
-      title: "Erro ao carregar artigos",
-      description: "Ocorreu um erro ao carregar os artigos do blog. Por favor, tente novamente.",
-      variant: "destructive",
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Erro ao carregar artigos",
+        description: "Ocorreu um erro ao carregar os artigos do blog. Por favor, tente novamente.",
+        variant: "destructive",
+      });
+    }
+  }, [error]);
 
   const formattedPosts = formatPosts(filteredPosts);
 
@@ -197,7 +178,7 @@ const Blog = () => {
                 <div className="bg-white rounded-lg overflow-hidden shadow-lg mb-12 lg:flex">
                   <div className="lg:w-1/2">
                     <img
-                      src={formattedPosts[0].cover_image}
+                      src={formattedPosts[0].cover_image || "https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop"}
                       alt={formattedPosts[0].title}
                       className="w-full h-full object-cover"
                       loading="eager"
@@ -209,7 +190,9 @@ const Blog = () => {
                         {formattedPosts[0].blog_categories?.name || "Sem categoria"}
                       </span>
                       <span className="text-sm text-gray-500">
-                        {new Date(formattedPosts[0].published_at).toLocaleDateString('pt-BR')}
+                        {formattedPosts[0].published_at ? 
+                          new Date(formattedPosts[0].published_at).toLocaleDateString('pt-BR') : 
+                          "Sem data"}
                       </span>
                     </div>
                     <h2 className="text-3xl font-bold mb-4">{formattedPosts[0].title}</h2>
