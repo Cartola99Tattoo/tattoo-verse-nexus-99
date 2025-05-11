@@ -59,8 +59,7 @@ export const useOrder = (id: string) => {
         
       if (error) throw error;
       
-      // Transform the scheduling_preferences array to a single object or null
-      // as expected by the type
+      // Create a new object to avoid modifying the original data
       const result = { ...data };
       
       // Check if scheduling_preferences exists and is an array
@@ -68,8 +67,7 @@ export const useOrder = (id: string) => {
           Array.isArray(result.scheduling_preferences) && 
           result.scheduling_preferences.length > 0) {
         // Extract the first scheduling preference and set it as the preference object
-        // Need to cast it properly to satisfy TypeScript
-        result.scheduling_preferences = result.scheduling_preferences[0];
+        result.scheduling_preferences = result.scheduling_preferences[0] as SchedulingPreference;
       } else {
         result.scheduling_preferences = null;
       }
