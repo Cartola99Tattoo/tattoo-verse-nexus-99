@@ -7,14 +7,16 @@ import { toast } from '@/components/ui/use-toast';
 export const useBlogPost = (slug: string) => {
   const incrementViewCount = async (postId: string) => {
     try {
-      // Corrigir a chamada para a função RPC do Supabase
-      const { error } = await supabase.rpc('increment_view_count', {
-        post_id: postId
+      // We need to make a direct fetch call to the edge function instead of using RPC
+      // since the types are not correctly aligned with the database function
+      await fetch(`https://hlirmvgytxjvfoorvxsv.supabase.co/functions/v1/increment_view_count`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.auth.session()?.access_token || ''}`
+        },
+        body: JSON.stringify({ post_id: postId })
       });
-      
-      if (error) {
-        console.error("Erro ao incrementar visualizações:", error);
-      }
     } catch (error) {
       console.error("Erro ao incrementar visualizações:", error);
     }
