@@ -9,11 +9,14 @@ export const useBlogPost = (slug: string) => {
     try {
       // We need to make a direct fetch call to the edge function instead of using RPC
       // since the types are not correctly aligned with the database function
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token || '';
+      
       await fetch(`https://hlirmvgytxjvfoorvxsv.supabase.co/functions/v1/increment_view_count`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.auth.session()?.access_token || ''}`
+          'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify({ post_id: postId })
       });
