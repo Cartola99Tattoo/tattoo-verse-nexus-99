@@ -135,9 +135,9 @@ const ProductDetail = () => {
       name: product.name,
       price: product.price,
       images: product.images,
-      artist: product.artist as string, // Cast to string to resolve the type error
-      product_id: product.id.toString(), // Add this line to match the CartItem type
-      quantity: 1, // Initialize with quantity 1
+      artist: product.artist, // This will be handled by our updated type
+      product_id: product.id.toString(), 
+      quantity: 1,
       status: 'available',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

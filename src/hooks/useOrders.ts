@@ -64,16 +64,16 @@ export const useOrder = (id: string) => {
       const result = { ...data };
       
       // Check if scheduling_preferences exists and is an array
-      if (result.scheduling_preferences && Array.isArray(result.scheduling_preferences) && result.scheduling_preferences.length > 0) {
-        // Extract the first scheduling preference
-        const preference = result.scheduling_preferences[0];
-        // Set it as a single object, not an array
-        result.scheduling_preferences = preference;
+      if (result.scheduling_preferences && 
+          Array.isArray(result.scheduling_preferences) && 
+          result.scheduling_preferences.length > 0) {
+        // Extract the first scheduling preference and set it as the preference object
+        result.scheduling_preferences = result.scheduling_preferences[0] as unknown as Order['scheduling_preferences'];
       } else {
         result.scheduling_preferences = null;
       }
       
-      return result as Order;
+      return result as unknown as Order;
     },
     enabled: !!user && !!id
   });
