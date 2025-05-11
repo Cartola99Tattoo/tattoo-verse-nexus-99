@@ -117,7 +117,10 @@ const OrderDetail = () => {
                       <div>
                         <h3 className="font-medium">{item.product?.name || 'Produto indisponível'}</h3>
                         {item.product?.artist && (
-                          <p className="text-sm text-gray-500">Por {item.product.artist.name}</p>
+                          <p className="text-sm text-gray-500">Por {typeof item.product.artist === 'string' 
+                            ? item.product.artist 
+                            : item.product.artist.name}
+                          </p>
                         )}
                       </div>
                     </div>

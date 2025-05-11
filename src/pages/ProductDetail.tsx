@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -8,6 +7,7 @@ import { Heart, ShoppingCart, Share2, ArrowLeft, Plus, Minus } from "lucide-reac
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { useCart } from "@/contexts/CartContext";
+import { CartItem } from "@/types";
 
 // Mock data - this would come from Supabase in a real implementation
 const tattoosData = [
@@ -130,18 +130,20 @@ const ProductDetail = () => {
     .filter(Boolean);
 
   const handleAddToCart = () => {
-    addToCart({
-      id: product.id.toString(), // Convert number to string
+    const cartItem: Partial<CartItem> = {
+      id: product.id.toString(),
       name: product.name,
       price: product.price,
       images: product.images,
-      artist: product.artist, // This is now handled correctly with our updated CartItem type
-      product_id: product.id.toString(), 
+      artist: product.artist,
+      product_id: product.id.toString(),
       quantity: 1,
       status: 'available',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }, quantity);
+    };
+    
+    addToCart(cartItem, quantity);
     
     toast({
       title: "Adicionado ao carrinho",

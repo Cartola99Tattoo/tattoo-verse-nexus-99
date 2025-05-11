@@ -58,7 +58,10 @@ const Cart = () => {
                             {item.product ? item.product.name : 'Produto indisponível'}
                           </Link>
                           {item.product && item.product.artist && (
-                            <p className="text-gray-500 text-sm">Por {item.product.artist.name}</p>
+                            <p className="text-gray-500 text-sm">Por {typeof item.product.artist === 'string' 
+                              ? item.product.artist 
+                              : item.product.artist.name}
+                            </p>
                           )}
                         </div>
                       </div>
