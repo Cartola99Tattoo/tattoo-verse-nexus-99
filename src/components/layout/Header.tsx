@@ -1,12 +1,22 @@
 
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import CartButton from "@/components/shop/CartButton";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const location = useLocation();
+  const { user, profile, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -24,6 +34,16 @@ const Header = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Função para obter as iniciais para o Avatar fallback
+  const getInitials = () => {
+    if (!profile) return "U";
+    
+    const first = profile.first_name?.charAt(0) || "";
+    const last = profile.last_name?.charAt(0) || "";
+    
+    return (first + last).toUpperCase();
+  };
 
   return (
     <header
@@ -95,18 +115,69 @@ const Header = () => {
           
           <CartButton />
           
-          <Button
-            asChild
-            className="bg-red-500 hover:bg-red-600 text-white"
-            size="sm"
-          >
-            <Link to="/contact">Agendar Consulta</Link>
-          </Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar>
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback>{getInitials()}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Meu Perfil</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sair</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              asChild
+              className="bg-red-500 hover:bg-red-600 text-white"
+              size="sm"
+            >
+              <Link to="/auth">Entrar</Link>
+            </Button>
+          )}
         </nav>
 
         {/* Menu móvel - toggle button */}
         <div className="md:hidden flex items-center space-x-4">
           <CartButton />
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="text-xs">{getInitials()}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Meu Perfil</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sair</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={`p-1 ${
@@ -161,14 +232,16 @@ const Header = () => {
             >
               Contato
             </Link>
-            <Button
-              asChild
-              className="bg-red-500 hover:bg-red-600 text-white w-full"
-            >
-              <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
-                Agendar Consulta
-              </Link>
-            </Button>
+            {!user && (
+              <Button
+                asChild
+                className="bg-red-500 hover:bg-red-600 text-white w-full"
+              >
+                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                  Entrar / Cadastrar
+                </Link>
+              </Button>
+            )}
           </nav>
         </div>
       )}
