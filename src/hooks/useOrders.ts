@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { Order, OrderItem } from '@/types';
+import { Order, OrderItem, SchedulingPreference } from '@/types';
 
 export const useOrders = () => {
   const { user } = useAuth();
@@ -72,7 +72,7 @@ export const useOrder = (id: string) => {
         result.scheduling_preferences = null;
       }
       
-      return result as Order;
+      return result as unknown as Order;
     },
     enabled: !!user && !!id
   });
