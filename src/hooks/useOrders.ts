@@ -68,12 +68,13 @@ export const useOrder = (id: string) => {
           Array.isArray(result.scheduling_preferences) && 
           result.scheduling_preferences.length > 0) {
         // Extract the first scheduling preference and set it as the preference object
-        result.scheduling_preferences = result.scheduling_preferences[0] as unknown as Order['scheduling_preferences'];
+        // Need to cast it properly to satisfy TypeScript
+        result.scheduling_preferences = result.scheduling_preferences[0];
       } else {
         result.scheduling_preferences = null;
       }
       
-      return result as unknown as Order;
+      return result as Order;
     },
     enabled: !!user && !!id
   });

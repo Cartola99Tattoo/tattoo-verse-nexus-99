@@ -135,7 +135,7 @@ const ProductDetail = () => {
       name: product.name,
       price: product.price,
       images: product.images,
-      artist: product.artist, // This will be handled by our updated type
+      artist: product.artist, // This works now with our updated CartItem type
       product_id: product.id.toString(), 
       quantity: 1,
       status: 'available',
