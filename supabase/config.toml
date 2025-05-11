@@ -1,1 +1,11 @@
+
 project_id = "hlirmvgytxjvfoorvxsv"
+
+[functions.create-order]
+verify_jwt = true
+
+[functions.product-availability]
+verify_jwt = false
+
+[functions.sync-customer]
+verify_jwt = true
