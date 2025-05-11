@@ -72,7 +72,7 @@ export const useBlogPost = (slug: string) => {
         
         // Incrementar a contagem de visualizações
         if (post && post.id) {
-          incrementViewCount(post.id);
+          await incrementViewCount(post.id);
         }
         
         return post;
