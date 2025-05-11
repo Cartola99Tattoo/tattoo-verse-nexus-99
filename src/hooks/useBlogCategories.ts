@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BlogCategory } from '@/types';
 
 export const useBlogCategories = () => {
-  return useQuery({
+  const result = useQuery({
     queryKey: ['blogCategories'],
     queryFn: async () => {
       console.log('Fetching blog categories');
@@ -23,4 +23,11 @@ export const useBlogCategories = () => {
     },
     staleTime: 300000, // 5 minutes
   });
+
+  return { 
+    categories: result.data || [], 
+    isLoading: result.isLoading,
+    error: result.error,
+    ...result 
+  };
 };

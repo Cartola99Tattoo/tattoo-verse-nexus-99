@@ -10,7 +10,7 @@ export const useBlogPost = (slug: string) => {
     try {
       console.log("[useBlogPost] Incrementing view count for post:", postId);
       
-      // Call the Supabase function directly
+      // Call the Supabase RPC function
       const { error } = await supabase.rpc('increment_view_count', {
         post_id: postId
       });
