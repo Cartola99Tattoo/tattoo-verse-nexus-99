@@ -46,15 +46,25 @@ const AdminUserSetup = () => {
     setSuccess(null);
     
     try {
-      // Verificar se o usuário já existe
-      const { data: existingUser } = await supabase.auth.admin.getUserByEmail(values.email);
+      // Utilizando a função customizada do Edge Function para verificar se o usuário existe
+      const { data: userCheck, error: checkError } = await supabase.functions.invoke("manage-admin", {
+        body: {
+          email: values.email,
+          action: "check"
+        }
+      });
       
-      if (existingUser) {
+      if (checkError) throw checkError;
+      
+      if (userCheck?.exists) {
         // Usuário existe, atualizar a senha
-        const { error: updateError } = await supabase.auth.admin.updateUserById(
-          existingUser.id,
-          { password: values.password }
-        );
+        const { error: updateError } = await supabase.functions.invoke("manage-admin", {
+          body: {
+            email: values.email,
+            password: values.password,
+            action: "update_password"
+          }
+        });
         
         if (updateError) throw updateError;
         
@@ -62,24 +72,15 @@ const AdminUserSetup = () => {
         setTimeout(() => navigate('/auth'), 3000);
       } else {
         // Usuário não existe, criar novo
-        const { error: createError } = await supabase.auth.admin.createUser({
-          email: values.email,
-          password: values.password,
-          email_confirm: true,
-          user_metadata: { first_name: "Admin", last_name: "99Tattoo" },
+        const { error: createError } = await supabase.functions.invoke("manage-admin", {
+          body: {
+            email: values.email,
+            password: values.password,
+            action: "create"
+          }
         });
         
         if (createError) throw createError;
-        
-        // Atualizar o perfil para ter a função de admin
-        const { data: userData } = await supabase.auth.admin.getUserByEmail(values.email);
-        
-        if (userData) {
-          await supabase
-            .from('profiles')
-            .update({ role: 'admin' })
-            .eq('id', userData.id);
-        }
         
         setSuccess(`Usuário administrador criado com sucesso: ${values.email}. Você pode fazer login agora.`);
         setTimeout(() => navigate('/auth'), 3000);
