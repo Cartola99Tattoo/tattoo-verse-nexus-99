@@ -2,34 +2,40 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import AdminLayout from '@/components/admin/AdminLayout';
-import BlogPostTable from '@/components/admin/blog/BlogPostTable';
-import BlogFilters from '@/components/admin/blog/BlogFilters';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import BlogCategoryManagement from '@/components/admin/blog/BlogCategoryManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BlogFiltersState } from '@/types/blog';
+import BlogCategoryManagement from '@/components/blog/admin/BlogCategoryManagement';
+import BlogPostTable from '@/components/blog/admin/BlogPostTable';
+import BlogFilters from '@/components/blog/filters/BlogFilters';
 
 const AdminBlog = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('posts');
+  const [filters, setFilters] = useState<BlogFiltersState>({});
+
+  const handleFiltersChange = (newFilters: BlogFiltersState) => {
+    setFilters(newFilters);
+  };
 
   return (
     <AdminLayout>
       <Helmet>
-        <title>Gerenciamento de Blog | 99Tattoo Admin</title>
+        <title>Blog Management | 99Tattoo Admin</title>
       </Helmet>
 
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-          <h1 className="text-3xl font-bold">Gerenciamento de Blog</h1>
+          <h1 className="text-3xl font-bold">Blog Management</h1>
           {activeTab === 'posts' && (
             <Button 
               onClick={() => navigate('/admin/blog/new')} 
               className="mt-4 md:mt-0"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Novo Artigo
+              New Post
             </Button>
           )}
         </div>
@@ -41,15 +47,15 @@ const AdminBlog = () => {
           className="w-full"
         >
           <TabsList className="mb-6">
-            <TabsTrigger value="posts">Artigos</TabsTrigger>
-            <TabsTrigger value="categories">Categorias</TabsTrigger>
-            <TabsTrigger value="comments">Comentários</TabsTrigger>
-            <TabsTrigger value="stats">Estatísticas</TabsTrigger>
+            <TabsTrigger value="posts">Posts</TabsTrigger>
+            <TabsTrigger value="categories">Categories</TabsTrigger>
+            <TabsTrigger value="comments">Comments</TabsTrigger>
+            <TabsTrigger value="stats">Statistics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="posts" className="space-y-6">
-            <BlogFilters />
-            <BlogPostTable />
+            <BlogFilters onFiltersChange={handleFiltersChange} />
+            <BlogPostTable filters={filters} />
           </TabsContent>
           
           <TabsContent value="categories">
@@ -58,18 +64,18 @@ const AdminBlog = () => {
           
           <TabsContent value="comments">
             <div className="bg-white rounded-md shadow p-6">
-              <h2 className="text-xl font-medium mb-4">Gerenciamento de Comentários</h2>
+              <h2 className="text-xl font-medium mb-4">Comment Management</h2>
               <p className="text-gray-500">
-                Funcionalidade de gerenciamento de comentários em desenvolvimento.
+                Comment management functionality is under development.
               </p>
             </div>
           </TabsContent>
           
           <TabsContent value="stats">
             <div className="bg-white rounded-md shadow p-6">
-              <h2 className="text-xl font-medium mb-4">Estatísticas do Blog</h2>
+              <h2 className="text-xl font-medium mb-4">Blog Statistics</h2>
               <p className="text-gray-500">
-                Funcionalidade de estatísticas em desenvolvimento.
+                Statistics functionality is under development.
               </p>
             </div>
           </TabsContent>
