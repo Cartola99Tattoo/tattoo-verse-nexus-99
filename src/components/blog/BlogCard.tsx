@@ -17,7 +17,9 @@ export interface BlogPostSummary {
   }[] | null;
   blog_categories?: {
     name?: string | null;
-  } | null;
+  } | {
+    name?: string | null;
+  }[] | null;
 }
 
 interface BlogCardProps {
@@ -26,7 +28,15 @@ interface BlogCardProps {
 
 const BlogCard = ({ post }: BlogCardProps) => {
   // Formatação do nome da categoria
-  const categoryName = post.blog_categories?.name || "Geral";
+  let categoryName = 'Geral';
+  
+  if (post.blog_categories) {
+    if (Array.isArray(post.blog_categories)) {
+      categoryName = post.blog_categories[0]?.name || 'Geral';
+    } else {
+      categoryName = post.blog_categories.name || 'Geral';
+    }
+  }
   
   // Formatação da data
   const formattedDate = post.published_at ? 

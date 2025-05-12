@@ -4,28 +4,22 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchBlogPosts } from "@/services/supabaseService";
 import { useSupabaseQuery } from "@/hooks/useSupabaseQuery";
-
-// Updated type for blog posts from Supabase
-type BlogPostPreview = {
-  id: string;
-  title: string;
-  excerpt: string | null;
-  cover_image: string | null;
-  published_at: string | null;
-  slug?: string | null;
-  author_id?: string | null;
-  profiles?: {
-    first_name?: string | null;
-    last_name?: string | null;
-  } | null;
-  blog_categories?: {
-    name?: string | null;
-  } | null;
-};
+import { BlogPostSummary } from "@/components/blog/BlogCard";
 
 const BlogPreview = () => {
-  const { data: posts = [], loading: isLoading } = useSupabaseQuery<BlogPostPreview[]>(
-    () => fetchBlogPosts(3), // Get only 3 latest posts
+  const { data: posts = [], loading: isLoading } = useSupabaseQuery<BlogPostSummary[]>(
+    () => fetchBlogPosts(3).then(posts => 
+      posts.map(post => ({
+        id: post.id,
+        title: post.title,
+        excerpt: post.excerpt,
+        cover_image: post.cover_image,
+        published_at: post.published_at,
+        slug: post.slug,
+        profiles: post.profiles,
+        blog_categories: post.blog_categories
+      }))
+    ),
     []
   );
 
@@ -36,12 +30,35 @@ const BlogPreview = () => {
   };
   
   // Função para formatar o nome do autor
-  const getAuthorName = (post: BlogPostPreview) => {
+  const getAuthorName = (post: BlogPostSummary) => {
     if (!post.profiles) return "Equipe 99Tattoo";
+    
+    if (Array.isArray(post.profiles)) {
+      if (post.profiles.length > 0) {
+        const firstName = post.profiles[0].first_name || '';
+        const lastName = post.profiles[0].last_name || '';
+        return `${firstName} ${lastName}`.trim() || "Equipe 99Tattoo";
+      }
+      return "Equipe 99Tattoo";
+    }
     
     const firstName = post.profiles.first_name || '';
     const lastName = post.profiles.last_name || '';
     return `${firstName} ${lastName}`.trim() || "Equipe 99Tattoo";
+  };
+
+  // Função para obter o nome da categoria
+  const getCategoryName = (post: BlogPostSummary) => {
+    if (!post.blog_categories) return "Geral";
+    
+    if (Array.isArray(post.blog_categories)) {
+      if (post.blog_categories.length > 0) {
+        return post.blog_categories[0].name || "Geral";
+      }
+      return "Geral";
+    }
+    
+    return post.blog_categories.name || "Geral";
   };
 
   return (
@@ -94,7 +111,7 @@ const BlogPreview = () => {
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-2">
                     <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded">
-                      {post.blog_categories?.name || "Geral"}
+                      {getCategoryName(post)}
                     </span>
                     <span className="text-xs text-gray-500">{formatDate(post.published_at)}</span>
                   </div>

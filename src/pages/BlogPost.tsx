@@ -21,7 +21,7 @@ const fetchRelatedTattoos = async (categoryId?: string) => {
     // mas como estamos em desenvolvimento, vamos mostrar alguns produtos genéricos
     return [
       {
-        id: "1",
+        id: 1, // Mudando para number para corresponder ao tipo esperado
         name: "Tatuagem Minimalista",
         artist: "João Silva",
         category: "Minimalista",
@@ -30,7 +30,7 @@ const fetchRelatedTattoos = async (categoryId?: string) => {
         rating: 4.8,
       },
       {
-        id: "2",
+        id: 2, // Mudando para number para corresponder ao tipo esperado
         name: "Tatuagem Floral",
         artist: "Maria Oliveira",
         category: "Floral",
@@ -39,7 +39,7 @@ const fetchRelatedTattoos = async (categoryId?: string) => {
         rating: 4.9,
       },
       {
-        id: "3",
+        id: 3, // Mudando para number para corresponder ao tipo esperado
         name: "Tatuagem Geométrica",
         artist: "Pedro Santos",
         category: "Geométrica",

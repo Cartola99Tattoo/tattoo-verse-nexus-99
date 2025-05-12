@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -17,8 +16,19 @@ const Blog = () => {
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   
   // Usar useSupabaseQuery para buscar posts do blog
-  const { data: posts = [], loading: isLoadingPosts, error: postsError } = useSupabaseQuery(
-    () => fetchBlogPosts(),
+  const { data: posts = [], loading: isLoadingPosts, error: postsError } = useSupabaseQuery<BlogPostSummary[]>(
+    () => fetchBlogPosts().then(posts => 
+      posts.map(post => ({
+        id: post.id,
+        title: post.title,
+        excerpt: post.excerpt,
+        cover_image: post.cover_image,
+        published_at: post.published_at,
+        slug: post.slug,
+        profiles: post.profiles,
+        blog_categories: post.blog_categories
+      }))
+    ),
     [activeCategory]
   );
   
@@ -43,7 +53,7 @@ const Blog = () => {
   };
 
   // Função auxiliar para verificar se o nome do autor contém a consulta de pesquisa
-  const checkAuthorName = (post: any, query: string): boolean => {
+  const checkAuthorName = (post: BlogPostSummary, query: string): boolean => {
     if (!post.profiles) return false;
     
     if (Array.isArray(post.profiles)) {
@@ -59,11 +69,25 @@ const Blog = () => {
     }
   };
 
+  // Função para obter o nome da categoria para filtro
+  const getCategoryName = (post: BlogPostSummary): string => {
+    if (!post.blog_categories) return "";
+    
+    if (Array.isArray(post.blog_categories)) {
+      if (post.blog_categories.length > 0) {
+        return post.blog_categories[0]?.name || "";
+      }
+      return "";
+    }
+    
+    return post.blog_categories?.name || "";
+  };
+
   // Filtrar os posts com base na categoria e pesquisa
   const filteredPosts = posts.filter(post => {
     // Filtro por categoria
     const categoryMatch = activeCategory === "Todos" || 
-      post.blog_categories?.name === activeCategory;
+      getCategoryName(post) === activeCategory;
     
     // Filtro por pesquisa
     const searchMatch = searchQuery === "" || 
@@ -73,32 +97,22 @@ const Blog = () => {
     
     return categoryMatch && searchMatch;
   });
-  
-  // Formatar os dados dos posts para o formato esperado pelo BlogCard
-  const formatPosts = (posts: any[]): BlogPostSummary[] => {
-    return posts.map(post => ({
-      id: post.id,
-      title: post.title || "Sem título",
-      excerpt: post.excerpt || "Sem descrição disponível",
-      cover_image: post.cover_image || "https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop",
-      published_at: post.published_at,
-      slug: post.slug || post.id,
-      profiles: post.profiles || null,
-      blog_categories: post.blog_categories || null
-    }));
-  };
 
-  const formattedPosts = formatPosts(filteredPosts);
+  // Formatar os dados dos posts para o formato esperado pelo BlogCard
+  const formattedPosts = filteredPosts;
 
   // Função para formatar o nome do autor com segurança
-  const getAuthorName = (profiles: any): string => {
-    if (!profiles) return 'Equipe 99Tattoo';
+  const getAuthorName = (post: BlogPostSummary): string => {
+    if (!post.profiles) return 'Equipe 99Tattoo';
     
-    if (Array.isArray(profiles) && profiles.length > 0) {
-      const profile = profiles[0];
-      return `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Equipe 99Tattoo';
+    if (Array.isArray(post.profiles)) {
+      if (post.profiles.length > 0) {
+        const profile = post.profiles[0];
+        return `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Equipe 99Tattoo';
+      }
+      return 'Equipe 99Tattoo';
     } else {
-      return `${profiles?.first_name || ''} ${profiles?.last_name || ''}`.trim() || 'Equipe 99Tattoo';
+      return `${post.profiles?.first_name || ''} ${post.profiles?.last_name || ''}`.trim() || 'Equipe 99Tattoo';
     }
   };
 
@@ -179,7 +193,7 @@ const Blog = () => {
                   <div className="lg:w-1/2 p-8 flex flex-col justify-center">
                     <div className="flex items-center mb-4">
                       <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded mr-2">
-                        {formattedPosts[0].blog_categories?.name || "Sem categoria"}
+                        {getCategoryName(formattedPosts[0]) || "Sem categoria"}
                       </span>
                       <span className="text-sm text-gray-500">
                         {formattedPosts[0].published_at ? 
@@ -191,7 +205,7 @@ const Blog = () => {
                     <p className="text-gray-600 mb-6">{formattedPosts[0].excerpt}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">
-                        Por {getAuthorName(formattedPosts[0].profiles)}
+                        Por {getAuthorName(formattedPosts[0])}
                       </span>
                       <Button asChild variant="outline" className="border-black text-black hover:bg-black hover:text-white">
                         <a href={`/blog/${formattedPosts[0].slug || formattedPosts[0].id}`}>Ler artigo</a>

@@ -23,12 +23,21 @@ export type BlogPost = {
     last_name?: string | null;
     avatar_url?: string | null;
     id?: string;
-  } | null;
+  } | {
+    first_name?: string | null;
+    last_name?: string | null;
+    avatar_url?: string | null;
+    id?: string;
+  }[] | null;
   blog_categories?: {
     name?: string | null;
     id?: string;
     description?: string | null;
-  } | null;
+  } | {
+    name?: string | null;
+    id?: string;
+    description?: string | null;
+  }[] | null;
 };
 
 export function useBlogPost(postIdOrSlug: string) {
