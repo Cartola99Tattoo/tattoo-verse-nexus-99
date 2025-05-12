@@ -12,7 +12,10 @@ const BlogPreview = () => {
   
   const { data, loading: isLoading, error } = useDataQuery(
     async () => {
-      const response = await blogService.fetchBlogPosts({ limit: 3, sort: 'latest' });
+      const response = await blogService.fetchBlogPosts({ 
+        limit: 3, 
+        sort: 'latest' 
+      });
       return response;
     },
     []

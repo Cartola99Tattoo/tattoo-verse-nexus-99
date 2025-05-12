@@ -83,6 +83,17 @@ const BlogPost = () => {
     }
   };
 
+  // Helper function to safely get avatar URL
+  const getAvatarUrl = () => {
+    if (!post?.profiles) return null;
+    
+    if (Array.isArray(post.profiles)) {
+      return post.profiles.length > 0 ? post.profiles[0]?.avatar_url : null;
+    }
+    
+    return post.profiles.avatar_url;
+  };
+
   return (
     <Layout>
       {/* SEO optimization */}
@@ -164,9 +175,9 @@ const BlogPost = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-gray-300 rounded-full mr-3 flex items-center justify-center overflow-hidden">
-                      {post.profiles?.avatar_url ? (
+                      {getAvatarUrl() ? (
                         <img 
-                          src={post.profiles.avatar_url} 
+                          src={getAvatarUrl() || ""} 
                           alt={getAuthorName(post)}
                           className="w-full h-full object-cover"
                         />

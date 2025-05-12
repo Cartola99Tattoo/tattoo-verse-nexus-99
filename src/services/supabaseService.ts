@@ -1,3 +1,4 @@
+
 import { toast } from "@/components/ui/use-toast";
 import { supabase, isSupabaseConnected, warnNotConnected } from "@/integrations/supabase/client";
 import { appConfig } from "@/config/appConfig";
@@ -10,10 +11,10 @@ import { getDashboardService } from "./serviceFactory";
  * @param limit Optional number of posts to fetch
  * @returns Array of blog posts with authors and categories
  */
-export async function fetchBlogPosts(limit?: number) {
+export async function fetchBlogPosts(options?: { limit?: number }) {
   if (appConfig.dataSource.useMockData) {
     const blogService = getBlogService();
-    return blogService.fetchBlogPosts(limit);
+    return blogService.fetchBlogPosts(options);
   }
 
   if (!isSupabaseConnected()) {
@@ -21,7 +22,7 @@ export async function fetchBlogPosts(limit?: number) {
   }
   
   try {
-    console.log("Fetching blog posts with limit:", limit);
+    console.log("Fetching blog posts with limit:", options?.limit);
     const query = supabase
       .from('blog_posts')
       .select(`
@@ -43,8 +44,8 @@ export async function fetchBlogPosts(limit?: number) {
       .not('published_at', 'is', null)
       .order('published_at', { ascending: false });
     
-    if (limit) {
-      query.limit(limit);
+    if (options?.limit) {
+      query.limit(options.limit);
     }
     
     const { data, error } = await query;
