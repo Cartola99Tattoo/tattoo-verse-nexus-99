@@ -1,6 +1,5 @@
 
 // Simple auth hook for blog module
-// To be expanded in the future for full authentication
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
