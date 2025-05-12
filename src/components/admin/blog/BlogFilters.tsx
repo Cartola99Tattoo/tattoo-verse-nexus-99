@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -81,7 +82,7 @@ const BlogFilters: React.FC<BlogFilterProps> = ({ initialValues }) => {
       // Extract unique authors
       const uniqueAuthors = new Map<string, Author>();
       
-      authorsData.forEach((post) => {
+      authorsData.forEach((post: any) => {
         if (post.profiles && !uniqueAuthors.has(post.profiles.id)) {
           uniqueAuthors.set(post.profiles.id, {
             id: post.profiles.id,
