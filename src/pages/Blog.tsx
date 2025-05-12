@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -33,13 +34,13 @@ const Blog = () => {
   );
   
   // Usar useSupabaseQuery para buscar categorias
-  const { data: categoriesData = [] } = useSupabaseQuery(
+  const { data: categoriesData = [], loading: isLoadingCategories } = useSupabaseQuery(
     fetchBlogCategories,
     []
   );
   
-  // Transformar os dados das categorias
-  const categories = ["Todos", ...categoriesData.map(cat => cat.name || "")].filter(Boolean);
+  // Transformar os dados das categorias - garantir que categoriesData não seja null
+  const categories = ["Todos", ...(categoriesData?.map(cat => cat.name || "") || [])].filter(Boolean);
   
   // Handle category change with URL params
   const handleCategoryChange = (category: string) => {
@@ -143,21 +144,28 @@ const Blog = () => {
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => handleCategoryChange(category)}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                    activeCategory === category
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                  aria-pressed={activeCategory === category}
-                  aria-label={`Filtrar por ${category}`}
-                >
-                  {category}
-                </button>
-              ))}
+              {isLoadingCategories ? (
+                <div className="flex items-center">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <span className="text-sm text-gray-500">Carregando categorias...</span>
+                </div>
+              ) : (
+                categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => handleCategoryChange(category)}
+                    className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                      activeCategory === category
+                        ? "bg-red-500 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                    aria-pressed={activeCategory === category}
+                    aria-label={`Filtrar por ${category}`}
+                  >
+                    {category}
+                  </button>
+                ))
+              )}
             </div>
           </div>
         </div>

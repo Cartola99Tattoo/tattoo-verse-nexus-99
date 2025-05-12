@@ -35,15 +35,15 @@ const BlogPreview = () => {
     
     if (Array.isArray(post.profiles)) {
       if (post.profiles.length > 0) {
-        const firstName = post.profiles[0].first_name || '';
-        const lastName = post.profiles[0].last_name || '';
+        const firstName = post.profiles[0]?.first_name || '';
+        const lastName = post.profiles[0]?.last_name || '';
         return `${firstName} ${lastName}`.trim() || "Equipe 99Tattoo";
       }
       return "Equipe 99Tattoo";
     }
     
-    const firstName = post.profiles.first_name || '';
-    const lastName = post.profiles.last_name || '';
+    const firstName = post.profiles?.first_name || '';
+    const lastName = post.profiles?.last_name || '';
     return `${firstName} ${lastName}`.trim() || "Equipe 99Tattoo";
   };
 
@@ -53,12 +53,12 @@ const BlogPreview = () => {
     
     if (Array.isArray(post.blog_categories)) {
       if (post.blog_categories.length > 0) {
-        return post.blog_categories[0].name || "Geral";
+        return post.blog_categories[0]?.name || "Geral";
       }
       return "Geral";
     }
     
-    return post.blog_categories.name || "Geral";
+    return post.blog_categories?.name || "Geral";
   };
 
   return (
