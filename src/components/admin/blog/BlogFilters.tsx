@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -80,15 +79,20 @@ const BlogFilters: React.FC<BlogFilterProps> = ({ initialValues }) => {
       if (authorsError) throw authorsError;
       
       // Extract unique authors
-      const uniqueAuthors = new Map();
+      const uniqueAuthors = new Map<string, Author>();
+      
       authorsData.forEach((post) => {
         if (post.profiles && !uniqueAuthors.has(post.profiles.id)) {
-          uniqueAuthors.set(post.profiles.id, post.profiles);
+          uniqueAuthors.set(post.profiles.id, {
+            id: post.profiles.id,
+            first_name: post.profiles.first_name,
+            last_name: post.profiles.last_name
+          });
         }
       });
       
       setCategories(categoriesData || []);
-      setAuthors(Array.from(uniqueAuthors.values()) as Author[]);
+      setAuthors(Array.from(uniqueAuthors.values()));
     } catch (error) {
       console.error('Error fetching filter options:', error);
     } finally {
