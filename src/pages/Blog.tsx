@@ -1,69 +1,13 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import BlogCard, { BlogPostSummary } from "@/components/blog/BlogCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-
-const fetchBlogPosts = async (category: string = "Todos") => {
-  console.log("Fetching blog posts for category:", category);
-  
-  // Modificar a consulta para não fazer join com a tabela users
-  // Em vez disso, buscar diretamente os blog_posts e associar o author_id com os profiles
-  let query = supabase
-    .from("blog_posts")
-    .select(`
-      id,
-      title,
-      excerpt,
-      cover_image,
-      published_at,
-      slug,
-      author_id,
-      blog_categories:category_id(name)
-    `)
-    .not('published_at', 'is', null) // Garantir que apenas posts publicados sejam mostrados
-    .order('published_at', { ascending: false });
-    
-  if (category !== "Todos") {
-    // Se tivermos uma categoria selecionada, filtramos pelo nome da categoria
-    query = query.eq('blog_categories.name', category);
-  }
-  
-  const { data: posts, error } = await query;
-  
-  if (error) {
-    console.error("Error fetching blog posts:", error);
-    throw error;
-  }
-  
-  console.log("Blog posts data:", posts);
-  
-  // Para cada post, buscar o perfil do autor separadamente (se houver author_id)
-  const postsWithProfiles = await Promise.all(posts.map(async post => {
-    if (!post.author_id) return { ...post, profiles: null };
-    
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("first_name, last_name")
-      .eq("id", post.author_id)
-      .single();
-      
-    if (profileError) {
-      console.warn(`Could not fetch profile for author ${post.author_id}:`, profileError);
-      return { ...post, profiles: null };
-    }
-    
-    return { ...post, profiles: profile };
-  }));
-  
-  return postsWithProfiles || [];
-};
+import { useSupabaseQuery } from "@/hooks/useSupabaseQuery";
+import { fetchBlogCategories, fetchBlogPosts } from "@/services/supabaseService";
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -72,30 +16,17 @@ const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   
-  const { data: posts = [], isLoading, error } = useQuery({
-    queryKey: ['blog-posts', activeCategory],
-    queryFn: () => fetchBlogPosts(activeCategory),
-    staleTime: 5 * 60 * 1000, // 5 minutos
-  });
+  // Usar useSupabaseQuery para buscar posts do blog
+  const { data: posts = [], loading: isLoadingPosts, error: postsError } = useSupabaseQuery(
+    () => fetchBlogPosts(),
+    [activeCategory]
+  );
   
-  // Buscar categorias do Supabase
-  const { data: categoriesData = [] } = useQuery({
-    queryKey: ['blog-categories'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_categories")
-        .select("name")
-        .order('name');
-      
-      if (error) {
-        console.error("Error fetching categories:", error);
-        throw error;
-      }
-      console.log("Categories data:", data);
-      return data || [];
-    },
-    staleTime: 60 * 60 * 1000, // 1 hora
-  });
+  // Usar useSupabaseQuery para buscar categorias
+  const { data: categoriesData = [] } = useSupabaseQuery(
+    fetchBlogCategories,
+    []
+  );
   
   // Transformar os dados das categorias
   const categories = ["Todos", ...categoriesData.map(cat => cat.name || "")].filter(Boolean);
@@ -128,14 +59,20 @@ const Blog = () => {
     }
   };
 
-  // Filtrar os posts com base na pesquisa
-  const filteredPosts = posts.filter(post => 
-    (searchQuery === "" || 
+  // Filtrar os posts com base na categoria e pesquisa
+  const filteredPosts = posts.filter(post => {
+    // Filtro por categoria
+    const categoryMatch = activeCategory === "Todos" || 
+      post.blog_categories?.name === activeCategory;
+    
+    // Filtro por pesquisa
+    const searchMatch = searchQuery === "" || 
       post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      checkAuthorName(post, searchQuery.toLowerCase())
-    )
-  );
+      checkAuthorName(post, searchQuery.toLowerCase());
+    
+    return categoryMatch && searchMatch;
+  });
   
   // Formatar os dados dos posts para o formato esperado pelo BlogCard
   const formatPosts = (posts: any[]): BlogPostSummary[] => {
@@ -150,17 +87,6 @@ const Blog = () => {
       blog_categories: post.blog_categories || null
     }));
   };
-
-  // Mostrar erro se houver problemas ao carregar os posts
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Erro ao carregar artigos",
-        description: "Ocorreu um erro ao carregar os artigos do blog. Por favor, tente novamente.",
-        variant: "destructive",
-      });
-    }
-  }, [error]);
 
   const formattedPosts = formatPosts(filteredPosts);
 
@@ -225,10 +151,16 @@ const Blog = () => {
 
       {/* Blog content with loading state */}
       <div className="container mx-auto px-4 py-12">
-        {isLoading ? (
+        {isLoadingPosts ? (
           <div className="flex flex-col items-center justify-center py-12">
             <Loader2 className="h-12 w-12 animate-spin text-red-500 mb-4" />
             <p className="text-lg text-gray-600">Carregando artigos...</p>
+          </div>
+        ) : postsError ? (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-bold mb-2 text-red-500">Erro ao carregar artigos</h3>
+            <p className="text-gray-600 mb-4">Ocorreu um erro ao carregar os artigos. Por favor, tente novamente.</p>
+            <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
           </div>
         ) : formattedPosts.length > 0 ? (
           <>
@@ -283,15 +215,17 @@ const Blog = () => {
                 <button 
                   className="px-4 py-2 text-gray-500 bg-gray-200 rounded-l-md hover:bg-gray-300"
                   aria-label="Página anterior"
+                  disabled
                 >
                   Anterior
                 </button>
                 <button className="px-4 py-2 text-white bg-red-500" aria-current="page">1</button>
-                <button className="px-4 py-2 text-gray-500 bg-gray-200 hover:bg-gray-300">2</button>
-                <button className="px-4 py-2 text-gray-500 bg-gray-200 hover:bg-gray-300">3</button>
+                <button className="px-4 py-2 text-gray-500 bg-gray-200 hover:bg-gray-300" disabled>2</button>
+                <button className="px-4 py-2 text-gray-500 bg-gray-200 hover:bg-gray-300" disabled>3</button>
                 <button 
                   className="px-4 py-2 text-gray-500 bg-gray-200 rounded-r-md hover:bg-gray-300"
                   aria-label="Próxima página"
+                  disabled
                 >
                   Próxima
                 </button>

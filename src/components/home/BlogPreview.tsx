@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchBlogPosts } from "@/services/supabaseService";
+import { useSupabaseQuery } from "@/hooks/useSupabaseQuery";
 
 // Updated type for blog posts from Supabase
 type BlogPostPreview = {
@@ -24,24 +24,10 @@ type BlogPostPreview = {
 };
 
 const BlogPreview = () => {
-  const [posts, setPosts] = useState<BlogPostPreview[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadBlogPosts = async () => {
-      setIsLoading(true);
-      try {
-        const postsData = await fetchBlogPosts(3); // Get only 3 latest posts
-        setPosts(postsData as BlogPostPreview[]);
-      } catch (error) {
-        console.error("Failed to load blog posts:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadBlogPosts();
-  }, []);
+  const { data: posts = [], loading: isLoading } = useSupabaseQuery<BlogPostPreview[]>(
+    () => fetchBlogPosts(3), // Get only 3 latest posts
+    []
+  );
 
   // Função para formatar a data
   const formatDate = (dateString?: string | null) => {

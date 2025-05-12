@@ -6,14 +6,16 @@ import { handleSupabaseError } from '@/services/supabaseService';
  * Custom hook for handling Supabase queries with loading and error states
  * @param queryFn Function that returns a promise with the data
  * @param deps Dependencies array for useEffect (optional)
+ * @param executeImmediately Whether to execute the query immediately (defaults to true)
  * @returns Object containing data, loading state, error state, and refresh function
  */
 export function useSupabaseQuery<T>(
   queryFn: () => Promise<T>,
-  deps: any[] = []
+  deps: any[] = [],
+  executeImmediately: boolean = true
 ) {
   const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(executeImmediately);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = async () => {
@@ -35,7 +37,9 @@ export function useSupabaseQuery<T>(
   };
 
   useEffect(() => {
-    fetchData();
+    if (executeImmediately) {
+      fetchData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 

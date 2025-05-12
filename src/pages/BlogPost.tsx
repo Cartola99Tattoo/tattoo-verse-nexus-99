@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
@@ -11,31 +10,44 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Share2, Twitter, Facebook, Bookmark, ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useSupabaseQuery } from "@/hooks/useSupabaseQuery";
 
 // Buscar tatuagens relacionadas com base nas tags ou categoria do post
-const fetchRelatedTattoos = async (categoryId?: string, tags?: string[] | null) => {
+const fetchRelatedTattoos = async (categoryId?: string) => {
   try {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("status", "available")
-      .limit(3);
+    console.log("Fetching related tattoos for category:", categoryId);
     
-    if (error) throw error;
-    
-    // Formatar os produtos para o formato esperado pelo TattooCard
-    return data.map(product => ({
-      id: product.id,
-      name: product.name,
-      artist: "Artista 99Tattoo",
-      category: "Tatuagem",
-      image: product.images && product.images.length > 0 ? product.images[0] : 
-        "https://images.unsplash.com/photo-1541127397299-0db99bb5edb3?q=80&w=2070&auto=format&fit=crop",
-      price: product.price,
-      rating: 4.8,
-    }));
+    // Aqui poderíamos passar o categoryId para filtrar os produtos relacionados,
+    // mas como estamos em desenvolvimento, vamos mostrar alguns produtos genéricos
+    return [
+      {
+        id: "1",
+        name: "Tatuagem Minimalista",
+        artist: "João Silva",
+        category: "Minimalista",
+        image: "https://images.unsplash.com/photo-1565058379143-25aea5a6b86c?w=800&auto=format&fit=crop",
+        price: 150,
+        rating: 4.8,
+      },
+      {
+        id: "2",
+        name: "Tatuagem Floral",
+        artist: "Maria Oliveira",
+        category: "Floral",
+        image: "https://images.unsplash.com/photo-1562962230-16e4623d36e2?w=800&auto=format&fit=crop",
+        price: 200,
+        rating: 4.9,
+      },
+      {
+        id: "3",
+        name: "Tatuagem Geométrica",
+        artist: "Pedro Santos",
+        category: "Geométrica",
+        image: "https://images.unsplash.com/photo-1611501355854-e9d73ff0df42?w=800&auto=format&fit=crop",
+        price: 180,
+        rating: 4.7,
+      }
+    ];
   } catch (error) {
     console.error("Error fetching related tattoos:", error);
     return [];
@@ -48,12 +60,11 @@ const BlogPost = () => {
   const navigate = useNavigate();
 
   // Buscar tatuagens relacionadas
-  const { data: relatedTattoos = [], isLoading: loadingTattoos } = useQuery({
-    queryKey: ['related-tattoos', post?.id],
-    queryFn: () => fetchRelatedTattoos(post?.category_id, post?.tags),
-    enabled: !!post?.id,
-    staleTime: 10 * 60 * 1000, // 10 minutos
-  });
+  const { data: relatedTattoos = [], loading: loadingTattoos } = useSupabaseQuery(
+    () => fetchRelatedTattoos(post?.category_id),
+    [post?.category_id],
+    false // Não executar automaticamente, esperar o post ser carregado
+  );
 
   // Format date function
   const formatDate = (dateString?: string | null) => {

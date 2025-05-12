@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
@@ -9,18 +8,24 @@ import { toast } from "@/components/ui/use-toast";
  */
 export async function fetchBlogPosts(limit?: number) {
   try {
+    console.log("Fetching blog posts with limit:", limit);
     const query = supabase
       .from('blog_posts')
       .select(`
         id,
         title,
         excerpt,
+        content,
         cover_image,
         published_at,
         slug,
         author_id,
-        blog_categories:category_id(name),
-        profiles:author_id(first_name, last_name)
+        category_id,
+        reading_time,
+        view_count,
+        tags,
+        blog_categories:category_id(id, name, description),
+        profiles:author_id(id, first_name, last_name, avatar_url)
       `)
       .not('published_at', 'is', null)
       .order('published_at', { ascending: false });
@@ -36,6 +41,7 @@ export async function fetchBlogPosts(limit?: number) {
       throw error;
     }
     
+    console.log("Blog posts fetched successfully:", data?.length || 0, "posts");
     return data || [];
   } catch (error) {
     console.error("Error in fetchBlogPosts:", error);
@@ -49,13 +55,45 @@ export async function fetchBlogPosts(limit?: number) {
 }
 
 /**
- * Fetches a single blog post by slug with author information
- * @param slug Blog post slug
- * @returns Blog post data or null if not found
+ * Fetches blog categories from Supabase
+ * @returns Array of blog categories
  */
-export async function fetchBlogPostBySlug(slug: string) {
+export async function fetchBlogCategories() {
   try {
     const { data, error } = await supabase
+      .from('blog_categories')
+      .select('id, name, description')
+      .order('name');
+    
+    if (error) {
+      console.error("Error fetching blog categories:", error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in fetchBlogCategories:", error);
+    toast({
+      title: "Erro ao carregar categorias",
+      description: "Não foi possível carregar as categorias do blog.",
+      variant: "destructive"
+    });
+    return [];
+  }
+}
+
+/**
+ * Fetches a single blog post by id or slug with author information
+ * @param idOrSlug Blog post id or slug
+ * @returns Blog post data or null if not found
+ */
+export async function fetchBlogPost(idOrSlug: string) {
+  try {
+    console.log("Fetching blog post with identifier:", idOrSlug);
+    // Determinar se estamos buscando por id ou slug
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
+    
+    const query = supabase
       .from('blog_posts')
       .select(`
         id,
@@ -66,34 +104,46 @@ export async function fetchBlogPostBySlug(slug: string) {
         published_at,
         slug,
         view_count,
+        reading_time,
+        tags,
+        category_id,
         author_id,
-        blog_categories:category_id(name),
-        profiles:author_id(first_name, last_name, avatar_url)
-      `)
-      .eq('slug', slug)
-      .single();
+        blog_categories:category_id(id, name, description),
+        profiles:author_id(id, first_name, last_name, avatar_url)
+      `);
+    
+    // Aplicar o filtro correto com base no identificador
+    const { data, error } = await (isUuid 
+      ? query.eq('id', idOrSlug) 
+      : query.eq('slug', idOrSlug))
+      .maybeSingle();
     
     if (error) {
-      if (error.code === 'PGRST116') {
-        // Not found error
-        return null;
-      }
       console.error("Error fetching blog post:", error);
       throw error;
     }
     
-    // Update view count
-    if (data) {
+    if (!data) {
+      console.log("Blog post not found with identifier:", idOrSlug);
+      return null;
+    }
+    
+    // Incrementar view_count
+    if (data.id) {
       const newViewCount = (data.view_count || 0) + 1;
       await supabase
         .from('blog_posts')
         .update({ view_count: newViewCount })
-        .eq('id', data.id);
+        .eq('id', data.id)
+        .then(({ error }) => {
+          if (error) console.warn("Failed to increment view count:", error);
+        });
     }
     
+    console.log("Blog post fetched successfully:", data.title);
     return data;
   } catch (error) {
-    console.error("Error in fetchBlogPostBySlug:", error);
+    console.error("Error in fetchBlogPost:", error);
     toast({
       title: "Erro ao carregar artigo",
       description: "Não foi possível carregar o conteúdo do artigo.",
