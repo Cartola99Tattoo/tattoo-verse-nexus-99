@@ -2,7 +2,7 @@
 import { useDataQuery } from './useDataQuery';
 import { getBlogService } from '@/services/serviceFactory';
 
-// Define proper types (keep existing type definition)
+// Define proper types
 export type BlogPost = {
   id: string;
   title: string;
@@ -51,8 +51,16 @@ export function useBlogPost(postIdOrSlug: string) {
   // Ensure we're returning a safe post object that won't cause null reference errors
   const post = data || null;
 
+  // Add additional null checks and safe access patterns
+  const safePost = post ? {
+    ...post,
+    tags: post.tags || [],
+    profiles: post.profiles || null,
+    blog_categories: post.blog_categories || null
+  } : null;
+
   return { 
-    post, 
+    post: safePost, 
     isLoading, 
     error: error ? {
       message: "Erro ao carregar artigo",

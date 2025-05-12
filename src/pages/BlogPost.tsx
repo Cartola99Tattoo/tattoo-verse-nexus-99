@@ -2,9 +2,11 @@
 import { useParams, Navigate } from "react-router-dom";
 import { useBlogPost } from "@/hooks/useBlogPost";
 import Layout from "@/components/layout/Layout";
-import { Loader2 } from "lucide-react";
+import { Loader2, Share2, Clock, Calendar, User, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Helmet } from "react-helmet-async";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -65,9 +67,39 @@ const BlogPost = () => {
     const category = post.blog_categories;
     return category.name || "Sem categoria";
   };
+  
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: post?.title || '99Tattoo Blog Post',
+        text: post?.excerpt || 'Confira este artigo da 99Tattoo',
+        url: window.location.href
+      })
+      .catch((error) => console.log('Erro ao compartilhar', error));
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => alert('Link copiado para a área de transferência'))
+        .catch((error) => console.log('Erro ao copiar link', error));
+    }
+  };
 
   return (
     <Layout>
+      {/* SEO optimization */}
+      {post && (
+        <Helmet>
+          <title>{post.title} | 99Tattoo Blog</title>
+          <meta name="description" content={post.meta_description || post.excerpt || ''} />
+          <meta name="keywords" content={post.meta_keywords || post.tags?.join(', ') || ''} />
+          <meta property="og:title" content={post.title} />
+          <meta property="og:description" content={post.meta_description || post.excerpt || ''} />
+          <meta property="og:image" content={post.cover_image || ''} />
+          <meta property="og:type" content="article" />
+          <meta property="og:url" content={window.location.href} />
+          <meta name="twitter:card" content="summary_large_image" />
+        </Helmet>
+      )}
+
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="h-12 w-12 animate-spin text-red-500 mb-4" />
@@ -107,27 +139,54 @@ const BlogPost = () => {
             <div className="max-w-3xl mx-auto">
               {/* Header */}
               <header className="mb-8">
-                <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-4">
                   <span className="bg-red-100 text-red-500 px-2 py-1 rounded">
                     {getCategoryName(post)}
                   </span>
                   <span>•</span>
-                  <time dateTime={post.published_at || ""}>
-                    {formatDate(post.published_at)}
-                  </time>
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    <time dateTime={post.published_at || ""}>
+                      {formatDate(post.published_at)}
+                    </time>
+                  </div>
                   {post.reading_time && (
                     <>
                       <span>•</span>
-                      <span>{post.reading_time} min de leitura</span>
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span>{post.reading_time} min de leitura</span>
+                      </div>
                     </>
                   )}
                 </div>
                 <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
-                  <div>
-                    <p className="font-medium">Por {getAuthorName(post)}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 bg-gray-300 rounded-full mr-3 flex items-center justify-center overflow-hidden">
+                      {post.profiles?.avatar_url ? (
+                        <img 
+                          src={post.profiles.avatar_url} 
+                          alt={getAuthorName(post)}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-5 w-5 text-gray-500" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium">Por {getAuthorName(post)}</p>
+                    </div>
                   </div>
+                  <Button 
+                    onClick={handleShare} 
+                    variant="outline" 
+                    size="sm"
+                    className="gap-1"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Compartilhar</span>
+                  </Button>
                 </div>
               </header>
 
@@ -140,22 +199,54 @@ const BlogPost = () => {
               {/* Tags */}
               {post.tags && post.tags.length > 0 && (
                 <div className="mt-12">
-                  <h3 className="text-lg font-bold mb-2">Tags</h3>
+                  <h3 className="text-lg font-bold mb-2 flex items-center">
+                    <Tag className="h-4 w-4 mr-2" />
+                    Tags
+                  </h3>
                   <div className="flex flex-wrap gap-2">
                     {post.tags.map((tag) => (
-                      <span
+                      <a
                         key={tag}
-                        className="bg-gray-200 px-3 py-1 rounded-full text-sm"
+                        href={`/blog?tag=${tag}`}
+                        className="bg-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors"
                       >
                         {tag}
-                      </span>
+                      </a>
                     ))}
                   </div>
                 </div>
               )}
 
+              {/* Related Posts - We would fetch these from the API in a real implementation */}
+              <div className="mt-12 border-t pt-8">
+                <h3 className="text-2xl font-bold mb-6">Artigos Relacionados</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[1, 2].map((i) => (
+                    <Card key={i} className="hover:shadow-md transition-shadow">
+                      <div className="h-40 w-full overflow-hidden">
+                        <img 
+                          src={`https://images.unsplash.com/photo-${i === 1 ? '1590246815107-56d48602592f' : '1565058398932-9a36a1a3c2b9'}?w=600&auto=format&fit=crop&q=60`} 
+                          alt="Artigo relacionado" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-4">
+                        <h4 className="font-bold truncate">
+                          <a href="/blog/article-slug" className="hover:text-red-500">
+                            {i === 1 ? 'Tendências de tatuagem para 2024' : 'Como cuidar da sua tatuagem recém-feita'}
+                          </a>
+                        </h4>
+                        <p className="text-sm text-gray-500 mt-2">
+                          {formatDate('2024-05-10')}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
               {/* Back link */}
-              <div className="mt-12 border-t pt-6">
+              <div className="mt-12 pt-6 border-t">
                 <Button asChild variant="outline">
                   <a href="/blog">
                     <svg
