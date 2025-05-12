@@ -1,110 +1,103 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { BlogPost } from '@/types/blog';
+import { Link } from "react-router-dom";
 
 export interface BlogPostSummary {
   id: string;
   title: string;
-  excerpt?: string | null;
-  cover_image?: string | null;
-  published_at?: string | null;
+  excerpt: string | null;
+  cover_image: string | null;
+  published_at: string | null;
   slug?: string | null;
   profiles?: {
     first_name?: string | null;
     last_name?: string | null;
-  } | null;
+  } | {
+    first_name?: string | null;
+    last_name?: string | null;
+  }[] | null;
   blog_categories?: {
     name?: string | null;
   } | null;
 }
 
 interface BlogCardProps {
-  post: BlogPostSummary | BlogPost;
-  compact?: boolean;
+  post: BlogPostSummary;
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ post, compact = false }) => {
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "";
-    try {
-      return format(new Date(dateString), "dd 'de' MMM, yyyy", { locale: ptBR });
-    } catch (error) {
-      return dateString;
+const BlogCard = ({ post }: BlogCardProps) => {
+  // Formatação do nome da categoria
+  const categoryName = post.blog_categories?.name || "Geral";
+  
+  // Formatação da data
+  const formattedDate = post.published_at ? 
+    new Date(post.published_at).toLocaleDateString('pt-BR') : 
+    "Sem data";
+  
+  // Formatação do nome do autor
+  let authorName = 'Equipe 99Tattoo';
+  
+  if (post.profiles) {
+    if (Array.isArray(post.profiles) && post.profiles.length > 0) {
+      const profile = post.profiles[0];
+      authorName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Equipe 99Tattoo';
+    } else if (!Array.isArray(post.profiles)) {
+      authorName = `${post.profiles.first_name || ''} ${post.profiles.last_name || ''}`.trim() || 'Equipe 99Tattoo';
     }
-  };
-
-  const getAuthorName = () => {
-    if (!post.profiles) return 'Equipe 99Tattoo';
-    
-    const firstName = post.profiles.first_name || '';
-    const lastName = post.profiles.last_name || '';
-    const fullName = `${firstName} ${lastName}`.trim();
-    
-    return fullName || 'Equipe 99Tattoo';
-  };
-
-  if (compact) {
-    return (
-      <Link to={`/blog/${post.slug || post.id}`} className="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
-        <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
-          <img 
-            src={post.cover_image || "https://via.placeholder.com/300x200?text=99Tattoo"} 
-            alt={post.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-900 truncate">{post.title}</h3>
-          <p className="text-xs text-gray-500">{formatDate(post.published_at)}</p>
-        </div>
-      </Link>
-    );
   }
 
+  // Usar slug se disponível, senão usar id
+  const postLink = `/blog/${post.slug || post.id}`;
+  
   return (
-    <article className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-      <Link to={`/blog/${post.slug || post.id}`}>
-        <div className="aspect-video w-full overflow-hidden">
-          <img
-            src={post.cover_image || "https://via.placeholder.com/800x450?text=99Tattoo"}
-            alt={post.title}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-          />
-        </div>
+    <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
+      <Link to={postLink} className="block h-48 overflow-hidden">
+        <img
+          src={post.cover_image || "https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop"}
+          alt={post.title}
+          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+          loading="lazy"
+        />
       </Link>
       <div className="p-6">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-1 rounded-full">
-            {post.blog_categories?.name || "Sem categoria"}
+        <div className="flex justify-between items-center mb-2">
+          <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded">
+            {categoryName}
           </span>
-          <span className="text-xs text-gray-500">
-            {formatDate(post.published_at)}
-          </span>
+          <time className="text-xs text-gray-500" dateTime={post.published_at || ''}>{formattedDate}</time>
         </div>
-        <Link to={`/blog/${post.slug || post.id}`}>
-          <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors">
+        <Link to={postLink}>
+          <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors line-clamp-2">
             {post.title}
           </h3>
         </Link>
-        <p className="text-gray-600 mb-4 line-clamp-2">
-          {post.excerpt || ""}
-        </p>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">Por {getAuthorName()}</span>
+        <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-500">Por {authorName}</span>
           <Link
-            to={`/blog/${post.slug || post.id}`}
-            className="text-sm font-medium text-red-500 hover:text-red-700"
+            to={postLink}
+            className="text-red-500 hover:text-red-700 transition-colors text-sm flex items-center"
+            aria-label={`Ler mais sobre ${post.title}`}
           >
-            Ler mais &rarr;
+            Ler mais
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 ml-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              />
+            </svg>
           </Link>
         </div>
       </div>
-    </article>
+    </div>
   );
 };
 
