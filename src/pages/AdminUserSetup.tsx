@@ -13,12 +13,24 @@ import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, Info, Loader2 } from "lucide-react";
 
 // Schema de validação para setup do administrador
 const adminSetupSchema = z.object({
   email: z.string().email({ message: "E-mail inválido" }),
-  password: z.string().min(8, { message: "A senha deve ter pelo menos 8 caracteres" }),
+  password: z.string().min(8, { message: "A senha deve ter pelo menos 8 caracteres" })
+    .refine(password => {
+      // Verifica se a senha contém pelo menos um número
+      return /\d/.test(password);
+    }, {
+      message: "A senha deve conter pelo menos um número",
+    })
+    .refine(password => {
+      // Verifica se a senha contém pelo menos um caractere especial
+      return /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    }, {
+      message: "A senha deve conter pelo menos um caractere especial",
+    }),
   confirmPassword: z.string().min(8, { message: "A senha deve ter pelo menos 8 caracteres" }),
 }).refine(data => data.password === data.confirmPassword, {
   message: "As senhas não coincidem",
@@ -29,12 +41,39 @@ const AdminUserSetup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [adminExists, setAdminExists] = useState<boolean | null>(null);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
   const navigate = useNavigate();
   
+  // Verificar se o usuário admin existe
   useEffect(() => {
-    // Verificar a configuração do Supabase ao carregar a página
-    console.log("AdminUserSetup: Verificando configuração do Supabase...");
-    // Remover a referência direta ao supabaseUrl que estava causando o erro
+    const checkAdminExists = async () => {
+      try {
+        setCheckingAdmin(true);
+        const { data, error } = await supabase.functions.invoke("manage-admin", {
+          body: {
+            email: "adm99tattoo@gmail.com",
+            action: "check"
+          }
+        });
+        
+        console.log("AdminUserSetup: Resposta da verificação:", data);
+        
+        if (error) {
+          console.error("AdminUserSetup: Erro ao verificar usuário:", error);
+          setError(`Erro ao verificar usuário administrador: ${error.message}`);
+        } else {
+          setAdminExists(data?.exists || false);
+        }
+      } catch (err: any) {
+        console.error("AdminUserSetup: Erro ao verificar usuário:", err);
+        setError(`Erro ao verificar usuário administrador: ${err.message}`);
+      } finally {
+        setCheckingAdmin(false);
+      }
+    };
+
+    checkAdminExists();
   }, []);
   
   const form = useForm<z.infer<typeof adminSetupSchema>>({
@@ -54,75 +93,42 @@ const AdminUserSetup = () => {
     try {
       console.log("AdminUserSetup: Iniciando configuração do administrador...");
       
-      // Utilizando a função customizada do Edge Function para verificar se o usuário existe
-      console.log("AdminUserSetup: Verificando se o usuário existe...");
-      const { data: userCheck, error: checkError } = await supabase.functions.invoke("manage-admin", {
+      const action = adminExists ? "update_password" : "create";
+      
+      // Utilizando a função customizada do Edge Function para criar ou atualizar o administrador
+      console.log(`AdminUserSetup: ${adminExists ? 'Atualizando' : 'Criando'} usuário administrador...`);
+      const { error: actionError } = await supabase.functions.invoke("manage-admin", {
         body: {
           email: values.email,
-          action: "check"
+          password: values.password,
+          action: action
         }
       });
       
-      console.log("AdminUserSetup: Resposta da verificação:", userCheck);
-      
-      if (checkError) {
-        console.error("AdminUserSetup: Erro ao verificar usuário:", checkError);
-        throw checkError;
+      if (actionError) {
+        console.error(`AdminUserSetup: Erro ao ${adminExists ? 'atualizar' : 'criar'} administrador:`, actionError);
+        throw actionError;
       }
       
-      if (userCheck?.exists) {
-        console.log("AdminUserSetup: Usuário existe, atualizando senha...");
-        // Usuário existe, atualizar a senha
-        const { error: updateError } = await supabase.functions.invoke("manage-admin", {
-          body: {
-            email: values.email,
-            password: values.password,
-            action: "update_password"
-          }
-        });
-        
-        if (updateError) {
-          console.error("AdminUserSetup: Erro ao atualizar senha:", updateError);
-          throw updateError;
-        }
-        
-        console.log("AdminUserSetup: Senha atualizada com sucesso");
-        setSuccess(`Senha atualizada com sucesso para ${values.email}. Você pode fazer login agora.`);
-        
-        // Adicionar um toast para melhor feedback visual
-        toast({
-          title: "Senha atualizada",
-          description: `A senha para ${values.email} foi atualizada com sucesso.`,
-        });
-        
-        setTimeout(() => navigate('/auth'), 3000);
-      } else {
-        console.log("AdminUserSetup: Usuário não existe, criando novo...");
-        // Usuário não existe, criar novo
-        const { error: createError } = await supabase.functions.invoke("manage-admin", {
-          body: {
-            email: values.email,
-            password: values.password,
-            action: "create"
-          }
-        });
-        
-        if (createError) {
-          console.error("AdminUserSetup: Erro ao criar usuário:", createError);
-          throw createError;
-        }
-        
-        console.log("AdminUserSetup: Usuário administrador criado com sucesso");
-        setSuccess(`Usuário administrador criado com sucesso: ${values.email}. Você pode fazer login agora.`);
-        
-        // Adicionar um toast para melhor feedback visual
-        toast({
-          title: "Administrador criado",
-          description: `O usuário administrador ${values.email} foi criado com sucesso.`,
-        });
-        
-        setTimeout(() => navigate('/auth'), 3000);
-      }
+      console.log("AdminUserSetup: Operação concluída com sucesso");
+      setSuccess(`${adminExists ? 'Senha atualizada' : 'Usuário administrador criado'} com sucesso: ${values.email}. Você pode fazer login agora.`);
+      setAdminExists(true);
+      
+      // Adicionar um toast para melhor feedback visual
+      toast({
+        title: adminExists ? "Senha atualizada" : "Administrador criado",
+        description: `${adminExists ? 'A senha para' : 'O usuário administrador'} ${values.email} foi ${adminExists ? 'atualizada' : 'criado'} com sucesso.`,
+      });
+      
+      // Reset form
+      form.reset({
+        email: values.email,
+        password: "",
+        confirmPassword: "",
+      });
+      
+      // Redirecionar após um tempo
+      setTimeout(() => navigate('/admin-auth'), 2000);
     } catch (err: any) {
       console.error("AdminUserSetup: Erro completo:", err);
       const errorMessage = err.message || "Erro desconhecido";
@@ -139,20 +145,35 @@ const AdminUserSetup = () => {
     }
   };
 
+  if (checkingAdmin) {
+    return (
+      <Layout>
+        <div className="container max-w-md py-10">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+            <p className="text-lg font-medium">Verificando configuração do administrador...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <Helmet>
         <title>Configuração de Administrador - 99Tattoo</title>
       </Helmet>
       <div className="container max-w-md py-10">
-        <Card>
-          <CardHeader>
+        <Card className="border-2 border-black">
+          <CardHeader className="bg-black text-white">
             <CardTitle>Configuração de Administrador</CardTitle>
-            <CardDescription>
-              Configure o acesso do administrador para o sistema 99Tattoo.
+            <CardDescription className="text-gray-300">
+              {adminExists 
+                ? "Atualize a senha do administrador para o sistema 99Tattoo." 
+                : "Configure o acesso do administrador para o sistema 99Tattoo."}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {error && (
               <Alert variant="destructive" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
@@ -168,6 +189,21 @@ const AdminUserSetup = () => {
                 <AlertDescription className="text-green-600">{success}</AlertDescription>
               </Alert>
             )}
+            
+            <Alert className="mb-4 bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-500" />
+              <AlertTitle className="text-blue-700">Informações importantes</AlertTitle>
+              <AlertDescription className="text-blue-600">
+                {adminExists 
+                  ? "Esta página permite atualizar a senha da conta de administrador." 
+                  : "Esta página permite criar a conta de administrador inicial do sistema."}
+                <ul className="list-disc pl-5 mt-2">
+                  <li>A senha deve ter pelo menos 8 caracteres</li>
+                  <li>Deve incluir pelo menos um número</li>
+                  <li>Deve incluir pelo menos um caractere especial</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSetupAdmin)} className="space-y-4">
@@ -210,8 +246,19 @@ const AdminUserSetup = () => {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? "Configurando..." : "Configurar Administrador"}
+                <Button 
+                  type="submit" 
+                  className="w-full bg-black hover:bg-gray-800" 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {adminExists ? "Atualizando senha..." : "Configurando..."}
+                    </>
+                  ) : (
+                    adminExists ? "Atualizar senha do administrador" : "Configurar administrador"
+                  )}
                 </Button>
               </form>
             </Form>
@@ -219,10 +266,10 @@ const AdminUserSetup = () => {
           <CardFooter className="flex justify-center">
             <Button
               variant="link"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/admin-auth")}
               className="p-0 h-auto"
             >
-              Voltar para o login
+              Voltar para o login de administrador
             </Button>
           </CardFooter>
         </Card>

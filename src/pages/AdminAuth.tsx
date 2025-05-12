@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Info } from "lucide-react";
+import { AlertCircle, Info, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/layout/Layout";
-import { Link } from "react-router-dom";
+import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 // Schema de validação para login de administrador
 const adminLoginSchema = z.object({
@@ -25,7 +26,44 @@ const AdminAuth = () => {
   const { user, signIn } = useAuth();
   const [loginError, setLoginError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [adminExists, setAdminExists] = useState<boolean | null>(null);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
   const navigate = useNavigate();
+
+  // Verificar se o usuário admin existe
+  useEffect(() => {
+    const checkAdminExists = async () => {
+      try {
+        setCheckingAdmin(true);
+        console.log("Verificando se o administrador existe...");
+        const { data, error } = await supabase.functions.invoke("manage-admin", {
+          body: {
+            email: "adm99tattoo@gmail.com",
+            action: "check"
+          }
+        });
+        
+        console.log("Resposta da verificação do administrador:", data);
+        
+        if (error) {
+          console.error("Erro ao verificar administrador:", error);
+          toast({
+            variant: "destructive",
+            title: "Erro ao verificar administrador",
+            description: error.message,
+          });
+        } else {
+          setAdminExists(data?.exists || false);
+        }
+      } catch (err) {
+        console.error("Erro ao verificar administrador:", err);
+      } finally {
+        setCheckingAdmin(false);
+      }
+    };
+
+    checkAdminExists();
+  }, []);
 
   // Se o usuário já estiver autenticado, redirecione para a página do admin
   if (user) {
@@ -55,16 +93,39 @@ const AdminAuth = () => {
       console.error("AdminAuth: Erro ao fazer login:", error);
       setLoginError(
         error.message === "Invalid login credentials"
-          ? "E-mail ou senha inválidos. Certifique-se de ter configurado uma senha de administrador primeiro."
+          ? "E-mail ou senha inválidos. Verifique se você configurou uma senha de administrador corretamente na página de configuração."
           : `Erro ao fazer login: ${error.message}`
       );
+      
+      toast({
+        variant: "destructive",
+        title: "Falha no login",
+        description: "Verifique suas credenciais e tente novamente.",
+      });
     } else {
       console.log("AdminAuth: Login bem-sucedido, redirecionando para o painel administrativo...");
+      toast({
+        title: "Login bem-sucedido",
+        description: "Redirecionando para o painel administrativo...",
+      });
       navigate("/admin");
     }
     
     setIsSubmitting(false);
   };
+
+  if (checkingAdmin) {
+    return (
+      <Layout>
+        <div className="container max-w-md py-10">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+            <p className="text-lg font-medium">Verificando configuração do administrador...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -80,13 +141,32 @@ const AdminAuth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            <Alert className="mb-4 bg-blue-50 border-blue-200">
-              <Info className="h-4 w-4 text-blue-500" />
-              <AlertTitle className="text-blue-700">Informação</AlertTitle>
-              <AlertDescription className="text-blue-600">
-                Antes de fazer login, certifique-se de ter configurado uma senha para a conta de administrador na página de configuração.
-              </AlertDescription>
-            </Alert>
+            {!adminExists ? (
+              <Alert className="mb-4 bg-amber-50 border-amber-200">
+                <AlertCircle className="h-4 w-4 text-amber-500" />
+                <AlertTitle className="text-amber-700">Administrador não configurado</AlertTitle>
+                <AlertDescription className="text-amber-600">
+                  A conta de administrador ainda não foi configurada. Você precisa configurar uma senha para a conta de administrador primeiro.
+                  <div className="mt-2">
+                    <Button 
+                      variant="outline" 
+                      className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-300"
+                      onClick={() => navigate("/admin-setup")}
+                    >
+                      Ir para configuração <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <Alert className="mb-4 bg-blue-50 border-blue-200">
+                <Info className="h-4 w-4 text-blue-500" />
+                <AlertTitle className="text-blue-700">Informação</AlertTitle>
+                <AlertDescription className="text-blue-600">
+                  Use a senha configurada para a conta de administrador. Se você esqueceu, pode resetá-la na página de configuração.
+                </AlertDescription>
+              </Alert>
+            )}
             
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(handleAdminLogin)} className="space-y-4">
@@ -123,7 +203,11 @@ const AdminAuth = () => {
                     <AlertDescription>{loginError}</AlertDescription>
                   </Alert>
                 )}
-                <Button type="submit" className="w-full bg-black hover:bg-gray-800" disabled={isSubmitting}>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-black hover:bg-gray-800" 
+                  disabled={isSubmitting || !adminExists}
+                >
                   {isSubmitting ? "Entrando..." : "Entrar como Administrador"}
                 </Button>
               </form>
