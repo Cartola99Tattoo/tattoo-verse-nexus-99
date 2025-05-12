@@ -21,7 +21,7 @@ const fetchRelatedTattoos = async (categoryId?: string) => {
     // mas como estamos em desenvolvimento, vamos mostrar alguns produtos genéricos
     return [
       {
-        id: 1, // Mudando para number para corresponder ao tipo esperado
+        id: 1, 
         name: "Tatuagem Minimalista",
         artist: "João Silva",
         category: "Minimalista",
@@ -30,7 +30,7 @@ const fetchRelatedTattoos = async (categoryId?: string) => {
         rating: 4.8,
       },
       {
-        id: 2, // Mudando para number para corresponder ao tipo esperado
+        id: 2,
         name: "Tatuagem Floral",
         artist: "Maria Oliveira",
         category: "Floral",
@@ -39,7 +39,7 @@ const fetchRelatedTattoos = async (categoryId?: string) => {
         rating: 4.9,
       },
       {
-        id: 3, // Mudando para number para corresponder ao tipo esperado
+        id: 3,
         name: "Tatuagem Geométrica",
         artist: "Pedro Santos",
         category: "Geométrica",
@@ -79,17 +79,33 @@ const BlogPost = () => {
 
   // Get author full name
   const getAuthorName = (post: BlogPostType) => {
-    if (post.profiles) {
-      const firstName = post.profiles.first_name || "";
-      const lastName = post.profiles.last_name || "";
-      return `${firstName} ${lastName}`.trim() || "Equipe 99Tattoo";
+    if (!post.profiles) return "Equipe 99Tattoo";
+    
+    if (Array.isArray(post.profiles)) {
+      if (post.profiles.length > 0) {
+        const profile = post.profiles[0];
+        return `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || "Equipe 99Tattoo";
+      }
+      return "Equipe 99Tattoo";
+    } else {
+      // Handle the case where profiles is an object
+      return `${post.profiles.first_name || ''} ${post.profiles.last_name || ''}`.trim() || "Equipe 99Tattoo";
     }
-    return "Equipe 99Tattoo";
   };
 
   // Get category name
   const getCategoryName = (post: BlogPostType) => {
-    return post.blog_categories?.name || "Sem categoria";
+    if (!post.blog_categories) return "Sem categoria";
+    
+    if (Array.isArray(post.blog_categories)) {
+      if (post.blog_categories.length > 0) {
+        return post.blog_categories[0]?.name || "Sem categoria";
+      }
+      return "Sem categoria";
+    } else {
+      // Handle the case where blog_categories is an object
+      return post.blog_categories.name || "Sem categoria";
+    }
   };
 
   // Show loading state
@@ -283,13 +299,34 @@ const BlogPost = () => {
               {/* Author info */}
               <div className="flex items-center">
                 <div className="w-12 h-12 rounded-full bg-gray-300 overflow-hidden mr-4">
-                  {post.profiles?.avatar_url ? (
-                    <img 
-                      src={post.profiles.avatar_url} 
-                      alt={authorName}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                  {post.profiles ? (
+                    Array.isArray(post.profiles) ? (
+                      post.profiles[0]?.avatar_url ? (
+                        <img 
+                          src={post.profiles[0].avatar_url} 
+                          alt={authorName}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-red-500 text-white text-lg font-bold">
+                          {authorName.charAt(0)}
+                        </div>
+                      )
+                    ) : (
+                      post.profiles.avatar_url ? (
+                        <img 
+                          src={post.profiles.avatar_url} 
+                          alt={authorName}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-red-500 text-white text-lg font-bold">
+                          {authorName.charAt(0)}
+                        </div>
+                      )
+                    )
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-red-500 text-white text-lg font-bold">
                       {authorName.charAt(0)}
