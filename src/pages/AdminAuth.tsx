@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Info } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/layout/Layout";
 import { Link } from "react-router-dom";
@@ -55,7 +55,7 @@ const AdminAuth = () => {
       console.error("AdminAuth: Erro ao fazer login:", error);
       setLoginError(
         error.message === "Invalid login credentials"
-          ? "E-mail ou senha inválidos"
+          ? "E-mail ou senha inválidos. Certifique-se de ter configurado uma senha de administrador primeiro."
           : `Erro ao fazer login: ${error.message}`
       );
     } else {
@@ -80,6 +80,14 @@ const AdminAuth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
+            <Alert className="mb-4 bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-500" />
+              <AlertTitle className="text-blue-700">Informação</AlertTitle>
+              <AlertDescription className="text-blue-600">
+                Antes de fazer login, certifique-se de ter configurado uma senha para a conta de administrador na página de configuração.
+              </AlertDescription>
+            </Alert>
+            
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(handleAdminLogin)} className="space-y-4">
                 <FormField
@@ -123,11 +131,14 @@ const AdminAuth = () => {
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
             <div className="text-sm text-center">
-              <Link to="/admin-setup" className="text-blue-600 hover:underline">
+              <Link to="/admin-setup" className="bg-green-100 text-green-700 hover:bg-green-200 px-4 py-2 rounded-md block font-medium">
                 Configurar usuário administrador
               </Link>
+              <p className="mt-2 text-gray-500">
+                Não tem acesso? Você precisa configurar uma senha de administrador primeiro.
+              </p>
             </div>
-            <div className="text-sm text-center">
+            <div className="text-sm text-center mt-4">
               <Link to="/auth" className="text-blue-600 hover:underline">
                 Voltar para login de cliente
               </Link>
