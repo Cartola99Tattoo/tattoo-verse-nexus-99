@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Info, ArrowRight, Loader2, Key, RefreshCw } from "lucide-react";
+import { AlertCircle, Info, ArrowRight, Loader2, Key, RefreshCw, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/layout/Layout";
 import { toast } from "@/components/ui/use-toast";
@@ -24,14 +24,25 @@ const adminLoginSchema = z.object({
 });
 
 const AdminAuth = () => {
-  const { user, signIn } = useAuth();
+  const { user, signIn, profile } = useAuth();
   const [loginError, setLoginError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [adminExists, setAdminExists] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [connectionInfo, setConnectionInfo] = useState<{status: string, message: string} | null>(null);
   const navigate = useNavigate();
+  const adminEmail = "adm99tattoo@gmail.com";
+
+  // Se o usuário já estiver autenticado e for admin, redirecione para a página do admin
+  useEffect(() => {
+    if (user && profile?.role === "admin") {
+      console.log("AdminAuth: Usuário já autenticado como administrador, redirecionando...");
+      navigate("/admin");
+    }
+  }, [user, profile, navigate]);
 
   // Verificar se o usuário admin existe
   useEffect(() => {
@@ -41,7 +52,7 @@ const AdminAuth = () => {
         console.log("Verificando se o administrador existe...");
         const { data, error } = await supabase.functions.invoke("manage-admin", {
           body: {
-            email: "adm99tattoo@gmail.com",
+            email: adminEmail,
             action: "check"
           }
         });
@@ -58,8 +69,12 @@ const AdminAuth = () => {
           setLoginError(`Erro ao verificar status do administrador: ${error.message}`);
         } else {
           setAdminExists(data?.exists || false);
+          setIsAdmin(data?.isAdmin || false);
+          
           if (!data?.exists) {
             setLoginError("Conta de administrador ainda não foi configurada. Configure-a primeiro.");
+          } else if (!data?.isAdmin) {
+            setLoginError("A conta existe mas não tem permissão de administrador. Clique em 'Corrigir Permissões'.");
           }
         }
       } catch (err: any) {
@@ -73,17 +88,11 @@ const AdminAuth = () => {
     checkAdminExists();
   }, []);
 
-  // Se o usuário já estiver autenticado, redirecione para a página do admin
-  if (user) {
-    console.log("AdminAuth: Usuário já autenticado, redirecionando...", user);
-    return <Navigate to="/admin" />;
-  }
-
   // Form para login de administrador
   const loginForm = useForm<z.infer<typeof adminLoginSchema>>({
     resolver: zodResolver(adminLoginSchema),
     defaultValues: {
-      email: "adm99tattoo@gmail.com", // Email do administrador já preenchido
+      email: adminEmail, // Email do administrador já preenchido
       password: "",
     },
   });
@@ -118,6 +127,46 @@ const AdminAuth = () => {
     }
   };
 
+  // Função para corrigir permissões de administrador
+  const handleFixAdminRole = async () => {
+    setIsUpdatingRole(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-admin", {
+        body: {
+          email: adminEmail,
+          action: "force_admin"
+        }
+      });
+      
+      if (error) {
+        console.error("Erro ao atualizar permissões:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao atualizar permissões",
+          description: error.message,
+        });
+      } else {
+        console.log("Permissões atualizadas com sucesso:", data);
+        toast({
+          title: "Permissões atualizadas",
+          description: "O usuário agora tem permissões de administrador.",
+        });
+        setIsAdmin(true);
+        setLoginError("");
+      }
+    } catch (err: any) {
+      console.error("Erro ao atualizar permissões:", err);
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar permissões",
+        description: err.message,
+      });
+    } finally {
+      setIsUpdatingRole(false);
+    }
+  };
+
   // Função para fazer login de administrador
   const handleAdminLogin = async (values: z.infer<typeof adminLoginSchema>) => {
     setIsSubmitting(true);
@@ -146,12 +195,40 @@ const AdminAuth = () => {
           description: "Verifique suas credenciais e tente novamente.",
         });
       } else {
-        console.log("AdminAuth: Login bem-sucedido, redirecionando para o painel administrativo...");
+        console.log("AdminAuth: Login bem-sucedido, verificando permissões...");
+        
+        // Verificar se o usuário tem papel de administrador
+        const { data } = await supabase.functions.invoke("manage-admin", {
+          body: {
+            email: adminEmail,
+            action: "check"
+          }
+        });
+        
+        if (!data?.isAdmin) {
+          console.log("Usuário logado mas não tem permissão de administrador, atualizando...");
+          
+          // Atualizar o papel do usuário para admin
+          await supabase.functions.invoke("manage-admin", {
+            body: {
+              email: adminEmail,
+              action: "force_admin"
+            }
+          });
+          
+          toast({
+            title: "Permissões de administrador atualizadas",
+            description: "Redirecionando para o painel administrativo...",
+          });
+        }
+        
         toast({
           title: "Login bem-sucedido",
           description: "Redirecionando para o painel administrativo...",
         });
-        navigate("/admin");
+        
+        // Recarregar a página para garantir que as permissões são aplicadas corretamente
+        window.location.href = "/admin";
       }
     } catch (err: any) {
       console.error("AdminAuth: Erro não tratado:", err);
@@ -207,6 +284,34 @@ const AdminAuth = () => {
                       onClick={() => navigate("/admin-setup")}
                     >
                       Ir para configuração <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            ) : adminExists && !isAdmin ? (
+              <Alert className="mb-4 bg-amber-50 border-amber-200">
+                <Shield className="h-4 w-4 text-amber-500" />
+                <AlertTitle className="text-amber-700">Permissão de administrador ausente</AlertTitle>
+                <AlertDescription className="text-amber-600">
+                  A conta existe mas não tem permissões de administrador. Isso pode ser corrigido automaticamente.
+                  <div className="mt-2">
+                    <Button 
+                      variant="outline" 
+                      className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-300"
+                      onClick={handleFixAdminRole}
+                      disabled={isUpdatingRole}
+                    >
+                      {isUpdatingRole ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Atualizando...
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="mr-2 h-4 w-4" />
+                          Corrigir permissões
+                        </>
+                      )}
                     </Button>
                   </div>
                 </AlertDescription>
@@ -316,7 +421,8 @@ const AdminAuth = () => {
                 <ol className="list-decimal list-inside space-y-1 mt-1">
                   <li>Verifique se você configurou a senha na página <Link to="/admin-setup" className="text-blue-600 hover:underline">configuração</Link></li>
                   <li>Limpe o cache do navegador e tente novamente</li>
-                  <li>Verifique se sua senha contém pelo menos 8 caracteres, um número e um caractere especial</li>
+                  <li>Tente usar o botão "Corrigir permissões" se disponível</li>
+                  <li>Após o login bem-sucedido, recarregue a página se necessário</li>
                 </ol>
               </div>
             </div>

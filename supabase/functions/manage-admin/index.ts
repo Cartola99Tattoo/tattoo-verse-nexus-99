@@ -50,9 +50,23 @@ serve(async (req) => {
       const adminUser = data?.users?.find(user => user.email === email)
       const userExists = !!adminUser
       
+      // Verificar se o usuário tem o papel de admin no perfil
+      let isAdmin = false
+      if (userExists && adminUser) {
+        const { data: profileData } = await supabaseClient
+          .from('profiles')
+          .select('role')
+          .eq('id', adminUser.id)
+          .single()
+        
+        isAdmin = profileData?.role === 'admin'
+        console.log(`Verificação de admin: ${isAdmin ? 'É admin' : 'Não é admin'}`, profileData)
+      }
+      
       return new Response(
         JSON.stringify({ 
           exists: userExists,
+          isAdmin,
           user: adminUser ? {
             id: adminUser.id,
             email: adminUser.email,
@@ -142,6 +156,8 @@ serve(async (req) => {
 
           if (updateError) {
             console.log("Error updating profile:", updateError)
+          } else {
+            console.log("Profile updated successfully to admin role")
           }
         }
 
@@ -166,10 +182,30 @@ serve(async (req) => {
         { password }
       )
 
-      // Adicionar logs para depuração
       console.log("Password update result:", updateError ? JSON.stringify(updateError) : "Success")
 
       if (updateError) throw updateError
+
+      // Verificar e garantir que o perfil tem papel de administrador
+      const { data: profileData } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', adminUser.id)
+        .single()
+      
+      if (!profileData || profileData.role !== 'admin') {
+        console.log("Atualizando perfil para administrador", profileData)
+        const { error: roleError } = await supabaseClient
+          .from('profiles')
+          .update({ role: 'admin' })
+          .eq('id', adminUser.id)
+        
+        if (roleError) {
+          console.log("Erro ao atualizar role para admin:", roleError)
+        } else {
+          console.log("Perfil atualizado para admin com sucesso")
+        }
+      }
 
       return new Response(
         JSON.stringify({ 
@@ -180,6 +216,44 @@ serve(async (req) => {
             id: adminUser.id,
             email: adminUser.email,
             created_at: adminUser.created_at,
+            updated_at: new Date().toISOString()
+          }
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      )
+    }
+    else if (action === "force_admin") {
+      // Forçar a atualização do perfil para admin
+      const { data: users } = await supabaseClient.auth.admin.listUsers()
+      
+      if (!users || !users.users) {
+        throw new Error("Não foi possível listar usuários")
+      }
+      
+      const adminUser = users.users.find(user => user.email === email)
+      
+      if (!adminUser) {
+        throw new Error("Usuário administrador não encontrado")
+      }
+      
+      // Garantir que o perfil tem papel de administrador
+      const { error: updateError } = await supabaseClient
+        .from('profiles')
+        .update({ role: 'admin' })
+        .eq('id', adminUser.id)
+      
+      if (updateError) {
+        console.log("Erro ao atualizar perfil:", updateError)
+        throw updateError
+      }
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: "Perfil atualizado para administrador com sucesso",
+          user: {
+            id: adminUser.id,
+            email: adminUser.email,
             updated_at: new Date().toISOString()
           }
         }),
