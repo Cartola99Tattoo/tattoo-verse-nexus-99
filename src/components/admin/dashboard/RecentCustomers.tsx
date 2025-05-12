@@ -1,8 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { handleSupabaseError } from '@/services/supabaseService';
+import { handleSupabaseError } from '@/services/serviceFactory';
+import { getDashboardService } from '@/services/serviceFactory';
+import { useDataQuery } from '@/hooks/useDataQuery';
 
 interface Customer {
   id: string;
@@ -14,35 +14,12 @@ interface Customer {
 }
 
 export default function RecentCustomers() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name, email, avatar_url, created_at')
-          .eq('role', 'cliente')
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        if (error) {
-          handleSupabaseError(error, "Erro ao carregar lista de clientes");
-          return;
-        }
-        
-        setCustomers(data || []);
-      } catch (error) {
-        handleSupabaseError(error, "Erro ao carregar lista de clientes");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCustomers();
-  }, []);
+  const dashboardService = getDashboardService();
+  
+  const { data: customers = [], loading: loading } = useDataQuery<Customer[]>(
+    () => dashboardService.fetchRecentCustomers(5),
+    []
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

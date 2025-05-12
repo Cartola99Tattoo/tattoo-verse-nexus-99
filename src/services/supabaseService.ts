@@ -1,5 +1,9 @@
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { supabase, isSupabaseConnected, warnNotConnected } from "@/integrations/supabase/client";
+import { appConfig } from "@/config/appConfig";
+import { getBlogService } from "./serviceFactory";
+import { getProductService } from "./serviceFactory";
+import { getDashboardService } from "./serviceFactory";
 
 /**
  * Fetches blog posts from Supabase with author and category information
@@ -7,6 +11,15 @@ import { toast } from "@/components/ui/use-toast";
  * @returns Array of blog posts with authors and categories
  */
 export async function fetchBlogPosts(limit?: number) {
+  if (appConfig.dataSource.useMockData) {
+    const blogService = getBlogService();
+    return blogService.fetchBlogPosts(limit);
+  }
+
+  if (!isSupabaseConnected()) {
+    return warnNotConnected();
+  }
+  
   try {
     console.log("Fetching blog posts with limit:", limit);
     const query = supabase
@@ -59,6 +72,15 @@ export async function fetchBlogPosts(limit?: number) {
  * @returns Array of blog categories
  */
 export async function fetchBlogCategories() {
+  if (appConfig.dataSource.useMockData) {
+    const blogService = getBlogService();
+    return blogService.fetchBlogCategories();
+  }
+  
+  if (!isSupabaseConnected()) {
+    return warnNotConnected();
+  }
+  
   try {
     const { data, error } = await supabase
       .from('blog_categories')
@@ -88,6 +110,15 @@ export async function fetchBlogCategories() {
  * @returns Blog post data or null if not found
  */
 export async function fetchBlogPost(idOrSlug: string) {
+  if (appConfig.dataSource.useMockData) {
+    const blogService = getBlogService();
+    return blogService.fetchBlogPost(idOrSlug);
+  }
+  
+  if (!isSupabaseConnected()) {
+    return warnNotConnected();
+  }
+  
   try {
     console.log("Fetching blog post with identifier:", idOrSlug);
     // Determinar se estamos buscando por id ou slug
@@ -164,6 +195,15 @@ export async function fetchProducts(options?: {
   limit?: number;
   offset?: number;
 }) {
+  if (appConfig.dataSource.useMockData) {
+    const productService = getProductService();
+    return productService.fetchProducts(options);
+  }
+  
+  if (!isSupabaseConnected()) {
+    return warnNotConnected();
+  }
+  
   try {
     let query = supabase
       .from('products')
@@ -222,6 +262,15 @@ export async function fetchProducts(options?: {
  * @returns Product data or null if not found
  */
 export async function fetchProductById(id: string | number) {
+  if (appConfig.dataSource.useMockData) {
+    const productService = getProductService();
+    return productService.fetchProductById(id);
+  }
+  
+  if (!isSupabaseConnected()) {
+    return warnNotConnected();
+  }
+  
   try {
     const { data, error } = await supabase
       .from('products')
@@ -265,6 +314,15 @@ export async function fetchProductById(id: string | number) {
  * @returns Dashboard statistics or null on error
  */
 export async function fetchDashboardStats() {
+  if (appConfig.dataSource.useMockData) {
+    const dashboardService = getDashboardService();
+    return dashboardService.fetchDashboardStats();
+  }
+  
+  if (!isSupabaseConnected()) {
+    return warnNotConnected();
+  }
+  
   try {
     // Total sales (last 30 days)
     const { data: salesData, error: salesError } = await supabase
@@ -334,7 +392,7 @@ export async function fetchDashboardStats() {
  * @returns void
  */
 export function handleSupabaseError(error: any, defaultMessage: string = "Ocorreu um erro na operação.") {
-  console.error("Supabase error:", error);
+  console.error("Error:", error);
   
   let message = defaultMessage;
   

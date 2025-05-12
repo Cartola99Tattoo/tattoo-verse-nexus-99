@@ -1,8 +1,8 @@
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Calendar } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getDashboardService } from '@/services/serviceFactory';
+import { useDataQuery } from '@/hooks/useDataQuery';
 
 interface Appointment {
   id: string;
@@ -15,72 +15,12 @@ interface Appointment {
 }
 
 export default function AppointmentsWidget() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('appointments')
-          .select('id, start_date, end_date, status, description, client_id, artist_id')
-          .gte('start_date', new Date().toISOString())
-          .order('start_date', { ascending: true })
-          .limit(5);
-
-        if (error) throw error;
-
-        // Para cada agendamento, buscar os nomes dos clientes e artistas
-        if (data) {
-          const appointmentsWithNames = await Promise.all(
-            data.map(async (appointment) => {
-              // Buscar nome do cliente
-              let clientName = 'Cliente não identificado';
-              if (appointment.client_id) {
-                const { data: client } = await supabase
-                  .from('clients')
-                  .select('name')
-                  .eq('id', appointment.client_id)
-                  .single();
-                
-                if (client) {
-                  clientName = client.name;
-                }
-              }
-
-              // Buscar nome do artista
-              let artistName = 'Artista não identificado';
-              if (appointment.artist_id) {
-                const { data: artist } = await supabase
-                  .from('artists')
-                  .select('name')
-                  .eq('id', appointment.artist_id)
-                  .single();
-                
-                if (artist) {
-                  artistName = artist.name;
-                }
-              }
-
-              return {
-                ...appointment,
-                client_name: clientName,
-                artist_name: artistName
-              };
-            })
-          );
-
-          setAppointments(appointmentsWithNames);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar agendamentos:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAppointments();
-  }, []);
+  const dashboardService = getDashboardService();
+  
+  const { data: appointments = [], loading } = useDataQuery<Appointment[]>(
+    () => dashboardService.fetchUpcomingAppointments(5),
+    []
+  );
 
   const formatDateTime = (dateTimeString: string) => {
     const date = new Date(dateTimeString);

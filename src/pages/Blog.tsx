@@ -6,8 +6,8 @@ import BlogCard, { BlogPostSummary } from "@/components/blog/BlogCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useSupabaseQuery } from "@/hooks/useSupabaseQuery";
-import { fetchBlogCategories, fetchBlogPosts } from "@/services/supabaseService";
+import { getBlogService } from "@/services/serviceFactory";
+import { useDataQuery } from "@/hooks/useDataQuery";
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,9 +16,11 @@ const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   
-  // Usar useSupabaseQuery para buscar posts do blog
-  const { data: posts = [], loading: isLoadingPosts, error: postsError } = useSupabaseQuery<BlogPostSummary[]>(
-    () => fetchBlogPosts().then(posts => 
+  const blogService = getBlogService();
+  
+  // Usar useDataQuery para buscar posts do blog
+  const { data: posts = [], loading: isLoadingPosts, error: postsError } = useDataQuery<BlogPostSummary[]>(
+    () => blogService.fetchBlogPosts().then(posts => 
       (posts || []).map(post => ({
         id: post.id,
         title: post.title,
@@ -33,9 +35,9 @@ const Blog = () => {
     [activeCategory]
   );
   
-  // Usar useSupabaseQuery para buscar categorias
-  const { data: categoriesData = [], loading: isLoadingCategories } = useSupabaseQuery(
-    fetchBlogCategories,
+  // Usar useDataQuery para buscar categorias
+  const { data: categoriesData = [], loading: isLoadingCategories } = useDataQuery(
+    () => blogService.fetchBlogCategories(),
     []
   );
   

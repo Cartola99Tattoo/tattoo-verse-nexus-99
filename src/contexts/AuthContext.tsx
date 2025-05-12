@@ -1,8 +1,8 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { getAuthService } from "@/services/serviceFactory";
 
 // Tipo para o perfil de usuário
 export interface UserProfile {
@@ -35,13 +35,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Get the auth service
+  const authService = getAuthService();
 
   // Autenticação inicial e configuração do listener para mudanças de auth
   useEffect(() => {
     console.log("Iniciando AuthProvider...");
     
     // Configurar o listener de mudanças de estado de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { subscription } = authService.onAuthStateChange(
       async (event, newSession) => {
         console.log("Auth state changed event:", event);
         setSession(newSession);
@@ -74,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     // Verificar a sessão atual
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+    authService.getSession().then((currentSession) => {
       console.log("Session check result:", currentSession ? "Session found" : "No session");
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -98,27 +101,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Buscando perfil para o userId:", userId);
       
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
+      const userProfile = await authService.fetchProfile(userId);
 
-      if (error) {
-        console.error("Erro ao buscar perfil:", error);
-        return;
+      if (userProfile) {
+        console.log("Perfil recebido:", userProfile);
+        setProfile(userProfile);
+        console.log("Perfil atualizado no estado:", userProfile);
       }
-
-      console.log("Perfil recebido:", data);
-
-      // Adicionar o email do usuário ao objeto de perfil
-      const userProfile = {
-        ...data,
-        email: user?.email || null
-      } as UserProfile;
-      
-      setProfile(userProfile);
-      console.log("Perfil atualizado no estado:", userProfile);
     } catch (error) {
       console.error("Erro ao buscar perfil:", error);
     }
@@ -127,8 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Função para login
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      return { error };
+      return await authService.signIn(email, password);
     } catch (error) {
       return { error };
     }
@@ -137,25 +125,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Função para registro
   const signUp = async (email: string, password: string, first_name: string, last_name: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name,
-            last_name
-          }
-        }
-      });
+      const result = await authService.signUp(email, password, first_name, last_name);
       
-      if (!error) {
+      if (!result.error) {
         toast({
           title: "Registro realizado com sucesso",
           description: "Verifique seu e-mail para confirmar sua conta.",
         });
       }
       
-      return { error };
+      return result;
     } catch (error) {
       return { error };
     }
@@ -163,24 +142,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Função para logout
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await authService.signOut();
   };
 
   // Função para recuperação de senha
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
+      const result = await authService.resetPassword(email);
       
-      if (!error) {
+      if (!result.error) {
         toast({
           title: "E-mail de recuperação enviado",
           description: "Verifique sua caixa de entrada para redefinir sua senha.",
         });
       }
       
-      return { error };
+      return result;
     } catch (error) {
       return { error };
     }
@@ -193,25 +170,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: new Error("Usuário não autenticado") };
       }
 
-      // Se o profileData contém tattoo_preferences, precisamos fazer um tratamento especial
-      let dataToUpdate: any = { ...profileData };
-      
-      // Se temos preferências de tatuagem existentes e novas preferências, mesclá-las
-      if (profileData.tattoo_preferences && profile?.tattoo_preferences) {
-        dataToUpdate.tattoo_preferences = {
-          ...profile.tattoo_preferences,
-          ...profileData.tattoo_preferences
-        };
-      }
+      const result = await authService.updateProfile(user.id, profileData);
 
-      const { error } = await supabase
-        .from("profiles")
-        .update(dataToUpdate)
-        .eq("id", user.id);
-
-      if (!error) {
+      if (!result.error) {
         // Atualizar o perfil localmente
-        setProfile(prev => prev ? { ...prev, ...dataToUpdate } : null);
+        setProfile(prev => prev ? { ...prev, ...profileData } : null);
         
         toast({
           title: "Perfil atualizado",
@@ -219,7 +182,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       }
 
-      return { error };
+      return result;
     } catch (error) {
       return { error };
     }

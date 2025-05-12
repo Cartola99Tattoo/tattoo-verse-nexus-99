@@ -1,8 +1,8 @@
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getDashboardService } from '@/services/serviceFactory';
+import { useDataQuery } from '@/hooks/useDataQuery';
 
 interface Order {
   id: string;
@@ -14,50 +14,12 @@ interface Order {
 }
 
 export default function OrdersTable() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        // Buscar pedidos com informações básicas
-        const { data, error } = await supabase
-          .from('orders')
-          .select(`
-            id, 
-            reference_code, 
-            status, 
-            total_amount, 
-            created_at,
-            customer_id
-          `)
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        if (error) throw error;
-
-        // Processar dados dos pedidos e adicionar nome de cliente padrão
-        if (data) {
-          const ordersWithDefaultNames = data.map(order => ({
-            id: order.id,
-            reference_code: order.reference_code,
-            status: order.status,
-            total_amount: order.total_amount,
-            created_at: order.created_at,
-            customer_name: 'Cliente' // Nome padrão até implementarmos busca de clientes
-          }));
-
-          setOrders(ordersWithDefaultNames);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar pedidos:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
+  const dashboardService = getDashboardService();
+  
+  const { data: orders = [], loading } = useDataQuery<Order[]>(
+    () => dashboardService.fetchRecentOrders(5),
+    []
+  );
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

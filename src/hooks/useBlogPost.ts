@@ -1,8 +1,7 @@
+import { useDataQuery } from './useDataQuery';
+import { getBlogService } from '@/services/serviceFactory';
 
-import { useSupabaseQuery } from './useSupabaseQuery';
-import { fetchBlogPost } from '@/services/supabaseService';
-
-// Define proper types
+// Define proper types (keep existing type definition)
 export type BlogPost = {
   id: string;
   title: string;
@@ -41,8 +40,10 @@ export type BlogPost = {
 };
 
 export function useBlogPost(postIdOrSlug: string) {
-  const { data: post, loading: isLoading, error, refresh } = useSupabaseQuery<BlogPost | null>(
-    () => fetchBlogPost(postIdOrSlug),
+  const blogService = getBlogService();
+  
+  const { data: post, loading: isLoading, error, refresh } = useDataQuery<BlogPost | null>(
+    () => blogService.fetchBlogPost(postIdOrSlug),
     [postIdOrSlug]
   );
 

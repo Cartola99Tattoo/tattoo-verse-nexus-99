@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import Layout from "@/components/layout/Layout";
+import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { BarChart, LineChart, PieChart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { fetchDashboardStats } from "@/services/supabaseService";
 import { toast } from "@/components/ui/use-toast";
+import { useDataQuery } from "@/hooks/useDataQuery";
+import { getDashboardService } from "@/services/serviceFactory";
+import { IDashboardStats } from "@/services/interfaces/IDashboardService";
 
 // Componentes de Gráficos
 import SalesChart from "@/components/admin/dashboard/SalesChart";
@@ -19,42 +19,23 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
+  const dashboardService = getDashboardService();
+  
+  const { data: stats = {
     totalSales: 0,
     newCustomers: 0,
     pendingOrders: 0,
     upcomingAppointments: 0,
     blogViews: 0
-  });
+  }, loading } = useDataQuery<IDashboardStats>(
+    () => dashboardService.fetchDashboardStats() as Promise<IDashboardStats>,
+    []
+  );
 
   // Verificar se o usuário tem permissão para acessar o painel
   if (!user || !profile || (profile.role !== "admin" && profile.role !== "artista")) {
     return <Navigate to="/access-denied" />;
   }
-
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      setLoading(true);
-      try {
-        const dashboardStats = await fetchDashboardStats();
-        if (dashboardStats) {
-          setStats(dashboardStats);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar dados do dashboard:", error);
-        toast({
-          title: "Erro ao carregar dashboard",
-          description: "Não foi possível carregar os dados do dashboard.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDashboardData();
-  }, []);
 
   return (
     <div className="flex min-h-screen">

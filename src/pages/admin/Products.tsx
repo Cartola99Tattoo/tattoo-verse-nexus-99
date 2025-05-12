@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,9 +6,10 @@ import { Package, Search, Plus, Edit, Trash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import { useDataQuery } from "@/hooks/useDataQuery";
+import { getProductService } from "@/services/serviceFactory";
 
 interface Product {
   id: string;
@@ -22,87 +22,34 @@ interface Product {
   status: string;
   category_name?: string;
   artist_name?: string;
+  category?: string;
+  profiles?: any;
 }
 
 export default function Products() {
   const { user, profile } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const productService = getProductService();
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Use the product service to fetch products
+  const { data: rawProducts = [], loading } = useDataQuery<Product[]>(
+    () => productService.fetchProducts(),
+    []
+  );
 
   // Verificar se o usuário tem permissão para acessar o painel
   if (!user || !profile || (profile.role !== "admin" && profile.role !== "artista")) {
     return <Navigate to="/access-denied" />;
   }
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        // Buscar produtos
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .order("name");
-
-        if (error) throw error;
-
-        // Para cada produto, buscar o nome da categoria e do artista
-        if (data) {
-          const productsWithDetails = await Promise.all(
-            data.map(async (product) => {
-              // Buscar categoria
-              let categoryName = "Sem categoria";
-              if (product.category_id) {
-                const { data: category } = await supabase
-                  .from("product_categories")
-                  .select("name")
-                  .eq("id", product.category_id)
-                  .single();
-                
-                if (category) {
-                  categoryName = category.name;
-                }
-              }
-
-              // Buscar artista
-              let artistName = "Sem artista";
-              if (product.artist_id) {
-                const { data: artist } = await supabase
-                  .from("artists")
-                  .select("name")
-                  .eq("id", product.artist_id)
-                  .single();
-                
-                if (artist) {
-                  artistName = artist.name;
-                }
-              }
-
-              return {
-                ...product,
-                category_name: categoryName,
-                artist_name: artistName
-              };
-            })
-          );
-
-          setProducts(productsWithDetails);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar produtos:", error);
-        toast({
-          title: "Erro ao carregar produtos",
-          description: "Não foi possível carregar a lista de produtos.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+  // Transform raw products to add category name and artist name
+  const products: Product[] = rawProducts.map(product => ({
+    ...product,
+    category_name: product.category || "Sem categoria",
+    artist_name: product.profiles ? 
+      `${product.profiles.first_name || ''} ${product.profiles.last_name || ''}`.trim() || "Sem artista" : 
+      "Sem artista"
+  }));
 
   // Filtrar produtos com base no termo de pesquisa
   const filteredProducts = products.filter(

@@ -2,13 +2,15 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchBlogPosts } from "@/services/supabaseService";
-import { useSupabaseQuery } from "@/hooks/useSupabaseQuery";
 import { BlogPostSummary } from "@/components/blog/BlogCard";
+import { useDataQuery } from "@/hooks/useDataQuery";
+import { getBlogService } from "@/services/serviceFactory";
 
 const BlogPreview = () => {
-  const { data: posts = [], loading: isLoading } = useSupabaseQuery<BlogPostSummary[]>(
-    () => fetchBlogPosts(3).then(posts => 
+  const blogService = getBlogService();
+  
+  const { data: posts = [], loading: isLoading } = useDataQuery<BlogPostSummary[]>(
+    () => blogService.fetchBlogPosts(3).then(posts => 
       (posts || []).map(post => ({
         id: post.id,
         title: post.title,
