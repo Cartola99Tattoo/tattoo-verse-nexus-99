@@ -346,7 +346,7 @@ const Blog = () => {
           </div>
           
           {/* Tags */}
-          {tagsData.length > 0 && (
+          {tagsData && tagsData.length > 0 && (
             <div className="mt-4">
               <h2 className="text-sm font-medium text-gray-700 mb-2">Tags:</h2>
               <div className="flex flex-wrap gap-2">
@@ -489,3 +489,4 @@ const Blog = () => {
 };
 
 export default Blog;
+
