@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, Home, BookOpen, ShoppingBag, Calendar, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -45,73 +45,47 @@ const Header = () => {
     return (first + last).toUpperCase();
   };
 
+  const navLinks = [
+    { name: "Início", path: "/", icon: <Home className="h-4 w-4 mr-1" /> },
+    { name: "Blog", path: "/blog", icon: <BookOpen className="h-4 w-4 mr-1" /> },
+    { name: "Loja", path: "/shop", icon: <ShoppingBag className="h-4 w-4 mr-1" /> },
+    { name: "Eventos", path: "/contact?section=events", icon: <Calendar className="h-4 w-4 mr-1" /> },
+    { name: "Contato", path: "/contact", icon: <Phone className="h-4 w-4 mr-1" /> },
+  ];
+
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         isScrolled || location.pathname !== "/"
-          ? "bg-white text-black shadow-md py-4"
-          : "bg-transparent text-white py-6"
+          ? "bg-white text-black shadow-md py-3"
+          : "bg-transparent text-white py-5"
       }`}
     >
       <div className="container mx-auto px-4 flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="text-2xl font-bold">
-          <span className={isScrolled || location.pathname !== "/" ? "text-red-500" : "text-red-500"}>
-            99
-          </span>
-          Tattoo
+        <Link to="/" className="text-2xl font-bold flex items-center">
+          <span className="text-red-500">99</span>
+          <span className={isScrolled || location.pathname !== "/" ? "text-black" : "text-white"}>Tattoo</span>
         </Link>
 
         {/* Navegação desktop */}
-        <nav className="hidden md:flex space-x-8 items-center">
-          <Link
-            to="/"
-            className={`transition-colors ${
-              isActive("/")
-                ? "font-medium text-red-500"
-                : isScrolled || location.pathname !== "/"
-                ? "text-gray-800 hover:text-red-500"
-                : "text-white hover:text-red-300"
-            }`}
-          >
-            Início
-          </Link>
-          <Link
-            to="/shop"
-            className={`transition-colors ${
-              isActive("/shop")
-                ? "font-medium text-red-500"
-                : isScrolled || location.pathname !== "/"
-                ? "text-gray-800 hover:text-red-500"
-                : "text-white hover:text-red-300"
-            }`}
-          >
-            Tatuagens
-          </Link>
-          <Link
-            to="/blog"
-            className={`transition-colors ${
-              isActive("/blog")
-                ? "font-medium text-red-500"
-                : isScrolled || location.pathname !== "/"
-                ? "text-gray-800 hover:text-red-500"
-                : "text-white hover:text-red-300"
-            }`}
-          >
-            Blog
-          </Link>
-          <Link
-            to="/contact"
-            className={`transition-colors ${
-              isActive("/contact")
-                ? "font-medium text-red-500"
-                : isScrolled || location.pathname !== "/"
-                ? "text-gray-800 hover:text-red-500"
-                : "text-white hover:text-red-300"
-            }`}
-          >
-            Contato
-          </Link>
+        <nav className="hidden md:flex space-x-6 items-center">
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`transition-colors flex items-center ${
+                isActive(link.path)
+                  ? "font-medium text-red-500"
+                  : isScrolled || location.pathname !== "/"
+                  ? "text-gray-800 hover:text-red-500"
+                  : "text-white hover:text-red-300"
+              }`}
+            >
+              {link.icon}
+              {link.name}
+            </Link>
+          ))}
           
           <CartButton />
           
@@ -148,6 +122,14 @@ const Header = () => {
               <Link to="/auth">Entrar</Link>
             </Button>
           )}
+          
+          <Button 
+            asChild 
+            size="sm" 
+            className="bg-red-500 hover:bg-red-600 text-white hidden lg:flex"
+          >
+            <Link to="/contact">Agende sua Tatuagem</Link>
+          </Button>
         </nav>
 
         {/* Menu móvel - toggle button */}
@@ -194,44 +176,21 @@ const Header = () => {
 
       {/* Menu móvel expansível */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg">
+        <div className="md:hidden bg-white shadow-lg animate-fade-in">
           <nav className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-            <Link
-              to="/"
-              className={`p-2 ${
-                isActive("/") ? "font-medium text-red-500" : "text-gray-800"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Início
-            </Link>
-            <Link
-              to="/shop"
-              className={`p-2 ${
-                isActive("/shop") ? "font-medium text-red-500" : "text-gray-800"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Tatuagens
-            </Link>
-            <Link
-              to="/blog"
-              className={`p-2 ${
-                isActive("/blog") ? "font-medium text-red-500" : "text-gray-800"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Blog
-            </Link>
-            <Link
-              to="/contact"
-              className={`p-2 ${
-                isActive("/contact") ? "font-medium text-red-500" : "text-gray-800"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contato
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`p-2 flex items-center ${
+                  isActive(link.path) ? "font-medium text-red-500" : "text-gray-800"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.icon}
+                {link.name}
+              </Link>
+            ))}
             {!user && (
               <Button
                 asChild
@@ -242,6 +201,14 @@ const Header = () => {
                 </Link>
               </Button>
             )}
+            <Button
+              asChild
+              className="bg-red-500 hover:bg-red-600 text-white w-full"
+            >
+              <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
+                Agende sua Tatuagem
+              </Link>
+            </Button>
           </nav>
         </div>
       )}

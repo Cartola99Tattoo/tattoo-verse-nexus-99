@@ -2,6 +2,8 @@
 import Layout from "@/components/layout/Layout";
 import Hero from "@/components/home/Hero";
 import AboutSection from "@/components/home/AboutSection";
+import ServicesSection from "@/components/home/ServicesSection";
+import EventTattoos from "@/components/home/EventTattoos";
 import ArtistsSection from "@/components/home/ArtistsSection";
 import FeaturedTattoos from "@/components/home/FeaturedTattoos";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
@@ -14,8 +16,10 @@ const Index = () => {
     <Layout>
       <Hero />
       <AboutSection />
+      <ServicesSection />
       <FeaturedTattoos />
       <ArtistsSection />
+      <EventTattoos />
       <TestimonialsSection />
       <BlogPreview />
       <CTASection />
