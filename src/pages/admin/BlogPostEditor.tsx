@@ -62,7 +62,7 @@ const BlogPostEditor = () => {
   const [readingTime, setReadingTime] = useState(0);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
-  const editorRef = useRef<Editor | null>(null);
+  const editorRef = useRef<any>(null);
   
   // Fetch post for editing
   const { data: post, isLoading, isError } = useQuery({
@@ -211,8 +211,8 @@ const BlogPostEditor = () => {
       if (error) throw error;
       
       // Invalidate and refetch queries
-      await queryClient.invalidateQueries(['blog-posts']);
-      await queryClient.invalidateQueries(['blog-post', id]);
+      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
+      queryClient.invalidateQueries({ queryKey: ['blog-post', id] });
       
       toast({
         title: "Artigo atualizado",
@@ -229,7 +229,7 @@ const BlogPostEditor = () => {
       if (error) throw error;
       
       // Invalidate and refetch queries
-      await queryClient.invalidateQueries(['blog-posts']);
+      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
       
       toast({
         title: "Artigo criado",
@@ -244,13 +244,17 @@ const BlogPostEditor = () => {
     if (!validateForm()) return;
     
     try {
+      // Fix the Date to string conversion for published_at
+      const publishedAtString = isDraft ? null : 
+        formValues.published_at ? formValues.published_at.toISOString() : new Date().toISOString();
+      
       const postData: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'> = {
         title: formValues.title,
         content: formValues.content,
         excerpt: formValues.excerpt || null,
         category_id: formValues.category_id,
         tags: formValues.tags,
-        published_at: isDraft ? null : formValues.published_at || new Date(),
+        published_at: publishedAtString,
         cover_image: formValues.cover_image || null,
         is_draft: isDraft,
         slug: formValues.slug,
