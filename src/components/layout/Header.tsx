@@ -63,7 +63,7 @@ const Header = () => {
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold flex items-center">
           <span className="text-red-500">99</span>
-          <span className="text-zinc-50">Tattoo</span>
+          <span className={isScrolled || location.pathname !== "/" ? "text-black" : "text-white"}>Tattoo</span>
         </Link>
 
         {/* Navegação desktop */}
