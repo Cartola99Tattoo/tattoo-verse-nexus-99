@@ -1,3 +1,4 @@
+
 import { useDataQuery } from './useDataQuery';
 import { getBlogService } from '@/services/serviceFactory';
 
@@ -42,10 +43,13 @@ export type BlogPost = {
 export function useBlogPost(postIdOrSlug: string) {
   const blogService = getBlogService();
   
-  const { data: post, loading: isLoading, error, refresh } = useDataQuery<BlogPost | null>(
+  const { data, loading: isLoading, error, refresh } = useDataQuery<BlogPost | null>(
     () => blogService.fetchBlogPost(postIdOrSlug),
     [postIdOrSlug]
   );
+
+  // Ensure we're returning a safe post object that won't cause null reference errors
+  const post = data || null;
 
   return { 
     post, 
