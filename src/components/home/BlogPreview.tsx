@@ -9,7 +9,7 @@ import { BlogPostSummary } from "@/components/blog/BlogCard";
 const BlogPreview = () => {
   const { data: posts = [], loading: isLoading } = useSupabaseQuery<BlogPostSummary[]>(
     () => fetchBlogPosts(3).then(posts => 
-      posts.map(post => ({
+      (posts || []).map(post => ({
         id: post.id,
         title: post.title,
         excerpt: post.excerpt,
@@ -94,7 +94,7 @@ const BlogPreview = () => {
               </div>
             ))}
           </div>
-        ) : posts.length > 0 ? (
+        ) : posts && posts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {posts.map((post) => (
               <div
