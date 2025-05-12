@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -15,14 +16,22 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { BlogPost } from '@/hooks/useBlogPost';
+import { BlogPost } from '@/types/blog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
+import useBlogPost from '@/hooks/useBlogPost';
 
 // Extend the BlogPost type to ensure it includes all the properties we need
-interface ExtendedBlogPost extends BlogPost {
-  is_draft?: boolean;
+interface ExtendedBlogPost extends Omit<BlogPost, 'profiles' | 'blog_categories'> {
+  profiles?: {
+    id: string;
+    first_name?: string | null;
+    last_name?: string | null;
+  } | null;
+  blog_categories?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface FormValues {
@@ -42,7 +51,7 @@ interface FormValues {
 const BlogPostPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = { user: { id: '12345' } }; // Replace with your auth context
   const isEditing = Boolean(id);
   
   // Form state

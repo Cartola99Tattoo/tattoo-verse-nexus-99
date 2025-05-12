@@ -1,59 +1,32 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { useBlogPost, BlogPost as BlogPostType } from "@/hooks/useBlogPost";
-import TattooCard from "@/components/shop/TattooCard";
+import useBlogPost from "@/hooks/useBlogPost";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Share2, Twitter, Facebook, Bookmark, ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Bookmark, Facebook, Loader2, Share2, Twitter } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-
-// Buscar tatuagens relacionadas com base nas tags ou categoria do post
-const fetchRelatedTattoos = async (categoryId?: string, tags?: string[] | null) => {
-  try {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("status", "available")
-      .limit(3);
-    
-    if (error) throw error;
-    
-    // Formatar os produtos para o formato esperado pelo TattooCard
-    return data.map(product => ({
-      id: product.id,
-      name: product.name,
-      artist: "Artista 99Tattoo",
-      category: "Tatuagem",
-      image: product.images && product.images.length > 0 ? product.images[0] : 
-        "https://images.unsplash.com/photo-1541127397299-0db99bb5edb3?q=80&w=2070&auto=format&fit=crop",
-      price: product.price,
-      rating: 4.8,
-    }));
-  } catch (error) {
-    console.error("Error fetching related tattoos:", error);
-    return [];
-  }
-};
+import BlogCard from "@/components/blog/BlogCard";
+import { useBlogPosts } from "@/hooks/useBlogPosts";
+import { BlogFiltersState } from "@/types/blog";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const { post, isLoading, error } = useBlogPost(slug || "");
   const navigate = useNavigate();
 
-  // Buscar tatuagens relacionadas
-  const { data: relatedTattoos = [], isLoading: loadingTattoos } = useQuery({
-    queryKey: ['related-tattoos', post?.id],
-    queryFn: () => fetchRelatedTattoos(post?.category_id, post?.tags),
-    enabled: !!post?.id,
-    staleTime: 10 * 60 * 1000, // 10 minutos
-  });
+  // Get related posts based on category or tags
+  const relatedFilters: BlogFiltersState = {
+    status: 'published',
+    category: post?.category_id,
+    sortBy: 'published_at:desc',
+  };
+  
+  const { data: relatedPostsData, isLoading: loadingRelated } = useBlogPosts(relatedFilters, 1, 3);
+  const relatedPosts = relatedPostsData?.data.filter(p => p.id !== post?.id).slice(0, 3) || [];
 
   // Format date function
   const formatDate = (dateString?: string | null) => {
@@ -67,18 +40,14 @@ const BlogPost = () => {
   };
 
   // Get author full name
-  const getAuthorName = (post: BlogPostType) => {
-    if (post.profiles) {
-      const firstName = post.profiles.first_name || "";
-      const lastName = post.profiles.last_name || "";
-      return `${firstName} ${lastName}`.trim() || "Equipe 99Tattoo";
-    }
-    return "Equipe 99Tattoo";
-  };
-
-  // Get category name
-  const getCategoryName = (post: BlogPostType) => {
-    return post.blog_categories?.name || "Sem categoria";
+  const getAuthorName = () => {
+    if (!post || !post.profiles) return "Equipe 99Tattoo";
+    
+    const firstName = post.profiles.first_name || "";
+    const lastName = post.profiles.last_name || "";
+    const fullName = `${firstName} ${lastName}`.trim();
+    
+    return fullName || "Equipe 99Tattoo";
   };
 
   // Show loading state
@@ -103,7 +72,7 @@ const BlogPost = () => {
           <Alert variant="destructive" className="mb-6">
             <AlertTitle>{error?.message || "Artigo não encontrado"}</AlertTitle>
             <AlertDescription>
-              {error?.details || "O artigo que você está procurando não existe ou foi removido."}
+              O artigo que você está procurando não existe ou foi removido.
             </AlertDescription>
           </Alert>
           
@@ -124,8 +93,8 @@ const BlogPost = () => {
   }
 
   const formattedDate = formatDate(post.published_at);
-  const authorName = getAuthorName(post);
-  const categoryName = getCategoryName(post);
+  const authorName = getAuthorName();
+  const categoryName = post.blog_categories?.name || "Geral";
 
   // Meta tags content
   const metaDescription = post.meta_description || post.excerpt || `${post.title} - Leia mais sobre tatuagens e arte no Blog da 99Tattoo`;
@@ -136,18 +105,18 @@ const BlogPost = () => {
       {/* SEO Optimization */}
       <Helmet>
         <title>{`${post.title} | Blog 99Tattoo`}</title>
-        <meta name="description" content={metaDescription || ''} />
+        <meta name="description" content={metaDescription} />
         <meta name="keywords" content={metaKeywords} />
         {/* Open Graph tags for social sharing */}
         <meta property="og:title" content={`${post.title} | Blog 99Tattoo`} />
-        <meta property="og:description" content={metaDescription || ''} />
+        <meta property="og:description" content={metaDescription} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={window.location.href} />
         {post.cover_image && <meta property="og:image" content={post.cover_image} />}
         {/* Twitter Card tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${post.title} | Blog 99Tattoo`} />
-        <meta name="twitter:description" content={metaDescription || ''} />
+        <meta name="twitter:description" content={metaDescription} />
         {post.cover_image && <meta name="twitter:image" content={post.cover_image} />}
         {/* Article specific metadata */}
         {post.published_at && <meta property="article:published_time" content={post.published_at} />}
@@ -161,7 +130,7 @@ const BlogPost = () => {
               "headline": "${post.title}",
               "image": "${post.cover_image || ''}",
               "datePublished": "${post.published_at || ''}",
-              "description": "${metaDescription || ''}",
+              "description": "${metaDescription}",
               "author": {
                 "@type": "Person",
                 "name": "${authorName}"
@@ -204,7 +173,7 @@ const BlogPost = () => {
           <div className="flex items-center text-white">
             <span className="mr-4">{formattedDate}</span>
             <span className="mr-4">|</span>
-            <span>Por {authorName}</span>
+            <span>By {authorName}</span>
           </div>
         </div>
       </div>
@@ -217,28 +186,18 @@ const BlogPost = () => {
               {/* Reading time and view count */}
               <div className="flex justify-between items-center mb-6 text-sm text-gray-500">
                 <div className="flex items-center">
-                  <span className="mr-4">{post.reading_time || 5} min de leitura</span>
+                  <span className="mr-4">{post.reading_time || 5} min read</span>
                 </div>
                 <div className="flex items-center">
-                  <span>{post.view_count || 0} visualizações</span>
+                  <span>{post.view_count || 0} views</span>
                 </div>
               </div>
               
-              {/* Optional featured image inside content if different from hero */}
-              {post.cover_image && (
-                <figure className="my-6">
-                  <img 
-                    src={post.cover_image} 
-                    alt={`Imagem ilustrativa para ${post.title}`} 
-                    className="w-full rounded-lg"
-                    width="800"
-                    height="400"
-                    loading="lazy"
-                  />
-                  <figcaption className="text-sm text-gray-500 mt-2 text-center">
-                    Imagem ilustrativa: {post.title}
-                  </figcaption>
-                </figure>
+              {/* Article excerpt if available */}
+              {post.excerpt && (
+                <div className="my-6 text-lg text-gray-700 italic border-l-4 border-red-500 pl-4 py-2">
+                  {post.excerpt}
+                </div>
               )}
 
               {/* Article content with rich text */}
@@ -287,7 +246,7 @@ const BlogPost = () => {
                 </div>
                 <div>
                   <p className="font-bold">{authorName}</p>
-                  <p className="text-sm text-gray-600">Artista Tatuador na 99Tattoo</p>
+                  <p className="text-sm text-gray-600">Tattoo Artist at 99Tattoo</p>
                 </div>
               </div>
             </div>
@@ -296,10 +255,10 @@ const BlogPost = () => {
             <div className="mt-8 flex flex-wrap gap-4">
               <Button variant="outline" className="flex gap-2" onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
-                toast({ title: "Link copiado!", description: "Link do artigo copiado para a área de transferência" });
+                toast({ title: "Link copied!", description: "Article link copied to clipboard" });
               }}>
                 <Share2 size={16} />
-                Compartilhar
+                Share
               </Button>
               <Button variant="outline" className="flex gap-2" onClick={() => {
                 window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.title)}`, '_blank');
@@ -315,37 +274,37 @@ const BlogPost = () => {
               </Button>
               <Button variant="outline" className="flex gap-2">
                 <Bookmark size={16} />
-                Salvar
+                Save
               </Button>
             </div>
 
             {/* Comments section - placeholder */}
             <div className="mt-8 bg-white rounded-lg shadow-md p-8">
-              <h3 className="text-2xl font-bold mb-6">Comentários (0)</h3>
+              <h3 className="text-2xl font-bold mb-6">Comments (0)</h3>
               <div className="border-b pb-6 mb-6">
                 <textarea 
-                  placeholder="Deixe seu comentário..." 
+                  placeholder="Leave your comment..." 
                   className="w-full border rounded-md p-3 h-24"
-                  aria-label="Área de comentário"
+                  aria-label="Comment area"
                 ></textarea>
-                <Button className="mt-4 bg-red-500 hover:bg-red-600">Comentar</Button>
+                <Button className="mt-4 bg-red-500 hover:bg-red-600">Comment</Button>
               </div>
               <div className="text-center text-gray-500">
-                Seja o primeiro a comentar!
+                Be the first to comment!
               </div>
             </div>
           </div>
 
           {/* Sidebar */}
           <div className="lg:w-1/3">
-            {/* Related tattoos */}
+            {/* Related Posts */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
               <h3 className="text-xl font-bold mb-4 border-b border-red-500 pb-2 inline-block">
-                Tatuagens Relacionadas
+                Related Posts
               </h3>
-              <div className="space-y-6 mt-4">
-                {loadingTattoos ? (
-                  // Loading state for tattoos
+              <div className="space-y-4 mt-4">
+                {loadingRelated ? (
+                  // Loading state for related posts
                   Array(3).fill(0).map((_, i) => (
                     <div key={i} className="flex items-center space-x-4">
                       <div className="w-16 h-16 bg-gray-200 rounded-md animate-pulse"></div>
@@ -355,48 +314,48 @@ const BlogPost = () => {
                       </div>
                     </div>
                   ))
-                ) : relatedTattoos.length > 0 ? (
-                  relatedTattoos.map(tattoo => (
-                    <TattooCard key={tattoo.id} tattoo={tattoo} />
+                ) : relatedPosts.length > 0 ? (
+                  relatedPosts.map(post => (
+                    <BlogCard key={post.id} post={post} compact />
                   ))
                 ) : (
-                  <p className="text-gray-500 text-center py-4">Nenhuma tatuagem relacionada disponível</p>
+                  <p className="text-gray-500 text-center py-4">No related posts available</p>
                 )}
               </div>
               <Button asChild variant="outline" className="w-full mt-4 border-black text-black hover:bg-black hover:text-white">
-                <Link to="/shop">Ver Mais Tatuagens</Link>
+                <Link to="/blog">View All Posts</Link>
               </Button>
             </div>
 
             {/* Categories */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold mb-4 border-b border-red-500 pb-2 inline-block">
-                Categorias
+                Categories
               </h3>
               <ul className="mt-4 space-y-2">
                 <li>
-                  <Link to="/blog?category=Cuidados" className="flex justify-between items-center hover:text-red-500">
-                    Cuidados <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">5</span>
+                  <Link to="/blog?category=care" className="flex justify-between items-center hover:text-red-500">
+                    Care <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">5</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/blog?category=Tendências" className="flex justify-between items-center hover:text-red-500">
-                    Tendências <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">8</span>
+                  <Link to="/blog?category=trends" className="flex justify-between items-center hover:text-red-500">
+                    Trends <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">8</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/blog?category=Informação" className="flex justify-between items-center hover:text-red-500">
-                    Informação <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">12</span>
+                  <Link to="/blog?category=information" className="flex justify-between items-center hover:text-red-500">
+                    Information <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">12</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/blog?category=Dicas" className="flex justify-between items-center hover:text-red-500">
-                    Dicas <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">6</span>
+                  <Link to="/blog?category=tips" className="flex justify-between items-center hover:text-red-500">
+                    Tips <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">6</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/blog?category=História" className="flex justify-between items-center hover:text-red-500">
-                    História <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">3</span>
+                  <Link to="/blog?category=history" className="flex justify-between items-center hover:text-red-500">
+                    History <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">3</span>
                   </Link>
                 </li>
               </ul>

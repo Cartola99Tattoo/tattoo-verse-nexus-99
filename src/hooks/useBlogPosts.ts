@@ -76,13 +76,17 @@ export const useBlogPosts = (filters: BlogFiltersState = {}, page: number = 1, l
   return useQuery({
     queryKey: ['blog-posts', filters, page, limit],
     queryFn: fetchPosts,
-    onError: (error: any) => {
-      toast({
-        title: "Error fetching blog posts",
-        description: error.message || "Failed to load blog posts",
-        variant: "destructive",
-      });
-    },
     staleTime: 60 * 1000, // 1 minute
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: "Error fetching blog posts",
+          description: error.message || "Failed to load blog posts",
+          variant: "destructive",
+        });
+      }
+    }
   });
 };
+
+export default useBlogPosts;

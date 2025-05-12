@@ -43,13 +43,17 @@ export const useBlogAuthors = () => {
   return useQuery({
     queryKey: ['blog-authors'],
     queryFn: fetchAuthors,
-    onError: (error: any) => {
-      toast({
-        title: "Error fetching authors",
-        description: error.message || "Failed to load blog authors",
-        variant: "destructive",
-      });
-    },
     staleTime: 10 * 60 * 1000, // 10 minutes
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: "Error fetching authors",
+          description: error.message || "Failed to load blog authors",
+          variant: "destructive",
+        });
+      }
+    }
   });
 };
+
+export default useBlogAuthors;

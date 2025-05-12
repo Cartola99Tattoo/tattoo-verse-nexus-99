@@ -24,13 +24,17 @@ export const useBlogCategories = () => {
   return useQuery({
     queryKey: ['blog-categories'],
     queryFn: fetchCategories,
-    onError: (error: any) => {
-      toast({
-        title: "Error fetching categories",
-        description: error.message || "Failed to load blog categories",
-        variant: "destructive",
-      });
-    },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: "Error fetching categories",
+          description: error.message || "Failed to load blog categories",
+          variant: "destructive",
+        });
+      }
+    }
   });
 };
+
+export default useBlogCategories;

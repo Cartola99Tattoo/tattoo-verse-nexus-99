@@ -2,14 +2,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BlogPost } from "@/types/blog";
+import { toast } from "@/components/ui/use-toast";
 
-interface UseBlogPostResult {
+export interface BlogPostQueryResult {
   post: BlogPost | null;
   isLoading: boolean;
   error: Error | null;
 }
 
-export const useBlogPost = (slug: string): UseBlogPostResult => {
+export const useBlogPost = (slug: string): BlogPostQueryResult => {
   const fetchPost = async (): Promise<BlogPost> => {
     console.log("Fetching blog post with slug:", slug);
     
@@ -71,3 +72,5 @@ export const useBlogPost = (slug: string): UseBlogPostResult => {
     error: error as Error | null,
   };
 };
+
+export default useBlogPost;

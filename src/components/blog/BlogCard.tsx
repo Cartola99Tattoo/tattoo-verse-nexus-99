@@ -1,112 +1,110 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
-import { BlogPost } from "@/types/blog";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { BlogPost } from '@/types/blog';
+
+export interface BlogPostSummary {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  cover_image?: string | null;
+  published_at?: string | null;
+  slug?: string | null;
+  profiles?: {
+    first_name?: string | null;
+    last_name?: string | null;
+  } | null;
+  blog_categories?: {
+    name?: string | null;
+  } | null;
+}
 
 interface BlogCardProps {
-  post: BlogPost;
+  post: BlogPostSummary | BlogPost;
   compact?: boolean;
 }
 
 const BlogCard: React.FC<BlogCardProps> = ({ post, compact = false }) => {
-  // Safely get category name
-  const categoryName = post.blog_categories?.name || "General";
-  
-  // Format date
-  const formattedDate = post.published_at ? 
-    new Date(post.published_at).toLocaleDateString('pt-BR') : 
-    "No date";
-  
-  // Get author name
-  let authorName = 'Equipe 99Tattoo';
-  
-  if (post.profiles) {
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) return "";
+    try {
+      return format(new Date(dateString), "dd 'de' MMM, yyyy", { locale: ptBR });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
+  const getAuthorName = () => {
+    if (!post.profiles) return 'Equipe 99Tattoo';
+    
     const firstName = post.profiles.first_name || '';
     const lastName = post.profiles.last_name || '';
     const fullName = `${firstName} ${lastName}`.trim();
-    if (fullName) authorName = fullName;
-  }
+    
+    return fullName || 'Equipe 99Tattoo';
+  };
 
-  // Use slug if available, otherwise use id
-  const postUrl = `/blog/${post.slug || post.id}`;
-  
-  // Compact card layout for sidebar widgets
   if (compact) {
     return (
-      <div className="flex items-center space-x-3 py-3 border-b last:border-0">
-        <div className="h-12 w-12 rounded overflow-hidden flex-shrink-0">
-          <img
-            src={post.cover_image || "https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop"}
+      <Link to={`/blog/${post.slug || post.id}`} className="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+        <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
+          <img 
+            src={post.cover_image || "https://via.placeholder.com/300x200?text=99Tattoo"} 
             alt={post.title}
             className="w-full h-full object-cover"
             loading="lazy"
           />
         </div>
         <div className="flex-1 min-w-0">
-          <Link to={postUrl}>
-            <h4 className="font-medium text-sm leading-tight mb-1 truncate hover:text-red-500 transition-colors">
-              {post.title}
-            </h4>
-          </Link>
-          <p className="text-xs text-gray-500">{formattedDate}</p>
+          <h3 className="text-sm font-medium text-gray-900 truncate">{post.title}</h3>
+          <p className="text-xs text-gray-500">{formatDate(post.published_at)}</p>
         </div>
-      </div>
+      </Link>
     );
   }
-  
-  // Standard card layout
+
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-      <Link to={postUrl} className="block h-48 overflow-hidden">
-        <img
-          src={post.cover_image || "https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop"}
-          alt={post.title}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-          loading="lazy"
-        />
-      </Link>
-      <div className="p-6 flex-1 flex flex-col">
-        <div className="flex justify-between items-center mb-2">
-          <span className="bg-red-100 text-red-500 text-xs font-medium px-2 py-1 rounded">
-            {categoryName}
-          </span>
-          <time className="text-xs text-gray-500" dateTime={post.published_at || ''}>
-            {formattedDate}
-          </time>
+    <article className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+      <Link to={`/blog/${post.slug || post.id}`}>
+        <div className="aspect-video w-full overflow-hidden">
+          <img
+            src={post.cover_image || "https://via.placeholder.com/800x450?text=99Tattoo"}
+            alt={post.title}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+          />
         </div>
-        <Link to={postUrl} className="flex-grow">
-          <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors line-clamp-2">
+      </Link>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-1 rounded-full">
+            {post.blog_categories?.name || "Sem categoria"}
+          </span>
+          <span className="text-xs text-gray-500">
+            {formatDate(post.published_at)}
+          </span>
+        </div>
+        <Link to={`/blog/${post.slug || post.id}`}>
+          <h3 className="text-xl font-bold mb-2 hover:text-red-500 transition-colors">
             {post.title}
           </h3>
         </Link>
-        <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
-        <div className="flex justify-between items-center mt-auto">
-          <span className="text-sm text-gray-500">By {authorName}</span>
+        <p className="text-gray-600 mb-4 line-clamp-2">
+          {post.excerpt || ""}
+        </p>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-500">Por {getAuthorName()}</span>
           <Link
-            to={postUrl}
-            className="text-red-500 hover:text-red-700 transition-colors text-sm flex items-center"
-            aria-label={`Read more about ${post.title}`}
+            to={`/blog/${post.slug || post.id}`}
+            className="text-sm font-medium text-red-500 hover:text-red-700"
           >
-            Read more
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 ml-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
+            Ler mais &rarr;
           </Link>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

@@ -1,6 +1,12 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Editor } from '@tinymce/tinymce-react';
+import { ArrowLeft, Calendar as CalendarIcon, Eye, Image, Save, X } from 'lucide-react';
+
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,19 +15,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Image, Save, X, Eye, ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { useNavigate, useParams } from 'react-router-dom';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { BlogPost } from '@/types/blog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
-import { useBlogCategories } from '@/hooks/useBlogCategories';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { BlogPost } from '@/types/blog';
 
 interface FormValues {
   title: string;
@@ -40,13 +38,9 @@ interface FormValues {
 const BlogPostEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const isEdit = !!id;
   const queryClient = useQueryClient();
-  const isEditing = Boolean(id);
-
-  const { data: categories = [] } = useBlogCategories();
   
-  // Form state
   const [formValues, setFormValues] = useState<FormValues>({
     title: '',
     content: '',
@@ -61,21 +55,20 @@ const BlogPostEditor = () => {
     meta_keywords: '',
   });
   
-  // Additional state
-  const [loading, setLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
+  const [categories, setCategories] = useState<Array<{id: string, name: string}>>([]);
   const [tagInput, setTagInput] = useState('');
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
-  // Fetch post data if editing
-  const { data: post, isLoading: loadingPost } = useQuery({
-    queryKey: ['blog-post-edit', id],
-    queryFn: async () => {
-      if (!isEditing) return null;
+  const editorRef = useRef<Editor | null>(null);
+  
+  // Fetch post for editing
+  const { data: post, isLoading, isError } = useQuery({
+    queryKey: ['blog-post', id],
+    queryFn: async (): Promise<BlogPost> => {
+      if (!id) throw new Error("No post ID provided");
       
       const { data, error } = await supabase
         .from('blog_posts')
@@ -84,33 +77,59 @@ const BlogPostEditor = () => {
         .single();
       
       if (error) throw error;
+      if (!data) throw new Error("Post not found");
       
       return data as BlogPost;
     },
-    enabled: isEditing,
-    onError: (error) => {
-      console.error('Error fetching post:', error);
-      toast({
-        title: "Error loading post",
-        description: "Could not load the post for editing",
-        variant: "destructive",
-      });
-      navigate('/admin/blog');
+    enabled: isEdit && !!id,
+    staleTime: 0, // Don't cache this query
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: "Erro ao carregar artigo",
+          description: error.message || "Não foi possível carregar o artigo para edição.",
+          variant: "destructive",
+        });
+        navigate('/admin/blog');
+      }
     }
   });
   
-  // Set form values from post data when available
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data, error } = await supabase
+        .from('blog_categories')
+        .select('id, name')
+        .order('name');
+      
+      if (error) {
+        toast({
+          title: "Erro ao carregar categorias",
+          description: "Não foi possível carregar as categorias. Tente novamente mais tarde.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setCategories(data || []);
+    };
+    
+    fetchCategories();
+  }, []);
+  
+  // Initialize form values when post data is available
   useEffect(() => {
     if (post) {
       setFormValues({
-        title: post.title || '',
-        content: post.content || '',
+        title: post.title,
+        content: post.content,
         excerpt: post.excerpt || '',
         category_id: post.category_id || '',
-        tags: post.tags || [],
+        tags: post.tags,
         published_at: post.published_at ? new Date(post.published_at) : null,
         cover_image: post.cover_image || '',
-        is_draft: post.is_draft ?? true,
+        is_draft: post.is_draft,
         slug: post.slug || '',
         meta_description: post.meta_description || '',
         meta_keywords: post.meta_keywords || '',
@@ -134,7 +153,7 @@ const BlogPostEditor = () => {
   
   // Generate slug from title
   useEffect(() => {
-    if (!isEditing || !formValues.slug) {
+    if (!isEdit || !formValues.slug) {
       const slug = formValues.title
         .toLowerCase()
         .replace(/[^\w\s]/g, '')
@@ -142,25 +161,25 @@ const BlogPostEditor = () => {
       
       setFormValues(prev => ({ ...prev, slug }));
     }
-  }, [formValues.title, isEditing]);
+  }, [formValues.title, isEdit]);
   
   const validateForm = () => {
     const errors: Record<string, string> = {};
     
     if (!formValues.title.trim()) {
-      errors.title = 'Title is required';
+      errors.title = 'O título é obrigatório';
     }
     
     if (!formValues.content.trim()) {
-      errors.content = 'Content is required';
+      errors.content = 'O conteúdo é obrigatório';
     }
     
     if (!formValues.category_id) {
-      errors.category_id = 'Category is required';
+      errors.category_id = 'A categoria é obrigatória';
     }
     
     if (!formValues.slug.trim()) {
-      errors.slug = 'Slug is required';
+      errors.slug = 'O slug é obrigatório';
     }
     
     setFormErrors(errors);
@@ -177,125 +196,79 @@ const BlogPostEditor = () => {
     }
   };
   
-  const handleSaveDraft = async () => {
-    if (!validateForm()) return;
-    
-    try {
-      setIsSaving(true);
+  const handleEditorChange = useCallback((content: string) => {
+    setFormValues(prev => ({ ...prev, content: content }));
+  }, []);
+  
+  const upsertBlogPost = async (data: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) => {
+    if (isEdit && id) {
+      // Update existing post
+      const { error } = await supabase
+        .from('blog_posts')
+        .update(data)
+        .eq('id', id);
       
-      const postData = {
-        title: formValues.title,
-        content: formValues.content,
-        excerpt: formValues.excerpt || null,
-        category_id: formValues.category_id,
-        tags: formValues.tags,
-        published_at: null, // No publication date for drafts
-        cover_image: formValues.cover_image || null,
-        is_draft: true,
-        slug: formValues.slug,
-        meta_description: formValues.meta_description || null,
-        meta_keywords: formValues.meta_keywords || null,
-        reading_time: readingTime || null,
-        author_id: user?.id,
-      };
+      if (error) throw error;
       
-      let result;
-      
-      if (isEditing) {
-        // Update existing post
-        result = await supabase
-          .from('blog_posts')
-          .update(postData)
-          .eq('id', id);
-      } else {
-        // Create new post
-        result = await supabase
-          .from('blog_posts')
-          .insert(postData);
-      }
-      
-      if (result.error) throw result.error;
-      
-      // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
+      // Invalidate and refetch queries
+      await queryClient.invalidateQueries(['blog-posts']);
+      await queryClient.invalidateQueries(['blog-post', id]);
       
       toast({
-        title: "Draft saved",
-        description: "The post has been saved as a draft.",
+        title: "Artigo atualizado",
+        description: "O artigo foi atualizado com sucesso.",
+      });
+    } else {
+      // Create new post
+      const { data: newPost, error } = await supabase
+        .from('blog_posts')
+        .insert([data])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Invalidate and refetch queries
+      await queryClient.invalidateQueries(['blog-posts']);
+      
+      toast({
+        title: "Artigo criado",
+        description: "O artigo foi criado com sucesso.",
       });
       
-      navigate('/admin/blog');
-    } catch (error: any) {
-      console.error('Error saving draft:', error);
-      toast({
-        title: "Error saving draft",
-        description: error.message || "Could not save the draft. Try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+      navigate(`/admin/blog/edit/${newPost.id}`);
     }
   };
   
-  const handlePublish = async () => {
+  const handleSave = async (isDraft: boolean) => {
     if (!validateForm()) return;
     
     try {
-      setIsPublishing(true);
-      
-      const postData = {
+      const postData: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'> = {
         title: formValues.title,
         content: formValues.content,
         excerpt: formValues.excerpt || null,
         category_id: formValues.category_id,
         tags: formValues.tags,
-        published_at: formValues.published_at || new Date(),
+        published_at: isDraft ? null : formValues.published_at || new Date(),
         cover_image: formValues.cover_image || null,
-        is_draft: false,
+        is_draft: isDraft,
         slug: formValues.slug,
         meta_description: formValues.meta_description || null,
         meta_keywords: formValues.meta_keywords || null,
+        view_count: 0,
         reading_time: readingTime || null,
-        author_id: user?.id,
+        author_id: '12345', // Replace with your auth context
       };
       
-      let result;
-      
-      if (isEditing) {
-        // Update existing post
-        result = await supabase
-          .from('blog_posts')
-          .update(postData)
-          .eq('id', id);
-      } else {
-        // Create new post
-        result = await supabase
-          .from('blog_posts')
-          .insert(postData);
-      }
-      
-      if (result.error) throw result.error;
-      
-      // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
-      
-      toast({
-        title: "Post published",
-        description: formValues.published_at && formValues.published_at > new Date() 
-          ? "The post has been scheduled for publication."
-          : "The post has been published successfully.",
-      });
-      
-      navigate('/admin/blog');
+      await upsertBlogPost(postData);
     } catch (error: any) {
-      console.error('Error publishing post:', error);
+      console.error('Error saving post:', error);
       toast({
-        title: "Error publishing post",
-        description: error.message || "Could not publish the post. Try again later.",
+        title: "Erro ao salvar artigo",
+        description: error.message || "Não foi possível salvar o artigo. Tente novamente mais tarde.",
         variant: "destructive",
       });
-    } finally {
-      setIsPublishing(false);
     }
   };
   
@@ -319,22 +292,10 @@ const BlogPostEditor = () => {
     }));
   };
 
-  if (loadingPost) {
-    return (
-      <AdminLayout>
-        <div className="container mx-auto px-4 py-12">
-          <div className="flex flex-col items-center">
-            <p className="text-lg text-gray-600">Loading post...</p>
-          </div>
-        </div>
-      </AdminLayout>
-    );
-  }
-
   return (
     <AdminLayout>
       <Helmet>
-        <title>{isEditing ? 'Edit Post' : 'New Post'} | 99Tattoo Admin</title>
+        <title>{isEdit ? 'Editar Artigo' : 'Novo Artigo'} | 99Tattoo Admin</title>
       </Helmet>
       
       <div className="container mx-auto px-4 py-6">
@@ -345,141 +306,228 @@ const BlogPostEditor = () => {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <h1 className="text-3xl font-bold">
-              {isEditing ? 'Edit Post' : 'New Post'}
+              {isEdit ? 'Editar Artigo' : 'Novo Artigo'}
             </h1>
           </div>
           
           <div className="flex mt-4 md:mt-0 space-x-2">
             <Button 
               variant="outline" 
-              onClick={handleSaveDraft}
-              disabled={isSaving || isPublishing || loading}
+              onClick={() => handleSave(true)}
+              disabled={isLoading}
             >
               <Save className="mr-2 h-4 w-4" />
-              {isSaving ? 'Saving...' : 'Save as Draft'}
+              Salvar Rascunho
             </Button>
             <Button 
-              onClick={handlePublish}
-              disabled={isSaving || isPublishing || loading}
+              onClick={() => handleSave(false)}
+              disabled={isLoading}
             >
               <Eye className="mr-2 h-4 w-4" />
-              {isPublishing ? 'Publishing...' : 'Publish'}
+              Publicar
             </Button>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Main content */}
-          <div className="xl:col-span-2 space-y-6">
-            {/* Title */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Title <span className="text-red-500">*</span></Label>
-                    <Input 
-                      id="title"
-                      name="title"
-                      value={formValues.title}
-                      onChange={handleInputChange}
-                      placeholder="Post title"
-                      className={formErrors.title ? 'border-red-500' : ''}
-                    />
-                    {formErrors.title && (
-                      <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>
-                    )}
-                  </div>
-                  
-                  {/* Slug */}
-                  <div>
-                    <Label htmlFor="slug">
-                      URL Slug <span className="text-red-500">*</span>
-                      <span className="text-gray-500 text-xs ml-2">
-                        (E.g.: /blog/{formValues.slug || 'post-title'})
-                      </span>
-                    </Label>
-                    <Input 
-                      id="slug"
-                      name="slug"
-                      value={formValues.slug}
-                      onChange={handleInputChange}
-                      placeholder="post-title"
-                      className={formErrors.slug ? 'border-red-500' : ''}
-                    />
-                    {formErrors.slug && (
-                      <p className="text-red-500 text-sm mt-1">{formErrors.slug}</p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Content */}
-            <Card>
-              <CardContent className="pt-6">
-                <div>
-                  <Label htmlFor="content">
-                    Content <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="mt-1">
-                    <Textarea 
-                      id="content"
-                      name="content"
-                      value={formValues.content}
-                      onChange={handleInputChange}
-                      placeholder="Write post content..."
-                      rows={15}
-                      className={`resize-y min-h-[300px] ${formErrors.content ? 'border-red-500' : ''}`}
-                    />
-                    {formErrors.content && (
-                      <p className="text-red-500 text-sm mt-1">{formErrors.content}</p>
-                    )}
-                  </div>
-                  
-                  <div className="mt-2 text-sm text-gray-500 flex justify-between">
-                    <span>Words: {wordCount}</span>
-                    <span>Characters: {charCount}</span>
-                    <span>Reading time: {readingTime} min</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Excerpt */}
-            <Card>
-              <CardContent className="pt-6">
-                <div>
-                  <Label htmlFor="excerpt">Excerpt</Label>
-                  <div className="mt-1">
-                    <Textarea 
-                      id="excerpt"
-                      name="excerpt"
-                      value={formValues.excerpt}
-                      onChange={handleInputChange}
-                      placeholder="Write a brief summary of the post..."
-                      rows={3}
-                    />
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    This text will be displayed in cards and post listings.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+        {isLoading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">Carregando artigo...</p>
           </div>
-          
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Settings */}
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="text-lg font-medium mb-4">Post Settings</h3>
-                
-                {/* Category */}
-                <div className="space-y-4">
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            {/* Main content */}
+            <div className="xl:col-span-2 space-y-6">
+              {/* Title */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="title">Título <span className="text-red-500">*</span></Label>
+                      <Input 
+                        id="title"
+                        name="title"
+                        value={formValues.title}
+                        onChange={handleInputChange}
+                        placeholder="Digite o título do artigo"
+                        className={formErrors.title ? 'border-red-500' : ''}
+                      />
+                      {formErrors.title && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>
+                      )}
+                    </div>
+                    
+                    {/* Slug */}
+                    <div>
+                      <Label htmlFor="slug">
+                        URL amigável <span className="text-red-500">*</span>
+                        <span className="text-gray-500 text-xs ml-2">
+                          (Ex: /blog/{formValues.slug || 'titulo-do-artigo'})
+                        </span>
+                      </Label>
+                      <Input 
+                        id="slug"
+                        name="slug"
+                        value={formValues.slug}
+                        onChange={handleInputChange}
+                        placeholder="titulo-do-artigo"
+                        className={formErrors.slug ? 'border-red-500' : ''}
+                      />
+                      {formErrors.slug && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.slug}</p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Content */}
+              <Card>
+                <CardContent className="pt-6">
                   <div>
-                    <Label htmlFor="category">
-                      Category <span className="text-red-500">*</span>
+                    <Label htmlFor="content">
+                      Conteúdo <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="mt-1">
+                      <Editor
+                        apiKey="YOUR_TINYMCE_API_KEY"
+                        onInit={(evt, editor) => editorRef.current = editor}
+                        initialValue={formValues.content}
+                        onEditorChange={handleEditorChange}
+                        init={{
+                          height: 500,
+                          menubar: false,
+                          plugins: [
+                            'advlist autolink lists link image charmap print preview anchor',
+                            'searchreplace visualblocks code fullscreen',
+                            'insertdatetime media table paste code help wordcount'
+                          ],
+                          toolbar: 'undo redo | formatselect | ' +
+                            'bold italic backcolor | alignleft aligncenter ' +
+                            'alignright alignjustify | bullist numlist outdent indent | ' +
+                            'removeformat | help',
+                          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                        }}
+                      />
+                      {formErrors.content && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.content}</p>
+                      )}
+                    </div>
+                    
+                    <div className="mt-2 text-sm text-gray-500 flex justify-between">
+                      <span>Palavras: {wordCount}</span>
+                      <span>Caracteres: {charCount}</span>
+                      <span>Tempo de leitura: {readingTime} min</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Excerpt */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div>
+                    <Label htmlFor="excerpt">Resumo</Label>
+                    <div className="mt-1">
+                      <Textarea 
+                        id="excerpt"
+                        name="excerpt"
+                        value={formValues.excerpt}
+                        onChange={handleInputChange}
+                        placeholder="Digite um breve resumo do artigo..."
+                        rows={3}
+                      />
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Este texto será exibido nos cards e listagens de artigos.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Status & Schedule */}
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-medium mb-4">Status e Agendamento</h3>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="is_draft">Rascunho</Label>
+                      <Switch 
+                        id="is_draft"
+                        checked={formValues.is_draft}
+                        onCheckedChange={(checked) => 
+                          setFormValues(prev => ({ ...prev, is_draft: checked }))
+                        }
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label>Data de Publicação</Label>
+                      <div className="mt-1">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full justify-start text-left"
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {formValues.published_at ? (
+                                format(formValues.published_at, 'PPP HH:mm', { locale: ptBR })
+                              ) : (
+                                <span className="text-gray-400">Escolha uma data</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={formValues.published_at || undefined}
+                              onSelect={(date) => 
+                                setFormValues(prev => ({ ...prev, published_at: date }))
+                              }
+                              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                              initialFocus
+                            />
+                            <div className="border-t p-3">
+                              <Input
+                                type="time"
+                                value={formValues.published_at 
+                                  ? format(formValues.published_at, 'HH:mm')
+                                  : format(new Date(), 'HH:mm')
+                                }
+                                onChange={(e) => {
+                                  const [hours, minutes] = e.target.value.split(':').map(Number);
+                                  const date = formValues.published_at || new Date();
+                                  date.setHours(hours, minutes);
+                                  setFormValues(prev => ({ ...prev, published_at: new Date(date) }));
+                                }}
+                              />
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      
+                      {formValues.published_at && formValues.published_at > new Date() && (
+                        <div className="rounded-md bg-muted p-2 mt-2">
+                          Este artigo será publicado automaticamente em{' '}
+                          {format(formValues.published_at, 'PPP', { locale: ptBR })}{' '}
+                          às {format(formValues.published_at, 'HH:mm', { locale: ptBR })}.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Category */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div>
+                    <Label htmlFor="category_id">
+                      Categoria <span className="text-red-500">*</span>
                     </Label>
                     <Select
                       value={formValues.category_id}
@@ -491,9 +539,9 @@ const BlogPostEditor = () => {
                       }}
                     >
                       <SelectTrigger 
-                        className={formErrors.category_id ? 'border-red-500' : ''}
+                        className={`mt-1 ${formErrors.category_id ? 'border-red-500' : ''}`}
                       >
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((category) => (
@@ -507,8 +555,12 @@ const BlogPostEditor = () => {
                       <p className="text-red-500 text-sm mt-1">{formErrors.category_id}</p>
                     )}
                   </div>
-                  
-                  {/* Tags */}
+                </CardContent>
+              </Card>
+              
+              {/* Tags */}
+              <Card>
+                <CardContent className="pt-6">
                   <div>
                     <Label htmlFor="tags">Tags</Label>
                     <div className="mt-1">
@@ -517,177 +569,117 @@ const BlogPostEditor = () => {
                         value={tagInput}
                         onChange={(e) => setTagInput(e.target.value)}
                         onKeyDown={handleAddTag}
-                        placeholder="Add tag and press Enter"
+                        placeholder="Digite uma tag e pressione Enter"
                       />
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {formValues.tags.map((tag) => (
-                        <div 
-                          key={tag} 
-                          className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm flex items-center"
-                        >
-                          {tag}
-                          <button
-                            onClick={() => handleRemoveTag(tag)}
-                            className="ml-1 text-gray-500 hover:text-red-500"
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formValues.tags.map((tag, index) => (
+                          <div 
+                            key={index}
+                            className="bg-gray-100 text-gray-800 px-2 py-1 rounded-md flex items-center text-sm"
                           >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
+                            {tag}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveTag(tag)}
+                              className="ml-1 text-gray-500 hover:text-gray-700"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Pressione Enter após cada tag para adicioná-la.
+                    </p>
                   </div>
-                  
-                  {/* Featured Image */}
+                </CardContent>
+              </Card>
+              
+              {/* Featured Image */}
+              <Card>
+                <CardContent className="pt-6">
                   <div>
-                    <Label htmlFor="cover_image">Featured Image URL</Label>
+                    <Label htmlFor="cover_image">Imagem de Destaque</Label>
                     <div className="mt-1">
                       <Input
                         id="cover_image"
                         name="cover_image"
                         value={formValues.cover_image}
                         onChange={handleInputChange}
-                        placeholder="https://example.com/image.jpg"
+                        placeholder="URL da imagem"
                       />
                     </div>
+                    
                     {formValues.cover_image && (
-                      <div className="mt-2 rounded-md overflow-hidden max-h-40">
+                      <div className="mt-2 relative rounded-md overflow-hidden aspect-video">
                         <img
                           src={formValues.cover_image}
-                          alt="Featured"
+                          alt="Imagem de destaque"
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x200?text=Invalid+Image+URL';
+                            e.currentTarget.src = 'https://via.placeholder.com/800x450?text=Imagem+invalida';
                           }}
                         />
                       </div>
                     )}
+                    
                     {!formValues.cover_image && (
-                      <div className="mt-2 bg-gray-100 rounded-md p-8 flex items-center justify-center">
-                        <Image className="h-8 w-8 text-gray-400" />
+                      <div className="mt-2 bg-gray-100 rounded-md flex items-center justify-center aspect-video">
+                        <div className="text-center text-gray-400">
+                          <Image className="h-10 w-10 mx-auto" />
+                          <p className="mt-1">Nenhuma imagem</p>
+                        </div>
                       </div>
                     )}
-                    <p className="text-sm text-gray-500 mt-1">
-                      Featured image for social sharing and listings.
+                    
+                    <p className="text-sm text-gray-500 mt-2">
+                      URL da imagem que será exibida como destaque do artigo.
                     </p>
                   </div>
+                </CardContent>
+              </Card>
+              
+              {/* SEO */}
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-medium mb-4">SEO</h3>
                   
-                  {/* Publication Date */}
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="published_at">Publication Date</Label>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={formValues.published_at !== null}
-                          onCheckedChange={(checked) => {
-                            setFormValues(prev => ({
-                              ...prev,
-                              published_at: checked ? new Date() : null
-                            }));
-                          }}
-                        />
-                        <span className="text-sm">
-                          {formValues.published_at !== null ? 'Scheduled' : 'Draft'}
-                        </span>
-                      </div>
-                    </div>
-                    {formValues.published_at !== null && (
-                      <div className="mt-1">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="w-full justify-start text-left font-normal"
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {formValues.published_at ? (
-                                format(formValues.published_at, 'PPP', { locale: ptBR })
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={formValues.published_at || undefined}
-                              onSelect={(date) => {
-                                setFormValues(prev => ({
-                                  ...prev,
-                                  published_at: date || new Date()
-                                }));
-                              }}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* SEO */}
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="text-lg font-medium mb-4">SEO Settings</h3>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="meta_description">Meta Description</Label>
-                    <div className="mt-1">
-                      <Textarea
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="meta_description">Meta Descrição</Label>
+                      <Textarea 
                         id="meta_description"
                         name="meta_description"
                         value={formValues.meta_description}
                         onChange={handleInputChange}
-                        placeholder="Brief description for search engines..."
-                        rows={3}
+                        placeholder="Descrição para mecanismos de busca"
+                        rows={2}
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Recomendado: até 155 caracteres
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {formValues.meta_description.length}/160 characters (recommended)
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="meta_keywords">Meta Keywords</Label>
-                    <div className="mt-1">
-                      <Input
+                    
+                    <div>
+                      <Label htmlFor="meta_keywords">Meta Palavras-chave</Label>
+                      <Input 
                         id="meta_keywords"
                         name="meta_keywords"
                         value={formValues.meta_keywords}
                         onChange={handleInputChange}
-                        placeholder="keyword1, keyword2, keyword3"
+                        placeholder="palavra1, palavra2, palavra3"
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Separe as palavras-chave por vírgulas
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Comma-separated list of keywords
-                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Instructions */}
-            <Card className="bg-blue-50 border border-blue-200">
-              <CardContent className="pt-6">
-                <div className="flex items-start space-x-2">
-                  <div>
-                    <h3 className="text-lg font-medium text-blue-800 mb-2">Posting Tips</h3>
-                    <ul className="text-blue-800 text-sm list-disc pl-4 space-y-1">
-                      <li>Use clear, descriptive titles</li>
-                      <li>Include relevant images</li>
-                      <li>Structure content with headings</li>
-                      <li>Keep paragraphs short and readable</li>
-                      <li>Add tags to improve discoverability</li>
-                      <li>Schedule posts during peak engagement times</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </AdminLayout>
   );
