@@ -11,7 +11,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Auth from "./pages/Auth";
-import AdminAuth from "./pages/AdminAuth";  // Nova importação
+import AdminAuth from "./pages/AdminAuth";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
@@ -26,6 +26,8 @@ import AdminUserSetup from "./pages/AdminUserSetup";
 // Dashboard do Admin
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
+import AdminBlog from "./pages/admin/Blog";
+import BlogPostPage from "./pages/admin/BlogPost";
 
 // Configuração do React Query com configurações otimizadas
 const queryClient = new QueryClient({
@@ -55,7 +57,7 @@ const App = () => (
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/admin-auth" element={<AdminAuth />} />  {/* Nova rota */}
+                <Route path="/admin-auth" element={<AdminAuth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
                 <Route path="/admin-setup" element={<AdminUserSetup />} />
@@ -71,6 +73,9 @@ const App = () => (
                 <Route element={<ProtectedRoute requiredRole="admin" />}>
                   <Route path="/admin" element={<Dashboard />} />
                   <Route path="/admin/products" element={<Products />} />
+                  <Route path="/admin/blog" element={<AdminBlog />} />
+                  <Route path="/admin/blog/new" element={<BlogPostPage />} />
+                  <Route path="/admin/blog/edit/:id" element={<BlogPostPage />} />
                   <Route path="/admin/loyalty" element={<Dashboard />} /> {/* Placeholder - usar Dashboard temporariamente */}
                   <Route path="/admin/analytics" element={<Dashboard />} /> {/* Placeholder - usar Dashboard temporariamente */}
                   <Route path="/admin/security" element={<Dashboard />} /> {/* Placeholder - usar Dashboard temporariamente */}
