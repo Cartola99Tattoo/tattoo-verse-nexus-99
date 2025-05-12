@@ -11,6 +11,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Auth from "./pages/Auth";
+import AdminAuth from "./pages/AdminAuth";  // Nova importação
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/admin-auth" element={<AdminAuth />} />  {/* Nova rota */}
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
                 <Route path="/admin-setup" element={<AdminUserSetup />} />
