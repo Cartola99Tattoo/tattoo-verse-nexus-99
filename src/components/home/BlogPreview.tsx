@@ -1,11 +1,11 @@
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { fetchBlogPosts } from "@/services/supabaseService";
 
-// Atualizar o tipo para corresponder ao formato do Supabase
+// Updated type for blog posts from Supabase
 type BlogPostPreview = {
   id: string;
   title: string;
@@ -28,62 +28,19 @@ const BlogPreview = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchLatestPosts = async () => {
+    const loadBlogPosts = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        
-        // Buscar posts primeiro
-        const { data: postsData, error: postsError } = await supabase
-          .from('blog_posts')
-          .select(`
-            id,
-            title,
-            excerpt,
-            cover_image,
-            published_at,
-            slug,
-            author_id,
-            blog_categories:category_id(name)
-          `)
-          .not('published_at', 'is', null)
-          .order('published_at', { ascending: false })
-          .limit(3);
-        
-        if (postsError) {
-          console.error("Error fetching latest blog posts:", postsError);
-          throw postsError;
-        }
-        
-        // Para cada post, buscar o perfil do autor separadamente (se houver author_id)
-        const postsWithProfiles = await Promise.all((postsData || []).map(async post => {
-          if (!post.author_id) return { ...post, profiles: null };
-          
-          const { data: profile, error: profileError } = await supabase
-            .from("profiles")
-            .select("first_name, last_name")
-            .eq("id", post.author_id)
-            .single();
-            
-          if (profileError) {
-            console.warn(`Could not fetch profile for author ${post.author_id}:`, profileError);
-            return { ...post, profiles: null };
-          }
-          
-          return { ...post, profiles: profile };
-        }));
-        
-        console.log("Blog preview data:", postsWithProfiles);
-        
-        // Garantir que os dados atendem à interface BlogPostPreview
-        setPosts(postsWithProfiles as BlogPostPreview[]);
+        const postsData = await fetchBlogPosts(3); // Get only 3 latest posts
+        setPosts(postsData as BlogPostPreview[]);
       } catch (error) {
-        console.error("Error fetching latest blog posts:", error);
+        console.error("Failed to load blog posts:", error);
       } finally {
         setIsLoading(false);
       }
     };
     
-    fetchLatestPosts();
+    loadBlogPosts();
   }, []);
 
   // Função para formatar a data

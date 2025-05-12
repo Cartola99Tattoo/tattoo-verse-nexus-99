@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { handleSupabaseError } from '@/services/supabaseService';
 
 interface Customer {
   id: string;
@@ -19,6 +20,7 @@ export default function RecentCustomers() {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
+        setLoading(true);
         const { data, error } = await supabase
           .from('profiles')
           .select('id, first_name, last_name, email, avatar_url, created_at')
@@ -26,10 +28,14 @@ export default function RecentCustomers() {
           .order('created_at', { ascending: false })
           .limit(5);
 
-        if (error) throw error;
+        if (error) {
+          handleSupabaseError(error, "Erro ao carregar lista de clientes");
+          return;
+        }
+        
         setCustomers(data || []);
       } catch (error) {
-        console.error('Erro ao buscar clientes:', error);
+        handleSupabaseError(error, "Erro ao carregar lista de clientes");
       } finally {
         setLoading(false);
       }

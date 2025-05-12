@@ -21,14 +21,28 @@ const TattooCard = ({ tattoo }: TattooCardProps) => {
   const { addToCart } = useCart();
   
   const handleAddToCart = () => {
-    addToCart({
-      id: tattoo.id,
-      name: tattoo.name,
-      price: tattoo.price,
-      image: tattoo.image,
-      artist: tattoo.artist,
-      category: tattoo.category,
-    });
+    try {
+      addToCart({
+        id: tattoo.id,
+        name: tattoo.name,
+        price: tattoo.price,
+        image: tattoo.image,
+        artist: tattoo.artist,
+        category: tattoo.category,
+      });
+      
+      toast({
+        title: "Produto adicionado",
+        description: `${tattoo.name} foi adicionado ao carrinho.`,
+      });
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o item ao carrinho.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -39,6 +53,7 @@ const TattooCard = ({ tattoo }: TattooCardProps) => {
             src={tattoo.image}
             alt={tattoo.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            loading="lazy"
           />
         </Link>
         <button 

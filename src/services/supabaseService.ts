@@ -1,0 +1,320 @@
+
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
+
+/**
+ * Fetches blog posts from Supabase with author and category information
+ * @param limit Optional number of posts to fetch
+ * @returns Array of blog posts with authors and categories
+ */
+export async function fetchBlogPosts(limit?: number) {
+  try {
+    const query = supabase
+      .from('blog_posts')
+      .select(`
+        id,
+        title,
+        excerpt,
+        cover_image,
+        published_at,
+        slug,
+        author_id,
+        blog_categories:category_id(name),
+        profiles:author_id(first_name, last_name)
+      `)
+      .not('published_at', 'is', null)
+      .order('published_at', { ascending: false });
+    
+    if (limit) {
+      query.limit(limit);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error("Error fetching blog posts:", error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in fetchBlogPosts:", error);
+    toast({
+      title: "Erro ao carregar artigos",
+      description: "Não foi possível carregar os artigos do blog.",
+      variant: "destructive"
+    });
+    return [];
+  }
+}
+
+/**
+ * Fetches a single blog post by slug with author information
+ * @param slug Blog post slug
+ * @returns Blog post data or null if not found
+ */
+export async function fetchBlogPostBySlug(slug: string) {
+  try {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select(`
+        id,
+        title,
+        content,
+        excerpt,
+        cover_image,
+        published_at,
+        slug,
+        view_count,
+        author_id,
+        blog_categories:category_id(name),
+        profiles:author_id(first_name, last_name, avatar_url)
+      `)
+      .eq('slug', slug)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Not found error
+        return null;
+      }
+      console.error("Error fetching blog post:", error);
+      throw error;
+    }
+    
+    // Update view count
+    if (data) {
+      const newViewCount = (data.view_count || 0) + 1;
+      await supabase
+        .from('blog_posts')
+        .update({ view_count: newViewCount })
+        .eq('id', data.id);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error in fetchBlogPostBySlug:", error);
+    toast({
+      title: "Erro ao carregar artigo",
+      description: "Não foi possível carregar o conteúdo do artigo.",
+      variant: "destructive"
+    });
+    return null;
+  }
+}
+
+/**
+ * Fetches products from the store with filtering options
+ * @param options Optional filtering and pagination options
+ * @returns Array of products
+ */
+export async function fetchProducts(options?: {
+  category?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  try {
+    let query = supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        description,
+        price,
+        images,
+        category,
+        artist_id,
+        rating,
+        profiles:artist_id(first_name, last_name)
+      `);
+    
+    // Apply filters
+    if (options?.category) {
+      query = query.eq('category', options.category);
+    }
+    
+    if (options?.search) {
+      query = query.or(`name.ilike.%${options.search}%,description.ilike.%${options.search}%`);
+    }
+    
+    // Apply pagination
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    
+    if (options?.offset) {
+      query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in fetchProducts:", error);
+    toast({
+      title: "Erro ao carregar produtos",
+      description: "Não foi possível carregar os produtos da loja.",
+      variant: "destructive"
+    });
+    return [];
+  }
+}
+
+/**
+ * Fetches a single product by ID
+ * @param id Product ID
+ * @returns Product data or null if not found
+ */
+export async function fetchProductById(id: string | number) {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        description,
+        price,
+        images,
+        category,
+        artist_id,
+        rating,
+        profiles:artist_id(first_name, last_name, avatar_url)
+      `)
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Not found error
+        return null;
+      }
+      console.error("Error fetching product:", error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error in fetchProductById:", error);
+    toast({
+      title: "Erro ao carregar produto",
+      description: "Não foi possível carregar os detalhes do produto.",
+      variant: "destructive"
+    });
+    return null;
+  }
+}
+
+/**
+ * Fetches application statistics for the admin dashboard
+ * @returns Dashboard statistics or null on error
+ */
+export async function fetchDashboardStats() {
+  try {
+    // Total sales (last 30 days)
+    const { data: salesData, error: salesError } = await supabase
+      .from('orders')
+      .select('total_amount')
+      .gte('created_at', new Date(new Date().setDate(new Date().getDate() - 30)).toISOString());
+    
+    if (salesError) throw salesError;
+    
+    // New customers (last 30 days)
+    const { count: newCustomers, error: customersError } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', new Date(new Date().setDate(new Date().getDate() - 30)).toISOString());
+    
+    if (customersError) throw customersError;
+    
+    // Pending orders
+    const { count: pendingOrders, error: ordersError } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending');
+      
+    if (ordersError) throw ordersError;
+
+    // Upcoming appointments
+    const { count: upcomingAppointments, error: appointmentsError } = await supabase
+      .from('appointments')
+      .select('*', { count: 'exact', head: true })
+      .gte('start_date', new Date().toISOString())
+      .eq('status', 'agendado');
+      
+    if (appointmentsError) throw appointmentsError;
+
+    // Blog views
+    const { data: blogPosts, error: blogError } = await supabase
+      .from('blog_posts')
+      .select('view_count');
+      
+    if (blogError) throw blogError;
+    
+    const totalSales = salesData?.reduce((acc, order) => acc + (order.total_amount || 0), 0) || 0;
+    const blogViews = blogPosts?.reduce((acc, post) => acc + (post.view_count || 0), 0) || 0;
+
+    return {
+      totalSales,
+      newCustomers: newCustomers || 0,
+      pendingOrders: pendingOrders || 0,
+      upcomingAppointments: upcomingAppointments || 0,
+      blogViews
+    };
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    toast({
+      title: "Erro ao carregar estatísticas",
+      description: "Não foi possível carregar os dados do dashboard.",
+      variant: "destructive"
+    });
+    return null;
+  }
+}
+
+/**
+ * Generic error handler for Supabase operations
+ * @param error The error object
+ * @param defaultMessage Default error message to display
+ * @returns void
+ */
+export function handleSupabaseError(error: any, defaultMessage: string = "Ocorreu um erro na operação.") {
+  console.error("Supabase error:", error);
+  
+  let message = defaultMessage;
+  
+  // Map common error codes to user-friendly messages
+  if (error.code) {
+    switch (error.code) {
+      case "PGRST116":
+        message = "O recurso solicitado não foi encontrado.";
+        break;
+      case "23505":
+        message = "Este registro já existe (chave duplicada).";
+        break;
+      case "22P02":
+        message = "Formato de dados inválido.";
+        break;
+      case "42P01":
+        message = "A tabela solicitada não existe.";
+        break;
+      case "42501":
+        message = "Permissão negada para este recurso.";
+        break;
+      case "auth/email-already-in-use":
+        message = "Este e-mail já está em uso.";
+        break;
+    }
+  }
+  
+  toast({
+    title: "Erro",
+    description: message,
+    variant: "destructive"
+  });
+}

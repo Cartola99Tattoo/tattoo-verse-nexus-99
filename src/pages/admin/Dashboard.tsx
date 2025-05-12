@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { BarChart, LineChart, PieChart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchDashboardStats } from "@/services/supabaseService";
 import { toast } from "@/components/ui/use-toast";
 
 // Componentes de Gráficos
@@ -35,66 +34,13 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const loadDashboardData = async () => {
       setLoading(true);
       try {
-        // Simulação de busca de dados para o dashboard
-        // Em produção, substituir por chamadas reais ao Supabase
-        
-        // Exemplo de como buscar dados de vendas
-        const { data: salesData, error: salesError } = await supabase
-          .from('orders')
-          .select('total_amount')
-          .gte('created_at', new Date(new Date().setDate(new Date().getDate() - 30)).toISOString());
-        
-        if (salesError) throw salesError;
-        
-        // Calcula o total de vendas
-        const totalSales = salesData?.reduce((acc, order) => acc + (order.total_amount || 0), 0) || 0;
-
-        // Buscar contagem de novos clientes
-        const { count: newCustomers, error: customersError } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', new Date(new Date().setDate(new Date().getDate() - 30)).toISOString());
-        
-        if (customersError) throw customersError;
-        
-        // Buscar pedidos pendentes
-        const { count: pendingOrders, error: ordersError } = await supabase
-          .from('orders')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending');
-          
-        if (ordersError) throw ordersError;
-
-        // Buscar agendamentos futuros
-        const { count: upcomingAppointments, error: appointmentsError } = await supabase
-          .from('appointments')
-          .select('*', { count: 'exact', head: true })
-          .gte('start_date', new Date().toISOString())
-          .eq('status', 'agendado');
-          
-        if (appointmentsError) throw appointmentsError;
-
-        // Buscar visualizações do blog
-        const { data: blogPosts, error: blogError } = await supabase
-          .from('blog_posts')
-          .select('view_count');
-          
-        if (blogError) throw blogError;
-        
-        const blogViews = blogPosts?.reduce((acc, post) => acc + (post.view_count || 0), 0) || 0;
-
-        // Atualizar estatísticas
-        setStats({
-          totalSales,
-          newCustomers: newCustomers || 0,
-          pendingOrders: pendingOrders || 0,
-          upcomingAppointments: upcomingAppointments || 0,
-          blogViews
-        });
-
+        const dashboardStats = await fetchDashboardStats();
+        if (dashboardStats) {
+          setStats(dashboardStats);
+        }
       } catch (error) {
         console.error("Erro ao buscar dados do dashboard:", error);
         toast({
@@ -107,7 +53,7 @@ const Dashboard = () => {
       }
     };
 
-    fetchDashboardData();
+    loadDashboardData();
   }, []);
 
   return (
