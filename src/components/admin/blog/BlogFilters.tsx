@@ -23,6 +23,17 @@ interface BlogFilterProps {
   }
 }
 
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface Author {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
 const BlogFilters: React.FC<BlogFilterProps> = ({ initialValues }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -40,8 +51,8 @@ const BlogFilters: React.FC<BlogFilterProps> = ({ initialValues }) => {
   const [sortBy, setSortBy] = useState(searchParams.get('sortBy') || 'published_at:desc');
   
   // Fetch options for dropdowns
-  const [categories, setCategories] = useState<Array<{ id: string, name: string }>>([]);
-  const [authors, setAuthors] = useState<Array<{ id: string, first_name: string, last_name: string }>>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
   
   useEffect(() => {
@@ -77,7 +88,7 @@ const BlogFilters: React.FC<BlogFilterProps> = ({ initialValues }) => {
       });
       
       setCategories(categoriesData || []);
-      setAuthors(Array.from(uniqueAuthors.values()) as any[]);
+      setAuthors(Array.from(uniqueAuthors.values()) as Author[]);
     } catch (error) {
       console.error('Error fetching filter options:', error);
     } finally {

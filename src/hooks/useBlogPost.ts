@@ -1,36 +1,38 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { useQuery } from '@tanstack/react-query';
 
 // Define proper types
-export type BlogPost = {
+export interface BlogPost {
   id: string;
   title: string;
+  slug?: string | null;
   content: string;
   excerpt?: string | null;
   cover_image?: string | null;
+  tags?: string[];
+  category_id?: string | null;
+  author_id?: string | null;
   published_at?: string | null;
-  category_id?: string;
-  author_id?: string;
-  reading_time?: number | null;
-  tags?: string[] | null;
+  created_at?: string | null;
+  updated_at?: string | null;
   view_count?: number | null;
-  slug?: string | null;
+  reading_time?: number | null;
+  is_draft?: boolean | null;
   meta_description?: string | null;
   meta_keywords?: string | null;
   profiles?: {
+    id: string;
     first_name?: string | null;
     last_name?: string | null;
     avatar_url?: string | null;
-    id?: string;
   } | null;
   blog_categories?: {
-    name?: string | null;
-    id?: string;
-    description?: string | null;
+    id: string;
+    name: string;
   } | null;
-};
+}
 
 type FetchBlogPostError = {
   message: string;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -20,6 +19,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { BlogPost } from '@/hooks/useBlogPost';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
+
+// Extend the BlogPost type to ensure it includes all the properties we need
+interface ExtendedBlogPost extends BlogPost {
+  is_draft?: boolean;
+}
 
 interface FormValues {
   title: string;
@@ -144,7 +148,7 @@ const BlogPostPage = () => {
         return;
       }
       
-      const post = data as BlogPost;
+      const post = data as ExtendedBlogPost;
       
       setFormValues({
         title: post.title || '',

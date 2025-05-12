@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -354,7 +353,7 @@ const BlogPostTable = () => {
                     {post.blog_categories?.name || '—'}
                   </TableCell>
                   <TableCell>
-                    {formatDate(post.published_at || post.created_at)}
+                    {formatDate(post.published_at || post.created_at || '')}
                   </TableCell>
                   <TableCell>
                     {getStatusBadge(post)}
