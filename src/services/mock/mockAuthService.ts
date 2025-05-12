@@ -1,4 +1,3 @@
-
 import { appConfig } from "@/config/appConfig";
 import { Session, User } from "@supabase/supabase-js";
 import { UserProfile } from "@/contexts/AuthContext";
@@ -71,7 +70,9 @@ const createMockSession = (user: typeof mockUsers[0]): Session => {
       role: "",
       updated_at: new Date().toISOString()
     },
-    expires_at: Math.floor(Date.now() / 1000) + 3600
+    expires_at: Math.floor(Date.now() / 1000) + 3600,
+    expires_in: 3600, // Adding the missing expires_in property (1 hour in seconds)
+    token_type: "bearer" // Adding the missing token_type property
   };
 };
 
