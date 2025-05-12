@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { getBlogService } from "@/services/serviceFactory";
 import { useDataQuery } from "@/hooks/useDataQuery";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -233,27 +241,33 @@ const Blog = () => {
               ))}
             </div>
 
-            {/* Pagination */}
-            <div className="flex justify-center mt-12">
-              <nav className="inline-flex" aria-label="Paginação">
-                <button 
-                  className="px-4 py-2 text-gray-500 bg-gray-200 rounded-l-md hover:bg-gray-300"
-                  aria-label="Página anterior"
-                  disabled
-                >
-                  Anterior
-                </button>
-                <button className="px-4 py-2 text-white bg-red-500" aria-current="page">1</button>
-                <button className="px-4 py-2 text-gray-500 bg-gray-200 hover:bg-gray-300" disabled>2</button>
-                <button className="px-4 py-2 text-gray-500 bg-gray-200 hover:bg-gray-300" disabled>3</button>
-                <button 
-                  className="px-4 py-2 text-gray-500 bg-gray-200 rounded-r-md hover:bg-gray-300"
-                  aria-label="Próxima página"
-                  disabled
-                >
-                  Próxima
-                </button>
-              </nav>
+            {/* Pagination using shadcn/ui pagination component */}
+            <div className="mt-12">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious href="#" aria-disabled="true" className="pointer-events-none text-gray-400" />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink href="#" isActive>
+                      1
+                    </PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink href="#" className="text-gray-400 pointer-events-none">
+                      2
+                    </PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink href="#" className="text-gray-400 pointer-events-none">
+                      3
+                    </PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext href="#" aria-disabled="true" className="pointer-events-none text-gray-400" />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           </>
         ) : (
