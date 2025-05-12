@@ -30,8 +30,8 @@ interface Category {
 
 interface Author {
   id: string;
-  first_name: string;
-  last_name: string;
+  first_name: string | null;
+  last_name: string | null;
 }
 
 const BlogFilters: React.FC<BlogFilterProps> = ({ initialValues }) => {
