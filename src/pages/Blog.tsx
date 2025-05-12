@@ -19,7 +19,7 @@ const Blog = () => {
   // Usar useSupabaseQuery para buscar posts do blog
   const { data: posts = [], loading: isLoadingPosts, error: postsError } = useSupabaseQuery<BlogPostSummary[]>(
     () => fetchBlogPosts().then(posts => 
-      posts.map(post => ({
+      (posts || []).map(post => ({
         id: post.id,
         title: post.title,
         excerpt: post.excerpt,
@@ -85,7 +85,7 @@ const Blog = () => {
   };
 
   // Filtrar os posts com base na categoria e pesquisa
-  const filteredPosts = posts.filter(post => {
+  const filteredPosts = posts ? posts.filter(post => {
     // Filtro por categoria
     const categoryMatch = activeCategory === "Todos" || 
       getCategoryName(post) === activeCategory;
@@ -97,7 +97,7 @@ const Blog = () => {
       checkAuthorName(post, searchQuery.toLowerCase());
     
     return categoryMatch && searchMatch;
-  });
+  }) : [];
 
   // Formatar os dados dos posts para o formato esperado pelo BlogCard
   const formattedPosts = filteredPosts;
