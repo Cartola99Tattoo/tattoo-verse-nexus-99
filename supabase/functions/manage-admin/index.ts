@@ -41,19 +41,25 @@ serve(async (req) => {
 
     if (action === "check") {
       // Verificar se o usuário existe pela listagem de usuários
-      const { data, error } = await supabaseClient.auth.admin.listUsers({
-        filter: {
-          email: email
-        }
-      })
+      const { data, error } = await supabaseClient.auth.admin.listUsers()
       
       // Adicionar logs para depuração
       console.log("Check user results:", JSON.stringify({ data, error }))
       
-      const userExists = data && data.users && data.users.length > 0
+      // Verificar se o usuário administrador existe entre os usuários listados
+      const adminUser = data?.users?.find(user => user.email === email)
+      const userExists = !!adminUser
       
       return new Response(
-        JSON.stringify({ exists: userExists }),
+        JSON.stringify({ 
+          exists: userExists,
+          user: adminUser ? {
+            id: adminUser.id,
+            email: adminUser.email,
+            created_at: adminUser.created_at,
+            last_sign_in_at: adminUser.last_sign_in_at
+          } : null
+        }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       )
     } 
@@ -90,28 +96,69 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ success: true, message: "Administrador criado com sucesso" }),
+        JSON.stringify({ 
+          success: true, 
+          message: "Administrador criado com sucesso",
+          user: userData?.user ? {
+            id: userData.user.id,
+            email: userData.user.email,
+            created_at: userData.user.created_at
+          } : null
+        }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       )
     }
     else if (action === "update_password") {
       // Primeiro obter o usuário
-      const { data: users, error: listError } = await supabaseClient.auth.admin.listUsers({
-        filter: {
-          email: email
-        }
-      })
+      const { data: users } = await supabaseClient.auth.admin.listUsers()
 
-      // Adicionar logs para depuração
-      console.log("Find user for password update:", JSON.stringify({ users, listError }))
-
-      if (listError) throw listError
-
-      if (!users || !users.users || users.users.length === 0) {
-        throw new Error("Usuário administrador não encontrado")
+      if (!users || !users.users) {
+        throw new Error("Não foi possível listar usuários")
       }
 
-      const adminUser = users.users[0]
+      const adminUser = users.users.find(user => user.email === email)
+
+      if (!adminUser) {
+        // Se o usuário não existe, vamos criá-lo
+        console.log("Usuário administrador não encontrado, criando novo usuário")
+        const { data: newUserData, error: createError } = await supabaseClient.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: {
+            first_name: "Admin",
+            last_name: "99Tattoo"
+          }
+        })
+
+        if (createError) throw createError
+
+        // Atualizar o perfil para ser admin
+        if (newUserData && newUserData.user) {
+          const { error: updateError } = await supabaseClient
+            .from('profiles')
+            .update({ role: 'admin' })
+            .eq('id', newUserData.user.id)
+
+          if (updateError) {
+            console.log("Error updating profile:", updateError)
+          }
+        }
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: "Administrador criado com sucesso", 
+            created: true,
+            user: newUserData?.user ? {
+              id: newUserData.user.id,
+              email: newUserData.user.email,
+              created_at: newUserData.user.created_at
+            } : null
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        )
+      }
 
       // Atualizar a senha
       const { error: updateError } = await supabaseClient.auth.admin.updateUserById(
@@ -125,7 +172,17 @@ serve(async (req) => {
       if (updateError) throw updateError
 
       return new Response(
-        JSON.stringify({ success: true, message: "Senha do administrador atualizada com sucesso" }),
+        JSON.stringify({ 
+          success: true, 
+          message: "Senha do administrador atualizada com sucesso",
+          updated: true,
+          user: {
+            id: adminUser.id,
+            email: adminUser.email,
+            created_at: adminUser.created_at,
+            updated_at: new Date().toISOString()
+          }
+        }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       )
     }
