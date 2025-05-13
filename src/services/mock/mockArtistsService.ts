@@ -122,7 +122,7 @@ export const mockArtistsService = {
     
     let portfolio = [...artist.portfolio];
     
-    // Apply filters - Use type assertion to handle string comparison safely
+    // Apply filters - Fix type issue by comparing strings without strict typing
     if (options?.category) {
       portfolio = portfolio.filter(item => 
         item.category.toLowerCase() === options.category?.toLowerCase()
