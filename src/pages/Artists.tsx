@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import ArtistCard from "@/components/artists/ArtistCard";
@@ -7,7 +7,7 @@ import ArtistsSidebar from "@/components/artists/ArtistsSidebar";
 import useArtists from "@/hooks/useArtists";
 import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet-async";
-import { Loader2 } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -16,10 +16,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useToast } from "@/hooks/use-toast";
 
 const ITEMS_PER_PAGE = 9;
 
 const Artists = () => {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Get initial values from URL parameters
@@ -51,27 +53,31 @@ const Artists = () => {
     refresh
   } = useArtists(initialQueryParams);
   
-  // Update URL when filters change
+  // Update URL when filters change - with debounce to prevent unnecessary URL updates
   useEffect(() => {
-    const params = new URLSearchParams();
+    const timeoutId = setTimeout(() => {
+      const params = new URLSearchParams();
+      
+      if (currentPage > 1) {
+        params.set('page', currentPage.toString());
+      }
+      
+      if (queryParams.search) {
+        params.set('search', queryParams.search);
+      }
+      
+      if (queryParams.style) {
+        params.set('style', queryParams.style);
+      }
+      
+      if (queryParams.specialties && queryParams.specialties.length > 0) {
+        params.set('specialties', queryParams.specialties.join(','));
+      }
+      
+      setSearchParams(params);
+    }, 300); // Debounce de 300ms
     
-    if (currentPage > 1) {
-      params.set('page', currentPage.toString());
-    }
-    
-    if (queryParams.search) {
-      params.set('search', queryParams.search);
-    }
-    
-    if (queryParams.style) {
-      params.set('style', queryParams.style);
-    }
-    
-    if (queryParams.specialties && queryParams.specialties.length > 0) {
-      params.set('specialties', queryParams.specialties.join(','));
-    }
-    
-    setSearchParams(params);
+    return () => clearTimeout(timeoutId);
   }, [currentPage, queryParams, setSearchParams]);
   
   // Reset to page 1 when filters change
@@ -87,9 +93,20 @@ const Artists = () => {
       offset: (currentPage - 1) * ITEMS_PER_PAGE 
     });
   }, [currentPage, updateQueryParams]);
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Erro ao carregar tatuadores",
+        description: "Ocorreu um problema ao buscar os tatuadores. Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
   
-  // Generate pagination items
-  const generatePaginationItems = () => {
+  // Generate pagination items - memoized to avoid recalculations
+  const paginationItems = useMemo(() => {
     let items = [];
     const maxVisiblePages = 5;
     
@@ -162,7 +179,7 @@ const Artists = () => {
     }
     
     return items;
-  };
+  }, [currentPage, totalPages]);
 
   return (
     <Layout>
@@ -172,9 +189,9 @@ const Artists = () => {
       </Helmet>
       
       {/* Hero section */}
-      <div className="bg-gray-900 text-white py-16">
+      <div className="bg-gradient-to-r from-gray-900 to-black text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Conheça nossos <span className="text-red-500">Tatuadores</span>
           </h1>
           <p className="text-xl max-w-2xl mx-auto">
@@ -193,6 +210,7 @@ const Artists = () => {
                 queryParams={queryParams} 
                 onUpdateParams={updateQueryParams}
                 totalResults={totalArtists}
+                isLoading={isLoading}
               />
             </div>
           </div>
@@ -212,6 +230,14 @@ const Artists = () => {
               </div>
             ) : artists.length > 0 ? (
               <>
+                {/* Lista de resultados com indicação de quantidade */}
+                <div className="mb-6 flex items-center">
+                  <Users className="text-red-500 mr-2" />
+                  <h2 className="text-lg font-medium">
+                    {totalArtists} {totalArtists === 1 ? 'Tatuador encontrado' : 'Tatuadores encontrados'}
+                  </h2>
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {artists.map((artist) => (
                     <ArtistCard key={artist.id} artist={artist} />
@@ -230,7 +256,7 @@ const Artists = () => {
                           />
                         </PaginationItem>
                         
-                        {generatePaginationItems()}
+                        {paginationItems}
                         
                         <PaginationItem>
                           <PaginationNext
@@ -263,14 +289,14 @@ const Artists = () => {
       </div>
       
       {/* CTA section */}
-      <div className="bg-red-50 py-16">
+      <div className="bg-gradient-to-r from-red-50 to-red-100 py-16">
         <div className="container mx-auto px-4 max-w-3xl text-center">
           <h2 className="text-3xl font-bold mb-4">Pronto para fazer sua tatuagem?</h2>
           <p className="text-gray-600 mb-6">
             Entre em contato conosco e agende uma consulta com um de nossos tatuadores.
           </p>
           <div className="flex justify-center">
-            <Button size="lg" className="bg-red-500 hover:bg-red-600">
+            <Button size="lg" className="bg-red-500 hover:bg-red-600 transition-all">
               Agendar consulta
             </Button>
           </div>

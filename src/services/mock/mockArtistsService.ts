@@ -53,6 +53,7 @@ export const mockArtistsService = {
   }) => {
     console.info('MockArtistsService: fetchArtists called', options);
     
+    // Use a stable reference to avoid re-creating array on every call
     let filteredArtists = [...mockArtists];
     
     // Apply filters
@@ -90,8 +91,8 @@ export const mockArtistsService = {
     const offset = options?.offset || 0;
     filteredArtists = filteredArtists.slice(offset, offset + limit);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Simulate API delay - reduced to minimize "flashing"
+    await new Promise(resolve => setTimeout(resolve, 300));
     
     return {
       artists: filteredArtists,
@@ -106,8 +107,8 @@ export const mockArtistsService = {
     
     const artist = mockArtists.find(a => a.id === id);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Simulate API delay - reduced to minimize "flashing"
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     return artist || null;
   },
@@ -137,8 +138,8 @@ export const mockArtistsService = {
     const offset = options?.offset || 0;
     portfolio = portfolio.slice(offset, offset + limit);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 400));
+    // Simulate API delay - reduced to minimize "flashing"
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     return portfolio;
   }

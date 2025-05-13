@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useDataQuery } from './useDataQuery';
 import { getArtistsService } from '@/services/serviceFactory';
 import { Artist, ArtistsQueryParams, PortfolioItem } from '@/services/interfaces/IArtistsService';
@@ -22,23 +22,23 @@ export function useArtists(initialParams?: ArtistsQueryParams) {
     [queryParams]
   );
   
-  // Function to fetch a single artist by ID
-  const fetchArtistById = async (id: string | number) => {
+  // Function to fetch a single artist by ID - memoized to prevent re-renders
+  const fetchArtistById = useCallback(async (id: string | number) => {
     return await artistsService.fetchArtistById(id);
-  };
+  }, [artistsService]);
   
-  // Function to fetch portfolio items for an artist
-  const fetchArtistPortfolio = async (
+  // Function to fetch portfolio items for an artist - memoized to prevent re-renders
+  const fetchArtistPortfolio = useCallback(async (
     artistId: string | number, 
     options?: { limit?: number; offset?: number; category?: string; }
   ) => {
     return await artistsService.fetchArtistPortfolio(artistId, options);
-  };
+  }, [artistsService]);
   
-  // Update query parameters
-  const updateQueryParams = (newParams: Partial<ArtistsQueryParams>) => {
+  // Update query parameters - memoized to prevent re-renders
+  const updateQueryParams = useCallback((newParams: Partial<ArtistsQueryParams>) => {
     setQueryParams(prev => ({ ...prev, ...newParams }));
-  };
+  }, []);
   
   return {
     artists: artistsData?.artists || [],

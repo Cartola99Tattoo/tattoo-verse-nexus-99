@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X, User, LogOut, Home, BookOpen, ShoppingBag, Calendar, Phone } from "lucide-react";
+import { Menu, X, User, LogOut, Home, BookOpen, ShoppingBag, Calendar, Phone, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -47,6 +47,7 @@ const Header = () => {
 
   const navLinks = [
     { name: "Início", path: "/", icon: <Home className="h-4 w-4 mr-1" /> },
+    { name: "Tatuadores", path: "/artists", icon: <Users className="h-4 w-4 mr-1" /> },
     { name: "Blog", path: "/blog", icon: <BookOpen className="h-4 w-4 mr-1" /> },
     { name: "Loja", path: "/shop", icon: <ShoppingBag className="h-4 w-4 mr-1" /> },
     { name: "Eventos", path: "/contact?section=events", icon: <Calendar className="h-4 w-4 mr-1" /> },
