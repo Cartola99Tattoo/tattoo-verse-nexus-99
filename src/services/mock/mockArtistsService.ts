@@ -1,8 +1,8 @@
 
-import { faker } from '@faker-js/faker/locale/pt_BR';
+import { faker } from '@faker-js/faker';
 
 // Generate mock portfolio images
-const generatePortfolioImages = (count: number = 6) => {
+const generatePortfolioImages = (count = 6) => {
   return Array.from({ length: count }, (_, i) => ({
     id: faker.string.uuid(),
     image_url: `https://picsum.photos/seed/${faker.number.int({ min: 100, max: 999 })}/600/800`,
