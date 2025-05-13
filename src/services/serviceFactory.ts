@@ -1,4 +1,3 @@
-
 import { appConfig } from "@/config/appConfig";
 
 // Interfaces
@@ -7,6 +6,7 @@ import { IAuthService } from "./interfaces/IAuthService";
 import { IProductService } from "./interfaces/IProductService";
 import { IDashboardService } from "./interfaces/IDashboardService";
 import { IArtistsService } from "./interfaces/IArtistsService";
+import { ITrackingService } from "./interfaces/ITrackingService";
 
 // Mock services
 import { mockBlogService } from "./mock/mockBlogService";
@@ -14,6 +14,7 @@ import { mockAuthService } from "./mock/mockAuthService";
 import { mockProductService } from "./mock/mockProductService";
 import { mockDashboardService } from "./mock/mockDashboardService";
 import { mockArtistsService } from "./mock/mockArtistsService";
+import { mockTrackingService } from "./mock/mockTrackingService";
 
 // Supabase services (imported lazily when needed)
 import { handleSupabaseError } from "./supabaseService";
@@ -75,3 +76,13 @@ export const getArtistsService = (): IArtistsService => {
 
 // Export the error handler for convenience
 export { handleSupabaseError };
+
+export function getTrackingService(): ITrackingService {
+  // If we're using Supabase, return the Supabase implementation
+  // if (useSupabase) {
+  //   return new SupabaseTrackingService();
+  // }
+  
+  // Otherwise return the mock implementation
+  return mockTrackingService;
+}

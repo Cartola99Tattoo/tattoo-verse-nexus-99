@@ -24,27 +24,18 @@ const specialties = [
   "Oriental"
 ];
 
-// Styles for tattoo art
-const styles = [
-  "Realismo", 
-  "Blackwork", 
-  "Aquarela", 
-  "Geométrico", 
-  "Old School"
-];
-
 interface ArtistsSidebarProps {
   queryParams: ArtistsQueryParams;
   onUpdateParams: (params: Partial<ArtistsQueryParams>) => void;
   totalResults: number;
-  isLoading?: boolean; // Add the isLoading prop as optional
+  isLoading?: boolean;
 }
 
 const ArtistsSidebar = ({ 
   queryParams, 
   onUpdateParams,
   totalResults,
-  isLoading = false // Default to false if not provided
+  isLoading = false
 }: ArtistsSidebarProps) => {
   const [searchInput, setSearchInput] = useState(queryParams.search || "");
   
@@ -65,10 +56,6 @@ const ArtistsSidebar = ({
         specialties: [...currentSpecialties, specialty] 
       });
     }
-  };
-  
-  const setStyle = (style: string | undefined) => {
-    onUpdateParams({ style });
   };
   
   const clearFilters = () => {
@@ -101,7 +88,7 @@ const ArtistsSidebar = ({
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="w-full"
-              disabled={isLoading} // Disable when loading
+              disabled={isLoading}
             />
             <Button type="submit" size="icon" disabled={isLoading}>
               <Search className="h-4 w-4" />
@@ -132,32 +119,6 @@ const ArtistsSidebar = ({
                 </Badge>
               );
             })}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Styles */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Estilo principal</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {styles.map((style) => (
-              <div 
-                key={style} 
-                className={`
-                  px-3 py-2 rounded-md cursor-pointer 
-                  ${queryParams.style === style 
-                    ? "bg-primary text-primary-foreground" 
-                    : "hover:bg-muted"}
-                  ${isLoading ? "opacity-50 pointer-events-none" : ""}
-                `}
-                onClick={() => !isLoading && setStyle(queryParams.style === style ? undefined : style)}
-              >
-                {style}
-              </div>
-            ))}
           </div>
         </CardContent>
       </Card>

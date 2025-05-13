@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import BlogCard from "@/components/blog/BlogCard";
+import BlogSidebar from "@/components/blog/BlogSidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search, Filter } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { getBlogService } from "@/services/serviceFactory";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { BlogQueryParams } from "@/services/interfaces/IBlogService";
@@ -25,6 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Filter } from "lucide-react";
 
 const ITEMS_PER_PAGE = 9;
 const sortOptions = [
@@ -316,66 +317,6 @@ const Blog = () => {
             </div>
           </div>
           
-          {/* Categories */}
-          <div className="mt-4">
-            <h2 className="text-sm font-medium text-gray-700 mb-2">Categorias:</h2>
-            <div className="flex flex-wrap gap-2">
-              {isLoadingCategories ? (
-                <div className="flex items-center">
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  <span className="text-sm text-gray-500">Carregando categorias...</span>
-                </div>
-              ) : (
-                categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => handleCategoryChange(category)}
-                    className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                      activeCategory === category
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                    aria-pressed={activeCategory === category}
-                    aria-label={`Filtrar por ${category}`}
-                  >
-                    {category}
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-          
-          {/* Tags */}
-          {tagsData && tagsData.length > 0 && (
-            <div className="mt-4">
-              <h2 className="text-sm font-medium text-gray-700 mb-2">Tags:</h2>
-              <div className="flex flex-wrap gap-2">
-                {isLoadingTags ? (
-                  <div className="flex items-center">
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    <span className="text-sm text-gray-500">Carregando tags...</span>
-                  </div>
-                ) : (
-                  tagsData.map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => handleTagChange(tag)}
-                      className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                        activeTag === tag
-                          ? "bg-red-500 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
-                      aria-pressed={activeTag === tag}
-                      aria-label={`Filtrar por tag ${tag}`}
-                    >
-                      {tag}
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
-          
           {/* Filter status summary */}
           {(activeCategory !== "Todos" || activeTag || searchQuery) && (
             <div className="mt-4 text-sm text-gray-600">
@@ -390,80 +331,101 @@ const Blog = () => {
         </div>
       </div>
 
-      {/* Blog content with loading state */}
+      {/* Blog content with sidebar layout */}
       <div className="container mx-auto px-4 py-12">
-        {isLoadingPosts ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-12 w-12 animate-spin text-red-500 mb-4" />
-            <p className="text-lg text-gray-600">Carregando artigos...</p>
-          </div>
-        ) : postsError ? (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-bold mb-2 text-red-500">Erro ao carregar artigos</h3>
-            <p className="text-gray-600 mb-4">Ocorreu um erro ao carregar os artigos. Por favor, tente novamente.</p>
-            <Button onClick={() => refreshPosts()}>Tentar novamente</Button>
-          </div>
-        ) : posts.length > 0 ? (
-          <>
-            {/* Featured post only on first page with no filters */}
-            {currentPage === 1 && activeCategory === "Todos" && !activeTag && !searchQuery && posts.length > 0 && (
-              <div className="mb-12">
-                <BlogCard post={posts[0]} variant="featured" />
-              </div>
-            )}
-
-            {/* Blog grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts
-                .slice(
-                  currentPage === 1 && activeCategory === "Todos" && !activeTag && !searchQuery ? 1 : 0
-                )
-                .map((post) => (
-                  <BlogCard key={post.id} post={post} />
-                ))}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar with filters - moved to the left side */}
+          <div className="lg:w-1/4 order-2 lg:order-1">
+            <div className="lg:sticky lg:top-24">
+              <BlogSidebar 
+                categories={categories}
+                activeCategory={activeCategory}
+                onCategoryChange={handleCategoryChange}
+                tags={tagsData}
+                activeTag={activeTag}
+                onTagChange={handleTagChange}
+                isLoadingCategories={isLoadingCategories}
+                isLoadingTags={isLoadingTags}
+              />
             </div>
+          </div>
+          
+          {/* Main content */}
+          <div className="lg:w-3/4 order-1 lg:order-2">
+            {isLoadingPosts ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="h-12 w-12 animate-spin text-red-500 mb-4" />
+                <p className="text-lg text-gray-600">Carregando artigos...</p>
+              </div>
+            ) : postsError ? (
+              <div className="text-center py-12">
+                <h3 className="text-xl font-bold mb-2 text-red-500">Erro ao carregar artigos</h3>
+                <p className="text-gray-600 mb-4">Ocorreu um erro ao carregar os artigos. Por favor, tente novamente.</p>
+                <Button onClick={() => refreshPosts()}>Tentar novamente</Button>
+              </div>
+            ) : posts.length > 0 ? (
+              <>
+                {/* Featured post only on first page with no filters */}
+                {currentPage === 1 && activeCategory === "Todos" && !activeTag && !searchQuery && posts.length > 0 && (
+                  <div className="mb-12">
+                    <BlogCard post={posts[0]} variant="featured" />
+                  </div>
+                )}
 
-            {/* Pagination */}
-            {totalPages > 0 && (
-              <div className="mt-12">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-                        className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
-                      />
-                    </PaginationItem>
-                    
-                    {/* Dynamic pagination items */}
-                    {generatePaginationItems()}
-                    
-                    <PaginationItem>
-                      <PaginationNext
-                        onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-                        className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+                {/* Blog grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+                  {posts
+                    .slice(
+                      currentPage === 1 && activeCategory === "Todos" && !activeTag && !searchQuery ? 1 : 0
+                    )
+                    .map((post) => (
+                      <BlogCard key={post.id} post={post} />
+                    ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 0 && (
+                  <div className="mt-12">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                            className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                          />
+                        </PaginationItem>
+                        
+                        {/* Dynamic pagination items */}
+                        {generatePaginationItems()}
+                        
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+                            className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <Card className="max-w-lg mx-auto p-6">
+                  <CardContent className="pt-6">
+                    <h3 className="text-xl font-bold mb-2">Nenhum artigo encontrado</h3>
+                    <p className="text-gray-600 mb-4">
+                      Não encontramos artigos que correspondam aos filtros aplicados.
+                    </p>
+                    <Button onClick={handleResetFilters}>
+                      Ver todos os artigos
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             )}
-          </>
-        ) : (
-          <div className="text-center py-12">
-            <Card className="max-w-lg mx-auto p-6">
-              <CardContent className="pt-6">
-                <h3 className="text-xl font-bold mb-2">Nenhum artigo encontrado</h3>
-                <p className="text-gray-600 mb-4">
-                  Não encontramos artigos que correspondam aos filtros aplicados.
-                </p>
-                <Button onClick={handleResetFilters}>
-                  Ver todos os artigos
-                </Button>
-              </CardContent>
-            </Card>
           </div>
-        )}
+        </div>
       </div>
       
       {/* Newsletter signup section */}
@@ -489,4 +451,3 @@ const Blog = () => {
 };
 
 export default Blog;
-
