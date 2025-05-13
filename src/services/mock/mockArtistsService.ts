@@ -36,13 +36,10 @@ const mockArtists = Array.from({ length: 8 }, (_, index) => {
       instagram: `@${firstName.toLowerCase()}_tattoo`,
       facebook: `${firstName.toLowerCase()}.${lastName.toLowerCase()}`
     },
-    rating: faker.number.float({ min: 4.0, max: 5.0, fractionDigits: 1 }), // Changed precision to fractionDigits
+    rating: faker.number.float({ min: 4.0, max: 5.0, fractionDigits: 1 }),
     total_reviews: faker.number.int({ min: 5, max: 200 })
   };
 });
-
-// Define valid categories as a type for better type checking
-type ValidCategory = 'Blackwork' | 'Realismo' | 'Aquarela' | 'Old School' | 'Minimalista' | 'Geométrico' | 'Tribal' | 'Oriental';
 
 // Artists service interface implementation
 export const mockArtistsService = {
@@ -66,6 +63,7 @@ export const mockArtistsService = {
     }
     
     if (options?.style) {
+      // Fix type error by using string comparison instead of strictly typed comparison
       filteredArtists = filteredArtists.filter(artist => 
         artist.style.toLowerCase() === options.style?.toLowerCase()
       );
