@@ -1,17 +1,24 @@
-
 import { toast } from "@/components/ui/use-toast";
 import { supabase, isSupabaseConnected, warnNotConnected } from "@/integrations/supabase/client";
 import { appConfig } from "@/config/appConfig";
 import { getBlogService } from "./serviceFactory";
 import { getProductService } from "./serviceFactory";
 import { getDashboardService } from "./serviceFactory";
+import { getArtistsService } from "./serviceFactory";
 
 /**
  * Fetches blog posts from Supabase with author and category information
- * @param limit Optional number of posts to fetch
+ * @param options Optional filtering and pagination options
  * @returns Array of blog posts with authors and categories
  */
-export async function fetchBlogPosts(options?: { limit?: number }) {
+export async function fetchBlogPosts(options?: { 
+  limit?: number,
+  page?: number,
+  category?: string,
+  tag?: string,
+  search?: string,
+  sort?: "latest" | "oldest" | "popular"
+}) {
   if (appConfig.dataSource.useMockData) {
     const blogService = getBlogService();
     return blogService.fetchBlogPosts(options);
@@ -383,6 +390,207 @@ export async function fetchDashboardStats() {
       variant: "destructive"
     });
     return null;
+  }
+}
+
+/**
+ * Fetches all tattoo artists from the database
+ * @param options Optional filtering and pagination options
+ * @returns Array of artists with their information
+ */
+export async function fetchArtists(options?: {
+  limit?: number;
+  offset?: number;
+  specialties?: string[];
+  style?: string;
+  search?: string;
+}) {
+  if (appConfig.dataSource.useMockData) {
+    const artistsService = getArtistsService();
+    return artistsService.fetchArtists(options);
+  }
+  
+  if (!isSupabaseConnected()) {
+    return warnNotConnected();
+  }
+  
+  try {
+    let query = supabase
+      .from('artists')
+      .select(`
+        id,
+        first_name,
+        last_name,
+        bio,
+        avatar_url,
+        specialties,
+        style,
+        contact,
+        rating,
+        total_reviews
+      `);
+    
+    // Apply filters
+    if (options?.specialties && options.specialties.length > 0) {
+      query = query.overlaps('specialties', options.specialties);
+    }
+    
+    if (options?.style) {
+      query = query.eq('style', options.style);
+    }
+    
+    if (options?.search) {
+      query = query.or(`first_name.ilike.%${options.search}%,last_name.ilike.%${options.search}%`);
+    }
+    
+    // Apply pagination
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    
+    if (options?.offset) {
+      query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error("Error fetching artists:", error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in fetchArtists:", error);
+    toast({
+      title: "Erro ao carregar tatuadores",
+      description: "Não foi possível carregar a lista de tatuadores.",
+      variant: "destructive"
+    });
+    return [];
+  }
+}
+
+/**
+ * Fetches a single artist by ID
+ * @param id Artist ID
+ * @returns Artist data or null if not found
+ */
+export async function fetchArtistById(id: string | number) {
+  if (appConfig.dataSource.useMockData) {
+    const artistsService = getArtistsService();
+    return artistsService.fetchArtistById(id);
+  }
+  
+  if (!isSupabaseConnected()) {
+    return warnNotConnected();
+  }
+  
+  try {
+    const { data, error } = await supabase
+      .from('artists')
+      .select(`
+        id,
+        first_name,
+        last_name,
+        bio,
+        avatar_url,
+        specialties,
+        style,
+        portfolio,
+        contact,
+        rating,
+        total_reviews
+      `)
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Not found error
+        return null;
+      }
+      console.error("Error fetching artist:", error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error in fetchArtistById:", error);
+    toast({
+      title: "Erro ao carregar tatuador",
+      description: "Não foi possível carregar os detalhes do tatuador.",
+      variant: "destructive"
+    });
+    return null;
+  }
+}
+
+/**
+ * Fetches portfolio images for an artist
+ * @param artistId Artist ID
+ * @param options Optional filtering and pagination options
+ * @returns Array of portfolio images
+ */
+export async function fetchArtistPortfolio(artistId: string | number, options?: {
+  limit?: number;
+  offset?: number;
+  category?: string;
+}) {
+  if (appConfig.dataSource.useMockData) {
+    const artistsService = getArtistsService();
+    return artistsService.fetchArtistPortfolio(artistId, options);
+  }
+  
+  if (!isSupabaseConnected()) {
+    return warnNotConnected();
+  }
+  
+  try {
+    let query = supabase
+      .from('artist_portfolio')
+      .select(`
+        id,
+        image_url,
+        description,
+        category,
+        created_at
+      `)
+      .eq('artist_id', artistId);
+    
+    // Apply filters
+    if (options?.category) {
+      query = query.eq('category', options.category);
+    }
+    
+    // Apply pagination
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    
+    if (options?.offset) {
+      query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+    }
+    
+    // Order by created date, newest first
+    query = query.order('created_at', { ascending: false });
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error("Error fetching artist portfolio:", error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in fetchArtistPortfolio:", error);
+    toast({
+      title: "Erro ao carregar portfólio",
+      description: "Não foi possível carregar o portfólio do tatuador.",
+      variant: "destructive"
+    });
+    return [];
   }
 }
 

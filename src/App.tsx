@@ -10,6 +10,8 @@ import Shop from "./pages/Shop";
 import ProductDetail from "./pages/ProductDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import Artists from "./pages/Artists";
+import ArtistDetail from "./pages/ArtistDetail";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
 import AdminAuth from "./pages/AdminAuth";
@@ -51,6 +53,8 @@ const App = () => (
             <Route path="/shop/:id" element={<ProductDetail />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/artists" element={<Artists />} />
+            <Route path="/artists/:id" element={<ArtistDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin-auth" element={<AdminAuth />} />
