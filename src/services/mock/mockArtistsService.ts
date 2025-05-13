@@ -36,10 +36,13 @@ const mockArtists = Array.from({ length: 8 }, (_, index) => {
       instagram: `@${firstName.toLowerCase()}_tattoo`,
       facebook: `${firstName.toLowerCase()}.${lastName.toLowerCase()}`
     },
-    rating: faker.number.float({ min: 4.0, max: 5.0, precision: 0.1 }),
+    rating: faker.number.float({ min: 4.0, max: 5.0, fractionDigits: 1 }), // Changed precision to fractionDigits
     total_reviews: faker.number.int({ min: 5, max: 200 })
   };
 });
+
+// Define valid categories as a type for better type checking
+type ValidCategory = 'Blackwork' | 'Realismo' | 'Aquarela' | 'Old School' | 'Minimalista' | 'Geométrico' | 'Tribal' | 'Oriental';
 
 // Artists service interface implementation
 export const mockArtistsService = {
@@ -119,7 +122,7 @@ export const mockArtistsService = {
     
     let portfolio = [...artist.portfolio];
     
-    // Apply filters
+    // Apply filters - Use type assertion to handle string comparison safely
     if (options?.category) {
       portfolio = portfolio.filter(item => 
         item.category.toLowerCase() === options.category?.toLowerCase()
