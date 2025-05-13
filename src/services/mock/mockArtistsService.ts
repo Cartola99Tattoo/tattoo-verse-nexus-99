@@ -57,8 +57,13 @@ export const mockArtistsService = {
     
     // Apply filters
     if (options?.specialties && options.specialties.length > 0) {
+      // Fix type error by using string comparison instead of strict typing
       filteredArtists = filteredArtists.filter(artist => 
-        options.specialties?.some(specialty => artist.specialties.includes(specialty))
+        options.specialties?.some(specialty => 
+          artist.specialties.some(artSpecialty => 
+            artSpecialty.toLowerCase() === specialty.toLowerCase()
+          )
+        )
       );
     }
     
