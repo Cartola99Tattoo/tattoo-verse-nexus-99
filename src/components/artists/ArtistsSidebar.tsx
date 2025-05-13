@@ -37,12 +37,14 @@ interface ArtistsSidebarProps {
   queryParams: ArtistsQueryParams;
   onUpdateParams: (params: Partial<ArtistsQueryParams>) => void;
   totalResults: number;
+  isLoading?: boolean; // Add the isLoading prop as optional
 }
 
 const ArtistsSidebar = ({ 
   queryParams, 
   onUpdateParams,
-  totalResults
+  totalResults,
+  isLoading = false // Default to false if not provided
 }: ArtistsSidebarProps) => {
   const [searchInput, setSearchInput] = useState(queryParams.search || "");
   
@@ -99,8 +101,9 @@ const ArtistsSidebar = ({
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="w-full"
+              disabled={isLoading} // Disable when loading
             />
-            <Button type="submit" size="icon">
+            <Button type="submit" size="icon" disabled={isLoading}>
               <Search className="h-4 w-4" />
               <span className="sr-only">Buscar</span>
             </Button>
@@ -122,8 +125,8 @@ const ArtistsSidebar = ({
                 <Badge
                   key={specialty}
                   variant={isActive ? "default" : "outline"}
-                  className={`cursor-pointer ${isActive ? "bg-primary" : "hover:bg-primary/10"}`}
-                  onClick={() => toggleSpecialty(specialty)}
+                  className={`cursor-pointer ${isActive ? "bg-primary" : "hover:bg-primary/10"} ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+                  onClick={() => !isLoading && toggleSpecialty(specialty)}
                 >
                   {specialty}
                 </Badge>
@@ -148,8 +151,9 @@ const ArtistsSidebar = ({
                   ${queryParams.style === style 
                     ? "bg-primary text-primary-foreground" 
                     : "hover:bg-muted"}
+                  ${isLoading ? "opacity-50 pointer-events-none" : ""}
                 `}
-                onClick={() => setStyle(queryParams.style === style ? undefined : style)}
+                onClick={() => !isLoading && setStyle(queryParams.style === style ? undefined : style)}
               >
                 {style}
               </div>
@@ -169,6 +173,7 @@ const ArtistsSidebar = ({
             variant="outline" 
             size="sm" 
             onClick={clearFilters}
+            disabled={isLoading}
             className="flex items-center gap-2"
           >
             <X className="h-4 w-4" />
