@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Loader2, Instagram, Facebook, Mail, Phone, Map } from "lucide-react";
+import { ArrowLeft, Loader2, Map, Star } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getArtistsService } from "@/services/serviceFactory";
@@ -9,15 +9,15 @@ import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Artist, PortfolioItem } from "@/services/interfaces/IArtistsService";
-import ArtistPortfolio from "@/components/artists/ArtistPortfolio";
+import ArtistContactForm from "@/components/artists/ArtistContactForm";
 
 const ArtistDetail = () => {
   const { id } = useParams<{ id: string }>();
   const artistsService = getArtistsService();
   const [artist, setArtist] = useState<Artist | null>(null);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [selectedImage, setSelectedImage] = useState<PortfolioItem | null>(null);
   
   // Fetch artist details
   const { 
@@ -118,11 +118,11 @@ const ArtistDetail = () => {
             <p className="text-lg text-gray-600">Carregando informações do tatuador...</p>
           </div>
         ) : artist ? (
-          <>
+          <div className="animate-fade-in space-y-12">
             {/* Artist header */}
-            <div className="flex flex-col md:flex-row gap-8 mb-12 animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Avatar column */}
-              <div className="md:w-1/3">
+              <div className="md:col-span-1">
                 <div className="flex flex-col items-center">
                   <div className="relative mb-6 w-64 h-64">
                     <div className="absolute inset-0 bg-gradient-to-br from-red-400 to-red-600 blur-2xl opacity-20 rounded-full"></div>
@@ -142,18 +142,10 @@ const ArtistDetail = () => {
                   {artist.rating && (
                     <div className="flex items-center mb-4 bg-white px-4 py-2 rounded-full shadow-sm">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <svg 
+                        <Star 
                           key={i}
-                          xmlns="http://www.w3.org/2000/svg" 
-                          className={`h-5 w-5 ${i < Math.floor(artist.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path 
-                            fillRule="evenodd" 
-                            d="M10 15.585l6.146 3.628-1.638-7.021L20 7.329l-7.055-.602L10 0 7.055 6.726 0 7.329l5.492 4.863L3.854 19.213 10 15.585z" 
-                          />
-                        </svg>
+                          className={`h-5 w-5 ${i < Math.floor(artist.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                        />
                       ))}
                       <span className="ml-2 font-bold">{artist.rating}</span>
                       {artist.total_reviews && (
@@ -176,114 +168,115 @@ const ArtistDetail = () => {
                     </div>
                   </div>
                   
-                  {/* Contact info */}
-                  {artist.contact && (
-                    <div className="w-full">
-                      <h3 className="font-bold mb-3 text-gray-700 text-center">Contato</h3>
-                      <div className="space-y-3">
-                        {artist.contact.instagram && (
-                          <a 
-                            href={`https://instagram.com/${artist.contact.instagram.replace('@', '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
-                          >
-                            <Instagram className="h-5 w-5 text-pink-600" />
-                            <span>{artist.contact.instagram}</span>
-                          </a>
-                        )}
-                        
-                        {artist.contact.facebook && (
-                          <a 
-                            href={`https://facebook.com/${artist.contact.facebook}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
-                          >
-                            <Facebook className="h-5 w-5 text-blue-600" />
-                            <span>{artist.contact.facebook}</span>
-                          </a>
-                        )}
-                        
-                        {artist.contact.email && (
-                          <a 
-                            href={`mailto:${artist.contact.email}`}
-                            className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
-                          >
-                            <Mail className="h-5 w-5 text-gray-600" />
-                            <span>{artist.contact.email}</span>
-                          </a>
-                        )}
-                        
-                        {artist.contact.phone && (
-                          <a 
-                            href={`tel:${artist.contact.phone}`}
-                            className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
-                          >
-                            <Phone className="h-5 w-5 text-green-600" />
-                            <span>{artist.contact.phone}</span>
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  {/* Location */}
+                  <div className="flex items-center mb-6 text-gray-600">
+                    <Map className="h-4 w-4 mr-2" />
+                    <span>São Paulo, SP</span>
+                  </div>
                   
                   {/* CTA Button */}
-                  <div className="mt-6 w-full">
-                    <Button className="w-full bg-red-500 hover:bg-red-600">
-                      Agendar com {artist.first_name}
+                  <div className="w-full mt-4">
+                    <Button className="w-full bg-red-500 hover:bg-red-600" 
+                      onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}>
+                      Entrar em contato
                     </Button>
                   </div>
                 </div>
               </div>
               
               {/* Info column */}
-              <div className="md:w-2/3">
-                <h1 className="text-3xl font-bold mb-2">{fullName}</h1>
-                <div className="flex items-center mb-6">
+              <div className="md:col-span-2">
+                <h1 className="text-3xl font-bold mb-4">{fullName}</h1>
+                <div className="flex items-center mb-4">
                   <Badge variant="secondary" className="mr-2">{artist.style}</Badge>
-                  <div className="flex items-center text-gray-500">
-                    <Map className="h-4 w-4 mr-1" />
-                    <span className="text-sm">São Paulo, SP</span>
-                  </div>
                 </div>
                 
-                <Tabs defaultValue="about" className="w-full">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="about">Sobre</TabsTrigger>
-                    <TabsTrigger value="portfolio">Portfólio</TabsTrigger>
-                  </TabsList>
+                <div className="prose prose-lg max-w-full">
+                  <h2 className="text-xl font-bold mb-4">Sobre {artist.first_name}</h2>
                   
-                  <TabsContent value="about">
-                    <div className="prose prose-lg max-w-full">
-                      <h2 className="text-xl font-bold mb-4">Sobre {artist.first_name}</h2>
-                      
-                      {artist.bio.split('\n').map((paragraph, idx) => (
-                        <p key={idx} className="mb-4 text-gray-700 leading-relaxed">
-                          {paragraph}
-                        </p>
-                      ))}
-                      
-                      <h3 className="text-lg font-bold mt-8 mb-3">Estilo de trabalho</h3>
-                      <p className="text-gray-700 leading-relaxed">
-                        {artist.first_name} é especialista em <strong>{artist.style}</strong> e tem um 
-                        trabalho reconhecido pelas técnicas de {artist.specialties.join(", ")}.
-                      </p>
-                    </div>
-                  </TabsContent>
+                  {artist.bio.split('\n').map((paragraph, idx) => (
+                    <p key={idx} className="mb-4 text-gray-700 leading-relaxed">
+                      {paragraph}
+                    </p>
+                  ))}
                   
-                  <TabsContent value="portfolio">
-                    <h2 className="text-xl font-bold mb-4">Portfólio de Trabalhos</h2>
-                    <ArtistPortfolio 
-                      portfolio={portfolio} 
-                      artistName={fullName} 
-                      isLoading={isLoadingPortfolio} 
-                    />
-                  </TabsContent>
-                </Tabs>
+                  <h3 className="text-lg font-bold mt-8 mb-3">Estilo de trabalho</h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {artist.first_name} é especialista em <strong>{artist.style}</strong> e tem um 
+                    trabalho reconhecido pelas técnicas de {artist.specialties.join(", ")}.
+                  </p>
+                </div>
               </div>
             </div>
-          </>
+            
+            {/* Portfolio Section */}
+            <div>
+              <h2 className="text-2xl font-bold mb-6 border-b pb-2">Portfólio de Trabalhos</h2>
+              
+              {isLoadingPortfolio ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {[...Array(9)].map((_, index) => (
+                    <div key={index} className="aspect-square bg-gray-200 animate-pulse rounded-md"></div>
+                  ))}
+                </div>
+              ) : portfolio.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {portfolio.slice(0, 9).map((item) => (
+                      <div 
+                        key={item.id}
+                        className="aspect-square rounded-md overflow-hidden cursor-pointer hover:opacity-90 transition-all hover:scale-[1.02] shadow-md"
+                        onClick={() => setSelectedImage(item)}
+                      >
+                        <img 
+                          src={item.image_url} 
+                          alt={item.description || `Trabalho de ${fullName}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Image Modal */}
+                  {selectedImage && (
+                    <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4" onClick={() => setSelectedImage(null)}>
+                      <div className="max-w-4xl max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
+                        <img 
+                          src={selectedImage.image_url} 
+                          alt={selectedImage.description || `Trabalho de ${fullName}`}
+                          className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                        />
+                        <div className="absolute top-2 right-2">
+                          <Button 
+                            variant="outline" 
+                            size="icon"
+                            className="bg-white text-gray-900 rounded-full"
+                            onClick={() => setSelectedImage(null)}
+                          >
+                            <span className="sr-only">Fechar</span>
+                            ✕
+                          </Button>
+                        </div>
+                        <div className="bg-white p-4 rounded-b-lg">
+                          <h3 className="font-bold">{selectedImage.category || 'Trabalho'} por {fullName}</h3>
+                          {selectedImage.description && <p className="text-gray-600">{selectedImage.description}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">Este tatuador ainda não possui fotos em seu portfólio.</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Contact Form Section */}
+            <div id="contact-form" className="max-w-2xl mx-auto">
+              <ArtistContactForm artistName={artist.first_name} artistId={artist.id} />
+            </div>
+          </div>
         ) : (
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold mb-4">Tatuador não encontrado</h2>
