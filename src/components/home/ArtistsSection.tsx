@@ -53,14 +53,14 @@ const ArtistsSection = () => {
                     <div className="bg-white rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:translate-y-[-5px] h-full">
                       <div className="h-64 overflow-hidden">
                         <img
-                          src={artist.image || "https://images.unsplash.com/photo-1567008732142-53d03a7e23e1?q=80&w=2073&auto=format&fit=crop"}
-                          alt={artist.name}
+                          src={artist.avatar_url || "https://images.unsplash.com/photo-1567008732142-53d03a7e23e1?q=80&w=2073&auto=format&fit=crop"}
+                          alt={`${artist.first_name} ${artist.last_name}`}
                           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                         />
                       </div>
                       <div className="p-6">
-                        <h3 className="text-xl font-bold mb-1">{artist.name}</h3>
-                        <p className="text-red-500 font-semibold mb-3">Especialidade: {artist.specialty}</p>
+                        <h3 className="text-xl font-bold mb-1">{`${artist.first_name} ${artist.last_name}`}</h3>
+                        <p className="text-red-500 font-semibold mb-3">Especialidade: {artist.style}</p>
                         <p className="text-gray-600 mb-4 line-clamp-3">{artist.bio}</p>
                         <Link 
                           to={`/artists/${artist.id}`}
