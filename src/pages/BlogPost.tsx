@@ -1,4 +1,3 @@
-
 import { useParams, Navigate } from "react-router-dom";
 import { useBlogPost } from "@/hooks/useBlogPost";
 import Layout from "@/components/layout/Layout";
@@ -7,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Helmet } from "react-helmet-async";
+import ContactForm from "@/components/common/ContactForm";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -280,6 +280,23 @@ const BlogPost = () => {
               </div>
             </div>
           </article>
+
+          {/* Seção de CTA com formulário */}
+          <section className="py-12 bg-gray-100">
+            <div className="container mx-auto px-4 max-w-4xl">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold">Gostou do conteúdo?</h3>
+                <p className="text-gray-600">Fale com um de nossos tatuadores para realizar seu projeto!</p>
+              </div>
+              
+              <ContactForm 
+                sourcePage={`blog-post-${post?.id}`} 
+                title="Solicite um orçamento"
+                description="Preencha seus dados e enviaremos um orçamento personalizado baseado nas suas ideias."
+                className="max-w-md mx-auto"
+              />
+            </div>
+          </section>
         </>
       )}
     </Layout>

@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Checkout from "./pages/Checkout";
 import AdminUserSetup from "./pages/AdminUserSetup";
+import Events from "./pages/Events";
 
 // Dashboard do Admin
 import Dashboard from "./pages/admin/Dashboard";
@@ -39,58 +40,53 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <HelmetProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Rotas públicas */}
-            <Route path="/" element={<Index />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/shop/:id" element={<ProductDetail />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/artists" element={<Artists />} />
-            <Route path="/artists/:id" element={<ArtistDetail />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/admin-auth" element={<AdminAuth />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/access-denied" element={<AccessDenied />} />
-            <Route path="/admin-setup" element={<AdminUserSetup />} />
-
-            {/* Rotas protegidas (requer login) */}
-            <Route element={<ProtectedRoute />}>
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <HelmetProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Rotas públicas */}
+              <Route path="/" element={<Index />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/shop/:id" element={<ProductDetail />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/artists" element={<Artists />} />
+              <Route path="/artists/:id" element={<ArtistDetail />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/admin-auth" element={<AdminAuth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/access-denied" element={<AccessDenied />} />
+              <Route path="/admin-setup" element={<AdminUserSetup />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/user-profile" element={<UserProfile />} />
               <Route path="/checkout" element={<Checkout />} />
-            </Route>
 
-            {/* Rotas específicas para administração */}
-            <Route element={<ProtectedRoute requiredRole="admin" />}>
+              {/* Rotas específicas para administração */}
               <Route path="/admin" element={<Dashboard />} />
               <Route path="/admin/products" element={<Products />} />
-              <Route path="/admin/loyalty" element={<Dashboard />} /> {/* Placeholder - usar Dashboard temporariamente */}
-              <Route path="/admin/analytics" element={<Dashboard />} /> {/* Placeholder - usar Dashboard temporariamente */}
-              <Route path="/admin/security" element={<Dashboard />} /> {/* Placeholder - usar Dashboard temporariamente */}
-            </Route>
+              <Route path="/admin/loyalty" element={<Dashboard />} />
+              <Route path="/admin/analytics" element={<Dashboard />} />
+              <Route path="/admin/security" element={<Dashboard />} />
 
-            {/* Rotas específicas para artistas */}
-            <Route element={<ProtectedRoute requiredRole="artista" />}>
+              {/* Rotas específicas para artistas */}
               <Route path="/admin" element={<Dashboard />} />
               <Route path="/admin/products" element={<Products />} />
-            </Route>
 
-            {/* Rota 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </HelmetProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+              {/* Rota 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </HelmetProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

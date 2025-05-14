@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -11,6 +10,7 @@ import RelatedProducts from "@/components/shop/RelatedProducts";
 import ProductGallery from "@/components/shop/ProductGallery";
 import ArtistInfo from "@/components/shop/ArtistInfo";
 import ProductReviews from "@/components/shop/ProductReviews";
+import ContactForm from "@/components/common/ContactForm";
 
 // Dados simulados - em produção, isso viria de uma API
 const getProductById = (id: number) => {
@@ -349,6 +349,24 @@ const ProductDetail = () => {
         {/* Related Products */}
         <RelatedProducts currentProductId={product.id} category={product.category} />
       </div>
+      
+      {/* Seção de CTA com formulário */}
+      <section className="py-12 bg-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold">Quer uma tatuagem personalizada?</h3>
+            <p className="text-gray-600">Entre em contato conosco para discutir seu projeto!</p>
+          </div>
+          
+          <ContactForm 
+            sourcePage={`product-${product?.id}`} 
+            title="Solicite um orçamento personalizado"
+            description="Informe seus dados e descreva sua ideia. Um de nossos tatuadores entrará em contato."
+            className="max-w-md mx-auto"
+            buttonText="Solicitar Tatuagem Personalizada"
+          />
+        </div>
+      </section>
     </Layout>
   );
 };

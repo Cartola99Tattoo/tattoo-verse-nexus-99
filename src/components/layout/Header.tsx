@@ -50,7 +50,7 @@ const Header = () => {
     { name: "Tatuadores", path: "/artists", icon: <Users className="h-4 w-4 mr-1" /> },
     { name: "Blog", path: "/blog", icon: <BookOpen className="h-4 w-4 mr-1" /> },
     { name: "Loja", path: "/shop", icon: <ShoppingBag className="h-4 w-4 mr-1" /> },
-    { name: "Eventos", path: "/contact?section=events", icon: <Calendar className="h-4 w-4 mr-1" /> },
+    { name: "Eventos", path: "/events", icon: <Calendar className="h-4 w-4 mr-1" /> },
     { name: "Contato", path: "/contact", icon: <Phone className="h-4 w-4 mr-1" /> },
   ];
 
@@ -58,15 +58,15 @@ const Header = () => {
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         isScrolled || location.pathname !== "/"
-          ? "bg-white text-black shadow-md py-3"
-          : "bg-transparent text-white py-5"
+          ? "bg-black text-white shadow-md py-3"
+          : "bg-black text-white py-5"
       }`}
     >
       <div className="container mx-auto px-4 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold flex items-center">
           <span className="text-red-500">99</span>
-          <span className={isScrolled || location.pathname !== "/" ? "text-black" : "text-white"}>Tattoo</span>
+          <span className="text-white">Tattoo</span>
         </Link>
 
         {/* Navegação desktop */}
@@ -77,9 +77,7 @@ const Header = () => {
               to={link.path}
               className={`transition-colors flex items-center ${
                 isActive(link.path)
-                  ? "font-medium text-red-500"
-                  : isScrolled || location.pathname !== "/"
-                  ? "text-gray-800 hover:text-red-500"
+                  ? "font-medium text-white bg-red-500 px-4 py-2 rounded-md bg-gradient-to-b from-red-400 to-red-600 shadow-md"
                   : "text-white hover:text-red-300"
               }`}
             >
@@ -90,7 +88,7 @@ const Header = () => {
           
           <CartButton />
           
-          {user ? (
+          {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -114,14 +112,6 @@ const Header = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <Button
-              asChild
-              className="bg-red-500 hover:bg-red-600 text-white"
-              size="sm"
-            >
-              <Link to="/auth">Entrar</Link>
-            </Button>
           )}
           
           <Button 
@@ -163,11 +153,7 @@ const Header = () => {
           )}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`p-1 ${
-              isScrolled || location.pathname !== "/"
-                ? "text-black"
-                : "text-white"
-            }`}
+            className="p-1 text-white"
             aria-label="Abrir menu"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -177,14 +163,16 @@ const Header = () => {
 
       {/* Menu móvel expansível */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg animate-fade-in">
+        <div className="md:hidden bg-black shadow-lg animate-fade-in">
           <nav className="container mx-auto px-4 py-4 flex flex-col space-y-4">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 className={`p-2 flex items-center ${
-                  isActive(link.path) ? "font-medium text-red-500" : "text-gray-800"
+                  isActive(link.path) 
+                    ? "font-medium text-white bg-red-500 px-4 py-2 rounded-md bg-gradient-to-b from-red-400 to-red-600 shadow-md" 
+                    : "text-white"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -192,16 +180,6 @@ const Header = () => {
                 {link.name}
               </Link>
             ))}
-            {!user && (
-              <Button
-                asChild
-                className="bg-red-500 hover:bg-red-600 text-white w-full"
-              >
-                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                  Entrar / Cadastrar
-                </Link>
-              </Button>
-            )}
             <Button
               asChild
               className="bg-red-500 hover:bg-red-600 text-white w-full"

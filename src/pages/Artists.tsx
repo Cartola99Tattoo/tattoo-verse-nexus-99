@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -17,6 +16,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
+import ContactForm from "@/components/common/ContactForm";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -287,6 +287,59 @@ const Artists = () => {
           </div>
         </div>
       </div>
+      
+      {/* Seção de CTA com formulário */}
+      <section className="py-16 bg-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <h2 className="text-3xl font-bold mb-6">Pronto para fazer sua tatuagem?</h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Preencha o formulário ao lado e um de nossos tatuadores entrará em contato para realizar seu orçamento personalizado.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="bg-red-500 p-2 rounded-full mt-1 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg">Profissionais Qualificados</h4>
+                    <p className="text-gray-600">Equipe com anos de experiência e diversos prêmios em convenções.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="bg-red-500 p-2 rounded-full mt-1 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg">Estúdio Certificado</h4>
+                    <p className="text-gray-600">Ambiente seguro, higienizado e com os melhores equipamentos.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="bg-red-500 p-2 rounded-full mt-1 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg">Projetos Personalizados</h4>
+                    <p className="text-gray-600">Criamos designs exclusivos baseados nas suas ideias e preferências.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <ContactForm sourcePage="artists-page" />
+          </div>
+        </div>
+      </section>
       
       {/* CTA section */}
       <div className="bg-gradient-to-r from-red-50 to-red-100 py-16">

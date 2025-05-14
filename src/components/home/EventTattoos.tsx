@@ -1,95 +1,88 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Calendar } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 
 const EventTattoos = () => {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      },
-      {
-        threshold: 0.1,
-      }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, []);
-
   return (
-    <section 
-      ref={sectionRef}
-      className="py-20 relative overflow-hidden"
-      style={{
-        backgroundImage: "linear-gradient(to right, #d61f3f, #ea384c, #ff596f)",
-      }}
-    >
-      <div className="absolute top-0 left-0 w-full h-full opacity-20">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1615212814093-f56085288bd1?q=80&w=2128&auto=format&fit=crop')] bg-cover bg-center"></div>
-      </div>
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <section className="py-20 bg-gradient-to-r from-black to-gray-900 text-white">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div 
-            className={`transition-all duration-1000 transform ${
-              isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
-            }`}
+            className="rounded-lg overflow-hidden h-[500px]" 
+            style={{
+              backgroundImage: "url(https://images.unsplash.com/photo-1595475207225-428b62bda831?q=80&w=2069&auto=format&fit=crop)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Tatuagens em Festas e Eventos
-            </h2>
-            <p className="text-white/90 text-lg mb-6 leading-relaxed">
-              Transforme seu evento com uma experiência única e memorável. Oferecemos serviço de tatuagens para festas corporativas, casamentos, aniversários e eventos especiais.
-            </p>
-            <p className="text-white/90 text-lg mb-8 leading-relaxed">
-              Nós da 99Tattoo priorizamos fechar parcerias com estúdios de tatuagem que levam a sua segurança e acolhimento a sério e com total prioridade! Com ambientes limpos, calmos e higienizados seguindo as normas de bio-segurança. Reserve seu horário hoje mesmo com um de nossos tatuadores!
-            </p>
-            <Button
-              asChild
-              size="lg"
-              className="bg-white text-red-500 hover:bg-gray-100 font-bold px-8 py-6 text-lg hover-scale"
-            >
-              <Link to="/contact" className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Solicite um Orçamento
-              </Link>
-            </Button>
+            <div className="w-full h-full bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8">
+              <span className="bg-red-500 text-white px-4 py-1 rounded-full text-sm font-semibold inline-block mb-4 w-max">
+                Novo
+              </span>
+              <h3 className="text-2xl font-bold mb-2">Festas & Eventos Corporativos</h3>
+              <p className="mb-4 opacity-90">
+                Flash tattoos e performances ao vivo
+              </p>
+            </div>
           </div>
-          <div 
-            className={`transition-all duration-1000 delay-300 transform ${
-              isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
-            }`}
-          >
-            <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1556195332-95503f664ced?q=80&w=2071&auto=format&fit=crop"
-                alt="Tatuagens em eventos"
-                className="w-full h-auto rounded-lg shadow-xl"
-              />
-              <div className="absolute -bottom-5 -right-5 bg-white p-4 rounded-lg shadow-lg rotate-6 animate-pulse">
-                <p className="text-red-500 font-bold text-xl">Perfeito para:</p>
-                <ul className="text-gray-700">
-                  <li>• Festas corporativas</li>
-                  <li>• Casamentos</li>
-                  <li>• Aniversários</li>
-                  <li>• Eventos especiais</li>
-                </ul>
+          
+          <div className="space-y-6">
+            <h2 className="text-4xl md:text-5xl font-bold">
+              <span className="text-red-500">Eleve seu evento</span> com 
+              <br />tatuagens exclusivas
+            </h2>
+            
+            <p className="text-lg opacity-90">
+              Transforme seu evento em uma experiência inesquecível com nosso serviço de tatuagens para festas, eventos corporativos e celebrações especiais.
+            </p>
+            
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <div className="bg-red-500 p-2 rounded-full mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg">Artistas Premiados</h4>
+                  <p className="opacity-80">Nossa equipe de tatuadores talentosos traz profissionalismo e excelência para qualquer evento.</p>
+                </div>
               </div>
+              
+              <div className="flex items-start space-x-3">
+                <div className="bg-red-500 p-2 rounded-full mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg">Personalização Total</h4>
+                  <p className="opacity-80">Designs exclusivos para seu evento, seja corporativo, casamento ou festa particular.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <div className="bg-red-500 p-2 rounded-full mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg">Experiência Inesquecível</h4>
+                  <p className="opacity-80">Crie memórias duradouras para seus convidados com uma atividade interativa e única.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="pt-4">
+              <Button 
+                asChild
+                className="bg-red-500 hover:bg-red-600 text-white px-8 py-6 rounded-md text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                <Link to="/events">
+                  Reserve para seu evento
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
