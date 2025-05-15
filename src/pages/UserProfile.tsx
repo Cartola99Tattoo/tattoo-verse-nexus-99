@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -66,6 +65,45 @@ const preferencesSchema = z.object({
   notes: z.string().optional(),
 });
 
+// Schema para o formulário da jornada
+const journeySchema = z.object({
+  music_styles: z.array(z.string()).optional(),
+  music_style_other: z.string().optional(),
+  favorite_artist: z.string().optional(),
+  
+  favorite_movie: z.string().optional(),
+  favorite_character: z.string().optional(),
+  
+  self_description_word: z.string().optional(),
+  self_representation_phrase: z.string().optional(),
+  self_representation_other: z.string().optional(),
+  
+  tattoo_feeling: z.string().optional(),
+  tattoo_feeling_other: z.string().optional(),
+  tattoo_message: z.string().optional(),
+  tattoo_preference: z.string().optional(),
+  
+  spiritual_symbol: z.string().optional(),
+  archetype: z.string().optional(),
+  archetype_other: z.string().optional(),
+  
+  dream_scene: z.string().optional(),
+  illustration_type: z.string().optional(),
+  illustration_type_other: z.string().optional(),
+  
+  life_phase: z.string().optional(),
+  art_experience: z.string().optional(),
+  tattoo_title: z.string().optional(),
+  
+  community_experiences: z.array(z.string()).optional(),
+  community_other: z.string().optional(),
+  want_suggestions: z.string().optional(),
+  
+  inspiration_sources: z.array(z.string()).optional(),
+  inspiration_other: z.string().optional(),
+  interaction_frequency: z.string().optional(),
+});
+
 const UserProfile = () => {
   const { profile, updateProfile } = useAuth();
   const { toast } = useToast();
@@ -119,6 +157,48 @@ const UserProfile = () => {
       },
       notes: "",
     },
+  });
+
+  // Formulário da jornada
+  const journeyForm = useForm<z.infer<typeof journeySchema>>({
+    resolver: zodResolver(journeySchema),
+    defaultValues: {
+      music_styles: [],
+      music_style_other: "",
+      favorite_artist: "",
+      
+      favorite_movie: "",
+      favorite_character: "",
+      
+      self_description_word: "",
+      self_representation_phrase: "",
+      self_representation_other: "",
+      
+      tattoo_feeling: "",
+      tattoo_feeling_other: "",
+      tattoo_message: "",
+      tattoo_preference: "",
+      
+      spiritual_symbol: "",
+      archetype: "",
+      archetype_other: "",
+      
+      dream_scene: "",
+      illustration_type: "",
+      illustration_type_other: "",
+      
+      life_phase: "",
+      art_experience: "",
+      tattoo_title: "",
+      
+      community_experiences: [],
+      community_other: "",
+      want_suggestions: "",
+      
+      inspiration_sources: [],
+      inspiration_other: "",
+      interaction_frequency: "",
+    }
   });
 
   // Submissão do formulário de informações pessoais
@@ -176,6 +256,33 @@ const UserProfile = () => {
     }
   };
 
+  // Submissão do formulário da jornada
+  const onSubmitJourney = async (data: z.infer<typeof journeySchema>) => {
+    setIsSubmitting(true);
+
+    try {
+      // Aqui você enviaria os dados para salvar no perfil do usuário
+      console.log("Jornada enviada:", data);
+      
+      toast({
+        title: "Jornada salva",
+        description: "Suas respostas foram salvas com sucesso. Obrigado por compartilhar sua história!",
+      });
+
+      // Mude para a outra aba após salvar com sucesso
+      setActiveTab("personal");
+    } catch (error) {
+      console.error("Erro ao salvar jornada:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível salvar suas respostas. Tente novamente.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Função para obter as iniciais para o Avatar fallback
   const getInitials = () => {
     if (!profile) return "U";
@@ -212,6 +319,68 @@ const UserProfile = () => {
     { value: "costela", label: "Costela" },
   ];
 
+  const musicStyles = [
+    { value: "rock", label: "Rock que te dá força" },
+    { value: "pop", label: "Pop que te deixa leve" },
+    { value: "hiphop", label: "Hip-hop/Rap que fala o que sente" },
+    { value: "eletronica", label: "Eletrônica que te faz flutuar" },
+    { value: "mpb", label: "MPB que acalma a alma" },
+    { value: "sertanejo", label: "Sertanejo que te conecta com raízes" },
+    { value: "reggae", label: "Reggae que espalha boas vibrações" },
+    { value: "jazz", label: "Jazz ou Blues para os momentos profundos" },
+  ];
+
+  const representationPhrases = [
+    { value: "reconstruindo", label: "Estou me reconstruindo." },
+    { value: "liberdade", label: "Estou celebrando minha liberdade." },
+    { value: "essencia", label: "Estou buscando minha essência." },
+    { value: "historia", label: "Estou honrando minha história." },
+    { value: "criando", label: "Estou criando algo novo." },
+  ];
+
+  const tattooFeelings = [
+    { value: "liberdade", label: "Liberdade" },
+    { value: "coragem", label: "Coragem" },
+    { value: "amor", label: "Amor" },
+    { value: "superacao", label: "Superação" },
+    { value: "protecao", label: "Proteção" },
+    { value: "gratidao", label: "Gratidão" },
+    { value: "fe", label: "Fé" },
+  ];
+
+  const archetypes = [
+    { value: "guerreiro", label: "O Guerreiro(a) que enfrenta tudo" },
+    { value: "curador", label: "O Curador(a) que transforma a dor" },
+    { value: "rebelde", label: "O Rebelde que não se encaixa" },
+    { value: "artista", label: "O Artista que cria mundos" },
+    { value: "explorador", label: "O Explorador que não para" },
+    { value: "mistico", label: "O Místico que vê além" },
+    { value: "sabio", label: "O Sábio que observa" },
+  ];
+
+  const illustrationTypes = [
+    { value: "animal", label: "Um animal com simbolismo" },
+    { value: "personagem", label: "Um personagem que diz muito" },
+    { value: "paisagem", label: "Uma paisagem com alma" },
+    { value: "abstrato", label: "Algo abstrato e misterioso" },
+    { value: "mistura", label: "Uma mistura simbólica única" },
+  ];
+
+  const communityExperiences = [
+    { value: "flash_day", label: "Flash day de tattoos" },
+    { value: "oficinas", label: "Oficinas criativas e encontros artísticos" },
+    { value: "meditacao", label: "Meditação e tatuagem consciente" },
+    { value: "eventos", label: "Eventos com música, drinks e arte" },
+  ];
+
+  const inspirationSources = [
+    { value: "instagram", label: "Instagram" },
+    { value: "pinterest", label: "Pinterest" },
+    { value: "tiktok", label: "TikTok" },
+    { value: "google", label: "Google" },
+    { value: "celular", label: "Celular" },
+  ];
+
   return (
     <Layout>
       <Helmet>
@@ -245,7 +414,7 @@ const UserProfile = () => {
           </CardHeader>
           <CardContent className="pt-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-2 mb-8">
+              <TabsList className="grid grid-cols-3 mb-8">
                 <TabsTrigger 
                   value="personal" 
                   className="data-[state=active]:bg-red-gradient data-[state=active]:text-white"
@@ -257,6 +426,12 @@ const UserProfile = () => {
                   className="data-[state=active]:bg-red-gradient data-[state=active]:text-white"
                 >
                   Preferências de Tatuagem
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="journey"
+                  className="data-[state=active]:bg-red-gradient data-[state=active]:text-white"
+                >
+                  Jornada 99Tattoo
                 </TabsTrigger>
               </TabsList>
               
@@ -849,116 +1024,6 @@ const UserProfile = () => {
                       )}
                     />
 
-                    <div className="border-t pt-6">
-                      <h3 className="text-lg font-medium mb-4">Disponibilidade para agendamentos</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <FormField
-                          control={preferencesForm.control}
-                          name="scheduling_preferences.weekdays"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel>Dias úteis</FormLabel>
-                              </div>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={preferencesForm.control}
-                          name="scheduling_preferences.weekends"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel>Finais de semana</FormLabel>
-                              </div>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={preferencesForm.control}
-                          name="scheduling_preferences.mornings"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel>Manhãs</FormLabel>
-                              </div>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={preferencesForm.control}
-                          name="scheduling_preferences.afternoons"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel>Tardes</FormLabel>
-                              </div>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={preferencesForm.control}
-                          name="scheduling_preferences.evenings"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel>Noites</FormLabel>
-                              </div>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-
-                    <FormField
-                      control={preferencesForm.control}
-                      name="notes"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Observações adicionais</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Compartilhe mais detalhes sobre o que você procura..."
-                              className="resize-none"
-                              rows={4}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
                     <div className="pt-4 flex justify-end">
                       <Button 
                         type="submit" 
@@ -966,6 +1031,715 @@ const UserProfile = () => {
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? "Salvando..." : "Salvar Preferências"}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </TabsContent>
+              
+              <TabsContent value="journey" className="animate-slide-in">
+                <Form {...journeyForm}>
+                  <form onSubmit={journeyForm.handleSubmit(onSubmitJourney)} className="space-y-8">
+                    <div className="text-center mb-8">
+                      <h2 className="text-2xl font-bold text-primary">✨ Jornada 99Tattoo – Descubra o que você carrega dentro e pode levar para a pele</h2>
+                      <p className="text-gray-600 mt-2">Este não é apenas um formulário. É um mapa da sua essência para criarmos juntos uma arte que realmente represente quem você é.</p>
+                    </div>
+                    
+                    {/* Seção 1: Trilha Sonora da Sua Vida */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <h3 className="text-xl font-semibold mb-4">🧠 1. Trilha Sonora da Sua Vida</h3>
+                      <p className="text-gray-600 mb-4">A música diz muito sobre o que sentimos, vivemos e queremos expressar. Quais estilos musicais embalam seus dias? (Escolha até 3)</p>
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="music_styles"
+                        render={() => (
+                          <FormItem>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {musicStyles.map((style) => (
+                                <FormField
+                                  key={style.value}
+                                  control={journeyForm.control}
+                                  name="music_styles"
+                                  render={({ field }) => (
+                                    <FormItem
+                                      key={style.value}
+                                      className="flex flex-row items-start space-x-3 space-y-0"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(style.value)}
+                                          onCheckedChange={(checked) => {
+                                            const currentValues = field.value || [];
+                                            if (currentValues.length >= 3 && checked && !currentValues.includes(style.value)) {
+                                              return;
+                                            }
+                                            return checked
+                                              ? field.onChange([...currentValues, style.value])
+                                              : field.onChange(currentValues?.filter(
+                                                  (value) => value !== style.value
+                                                )
+                                              );
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal cursor-pointer">
+                                        {style.label}
+                                      </FormLabel>
+                                    </FormItem>
+                                  )}
+                                />
+                              ))}
+                              
+                              <div className="md:col-span-2">
+                                <FormField
+                                  control={journeyForm.control}
+                                  name="music_style_other"
+                                  render={({ field }) => (
+                                    <FormItem className="flex items-center space-x-2">
+                                      <FormLabel className="min-w-[80px]">Outros:</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} placeholder="Especifique outro estilo musical" />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="favorite_artist"
+                        render={({ field }) => (
+                          <FormItem className="mt-4">
+                            <FormLabel>Qual artista ou banda representa seu momento atual?</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Seu artista ou banda favorito" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Seção 2: Imagens que Marcam */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <h3 className="text-xl font-semibold mb-4">🎬 2. Imagens que Marcam</h3>
+                      <FormField
+                        control={journeyForm.control}
+                        name="favorite_movie"
+                        render={({ field }) => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Filmes, séries e personagens que tocam sua essência revelam seus símbolos internos. Que filme ou série te deixou pensando dias depois?</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Nome do filme ou série" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="favorite_character"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Existe algum personagem com quem você se identifica? Pode ser de livro, filme, animação ou vida real.</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Nome do personagem" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Seção 3: Quem é você além do que mostram? */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <h3 className="text-xl font-semibold mb-4">🧬 3. Quem é você além do que mostram?</h3>
+                      <FormField
+                        control={journeyForm.control}
+                        name="self_description_word"
+                        render={({ field }) => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Vamos além da superfície... Se pudesse se descrever em uma única palavra, qual seria?</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Uma palavra que te define" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="self_representation_phrase"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Qual dessas frases mais te representa hoje?</FormLabel>
+                            <FormControl>
+                              <RadioGroup 
+                                onValueChange={field.onChange} 
+                                value={field.value} 
+                                className="flex flex-col space-y-1"
+                              >
+                                {representationPhrases.map((phrase) => (
+                                  <FormItem key={phrase.value} className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value={phrase.value} />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {phrase.label}
+                                    </FormLabel>
+                                  </FormItem>
+                                ))}
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="outro" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Outra
+                                  </FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {journeyForm.watch("self_representation_phrase") === "outro" && (
+                        <FormField
+                          control={journeyForm.control}
+                          name="self_representation_other"
+                          render={({ field }) => (
+                            <FormItem className="mt-2">
+                              <FormControl>
+                                <Input {...field} placeholder="Escreva outra frase que te representa" />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Seção 4: A Tattoo como Espelho da Alma */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <h3 className="text-xl font-semibold mb-4">💫 4. A Tattoo como Espelho da Alma</h3>
+                      <FormField
+                        control={journeyForm.control}
+                        name="tattoo_feeling"
+                        render={({ field }) => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Tatuar é transformar o invisível em arte. Se sua próxima tatuagem fosse um sentimento, qual seria?</FormLabel>
+                            <FormControl>
+                              <RadioGroup 
+                                onValueChange={field.onChange} 
+                                value={field.value} 
+                                className="grid grid-cols-2 gap-2"
+                              >
+                                {tattooFeelings.map((feeling) => (
+                                  <FormItem key={feeling.value} className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value={feeling.value} />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {feeling.label}
+                                    </FormLabel>
+                                  </FormItem>
+                                ))}
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="outro" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Outros
+                                  </FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {journeyForm.watch("tattoo_feeling") === "outro" && (
+                        <FormField
+                          control={journeyForm.control}
+                          name="tattoo_feeling_other"
+                          render={({ field }) => (
+                            <FormItem className="mb-4">
+                              <FormControl>
+                                <Input {...field} placeholder="Descreva outro sentimento" />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="tattoo_message"
+                        render={({ field }) => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Qual mensagem você gostaria de eternizar na pele?</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                placeholder="Descreva a mensagem que você gostaria que sua tatuagem transmitisse" 
+                                className="resize-none" 
+                                rows={3}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="tattoo_preference"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Você prefere uma tatuagem com...</FormLabel>
+                            <FormControl>
+                              <RadioGroup 
+                                onValueChange={field.onChange} 
+                                value={field.value} 
+                                className="flex flex-col space-y-1"
+                              >
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="estetica" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Estética única
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="significado" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Um significado profundo
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="ambos" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Um pouco dos dois
+                                  </FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Seção 5: Autoconhecimento e Simbolismo */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <h3 className="text-xl font-semibold mb-4">🌀 5. Autoconhecimento e Simbolismo</h3>
+                      <FormField
+                        control={journeyForm.control}
+                        name="spiritual_symbol"
+                        render={({ field }) => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Todo símbolo é uma chave para abrir algo em você. Você se conecta com algum símbolo espiritual, cultural ou místico?</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Exemplo: mandala, cruz, árvore da vida, etc." />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="archetype"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Qual desses arquétipos mais te representa?</FormLabel>
+                            <FormControl>
+                              <RadioGroup 
+                                onValueChange={field.onChange} 
+                                value={field.value} 
+                                className="flex flex-col space-y-1"
+                              >
+                                {archetypes.map((archetype) => (
+                                  <FormItem key={archetype.value} className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value={archetype.value} />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {archetype.label}
+                                    </FormLabel>
+                                  </FormItem>
+                                ))}
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="outro" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Outro
+                                  </FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {journeyForm.watch("archetype") === "outro" && (
+                        <FormField
+                          control={journeyForm.control}
+                          name="archetype_other"
+                          render={({ field }) => (
+                            <FormItem className="mt-2">
+                              <FormControl>
+                                <Input {...field} placeholder="Descreva outro arquétipo" />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Seção 6: Criatividade na Pele */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <h3 className="text-xl font-semibold mb-4">🎨 6. Criatividade na Pele</h3>
+                      <FormField
+                        control={journeyForm.control}
+                        name="dream_scene"
+                        render={({ field }) => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Vamos imaginar juntos. Se você pudesse tatuar uma cena de um sonho, qual seria?</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                placeholder="Descreva essa cena do seu sonho" 
+                                className="resize-none" 
+                                rows={3}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="illustration_type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Qual tipo de ilustração mais te representa?</FormLabel>
+                            <FormControl>
+                              <RadioGroup 
+                                onValueChange={field.onChange} 
+                                value={field.value} 
+                                className="flex flex-col space-y-1"
+                              >
+                                {illustrationTypes.map((type) => (
+                                  <FormItem key={type.value} className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value={type.value} />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {type.label}
+                                    </FormLabel>
+                                  </FormItem>
+                                ))}
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="outro" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Outro
+                                  </FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {journeyForm.watch("illustration_type") === "outro" && (
+                        <FormField
+                          control={journeyForm.control}
+                          name="illustration_type_other"
+                          render={({ field }) => (
+                            <FormItem className="mt-2">
+                              <FormControl>
+                                <Input {...field} placeholder="Descreva outro tipo de ilustração" />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Seção 7: Sua Jornada */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <h3 className="text-xl font-semibold mb-4">🗺️ 7. Sua Jornada</h3>
+                      <FormField
+                        control={journeyForm.control}
+                        name="life_phase"
+                        render={({ field }) => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Queremos saber em que parte da sua caminhada você está. Qual fase da sua vida você gostaria de eternizar?</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Exemplo: formatura, casamento, superação..." />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="art_experience"
+                        render={({ field }) => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Você já usou arte para lidar com sentimentos? Como foi essa experiência?</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                placeholder="Conte-nos sobre sua experiência com arte" 
+                                className="resize-none" 
+                                rows={3}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="tattoo_title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Se sua próxima tatuagem tivesse um título, qual seria?</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Título da sua próxima tatuagem" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Seção 8: Conexão com a Comunidade 99Tattoo */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <h3 className="text-xl font-semibold mb-4">🤝 8. Conexão com a Comunidade 99Tattoo</h3>
+                      <FormField
+                        control={journeyForm.control}
+                        name="community_experiences"
+                        render={() => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Você gostaria de participar de experiências como:</FormLabel>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                              {communityExperiences.map((experience) => (
+                                <FormField
+                                  key={experience.value}
+                                  control={journeyForm.control}
+                                  name="community_experiences"
+                                  render={({ field }) => (
+                                    <FormItem
+                                      key={experience.value}
+                                      className="flex flex-row items-start space-x-3 space-y-0"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(experience.value)}
+                                          onCheckedChange={(checked) => {
+                                            const currentValues = field.value || [];
+                                            return checked
+                                              ? field.onChange([...currentValues, experience.value])
+                                              : field.onChange(currentValues?.filter(
+                                                  (value) => value !== experience.value
+                                                )
+                                              );
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal cursor-pointer">
+                                        {experience.label}
+                                      </FormLabel>
+                                    </FormItem>
+                                  )}
+                                />
+                              ))}
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="community_other"
+                        render={({ field }) => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Outra ideia:</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Sugira outras experiências" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="want_suggestions"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Quer receber sugestões de tatuagens baseadas no que você compartilhou aqui?</FormLabel>
+                            <FormControl>
+                              <RadioGroup 
+                                onValueChange={field.onChange} 
+                                value={field.value} 
+                                className="flex space-x-4"
+                              >
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="sim" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Sim, quero algo só meu
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="nao" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Não por agora
+                                  </FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Seção 9: De onde vem suas inspirações? */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <h3 className="text-xl font-semibold mb-4">📲 9. De onde vem suas inspirações?</h3>
+                      <FormField
+                        control={journeyForm.control}
+                        name="inspiration_sources"
+                        render={() => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Onde você costuma salvar referências de tatuagem?</FormLabel>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                              {inspirationSources.map((source) => (
+                                <FormField
+                                  key={source.value}
+                                  control={journeyForm.control}
+                                  name="inspiration_sources"
+                                  render={({ field }) => (
+                                    <FormItem
+                                      key={source.value}
+                                      className="flex flex-row items-start space-x-3 space-y-0"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(source.value)}
+                                          onCheckedChange={(checked) => {
+                                            const currentValues = field.value || [];
+                                            return checked
+                                              ? field.onChange([...currentValues, source.value])
+                                              : field.onChange(currentValues?.filter(
+                                                  (value) => value !== source.value
+                                                )
+                                              );
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal cursor-pointer">
+                                        {source.label}
+                                      </FormLabel>
+                                    </FormItem>
+                                  )}
+                                />
+                              ))}
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="inspiration_other"
+                        render={({ field }) => (
+                          <FormItem className="mb-4">
+                            <FormLabel>Outro:</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Outra fonte de inspiração" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={journeyForm.control}
+                        name="interaction_frequency"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Com que frequência você interage com conteúdos sobre tatuagem?</FormLabel>
+                            <FormControl>
+                              <RadioGroup 
+                                onValueChange={field.onChange} 
+                                value={field.value} 
+                                className="flex flex-col md:flex-row md:space-x-4 space-y-1 md:space-y-0"
+                              >
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="diariamente" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Todos os dias
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="semanalmente" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Algumas vezes por semana
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="raramente" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Raramente
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="nunca" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Nunca
+                                  </FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Finalização */}
+                    <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-100">
+                      <p className="text-lg font-medium text-primary">
+                        ✨ Obrigado por compartilhar seu mundo interior com a gente. Agora que você chegou até aqui, estamos ainda mais perto de criar algo realmente seu.
+                      </p>
+                    </div>
+                    
+                    <div className="pt-4 flex justify-end">
+                      <Button 
+                        type="submit" 
+                        className="bg-red-gradient hover:opacity-90 hover-lift"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Salvando..." : "Salvar Jornada"}
                       </Button>
                     </div>
                   </form>
