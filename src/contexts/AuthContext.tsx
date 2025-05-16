@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { toast } from "@/components/ui/use-toast";
 import { getAuthService } from "@/services/serviceFactory";
@@ -26,6 +26,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updateProfile: (profile: Partial<UserProfile>) => Promise<{ error: any }>;
+  simulateAdminSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,15 +40,82 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Get the auth service
   const authService = getAuthService();
 
+  // Função para simular uma sessão de administrador
+  const simulateAdminSession = useCallback(() => {
+    // Verificar se já temos um perfil de admin simulado
+    if (profile?.role !== "admin") {
+      console.log("Simulando sessão de administrador");
+      
+      // Criar um usuário simulado
+      const simulatedUser = {
+        id: "admin-demo-user",
+        email: "admin@demo.com",
+        aud: "authenticated",
+        role: "authenticated",
+      } as User;
+
+      // Criar um perfil simulado de administrador
+      const simulatedProfile: UserProfile = {
+        id: "admin-demo-user",
+        first_name: "Admin",
+        last_name: "Demo",
+        avatar_url: null,
+        phone: null,
+        email: "admin@demo.com",
+        role: "admin",
+      };
+
+      // Definir o usuário e perfil simulados
+      setUser(simulatedUser);
+      setProfile(simulatedProfile);
+      
+      toast({
+        title: "Modo administrativo ativado",
+        description: "Você agora tem acesso total como administrador para fins de desenvolvimento.",
+      });
+    }
+  }, [profile]);
+
   // Função para login - simulada
   const signIn = async (email: string, password: string) => {
     console.log("Modo de demonstração - login simulado para:", email);
-    toast({
-      title: "Modo de demonstração",
-      description: "O site está em modo de demonstração. Todas as funcionalidades estão disponíveis sem login.",
-    });
+    
+    // Se for email administrativo, simular sessão de administrador
+    if (email.includes("admin") || email.endsWith("@99tattoo.com")) {
+      simulateAdminSession();
+    } else {
+      toast({
+        title: "Modo de demonstração",
+        description: "O site está em modo de demonstração. Todas as funcionalidades estão disponíveis sem login.",
+      });
+    }
+    
     return { error: null };
   };
+
+  // Verificar se a URL atual é uma página administrativa e simular automaticamente quando necessário
+  useEffect(() => {
+    const checkAndSimulateAdmin = () => {
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith('/admin')) {
+        simulateAdminSession();
+      }
+    };
+
+    // Verificar ao carregar a página
+    checkAndSimulateAdmin();
+    
+    // Monitorar mudanças na URL
+    const handleRouteChange = () => {
+      checkAndSimulateAdmin();
+    };
+    
+    window.addEventListener('popstate', handleRouteChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, [simulateAdminSession]);
 
   // Função para registro - simulada
   const signUp = async (email: string, password: string, first_name: string, last_name: string) => {
@@ -62,9 +130,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Função para logout - simulada
   const signOut = async () => {
     console.log("Modo de demonstração - logout simulado");
+    setUser(null);
+    setProfile(null);
     toast({
-      title: "Modo de demonstração",
-      description: "O site está em modo de demonstração. Todas as funcionalidades estão disponíveis sem login.",
+      title: "Logout simulado",
+      description: "Você saiu do modo administrativo.",
     });
   };
 
@@ -100,6 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         resetPassword,
         updateProfile,
+        simulateAdminSession,
       }}
     >
       {children}

@@ -68,16 +68,12 @@ const App = () => {
               <Route path="/user-profile" element={<UserProfile />} />
               <Route path="/checkout" element={<Checkout />} />
 
-              {/* Rotas específicas para administração */}
+              {/* Rotas para administração - agora acessíveis sem login */}
               <Route path="/admin" element={<Dashboard />} />
               <Route path="/admin/products" element={<Products />} />
               <Route path="/admin/loyalty" element={<Dashboard />} />
               <Route path="/admin/analytics" element={<Dashboard />} />
               <Route path="/admin/security" element={<Dashboard />} />
-
-              {/* Rotas específicas para artistas */}
-              <Route path="/admin" element={<Dashboard />} />
-              <Route path="/admin/products" element={<Products />} />
 
               {/* Rota 404 */}
               <Route path="*" element={<NotFound />} />
