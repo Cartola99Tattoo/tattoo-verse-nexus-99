@@ -1,5 +1,5 @@
 
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -8,8 +8,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ requiredRole }: ProtectedRouteProps) => {
-  // No modo de demonstração, todas as rotas são acessíveis
-  const { simulateAdminSession } = useAuth();
+  const { user, profile, simulateAdminSession } = useAuth();
   
   useEffect(() => {
     // Simular uma sessão de administrador quando acessando rotas protegidas
@@ -17,6 +16,23 @@ const ProtectedRoute = ({ requiredRole }: ProtectedRouteProps) => {
       simulateAdminSession();
     }
   }, [requiredRole, simulateAdminSession]);
+  
+  // Verificar se o usuário tem permissões para acessar a rota
+  // Obs: No modo de demonstração, não bloquear o acesso
+  if (!user || !profile) {
+    return <Navigate to="/access-denied" />;
+  }
+  
+  // Se um papel específico for necessário, verificar se o usuário tem esse papel
+  if (requiredRole && profile.role !== requiredRole) {
+    // Exceção para artistas que podem acessar algumas páginas administrativas
+    if (requiredRole === "admin" && profile.role === "artista" && 
+        (window.location.pathname === "/admin" || window.location.pathname === "/admin/products")) {
+      // Permitir artistas acessarem /admin e /admin/products
+    } else {
+      return <Navigate to="/access-denied" />;
+    }
+  }
   
   return <Outlet />;
 };

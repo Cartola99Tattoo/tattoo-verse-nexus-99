@@ -71,7 +71,7 @@ const App = () => {
               <Route path="/user-profile" element={<UserProfile />} />
               <Route path="/checkout" element={<Checkout />} />
 
-              {/* Rotas administrativas com ProtectedRoute */}
+              {/* Rotas administrativas com ProtectedRoute - usando "admin" como required role */}
               <Route element={<ProtectedRoute requiredRole="admin" />}>
                 <Route path="/admin" element={<Dashboard />} />
                 <Route path="/admin/products" element={<Products />} />

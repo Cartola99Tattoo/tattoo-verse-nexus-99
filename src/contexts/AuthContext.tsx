@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Função para simular uma sessão de administrador
   const simulateAdminSession = useCallback(() => {
     // Verificar se já temos um perfil de admin simulado
-    if (profile?.role !== "admin") {
+    if (!user || !profile) {
       console.log("Simulando sessão de administrador");
       
       // Criar um usuário simulado
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "Você agora tem acesso total como administrador para fins de desenvolvimento.",
       });
     }
-  }, [profile]);
+  }, [user, profile]);
 
   // Função para login - simulada
   const signIn = async (email: string, password: string) => {
