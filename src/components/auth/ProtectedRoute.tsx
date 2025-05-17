@@ -20,7 +20,8 @@ const ProtectedRoute = ({ requiredRole }: ProtectedRouteProps) => {
   // Verificar se o usuário tem permissões para acessar a rota
   // Obs: No modo de demonstração, não bloquear o acesso
   if (!user || !profile) {
-    return <Navigate to="/access-denied" />;
+    // Redirecionando para a página inicial em vez de AccessDenied
+    return <Navigate to="/" />;
   }
   
   // Se um papel específico for necessário, verificar se o usuário tem esse papel
@@ -30,7 +31,8 @@ const ProtectedRoute = ({ requiredRole }: ProtectedRouteProps) => {
         (window.location.pathname === "/admin" || window.location.pathname === "/admin/products")) {
       // Permitir artistas acessarem /admin e /admin/products
     } else {
-      return <Navigate to="/access-denied" />;
+      // Redirecionando para a página inicial em vez de AccessDenied
+      return <Navigate to="/" />;
     }
   }
   

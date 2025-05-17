@@ -18,7 +18,6 @@ import AdminAuth from "./pages/AdminAuth";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
-import AccessDenied from "./pages/AccessDenied";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Checkout from "./pages/Checkout";
@@ -65,7 +64,6 @@ const App = () => {
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin-auth" element={<AdminAuth />} />
               <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/access-denied" element={<AccessDenied />} />
               <Route path="/admin-setup" element={<AdminUserSetup />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/user-profile" element={<UserProfile />} />
