@@ -44,7 +44,8 @@ export default function Products() {
   }
 
   // Transform raw products to add category name and artist name
-  const products: Product[] = rawProducts.map(product => ({
+  // Ensure products is always an array, even if rawProducts is null
+  const products: Product[] = (rawProducts || []).map(product => ({
     ...product,
     category_name: product.category || "Sem categoria",
     artist_name: product.profiles ? 
