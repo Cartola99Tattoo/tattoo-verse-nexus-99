@@ -28,6 +28,9 @@ import Events from "./pages/Events";
 // Dashboard do Admin
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
+import Loyalty from "./pages/admin/Loyalty";
+import Analytics from "./pages/admin/Analytics";
+import Security from "./pages/admin/Security";
 
 // Configuração do React Query com configurações otimizadas
 const queryClient = new QueryClient({
@@ -68,12 +71,14 @@ const App = () => {
               <Route path="/user-profile" element={<UserProfile />} />
               <Route path="/checkout" element={<Checkout />} />
 
-              {/* Rotas para administração - agora acessíveis sem login */}
-              <Route path="/admin" element={<Dashboard />} />
-              <Route path="/admin/products" element={<Products />} />
-              <Route path="/admin/loyalty" element={<Dashboard />} />
-              <Route path="/admin/analytics" element={<Dashboard />} />
-              <Route path="/admin/security" element={<Dashboard />} />
+              {/* Rotas administrativas com ProtectedRoute */}
+              <Route element={<ProtectedRoute requiredRole="admin" />}>
+                <Route path="/admin" element={<Dashboard />} />
+                <Route path="/admin/products" element={<Products />} />
+                <Route path="/admin/loyalty" element={<Loyalty />} />
+                <Route path="/admin/analytics" element={<Analytics />} />
+                <Route path="/admin/security" element={<Security />} />
+              </Route>
 
               {/* Rota 404 */}
               <Route path="*" element={<NotFound />} />

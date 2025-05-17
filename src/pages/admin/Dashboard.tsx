@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +16,7 @@ import OrdersTable from "@/components/admin/dashboard/OrdersTable";
 import AppointmentsWidget from "@/components/admin/dashboard/AppointmentsWidget";
 import RecentCustomers from "@/components/admin/dashboard/RecentCustomers";
 import StatsCards from "@/components/admin/dashboard/StatsCards";
-import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
@@ -38,14 +39,11 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <AdminSidebar />
-      <div className="flex-1 p-6 bg-gray-50">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500">Bem-vindo ao painel de administração do 99Tattoo</p>
-        </div>
-
+    <AdminLayout 
+      title="Dashboard" 
+      description="Bem-vindo ao painel de administração do 99Tattoo"
+    >
+      <div className="p-6">
         <StatsCards stats={stats} loading={loading} />
 
         <Tabs defaultValue="overview" className="mt-6">
@@ -143,7 +141,7 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

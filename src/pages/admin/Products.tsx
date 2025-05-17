@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,9 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
-import AdminSidebar from "@/components/admin/AdminSidebar";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getProductService } from "@/services/serviceFactory";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 interface Product {
   id: string;
@@ -84,14 +85,13 @@ export default function Products() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <AdminSidebar />
-      <div className="flex-1 p-6 bg-gray-50">
+    <AdminLayout 
+      title="Produtos" 
+      description="Gerencie os produtos da loja virtual"
+    >
+      <div className="p-6">
         <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Produtos</h1>
-            <p className="text-gray-500">Gerencie os produtos da loja virtual</p>
-          </div>
+          <div className="flex-1"></div>
           <Button className="flex items-center gap-2">
             <Plus size={16} />
             <span>Novo Produto</span>
@@ -179,6 +179,6 @@ export default function Products() {
           </div>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 }
