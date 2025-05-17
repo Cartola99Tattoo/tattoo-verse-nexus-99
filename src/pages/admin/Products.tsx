@@ -71,13 +71,14 @@ export default function Products() {
     []
   );
 
-  // Fetch artists - Fix the type mismatch by extracting just the artists array
-  const { data: artistsData = { artists: [] } } = useDataQuery<{ artists: Artist[]; total: number; totalPages: number; }>(
+  // Fetch artists - Fix the type mismatch and null handling
+  const { data: artistsData } = useDataQuery<{ artists: Artist[]; total: number; totalPages: number; }>(
     () => artistsService.fetchArtists(),
     []
   );
   
-  const artists = artistsData.artists;
+  // Ensure artists is always an array, even if artistsData is null
+  const artists = artistsData?.artists || [];
 
   // Transform raw products to add category name and artist name
   // Ensure products is always an array, even if rawProducts is null
@@ -130,7 +131,7 @@ export default function Products() {
         title: "Produto adicionado",
         description: "O produto foi adicionado com sucesso.",
       });
-      refresh(); // Changed from refetch to refresh
+      refresh();
       setIsAddDialogOpen(false);
     } catch (error) {
       console.error("Error adding product:", error);
@@ -155,7 +156,7 @@ export default function Products() {
         title: "Produto atualizado",
         description: "O produto foi atualizado com sucesso.",
       });
-      refresh(); // Changed from refetch to refresh
+      refresh();
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating product:", error);
@@ -180,7 +181,7 @@ export default function Products() {
         title: "Produto excluído",
         description: "O produto foi excluído com sucesso.",
       });
-      refresh(); // Changed from refetch to refresh
+      refresh();
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Error deleting product:", error);
