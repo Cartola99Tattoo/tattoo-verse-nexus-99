@@ -1,10 +1,8 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, LineChart, PieChart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getDashboardService } from "@/services/serviceFactory";
@@ -36,11 +34,8 @@ const Dashboard = () => {
     []
   );
 
-  // Verificar se o usuário tem permissão para acessar o painel
-  if (!user || !profile || (profile.role !== "admin" && profile.role !== "artista")) {
-    return <Navigate to="/access-denied" />;
-  }
-
+  // Removed authentication check to allow everyone access
+  
   // Use default stats or fetched stats, ensuring we never have null values
   const safeStats = stats || defaultStats;
 

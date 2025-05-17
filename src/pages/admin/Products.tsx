@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,11 +78,6 @@ export default function Products() {
   );
   
   const artists = artistsData.artists;
-
-  // Verificar se o usuário tem permissão para acessar o painel
-  if (!user || !profile || (profile.role !== "admin" && profile.role !== "artista")) {
-    return <Navigate to="/" />;
-  }
 
   // Transform raw products to add category name and artist name
   // Ensure products is always an array, even if rawProducts is null

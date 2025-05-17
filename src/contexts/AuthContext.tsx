@@ -1,8 +1,7 @@
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { toast } from "@/components/ui/use-toast";
-import { getAuthService } from "@/services/serviceFactory";
 
 // Tipo para o perfil de usuário
 export interface UserProfile {
@@ -32,131 +31,35 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Always simulate an admin user automatically
+  const [user] = useState<User | null>({
+    id: "auto-admin-user",
+    email: "admin@example.com",
+    aud: "authenticated",
+    role: "authenticated",
+  } as User);
   
-  // Get the auth service
-  const authService = getAuthService();
+  const [profile] = useState<UserProfile | null>({
+    id: "auto-admin-user",
+    first_name: "Auto",
+    last_name: "Admin",
+    avatar_url: null,
+    phone: null,
+    email: "admin@example.com",
+    role: "admin",
+    tattoo_preferences: null
+  });
+  
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Função para simular uma sessão de administrador
-  const simulateAdminSession = useCallback(() => {
-    // Verificar se já temos um perfil de admin simulado
-    if (!user || !profile) {
-      console.log("Simulando sessão de administrador");
-      
-      // Criar um usuário simulado
-      const simulatedUser = {
-        id: "admin-demo-user",
-        email: "admin@demo.com",
-        aud: "authenticated",
-        role: "authenticated",
-      } as User;
-
-      // Criar um perfil simulado de administrador
-      const simulatedProfile: UserProfile = {
-        id: "admin-demo-user",
-        first_name: "Admin",
-        last_name: "Demo",
-        avatar_url: null,
-        phone: null,
-        email: "admin@demo.com",
-        role: "admin",
-      };
-
-      // Definir o usuário e perfil simulados
-      setUser(simulatedUser);
-      setProfile(simulatedProfile);
-      
-      toast({
-        title: "Modo administrativo ativado",
-        description: "Você agora tem acesso total como administrador para fins de desenvolvimento.",
-      });
-    }
-  }, [user, profile]);
-
-  // Função para login - simulada
-  const signIn = async (email: string, password: string) => {
-    console.log("Modo de demonstração - login simulado para:", email);
-    
-    // Se for email administrativo, simular sessão de administrador
-    if (email.includes("admin") || email.endsWith("@99tattoo.com")) {
-      simulateAdminSession();
-    } else {
-      toast({
-        title: "Modo de demonstração",
-        description: "O site está em modo de demonstração. Todas as funcionalidades estão disponíveis sem login.",
-      });
-    }
-    
-    return { error: null };
-  };
-
-  // Verificar se a URL atual é uma página administrativa e simular automaticamente quando necessário
-  useEffect(() => {
-    const checkAndSimulateAdmin = () => {
-      const currentPath = window.location.pathname;
-      if (currentPath.startsWith('/admin')) {
-        simulateAdminSession();
-      }
-    };
-
-    // Verificar ao carregar a página
-    checkAndSimulateAdmin();
-    
-    // Monitorar mudanças na URL
-    const handleRouteChange = () => {
-      checkAndSimulateAdmin();
-    };
-    
-    window.addEventListener('popstate', handleRouteChange);
-    
-    return () => {
-      window.removeEventListener('popstate', handleRouteChange);
-    };
-  }, [simulateAdminSession]);
-
-  // Função para registro - simulada
-  const signUp = async (email: string, password: string, first_name: string, last_name: string) => {
-    console.log("Modo de demonstração - registro simulado para:", email);
-    toast({
-      title: "Modo de demonstração",
-      description: "O site está em modo de demonstração. Todas as funcionalidades estão disponíveis sem login.",
-    });
-    return { error: null };
-  };
-
-  // Função para logout - simulada
-  const signOut = async () => {
-    console.log("Modo de demonstração - logout simulado");
-    setUser(null);
-    setProfile(null);
-    toast({
-      title: "Logout simulado",
-      description: "Você saiu do modo administrativo.",
-    });
-  };
-
-  // Função para recuperação de senha - simulada
-  const resetPassword = async (email: string) => {
-    console.log("Modo de demonstração - recuperação de senha simulada para:", email);
-    toast({
-      title: "Modo de demonstração",
-      description: "O site está em modo de demonstração. Todas as funcionalidades estão disponíveis sem login.",
-    });
-    return { error: null };
-  };
-
-  // Função para atualizar o perfil - simulada
-  const updateProfile = async (profileData: Partial<UserProfile>) => {
-    console.log("Modo de demonstração - atualização de perfil simulada:", profileData);
-    toast({
-      title: "Modo de demonstração",
-      description: "O site está em modo de demonstração. Todas as funcionalidades estão disponíveis sem login.",
-    });
-    return { error: null };
-  };
+  // No-op functions since authentication is removed
+  const signIn = async () => ({ error: null });
+  const signUp = async () => ({ error: null });
+  const signOut = async () => {};
+  const resetPassword = async () => ({ error: null });
+  const updateProfile = async () => ({ error: null });
+  const simulateAdminSession = () => {};
 
   return (
     <AuthContext.Provider

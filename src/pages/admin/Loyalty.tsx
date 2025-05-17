@@ -1,20 +1,13 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Award, Settings, Users, Star, Gift, Calendar } from "lucide-react";
 
 export default function Loyalty() {
   const { user, profile } = useAuth();
-
-  // Verificar se o usuário tem permissão para acessar o painel
-  if (!user || !profile || profile.role !== "admin") {
-    return <Navigate to="/access-denied" />;
-  }
 
   return (
     <AdminLayout 

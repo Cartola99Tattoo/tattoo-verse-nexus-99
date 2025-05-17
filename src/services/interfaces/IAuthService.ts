@@ -3,6 +3,7 @@ import { Session, User } from "@supabase/supabase-js";
 import { UserProfile } from "@/contexts/AuthContext";
 
 export interface IAuthService {
+  // These methods will now all be no-ops that don't perform any authentication
   getSession(): Promise<Session | null>;
   getUser(): Promise<User | null>;
   signIn(email: string, password: string): Promise<{ error: any }>;

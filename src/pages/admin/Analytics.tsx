@@ -1,8 +1,6 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, LineChart, Users, Calendar, ShoppingCart, Repeat } from "lucide-react";
@@ -11,11 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function Analytics() {
   const { user, profile } = useAuth();
   const [timeRange, setTimeRange] = useState("30");
-
-  // Verificar se o usuário tem permissão para acessar o painel
-  if (!user || !profile || profile.role !== "admin") {
-    return <Navigate to="/access-denied" />;
-  }
 
   return (
     <AdminLayout 
