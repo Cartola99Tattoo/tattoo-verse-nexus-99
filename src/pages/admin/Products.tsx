@@ -3,14 +3,17 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Package, Search, Plus, Edit, Trash } from "lucide-react";
+import { Package, Search, Plus, Edit, Trash, Loader } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { useDataQuery } from "@/hooks/useDataQuery";
-import { getProductService } from "@/services/serviceFactory";
+import { getProductService, getArtistsService } from "@/services/serviceFactory";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import ProductForm from "@/components/admin/ProductForm";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface Product {
   id: string;
@@ -27,20 +30,57 @@ interface Product {
   profiles?: any;
 }
 
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface Artist {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
 export default function Products() {
   const { user, profile } = useAuth();
   const productService = getProductService();
+  const artistsService = getArtistsService();
+  
+  // State for UI
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Use the product service to fetch products
-  const { data: rawProducts = [], loading } = useDataQuery<Product[]>(
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Fetch products with the service
+  const { data: rawProducts = [], loading, refetch } = useDataQuery<Product[]>(
     () => productService.fetchProducts(),
+    []
+  );
+
+  // Fetch categories (simplified for demo)
+  const { data: categories = [] } = useDataQuery<Category[]>(
+    () => Promise.resolve([
+      { id: "cat1", name: "Blackwork" },
+      { id: "cat2", name: "Tradicional" },
+      { id: "cat3", name: "Realista" },
+      { id: "cat4", name: "Old School" },
+      { id: "cat5", name: "New School" },
+    ]),
+    []
+  );
+
+  // Fetch artists
+  const { data: artists = [] } = useDataQuery<Artist[]>(
+    () => artistsService.fetchArtists(),
     []
   );
 
   // Verificar se o usuário tem permissão para acessar o painel
   if (!user || !profile || (profile.role !== "admin" && profile.role !== "artista")) {
-    return <Navigate to="/access-denied" />;
+    return <Navigate to="/" />;
   }
 
   // Transform raw products to add category name and artist name
@@ -85,6 +125,91 @@ export default function Products() {
     }
   };
 
+  // Handler for adding a new product
+  const handleAddProduct = async (data: any) => {
+    try {
+      setIsSubmitting(true);
+      await productService.createProduct(data);
+      toast({
+        title: "Produto adicionado",
+        description: "O produto foi adicionado com sucesso.",
+      });
+      refetch(); // Reload the products list
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding product:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o produto. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handler for editing a product
+  const handleEditProduct = async (data: any) => {
+    if (!currentProduct) return;
+    
+    try {
+      setIsSubmitting(true);
+      await productService.updateProduct(currentProduct.id, data);
+      toast({
+        title: "Produto atualizado",
+        description: "O produto foi atualizado com sucesso.",
+      });
+      refetch(); // Reload the products list
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o produto. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handler for deleting a product
+  const handleDeleteProduct = async () => {
+    if (!currentProduct) return;
+    
+    try {
+      setIsSubmitting(true);
+      await productService.deleteProduct(currentProduct.id);
+      toast({
+        title: "Produto excluído",
+        description: "O produto foi excluído com sucesso.",
+      });
+      refetch(); // Reload the products list
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o produto. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Open edit dialog with product data
+  const openEditDialog = (product: Product) => {
+    setCurrentProduct(product);
+    setIsEditDialogOpen(true);
+  };
+
+  // Open delete confirmation dialog
+  const openDeleteDialog = (product: Product) => {
+    setCurrentProduct(product);
+    setIsDeleteDialogOpen(true);
+  };
+
   return (
     <AdminLayout 
       title="Produtos" 
@@ -93,7 +218,7 @@ export default function Products() {
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <div className="flex-1"></div>
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2" onClick={() => setIsAddDialogOpen(true)}>
             <Plus size={16} />
             <span>Novo Produto</span>
           </Button>
@@ -120,7 +245,10 @@ export default function Products() {
         </Card>
 
         {loading ? (
-          <p className="text-center py-8">Carregando produtos...</p>
+          <div className="text-center py-12">
+            <Loader className="mx-auto h-8 w-8 animate-spin text-gray-400" />
+            <p className="mt-4 text-gray-500">Carregando produtos...</p>
+          </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-12">
             <Package className="mx-auto h-12 w-12 text-gray-400" />
@@ -168,10 +296,20 @@ export default function Products() {
                 <div className="col-span-2 text-sm">{product.artist_name}</div>
                 <div className="col-span-1">{getStatusBadge(product.status)}</div>
                 <div className="col-span-1 flex justify-end gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => openEditDialog(product)}
+                  >
                     <Edit size={16} />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-red-500"
+                    onClick={() => openDeleteDialog(product)}
+                  >
                     <Trash size={16} />
                   </Button>
                 </div>
@@ -180,6 +318,84 @@ export default function Products() {
           </div>
         )}
       </div>
+
+      {/* Add Product Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Adicionar Novo Produto</DialogTitle>
+            <DialogDescription>
+              Preencha os detalhes do novo produto abaixo.
+            </DialogDescription>
+          </DialogHeader>
+          <ProductForm
+            onSubmit={handleAddProduct}
+            onCancel={() => setIsAddDialogOpen(false)}
+            categories={categories}
+            artists={artists}
+            isSubmitting={isSubmitting}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Product Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Editar Produto</DialogTitle>
+            <DialogDescription>
+              Atualize os detalhes do produto abaixo.
+            </DialogDescription>
+          </DialogHeader>
+          {currentProduct && (
+            <ProductForm
+              initialData={{
+                name: currentProduct.name,
+                description: currentProduct.description || "",
+                price: currentProduct.price,
+                category_id: currentProduct.category_id || "",
+                artist_id: currentProduct.artist_id || "",
+                status: currentProduct.status,
+                images: currentProduct.images || []
+              }}
+              onSubmit={handleEditProduct}
+              onCancel={() => setIsEditDialogOpen(false)}
+              categories={categories}
+              artists={artists}
+              isSubmitting={isSubmitting}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o produto "{currentProduct?.name}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProduct}
+              disabled={isSubmitting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
