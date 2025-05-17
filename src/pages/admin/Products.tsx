@@ -55,7 +55,7 @@ export default function Products() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Fetch products with the service
-  const { data: rawProducts = [], loading, refetch } = useDataQuery<Product[]>(
+  const { data: rawProducts = [], loading, refresh } = useDataQuery<Product[]>(
     () => productService.fetchProducts(),
     []
   );
@@ -72,11 +72,13 @@ export default function Products() {
     []
   );
 
-  // Fetch artists
-  const { data: artists = [] } = useDataQuery<Artist[]>(
+  // Fetch artists - Fix the type mismatch by extracting just the artists array
+  const { data: artistsData = { artists: [] } } = useDataQuery<{ artists: Artist[]; total: number; totalPages: number; }>(
     () => artistsService.fetchArtists(),
     []
   );
+  
+  const artists = artistsData.artists;
 
   // Verificar se o usuário tem permissão para acessar o painel
   if (!user || !profile || (profile.role !== "admin" && profile.role !== "artista")) {
@@ -134,7 +136,7 @@ export default function Products() {
         title: "Produto adicionado",
         description: "O produto foi adicionado com sucesso.",
       });
-      refetch(); // Reload the products list
+      refresh(); // Changed from refetch to refresh
       setIsAddDialogOpen(false);
     } catch (error) {
       console.error("Error adding product:", error);
@@ -159,7 +161,7 @@ export default function Products() {
         title: "Produto atualizado",
         description: "O produto foi atualizado com sucesso.",
       });
-      refetch(); // Reload the products list
+      refresh(); // Changed from refetch to refresh
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating product:", error);
@@ -184,7 +186,7 @@ export default function Products() {
         title: "Produto excluído",
         description: "O produto foi excluído com sucesso.",
       });
-      refetch(); // Reload the products list
+      refresh(); // Changed from refetch to refresh
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Error deleting product:", error);
