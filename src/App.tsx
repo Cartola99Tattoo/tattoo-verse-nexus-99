@@ -48,9 +48,9 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <HelmetProvider>
-          <Toaster />
-          <Sonner />
           <BrowserRouter>
+            <Toaster />
+            <Sonner />
             <Routes>
               {/* Rotas públicas */}
               <Route path="/" element={<Index />} />
