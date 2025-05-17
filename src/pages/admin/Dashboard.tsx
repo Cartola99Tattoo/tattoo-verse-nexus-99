@@ -18,17 +18,20 @@ import RecentCustomers from "@/components/admin/dashboard/RecentCustomers";
 import StatsCards from "@/components/admin/dashboard/StatsCards";
 import AdminLayout from "@/components/admin/AdminLayout";
 
+// Default stats to prevent null errors
+const defaultStats: IDashboardStats = {
+  totalSales: 0,
+  newCustomers: 0,
+  pendingOrders: 0,
+  upcomingAppointments: 0,
+  blogViews: 0
+};
+
 const Dashboard = () => {
   const { user, profile } = useAuth();
   const dashboardService = getDashboardService();
   
-  const { data: stats = {
-    totalSales: 0,
-    newCustomers: 0,
-    pendingOrders: 0,
-    upcomingAppointments: 0,
-    blogViews: 0
-  }, loading } = useDataQuery<IDashboardStats>(
+  const { data: stats, loading } = useDataQuery<IDashboardStats>(
     () => dashboardService.fetchDashboardStats() as Promise<IDashboardStats>,
     []
   );
@@ -38,13 +41,16 @@ const Dashboard = () => {
     return <Navigate to="/access-denied" />;
   }
 
+  // Use default stats or fetched stats, ensuring we never have null values
+  const safeStats = stats || defaultStats;
+
   return (
     <AdminLayout 
       title="Dashboard" 
       description="Bem-vindo ao painel de administração do 99Tattoo"
     >
       <div className="p-6">
-        <StatsCards stats={stats} loading={loading} />
+        <StatsCards stats={safeStats} loading={loading} />
 
         <Tabs defaultValue="overview" className="mt-6">
           <TabsList>
