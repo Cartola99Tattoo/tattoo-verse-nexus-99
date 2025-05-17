@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,10 @@ interface Product {
   artist_name?: string;
   category?: string;
   profiles?: any;
+  average_time?: string;
+  sizes?: string[];
+  body_locations?: string[];
+  style_tags?: string[];
 }
 
 interface Category {
@@ -318,7 +323,7 @@ export default function Products() {
 
       {/* Add Product Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Adicionar Novo Produto</DialogTitle>
             <DialogDescription>
@@ -337,7 +342,7 @@ export default function Products() {
 
       {/* Edit Product Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Editar Produto</DialogTitle>
             <DialogDescription>
@@ -353,7 +358,11 @@ export default function Products() {
                 category_id: currentProduct.category_id || "",
                 artist_id: currentProduct.artist_id || "",
                 status: currentProduct.status,
-                images: currentProduct.images || []
+                images: currentProduct.images || [],
+                average_time: currentProduct.average_time || "",
+                sizes: currentProduct.sizes || [],
+                body_locations: currentProduct.body_locations || [],
+                style_tags: currentProduct.style_tags || []
               }}
               onSubmit={handleEditProduct}
               onCancel={() => setIsEditDialogOpen(false)}
