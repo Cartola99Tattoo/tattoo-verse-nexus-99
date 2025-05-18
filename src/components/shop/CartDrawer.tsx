@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Sheet,
@@ -15,6 +14,7 @@ import { Link } from "react-router-dom";
 import { TattooDetails } from "@/services/interfaces/IProductService";
 import TattooDetailsForm from "./TattooDetailsForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import TattooCopyrightNotice from "./TattooCopyrightNotice";
 
 interface CartDrawerProps {
   open: boolean;

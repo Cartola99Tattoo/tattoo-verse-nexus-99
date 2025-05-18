@@ -26,7 +26,9 @@ export interface IProductService {
 // Product types for the tattoo studio
 export type ProductType = 'tattoo' | 'product';
 export type CategoryType = 'exclusive' | 'inspiration';
-export type TattooStyle = 'Realismo' | 'Minimalista' | 'Old School' | 'Aquarela' | 'Outros';
+export type TattooStyle = 'Realismo' | 'Minimalista' | 'Old School' | 'Aquarela' | 
+                          'Blackwork' | 'Tradicional' | 'Neo-tradicional' | 'Geométrico' | 
+                          'Pontilhismo' | 'Tribal' | 'Japonês' | 'Outros';
 export type TattooSize = 'Pequeno (até 10cm)' | 'Médio (10-20cm)' | 'Grande (20-30cm)' | 'Extra Grande (acima de 30cm)' | string;
 export type BodyPart = 'Braço - Bíceps' | 'Braço - Antebraço' | 'Costas - Superior' | 'Costas - Inferior' | 
                      'Perna - Coxa' | 'Perna - Panturrilha' | 'Tornozelo' | 'Pé' | 'Costelas' | 
