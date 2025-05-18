@@ -2,6 +2,7 @@
 import { ReactNode } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
+import { CartProvider } from "@/contexts/CartContext";
 
 interface LayoutProps {
   children: ReactNode;

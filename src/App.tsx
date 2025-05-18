@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './pages';
 import Shop from './pages/Shop';
 import ProductDetail from './pages/ProductDetail';
-import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Artists from './pages/Artists';
 import ArtistDetail from './pages/ArtistDetail';
@@ -52,11 +51,31 @@ function App() {
           {/* Admin routes */}
           <Route path="/admin/auth" element={<AdminAuth />} />
           <Route path="/admin/setup" element={<AdminUserSetup />} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
-          <Route path="/admin/analytics" element={<ProtectedRoute><AdminAnalytics /></ProtectedRoute>} />
-          <Route path="/admin/loyalty" element={<ProtectedRoute><AdminLoyalty /></ProtectedRoute>} />
-          <Route path="/admin/security" element={<ProtectedRoute><AdminSecurity /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/products" element={
+            <ProtectedRoute>
+              <AdminProducts />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/analytics" element={
+            <ProtectedRoute>
+              <AdminAnalytics />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/loyalty" element={
+            <ProtectedRoute>
+              <AdminLoyalty />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/security" element={
+            <ProtectedRoute>
+              <AdminSecurity />
+            </ProtectedRoute>
+          } />
           
           <Route path="*" element={<NotFound />} />
         </Routes>

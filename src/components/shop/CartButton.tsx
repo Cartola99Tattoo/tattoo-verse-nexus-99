@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import CartDrawer from "./CartDrawer";
 import { useCart } from "@/contexts/CartContext";
 import { useState, useEffect } from "react";
-import { Toaster } from "sonner";
+// Remove the Toaster import since we're using the SonnerToaster component globally
+// import { Toaster } from "sonner";
 
 const CartButton = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -58,8 +59,7 @@ const CartButton = () => {
         )}
       </Button>
       
-      {/* Toaster para exibir notificações próximas ao ícone do carrinho */}
-      <Toaster position="top-right" closeButton richColors />
+      {/* Remove the local Toaster since we're using the SonnerToaster component globally */}
       
       <CartDrawer open={isCartOpen} onOpenChange={setIsCartOpen} />
     </>

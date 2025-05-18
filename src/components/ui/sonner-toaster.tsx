@@ -1,15 +1,13 @@
 
-import { Toaster as SonnerToaster } from "sonner";
+import { Toaster } from "sonner";
 
 export function SonnerToaster() {
   return (
-    <SonnerToaster
+    <Toaster
+      className="sonner-toast"
       position="top-right"
-      toastOptions={{
-        className: "sonner-toast",
-        duration: 3000,
-        closeButton: true,
-      }}
+      duration={3000}
+      closeButton
       richColors
     />
   );
