@@ -4,23 +4,30 @@ import { Button } from "@/components/ui/button";
 import CartDrawer from "./CartDrawer";
 import { useCart } from "@/contexts/CartContext";
 import { useState } from "react";
+import { toast } from "@/components/ui/use-toast";
 
 const CartButton = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { cart } = useCart();
 
+  // Função para abrir o carrinho com uma pequena animação de destaque
+  const handleOpenCart = () => {
+    setIsCartOpen(true);
+    // A classe de destaque será adicionada ao botão quando o carrinho for aberto
+  };
+
   return (
     <>
       <Button
-        onClick={() => setIsCartOpen(true)}
+        onClick={handleOpenCart}
         variant="ghost"
         size="icon"
-        className="relative md:static fixed bottom-4 right-4 md:bottom-auto md:right-auto z-50 md:z-auto bg-red-500 md:bg-transparent text-white md:text-inherit hover:bg-red-600 md:hover:bg-transparent shadow-lg md:shadow-none rounded-full md:rounded-md h-12 w-12 md:h-10 md:w-10"
+        className="relative md:static fixed bottom-4 right-4 md:bottom-auto md:right-auto z-50 md:z-auto bg-red-500 md:bg-transparent text-white md:text-inherit hover:bg-red-600 md:hover:bg-transparent shadow-lg md:shadow-none rounded-full md:rounded-md h-12 w-12 md:h-10 md:w-10 transition-all duration-200"
         aria-label="Abrir carrinho de compras"
       >
         <ShoppingCart className="h-5 w-5" />
         {cart.totalItems > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-600 md:bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-red-600 md:bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-scale-in">
             {cart.totalItems}
           </span>
         )}

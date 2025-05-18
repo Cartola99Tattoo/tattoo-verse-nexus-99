@@ -8,22 +8,30 @@ import { Switch } from "@/components/ui/switch";
 import { SchedulingPreferences, PreferredTime } from "@/services/interfaces/IProductService";
 import DateSelector from "./DateSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import { Info, Check } from "lucide-react";
 
 interface SchedulingPreferencesFormProps {
   initialPreferences?: SchedulingPreferences;
   onSave: (preferences: SchedulingPreferences) => void;
   onlyDisplay?: boolean;
+  artistName?: string;
 }
 
 const SchedulingPreferencesForm: React.FC<SchedulingPreferencesFormProps> = ({
   initialPreferences,
   onSave,
   onlyDisplay = false,
+  artistName
 }) => {
   const [preferences, setPreferences] = useState<SchedulingPreferences>(
-    initialPreferences || { preferredDates: [], preferredTime: "Qualquer horário", isFlexible: true }
+    initialPreferences || { 
+      preferredDates: [], 
+      preferredTime: "Qualquer horário", 
+      isFlexible: true 
+    }
   );
+  
+  const [saveAttempted, setSaveAttempted] = useState(false);
   
   const preferredTimes: PreferredTime[] = [
     'Manhã',
@@ -43,18 +51,29 @@ const SchedulingPreferencesForm: React.FC<SchedulingPreferencesFormProps> = ({
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(preferences);
+    setSaveAttempted(true);
+    
+    if (isValid) {
+      onSave(preferences);
+    }
   };
   
   // Parse stored ISO strings back to Date objects
   const selectedDates: Date[] = (preferences.preferredDates || []).map(dateStr => new Date(dateStr));
   
   const isValid = selectedDates.length >= 3;
+  const showError = saveAttempted && !isValid;
   
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label className="font-medium">Datas Preferenciais</Label>
+        <div className="flex justify-between items-center mb-2">
+          <Label className="font-medium">Datas Preferenciais</Label>
+          {artistName && (
+            <span className="text-sm text-gray-500">para {artistName}</span>
+          )}
+        </div>
+        
         <p className="text-sm text-gray-500 mb-2">
           Selecione pelo menos 3 datas preferidas para agendamento da sua sessão
         </p>
@@ -66,7 +85,7 @@ const SchedulingPreferencesForm: React.FC<SchedulingPreferencesFormProps> = ({
           disabled={onlyDisplay}
         />
         
-        {selectedDates.length < 3 && !onlyDisplay && (
+        {showError && (
           <Alert className="mt-2 bg-amber-50 border-amber-100">
             <Info className="h-4 w-4 text-amber-500" />
             <AlertDescription className="text-amber-800 text-xs">
@@ -117,14 +136,31 @@ const SchedulingPreferencesForm: React.FC<SchedulingPreferencesFormProps> = ({
       </div>
       
       {!onlyDisplay && (
-        <div className="flex justify-end pt-2">
-          <Button
-            type="submit"
-            className="bg-red-500 hover:bg-red-600"
-            disabled={!isValid}
-          >
-            Salvar Preferências
-          </Button>
+        <div className="flex flex-col pt-2 space-y-2">
+          <Alert className="bg-blue-50 border-blue-100">
+            <Info className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-blue-800 text-xs">
+              Após confirmação do seu pedido, o estúdio entrará em contato para confirmar
+              uma das suas datas preferenciais de acordo com a disponibilidade do artista.
+            </AlertDescription>
+          </Alert>
+          
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              className="bg-red-500 hover:bg-red-600"
+              disabled={!isValid}
+            >
+              {isValid ? (
+                <>
+                  <Check className="h-4 w-4 mr-1" />
+                  Salvar Preferências
+                </>
+              ) : (
+                "Selecione pelo menos 3 datas"
+              )}
+            </Button>
+          </div>
         </div>
       )}
     </form>

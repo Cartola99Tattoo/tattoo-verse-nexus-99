@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface DateSelectorProps {
   selectedDates: Date[];
@@ -26,7 +27,17 @@ const DateSelector: React.FC<DateSelectorProps> = ({
     
     setCurrentDate(date);
     
-    // Check if date is already selected
+    // Verificar se a data é passada
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      return; // Não permitir datas passadas
+    }
+    
+    // Verificar se a data já está selecionada
     const dateExists = selectedDates.some(
       selectedDate => 
         selectedDate.getDate() === date.getDate() && 
@@ -35,7 +46,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({
     );
     
     if (dateExists) {
-      // If already selected, remove it
+      // Se já estiver selecionada, remover
       const updatedDates = selectedDates.filter(
         selectedDate => 
           !(selectedDate.getDate() === date.getDate() && 
@@ -44,7 +55,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({
       );
       onChange(updatedDates);
     } else {
-      // If not selected and haven't reached max, add it
+      // Se não estiver selecionada e não tiver atingido o máximo, adicionar
       if (selectedDates.length < maxDates) {
         onChange([...selectedDates, date]);
       }
@@ -58,28 +69,39 @@ const DateSelector: React.FC<DateSelectorProps> = ({
     onChange(updatedDates);
   };
 
-  // Create an array of Date objects for the next 2 months that excludes past dates
+  // Criar um array de objetos Date para os próximos 2 meses que exclui datas passadas
   const today = new Date();
   const twoMonthsFromNow = new Date();
   twoMonthsFromNow.setMonth(today.getMonth() + 2);
   
-  // Function to format date for display
+  // Função para formatar data para exibição
   const formatDate = (date: Date): string => {
     return new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit', 
       month: '2-digit', 
-      year: 'numeric'
+      year: 'numeric',
+      weekday: 'short'
     }).format(date);
+  };
+
+  // Verificar se uma data está selecionada para destacá-la no calendário
+  const isDateSelected = (date: Date): boolean => {
+    return selectedDates.some(selectedDate => 
+      selectedDate.getDate() === date.getDate() && 
+      selectedDate.getMonth() === date.getMonth() && 
+      selectedDate.getFullYear() === date.getFullYear()
+    );
   };
   
   return (
     <div className="space-y-3">
-      {/* Selected dates chips */}
+      {/* Chips de datas selecionadas */}
       <div className="flex flex-wrap gap-2 min-h-10">
         {selectedDates.map((date, index) => (
-          <div 
+          <Badge 
             key={date.toISOString()} 
-            className="bg-red-100 text-red-800 px-3 py-1 rounded-full flex items-center text-sm"
+            variant="outline"
+            className="bg-red-50 text-red-800 hover:bg-red-100 px-3 py-1.5 rounded-full flex items-center text-sm"
           >
             {formatDate(date)}
             {!disabled && (
@@ -92,7 +114,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({
                 <X className="h-3 w-3" />
               </button>
             )}
-          </div>
+          </Badge>
         ))}
       </div>
       
@@ -106,12 +128,33 @@ const DateSelector: React.FC<DateSelectorProps> = ({
               { before: today },
               { after: twoMonthsFromNow }
             ]}
-            className="rounded border pointer-events-auto"
+            className="rounded border pointer-events-auto bg-white"
+            modifiers={{
+              selected: selectedDates
+            }}
+            modifiersStyles={{
+              selected: {
+                backgroundColor: "#f44336",
+                color: "white",
+                fontWeight: "bold"
+              }
+            }}
+            showOutsideDays={false}
+            fixedWeeks
           />
           
           <div className="flex justify-between text-xs text-gray-500">
             <span>Datas selecionadas: {selectedDates.length}/{maxDates}</span>
-            <span>Clique em uma data para adicionar/remover</span>
+            <span>
+              {selectedDates.length < minDates 
+                ? `Selecione pelo menos ${minDates} datas` 
+                : "Clique em uma data para adicionar/remover"}
+            </span>
+          </div>
+          
+          <div className="text-xs text-gray-500">
+            <p>• Selecione datas nos próximos 2 meses</p>
+            <p>• Horário específico será confirmado pelo estúdio</p>
           </div>
         </>
       )}

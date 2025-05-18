@@ -9,6 +9,7 @@ import { TattooDetails, TattooStyle, TattooSize, BodyPart } from "@/services/int
 import ImageUploader from "./ImageUploader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import TattooCopyrightNotice from "./TattooCopyrightNotice";
 
 interface TattooDetailsFormProps {
   initialDetails?: TattooDetails;
@@ -26,12 +27,20 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
   onlyDisplay = false,
 }) => {
   const [details, setDetails] = useState<TattooDetails>(initialDetails || {});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
   const tattooStyles: TattooStyle[] = [
     'Realismo',
     'Minimalista',
     'Old School',
     'Aquarela',
+    'Blackwork',
+    'Tradicional',
+    'Neo-tradicional',
+    'Geométrico',
+    'Pontilhismo',
+    'Tribal',
+    'Japonês',
     'Outros'
   ];
   
@@ -56,16 +65,47 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
     'Pescoço',
     'Mão',
     'Pulso',
-    'Ombro'
+    'Ombro',
+    'Peito',
+    'Nuca',
+    'Cabeça',
+    'Rosto',
+    'Outro'
   ];
   
   const handleChange = (field: keyof TattooDetails, value: any) => {
     setDetails(prev => ({ ...prev, [field]: value }));
+    
+    // Limpar erro quando o campo é preenchido
+    if (errors[field] && value) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+  
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!details.style) newErrors.style = "Por favor, selecione um estilo de tatuagem";
+    if (!details.bodyPart) newErrors.bodyPart = "Por favor, selecione um local do corpo";
+    if (!details.size) newErrors.size = "Por favor, selecione um tamanho";
+    if (!details.estimatedTime) newErrors.estimatedTime = "Por favor, selecione um tempo estimado";
+    if (!details.estimatedSessions || details.estimatedSessions < 1) 
+      newErrors.estimatedSessions = "Por favor, informe o número de sessões";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(details);
+    
+    if (validateForm()) {
+      onSave(details);
+    }
   };
   
   const handleImagesChange = (images: string[]) => {
@@ -82,13 +122,15 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
       
       <div className="space-y-3">
         <div>
-          <Label htmlFor="style">Estilo da Tatuagem*</Label>
+          <Label htmlFor="style" className="flex items-center">
+            Estilo da Tatuagem<span className="text-red-500 ml-1">*</span>
+          </Label>
           <Select
             value={details.style || ''}
             onValueChange={(value) => handleChange('style', value)}
             disabled={onlyDisplay}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className={`w-full ${errors.style ? 'border-red-500 focus:ring-red-500' : ''}`}>
               <SelectValue placeholder="Selecione um estilo" />
             </SelectTrigger>
             <SelectContent>
@@ -97,16 +139,19 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
               ))}
             </SelectContent>
           </Select>
+          {errors.style && <p className="text-red-500 text-xs mt-1">{errors.style}</p>}
         </div>
         
         <div>
-          <Label htmlFor="bodyPart">Local do Corpo*</Label>
+          <Label htmlFor="bodyPart" className="flex items-center">
+            Local do Corpo<span className="text-red-500 ml-1">*</span>
+          </Label>
           <Select
             value={details.bodyPart || ''}
             onValueChange={(value) => handleChange('bodyPart', value)}
             disabled={onlyDisplay}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className={`w-full ${errors.bodyPart ? 'border-red-500 focus:ring-red-500' : ''}`}>
               <SelectValue placeholder="Selecione o local do corpo" />
             </SelectTrigger>
             <SelectContent>
@@ -115,16 +160,19 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
               ))}
             </SelectContent>
           </Select>
+          {errors.bodyPart && <p className="text-red-500 text-xs mt-1">{errors.bodyPart}</p>}
         </div>
         
         <div>
-          <Label htmlFor="size">Tamanho Aproximado*</Label>
+          <Label htmlFor="size" className="flex items-center">
+            Tamanho Aproximado<span className="text-red-500 ml-1">*</span>
+          </Label>
           <Select
             value={details.size || ''}
             onValueChange={(value) => handleChange('size', value)}
             disabled={onlyDisplay}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className={`w-full ${errors.size ? 'border-red-500 focus:ring-red-500' : ''}`}>
               <SelectValue placeholder="Selecione um tamanho" />
             </SelectTrigger>
             <SelectContent>
@@ -133,16 +181,19 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
               ))}
             </SelectContent>
           </Select>
+          {errors.size && <p className="text-red-500 text-xs mt-1">{errors.size}</p>}
         </div>
         
         <div>
-          <Label htmlFor="estimatedTime">Tempo Estimado*</Label>
+          <Label htmlFor="estimatedTime" className="flex items-center">
+            Tempo Estimado<span className="text-red-500 ml-1">*</span>
+          </Label>
           <Select
             value={details.estimatedTime || ''}
             onValueChange={(value) => handleChange('estimatedTime', value)}
             disabled={onlyDisplay}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className={`w-full ${errors.estimatedTime ? 'border-red-500 focus:ring-red-500' : ''}`}>
               <SelectValue placeholder="Selecione o tempo estimado" />
             </SelectTrigger>
             <SelectContent>
@@ -152,18 +203,23 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
               <SelectItem value="Mais de 6 horas">Mais de 6 horas</SelectItem>
             </SelectContent>
           </Select>
+          {errors.estimatedTime && <p className="text-red-500 text-xs mt-1">{errors.estimatedTime}</p>}
         </div>
         
         <div>
-          <Label htmlFor="estimatedSessions">Sessões Estimadas*</Label>
+          <Label htmlFor="estimatedSessions" className="flex items-center">
+            Sessões Estimadas<span className="text-red-500 ml-1">*</span>
+          </Label>
           <Input
             type="number"
             min="1"
             value={details.estimatedSessions || ''}
-            onChange={(e) => handleChange('estimatedSessions', parseInt(e.target.value))}
+            onChange={(e) => handleChange('estimatedSessions', parseInt(e.target.value) || '')}
             placeholder="Número de sessões necessárias"
             disabled={onlyDisplay}
+            className={errors.estimatedSessions ? 'border-red-500 focus:ring-red-500' : ''}
           />
+          {errors.estimatedSessions && <p className="text-red-500 text-xs mt-1">{errors.estimatedSessions}</p>}
         </div>
         
         <div>
@@ -213,9 +269,14 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
           <Alert className="mt-2 bg-amber-50 border-amber-100">
             <Info className="h-4 w-4 text-amber-500" />
             <AlertDescription className="text-amber-800 text-xs">
-              Por favor, preencha todos os campos obrigatórios marcados com *
+              Por favor, preencha todos os campos obrigatórios marcados com <span className="text-red-500">*</span>
             </AlertDescription>
           </Alert>
+        )}
+        
+        {/* Aviso de direitos autorais */}
+        {!onlyDisplay && artistName && (
+          <TattooCopyrightNotice artistName={artistName} />
         )}
       </div>
       

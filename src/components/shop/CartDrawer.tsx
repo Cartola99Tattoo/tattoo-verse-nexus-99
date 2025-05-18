@@ -22,7 +22,7 @@ interface CartDrawerProps {
 }
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
-  const { cart, removeFromCart, updateQuantity, clearCart, updateTattooDetails } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart, updateTattooDetails, updateSchedulingPreferences } = useCart();
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   
   // Lista de artistas disponíveis (em um sistema real, isso viria do backend)
@@ -59,6 +59,11 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
     setEditingItemId(null);
   };
 
+  // Verifica se todos os itens de tatuagem têm detalhes preenchidos
+  const allTattooDetailsComplete = !cart.items.some(
+    item => item.product_type === 'tattoo' && (!item.tattoo_details || !item.tattoo_details.bodyPart)
+  );
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md flex flex-col">
@@ -81,7 +86,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
                 <div className="flex-grow">
                   <h4 className="font-medium text-sm mb-1">{item.name}</h4>
                   <p className="text-gray-500 text-xs mb-2">Artista: {item.artist}</p>
-                  <p className="font-bold mb-2">R$ {item.price}</p>
+                  <p className="font-bold mb-2">R$ {item.price.toFixed(2)}</p>
                   
                   <div className="flex items-center">
                     <button
@@ -132,9 +137,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
                     <h5 className="font-semibold text-sm">Detalhes da Tatuagem</h5>
                     <button
                       onClick={() => setEditingItemId(item.id)}
-                      className="text-xs text-blue-500 hover:underline"
+                      className="text-xs text-blue-500 hover:underline flex items-center"
                     >
-                      Editar
+                      <span>Editar</span>
                     </button>
                   </div>
                   
@@ -203,11 +208,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
               
               {/* Copyright notice for tattoos */}
               {item.product_type === 'tattoo' && (
-                <div className="mt-3 text-xs italic text-gray-500 p-2 border-l-2 border-gray-200">
-                  Tatuagens são procedimentos artísticos e personalizados. Ao reservar essa arte você estará garantindo 
-                  uma obra feita especialmente para você. Todos os direitos autorais precisam ser preservados e essa arte 
-                  só poderá ser tatuada e reproduzida por {item.artist}.
-                </div>
+                <TattooCopyrightNotice artistName={item.artist} />
               )}
             </div>
           ))}

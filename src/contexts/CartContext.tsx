@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { 
   ProductType, 
@@ -180,12 +180,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, initialState);
   
   // Salvar no localStorage quando o carrinho mudar
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('99tattoo-cart', JSON.stringify(cart.items));
   }, [cart.items]);
   
   // Carregar do localStorage na inicialização
-  React.useEffect(() => {
+  useEffect(() => {
     const savedCart = localStorage.getItem('99tattoo-cart');
     if (savedCart) {
       try {
@@ -205,30 +205,55 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       type: 'ADD_ITEM', 
       payload: { ...product, quantity } 
     });
+    
+    // Notificação de toast melhorada com posição e estilo específicos
     toast({
-      title: 'Item adicionado',
-      description: `${product.name} foi adicionado ao seu carrinho.`,
+      title: `${product.name} adicionado ao carrinho`,
+      description: `Quantidade: ${quantity} • Preço: R$ ${product.price.toFixed(2)}`,
+      variant: "default",
+      className: "bg-green-50 border-green-200 text-green-800",
     });
   };
   
   const removeFromCart = (id: number) => {
+    // Obtém o nome do produto antes de removê-lo para usar na notificação
+    const productToRemove = cart.items.find(item => item.id === id);
+    const productName = productToRemove ? productToRemove.name : "Item";
+    
     dispatch({ type: 'REMOVE_ITEM', payload: { id } });
+    
+    // Notificação mais específica para remoção
     toast({
-      title: 'Item removido',
-      description: 'O item foi removido do seu carrinho.',
-      variant: 'destructive',
+      title: `${productName} removido`,
+      description: "O item foi removido do seu carrinho.",
+      variant: "destructive",
     });
   };
   
   const updateQuantity = (id: number, quantity: number) => {
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
+    
+    if (quantity > 0) {
+      const item = cart.items.find(item => item.id === id);
+      if (item) {
+        toast({
+          title: "Quantidade atualizada",
+          description: `${item.name}: ${quantity} ${quantity === 1 ? 'unidade' : 'unidades'}`,
+          variant: "default",
+        });
+      }
+    }
   };
 
   const updateTattooDetails = (id: number, tattoo_details: TattooDetails) => {
     dispatch({ type: 'UPDATE_TATTOO_DETAILS', payload: { id, tattoo_details } });
+    
+    // Mensagem mais informativa quando os detalhes da tatuagem são atualizados
     toast({
-      title: 'Detalhes atualizados',
-      description: 'Os detalhes da sua tatuagem foram atualizados.',
+      title: "Detalhes da tatuagem atualizados",
+      description: "As especificações da sua tatuagem foram salvas com sucesso.",
+      variant: "default",
+      className: "bg-blue-50 border-blue-200 text-blue-800",
     });
   };
   
@@ -237,13 +262,24 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       type: 'UPDATE_SCHEDULING_PREFERENCES', 
       payload: { id, scheduling_preferences } 
     });
+    
+    // Notificação para atualização das preferências de agendamento
+    toast({
+      title: "Preferências de agendamento salvas",
+      description: "Suas datas e horários preferenciais foram registrados.",
+      variant: "default",
+      className: "bg-blue-50 border-blue-200 text-blue-800",
+    });
   };
   
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
+    
+    // Notificação de limpeza do carrinho
     toast({
-      title: 'Carrinho limpo',
-      description: 'Todos os itens foram removidos do carrinho.',
+      title: "Carrinho esvaziado",
+      description: "Todos os itens foram removidos do carrinho.",
+      variant: "default",
     });
   };
   
