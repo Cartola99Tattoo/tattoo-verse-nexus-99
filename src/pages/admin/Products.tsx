@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,10 +32,6 @@ interface Product {
   sizes?: string[];
   body_locations?: string[];
   style_tags?: string[];
-  product_type?: 'tattoo' | 'product';
-  category_type?: 'exclusive' | 'inspiration';
-  package_size?: string;
-  weight?: string;
 }
 
 interface Category {
@@ -130,28 +127,6 @@ export default function Products() {
     }
   };
 
-  const getProductTypeBadge = (type?: string) => {
-    switch (type) {
-      case 'tattoo':
-        return <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300">Tatuagem</Badge>;
-      case 'product':
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">Produto</Badge>;
-      default:
-        return null;
-    }
-  };
-
-  const getCategoryTypeBadge = (type?: string) => {
-    switch (type) {
-      case 'exclusive':
-        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">Exclusiva</Badge>;
-      case 'inspiration':
-        return <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300">Inspiração</Badge>;
-      default:
-        return null;
-    }
-  };
-
   // Handler for adding a new product
   const handleAddProduct = async (data: any) => {
     try {
@@ -181,29 +156,7 @@ export default function Products() {
     
     try {
       setIsSubmitting(true);
-      
-      // Create an object that only contains properties that should be updated
-      const updateData = {
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        category_id: data.category_id,
-        artist_id: data.artist_id,
-        status: data.status,
-        images: data.images,
-        average_time: data.average_time,
-        sizes: data.sizes,
-        body_locations: data.body_locations,
-        style_tags: data.style_tags,
-        // Make sure we only include fields that are in the Product interface
-        // and in the ProductForm's expected values
-        product_type: currentProduct.product_type,
-        category_type: currentProduct.category_type,
-        package_size: data.package_size,
-        weight: data.weight,
-      };
-      
-      await productService.updateProduct(currentProduct.id, updateData);
+      await productService.updateProduct(currentProduct.id, data);
       toast({
         title: "Produto atualizado",
         description: "O produto foi atualizado com sucesso.",
@@ -309,18 +262,17 @@ export default function Products() {
         ) : (
           <div className="rounded-lg border bg-white">
             <div className="grid grid-cols-12 border-b px-6 py-3 font-medium text-sm text-gray-500">
-              <div className="col-span-4">Produto</div>
-              <div className="col-span-1">Tipo</div>
-              <div className="col-span-1">Categoria</div>
+              <div className="col-span-5">Produto</div>
+              <div className="col-span-2">Categoria</div>
               <div className="col-span-1">Preço</div>
               <div className="col-span-2">Artista</div>
-              <div className="col-span-2">Status</div>
+              <div className="col-span-1">Status</div>
               <div className="col-span-1 text-right">Ações</div>
             </div>
 
             {filteredProducts.map((product) => (
               <div key={product.id} className="grid grid-cols-12 items-center px-6 py-4 hover:bg-gray-50 border-b last:border-0">
-                <div className="col-span-4 flex items-center gap-3">
+                <div className="col-span-5 flex items-center gap-3">
                   {product.images && product.images[0] ? (
                     <img
                       src={product.images[0]}
@@ -341,18 +293,10 @@ export default function Products() {
                     )}
                   </div>
                 </div>
-                <div className="col-span-1">
-                  {getProductTypeBadge(product.product_type)}
-                  {product.product_type === 'tattoo' && product.category_type && (
-                    <div className="mt-1">
-                      {getCategoryTypeBadge(product.category_type)}
-                    </div>
-                  )}
-                </div>
-                <div className="col-span-1 text-sm">{product.category_name}</div>
+                <div className="col-span-2 text-sm">{product.category_name}</div>
                 <div className="col-span-1 text-sm font-medium">{formatCurrency(product.price)}</div>
                 <div className="col-span-2 text-sm">{product.artist_name}</div>
-                <div className="col-span-2">{getStatusBadge(product.status)}</div>
+                <div className="col-span-1">{getStatusBadge(product.status)}</div>
                 <div className="col-span-1 flex justify-end gap-2">
                   <Button
                     variant="ghost"
@@ -379,7 +323,7 @@ export default function Products() {
 
       {/* Add Product Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-auto">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Adicionar Novo Produto</DialogTitle>
             <DialogDescription>
@@ -398,7 +342,7 @@ export default function Products() {
 
       {/* Edit Product Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-auto">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Editar Produto</DialogTitle>
             <DialogDescription>
@@ -418,12 +362,7 @@ export default function Products() {
                 average_time: currentProduct.average_time || "",
                 sizes: currentProduct.sizes || [],
                 body_locations: currentProduct.body_locations || [],
-                style_tags: currentProduct.style_tags || [],
-                package_size: currentProduct.package_size || "",
-                weight: currentProduct.weight || "",
-                // We need to pass these separately since they're not part of initialData
-                product_type: currentProduct.product_type,
-                category_type: currentProduct.category_type,
+                style_tags: currentProduct.style_tags || []
               }}
               onSubmit={handleEditProduct}
               onCancel={() => setIsEditDialogOpen(false)}

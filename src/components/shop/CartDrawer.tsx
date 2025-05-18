@@ -66,18 +66,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
               
               <div className="flex-grow">
                 <h4 className="font-medium text-sm mb-1">{item.name}</h4>
-                <p className="text-gray-500 text-xs mb-2">
-                  {item.productType === 'tattoo' ? 'Tatuagem' : 'Produto'} • Artista: {item.artist}
-                </p>
+                <p className="text-gray-500 text-xs mb-2">Artista: {item.artist}</p>
                 <p className="font-bold mb-2">R$ {item.price}</p>
-                
-                {/* Mostrar detalhes de tatuagem se preenchidos */}
-                {item.productType === 'tattoo' && item.bodyPart && (
-                  <div className="mb-2 text-xs text-gray-600">
-                    <p>Local: {item.bodyPart}</p>
-                    {item.size && <p>Tamanho: {item.size}</p>}
-                  </div>
-                )}
                 
                 <div className="flex items-center">
                   <button
