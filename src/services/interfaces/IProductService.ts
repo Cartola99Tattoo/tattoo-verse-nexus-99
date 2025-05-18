@@ -6,6 +6,8 @@ export interface IProductService {
     limit?: number;
     offset?: number;
     userId?: string; // For tracking user-specific recommendations
+    product_type?: 'tattoo' | 'product';
+    category_type?: 'exclusive' | 'inspiration';
   }): Promise<any[]>;
   
   fetchProductById(id: string | number): Promise<any | null>;

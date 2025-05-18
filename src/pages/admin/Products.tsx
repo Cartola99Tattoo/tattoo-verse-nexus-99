@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -182,7 +181,27 @@ export default function Products() {
     
     try {
       setIsSubmitting(true);
-      await productService.updateProduct(currentProduct.id, data);
+      
+      // Create an object that only contains properties that should be updated
+      const updateData = {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        category_id: data.category_id,
+        artist_id: data.artist_id,
+        status: data.status,
+        images: data.images,
+        average_time: data.average_time,
+        sizes: data.sizes,
+        body_locations: data.body_locations,
+        style_tags: data.style_tags,
+        package_size: data.package_size,
+        weight: data.weight,
+        // Explicitly include these fields in the API call instead of using them directly from data
+        // This way TypeScript knows they are supposed to be there
+      };
+      
+      await productService.updateProduct(currentProduct.id, updateData);
       toast({
         title: "Produto atualizado",
         description: "O produto foi atualizado com sucesso.",
@@ -398,10 +417,9 @@ export default function Products() {
                 sizes: currentProduct.sizes || [],
                 body_locations: currentProduct.body_locations || [],
                 style_tags: currentProduct.style_tags || [],
-                product_type: currentProduct.product_type || "tattoo",
-                category_type: currentProduct.category_type || "exclusive",
                 package_size: currentProduct.package_size || "",
-                weight: currentProduct.weight || ""
+                weight: currentProduct.weight || "",
+                // We don't include product_type and category_type here as they're not in the expected type
               }}
               onSubmit={handleEditProduct}
               onCancel={() => setIsEditDialogOpen(false)}
