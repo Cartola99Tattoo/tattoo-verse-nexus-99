@@ -1,57 +1,60 @@
 
-import React, { useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { TattooDetails } from '@/services/interfaces/IProductService';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ImageUploader from "./ImageUploader";
+import { TattooDetails, TattooStyle, TattooSize, BodyPart } from "@/services/interfaces/IProductService";
 
-const bodyPartOptions = [
-  { value: 'braco', label: 'Braço' },
-  { value: 'costas', label: 'Costas' },
-  { value: 'perna', label: 'Perna' },
-  { value: 'tornozelo', label: 'Tornozelo' },
-  { value: 'costelas', label: 'Costelas' },
-  { value: 'peito', label: 'Peito' },
-  { value: 'pescoco', label: 'Pescoço' },
+const tattooStyles: TattooStyle[] = ["Realismo", "Minimalista", "Old School", "Aquarela", "Outros"];
+const tattooSizes: TattooSize[] = ["Pequeno (até 10cm)", "Médio (10-20cm)", "Grande (20-30cm)", "Extra Grande (acima de 30cm)"];
+const bodyParts: BodyPart[] = [
+  "Braço - Bíceps", "Braço - Antebraço", "Costas - Superior", "Costas - Inferior", 
+  "Perna - Coxa", "Perna - Panturrilha", "Tornozelo", "Pé", "Costelas", 
+  "Abdômen", "Pescoço", "Mão", "Pulso", "Ombro"
 ];
-
-const sizeOptions = [
-  { value: 'pequeno', label: 'Pequeno' },
-  { value: 'medio', label: 'Médio' },
-  { value: 'grande', label: 'Grande' },
-  { value: 'personalizado', label: 'Personalizado (especificar)' },
-];
-
-const timeOptions = [
-  { value: '1-2', label: '1-2 horas' },
-  { value: '2-4', label: '2-4 horas' },
-  { value: '4+', label: '4+ horas' },
-];
+const estimatedTimes = ["1-2 horas", "2-4 horas", "4+ horas"];
 
 interface TattooDetailsFormProps {
   initialDetails?: TattooDetails;
-  artistName: string;
+  artistName?: string;
+  availableArtists?: string[];
   onSave: (details: TattooDetails) => void;
 }
 
-const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({ initialDetails, artistName, onSave }) => {
-  const [details, setDetails] = useState<TattooDetails>(initialDetails || {});
-  const [customSize, setCustomSize] = useState<string>('');
+const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({ 
+  initialDetails = {}, 
+  artistName, 
+  availableArtists = [],
+  onSave 
+}) => {
+  const [details, setDetails] = useState<TattooDetails>({
+    bodyPart: initialDetails.bodyPart || undefined,
+    size: initialDetails.size || undefined,
+    style: initialDetails.style || undefined,
+    description: initialDetails.description || "",
+    estimatedTime: initialDetails.estimatedTime || "",
+    estimatedSessions: initialDetails.estimatedSessions || 1,
+    preferredArtist: initialDetails.preferredArtist || artistName,
+    referenceImages: initialDetails.referenceImages || [],
+  });
+  
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const updateDetail = (field: keyof TattooDetails, value: any) => {
-    setDetails({ ...details, [field]: value });
-    
-    // Clear error when field is updated
+  
+  const handleChange = (field: keyof TattooDetails, value: any) => {
+    setDetails(prev => ({ ...prev, [field]: value }));
+    // Clear error for this field if it exists
     if (errors[field]) {
-      const newErrors = { ...errors };
-      delete newErrors[field];
-      setErrors(newErrors);
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
   };
-
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -59,148 +62,218 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({ initialDetails, a
     const newErrors: Record<string, string> = {};
     
     if (!details.bodyPart) {
-      newErrors.bodyPart = 'Por favor, selecione uma parte do corpo';
+      newErrors.bodyPart = "Parte do corpo é obrigatória";
     }
     
-    if (!details.size && !customSize) {
-      newErrors.size = 'Por favor, selecione um tamanho';
+    if (!details.size) {
+      newErrors.size = "Tamanho é obrigatório";
     }
     
-    if (!details.description) {
-      newErrors.description = 'Por favor, descreva a arte desejada';
+    if (!details.style) {
+      newErrors.style = "Estilo é obrigatório";
     }
     
     if (!details.estimatedTime) {
-      newErrors.estimatedTime = 'Por favor, selecione um tempo estimado';
+      newErrors.estimatedTime = "Tempo estimado é obrigatório";
     }
     
-    if (!details.estimatedSessions || details.estimatedSessions <= 0) {
-      newErrors.estimatedSessions = 'Por favor, informe um número válido de sessões';
+    if (!details.estimatedSessions || details.estimatedSessions < 1) {
+      newErrors.estimatedSessions = "Número de sessões deve ser maior que zero";
     }
     
+    // If there are validation errors, don't proceed
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
     
-    // If using custom size, update the size field
-    const finalDetails = { ...details };
-    if (details.size === 'personalizado' && customSize) {
-      finalDetails.size = customSize;
-    }
-    
-    onSave(finalDetails);
+    onSave(details);
   };
-
+  
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 mt-4 border-t pt-4">
-      <h3 className="font-semibold text-lg mb-3">Detalhes da Tatuagem</h3>
+    <form onSubmit={handleSubmit} className="space-y-4 p-3 bg-gray-50 rounded-md mt-3">
+      <h5 className="font-semibold text-sm mb-2">Detalhes da Tatuagem</h5>
       
-      <div className="space-y-2">
-        <Label htmlFor="bodyPart">Parte do corpo <span className="text-red-500">*</span></Label>
+      {/* Artista preferencial */}
+      {availableArtists.length > 0 && (
+        <div className="space-y-1">
+          <Label htmlFor="artist" className="text-xs">
+            Artista <span className="text-red-500">*</span>
+          </Label>
+          <Select
+            value={details.preferredArtist}
+            onValueChange={(value) => handleChange('preferredArtist', value)}
+          >
+            <SelectTrigger id="artist" className={errors.preferredArtist ? "border-red-500" : ""}>
+              <SelectValue placeholder="Selecione um artista" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableArtists.map((artist) => (
+                <SelectItem key={artist} value={artist}>
+                  {artist}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.preferredArtist && (
+            <p className="text-xs text-red-500">{errors.preferredArtist}</p>
+          )}
+        </div>
+      )}
+      
+      {/* Estilo da tatuagem */}
+      <div className="space-y-1">
+        <Label htmlFor="style" className="text-xs">
+          Estilo da Tatuagem <span className="text-red-500">*</span>
+        </Label>
         <Select
-          value={details.bodyPart}
-          onValueChange={(value) => updateDetail('bodyPart', value)}
+          value={details.style}
+          onValueChange={(value) => handleChange('style', value as TattooStyle)}
         >
-          <SelectTrigger id="bodyPart" className={errors.bodyPart ? 'border-red-500' : ''}>
-            <SelectValue placeholder="Selecione a parte do corpo" />
+          <SelectTrigger id="style" className={errors.style ? "border-red-500" : ""}>
+            <SelectValue placeholder="Selecione um estilo" />
           </SelectTrigger>
           <SelectContent>
-            {bodyPartOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
+            {tattooStyles.map((style) => (
+              <SelectItem key={style} value={style}>
+                {style}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {errors.bodyPart && <p className="text-xs text-red-500">{errors.bodyPart}</p>}
+        {errors.style && (
+          <p className="text-xs text-red-500">{errors.style}</p>
+        )}
       </div>
       
-      <div className="space-y-2">
-        <Label htmlFor="size">Tamanho <span className="text-red-500">*</span></Label>
+      {/* Tamanho */}
+      <div className="space-y-1">
+        <Label htmlFor="size" className="text-xs">
+          Tamanho Aproximado <span className="text-red-500">*</span>
+        </Label>
         <Select
           value={details.size}
-          onValueChange={(value) => updateDetail('size', value)}
+          onValueChange={(value) => handleChange('size', value as TattooSize)}
         >
-          <SelectTrigger id="size" className={errors.size ? 'border-red-500' : ''}>
+          <SelectTrigger id="size" className={errors.size ? "border-red-500" : ""}>
             <SelectValue placeholder="Selecione o tamanho" />
           </SelectTrigger>
           <SelectContent>
-            {sizeOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
+            {tattooSizes.map((size) => (
+              <SelectItem key={size} value={size}>
+                {size}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {details.size === 'personalizado' && (
-          <Input
-            placeholder="Ex: 10cm x 15cm"
-            value={customSize}
-            onChange={(e) => setCustomSize(e.target.value)}
-            className="mt-2"
-          />
+        {errors.size && (
+          <p className="text-xs text-red-500">{errors.size}</p>
         )}
-        {errors.size && <p className="text-xs text-red-500">{errors.size}</p>}
       </div>
       
-      <div className="space-y-2">
-        <Label htmlFor="description">Descrição da arte <span className="text-red-500">*</span></Label>
-        <Textarea
-          id="description"
-          placeholder="Descreva os detalhes da tatuagem que você deseja..."
-          value={details.description || ''}
-          onChange={(e) => updateDetail('description', e.target.value)}
-          rows={3}
-          className={errors.description ? 'border-red-500' : ''}
-        />
-        {errors.description && <p className="text-xs text-red-500">{errors.description}</p>}
+      {/* Parte do corpo */}
+      <div className="space-y-1">
+        <Label htmlFor="bodyPart" className="text-xs">
+          Local do Corpo <span className="text-red-500">*</span>
+        </Label>
+        <Select
+          value={details.bodyPart}
+          onValueChange={(value) => handleChange('bodyPart', value as BodyPart)}
+        >
+          <SelectTrigger id="bodyPart" className={errors.bodyPart ? "border-red-500" : ""}>
+            <SelectValue placeholder="Selecione o local do corpo" />
+          </SelectTrigger>
+          <SelectContent>
+            {bodyParts.map((part) => (
+              <SelectItem key={part} value={part}>
+                {part}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.bodyPart && (
+          <p className="text-xs text-red-500">{errors.bodyPart}</p>
+        )}
       </div>
       
-      <div className="space-y-2">
-        <Label htmlFor="estimatedTime">Tempo estimado <span className="text-red-500">*</span></Label>
+      {/* Tempo estimado */}
+      <div className="space-y-1">
+        <Label htmlFor="estimatedTime" className="text-xs">
+          Tempo Estimado <span className="text-red-500">*</span>
+        </Label>
         <Select
           value={details.estimatedTime}
-          onValueChange={(value) => updateDetail('estimatedTime', value)}
+          onValueChange={(value) => handleChange('estimatedTime', value)}
         >
-          <SelectTrigger id="estimatedTime" className={errors.estimatedTime ? 'border-red-500' : ''}>
+          <SelectTrigger id="estimatedTime" className={errors.estimatedTime ? "border-red-500" : ""}>
             <SelectValue placeholder="Selecione o tempo estimado" />
           </SelectTrigger>
           <SelectContent>
-            {timeOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
+            {estimatedTimes.map((time) => (
+              <SelectItem key={time} value={time}>
+                {time}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {errors.estimatedTime && <p className="text-xs text-red-500">{errors.estimatedTime}</p>}
+        {errors.estimatedTime && (
+          <p className="text-xs text-red-500">{errors.estimatedTime}</p>
+        )}
       </div>
       
-      <div className="space-y-2">
-        <Label htmlFor="estimatedSessions">Sessões estimadas <span className="text-red-500">*</span></Label>
+      {/* Número de sessões */}
+      <div className="space-y-1">
+        <Label htmlFor="estimatedSessions" className="text-xs">
+          Sessões Estimadas <span className="text-red-500">*</span>
+        </Label>
         <Input
           id="estimatedSessions"
           type="number"
           min="1"
-          value={details.estimatedSessions || ''}
-          onChange={(e) => updateDetail('estimatedSessions', parseInt(e.target.value))}
-          className={errors.estimatedSessions ? 'border-red-500' : ''}
+          value={details.estimatedSessions || ""}
+          onChange={(e) => handleChange('estimatedSessions', parseInt(e.target.value) || "")}
+          className={errors.estimatedSessions ? "border-red-500" : ""}
         />
-        {errors.estimatedSessions && <p className="text-xs text-red-500">{errors.estimatedSessions}</p>}
+        {errors.estimatedSessions && (
+          <p className="text-xs text-red-500">{errors.estimatedSessions}</p>
+        )}
       </div>
       
-      <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 mt-4">
-        <p>
-          Tatuagens são procedimentos artísticos e personalizados para que cada traço da sua tattoo seja único e exclusivo. 
-          Ao reservar essa arte você estará garantindo uma obra de arte feita especialmente para você. 
-          Todos os direitos autorais precisam ser preservados e essa arte só poderá ser tatuada e reproduzida por {artistName}.
+      {/* Descrição */}
+      <div className="space-y-1">
+        <Label htmlFor="description" className="text-xs">
+          Descrição Detalhada da Ideia <span className="text-gray-500">(recomendado)</span>
+        </Label>
+        <Textarea
+          id="description"
+          value={details.description || ""}
+          onChange={(e) => handleChange('description', e.target.value)}
+          placeholder="Descreva sua ideia em detalhes para ajudar o artista"
+          maxLength={1000}
+          className="h-24"
+        />
+        <p className="text-xs text-right text-gray-500">
+          {(details.description?.length || 0)}/1000 caracteres
         </p>
       </div>
       
-      <Button type="submit" className="w-full bg-red-500 hover:bg-red-600">
-        Salvar Detalhes
-      </Button>
+      {/* Imagens de referência */}
+      <div className="space-y-1">
+        <Label className="text-xs">
+          Imagens de Referência <span className="text-gray-500">(opcional)</span>
+        </Label>
+        <ImageUploader 
+          maxImages={3} 
+          onImagesChange={(images) => handleChange('referenceImages', images)}
+          initialImages={details.referenceImages}
+        />
+      </div>
+      
+      <div className="pt-2 flex justify-end">
+        <Button type="submit" className="bg-red-500 hover:bg-red-600">
+          Salvar Detalhes
+        </Button>
+      </div>
     </form>
   );
 };

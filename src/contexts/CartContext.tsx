@@ -1,7 +1,15 @@
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { ProductType, CategoryType, TattooDetails } from '@/services/interfaces/IProductService';
+import { 
+  ProductType, 
+  CategoryType, 
+  TattooDetails, 
+  SchedulingPreferences,
+  TattooStyle,
+  TattooSize,
+  BodyPart
+} from '@/services/interfaces/IProductService';
 
 // Definir o tipo para os itens do carrinho
 export type CartItem = {
@@ -15,6 +23,7 @@ export type CartItem = {
   product_type?: ProductType;
   category_type?: CategoryType;
   tattoo_details?: TattooDetails;
+  scheduling_preferences?: SchedulingPreferences;
 };
 
 // Estado do carrinho
@@ -30,6 +39,7 @@ type CartAction =
   | { type: 'REMOVE_ITEM'; payload: { id: number } }
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
   | { type: 'UPDATE_TATTOO_DETAILS'; payload: { id: number; tattoo_details: TattooDetails } }
+  | { type: 'UPDATE_SCHEDULING_PREFERENCES'; payload: { id: number; scheduling_preferences: SchedulingPreferences } }
   | { type: 'CLEAR_CART' };
 
 // Valores iniciais do carrinho
@@ -117,6 +127,19 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       };
     }
     
+    case 'UPDATE_SCHEDULING_PREFERENCES': {
+      const { id, scheduling_preferences } = action.payload;
+      
+      const updatedItems = state.items.map(item => 
+        item.id === id ? { ...item, scheduling_preferences } : item
+      );
+      
+      return {
+        ...state,
+        items: updatedItems,
+      };
+    }
+    
     case 'CLEAR_CART': {
       return initialState;
     }
@@ -133,6 +156,7 @@ type CartContextType = {
   removeFromCart: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
   updateTattooDetails: (id: number, tattoo_details: TattooDetails) => void;
+  updateSchedulingPreferences: (id: number, scheduling_preferences: SchedulingPreferences) => void;
   clearCart: () => void;
 };
 
@@ -202,6 +226,17 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const updateTattooDetails = (id: number, tattoo_details: TattooDetails) => {
     dispatch({ type: 'UPDATE_TATTOO_DETAILS', payload: { id, tattoo_details } });
+    toast({
+      title: 'Detalhes atualizados',
+      description: 'Os detalhes da sua tatuagem foram atualizados.',
+    });
+  };
+  
+  const updateSchedulingPreferences = (id: number, scheduling_preferences: SchedulingPreferences) => {
+    dispatch({ 
+      type: 'UPDATE_SCHEDULING_PREFERENCES', 
+      payload: { id, scheduling_preferences } 
+    });
   };
   
   const clearCart = () => {
@@ -218,6 +253,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     removeFromCart,
     updateQuantity,
     updateTattooDetails,
+    updateSchedulingPreferences,
     clearCart,
   };
   

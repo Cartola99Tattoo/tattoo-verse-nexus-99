@@ -1,10 +1,9 @@
 
-import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CartDrawer from "./CartDrawer";
 import { useCart } from "@/contexts/CartContext";
-import { Drawer, DrawerTrigger } from "@/components/ui/drawer";
+import { useState } from "react";
 
 const CartButton = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);

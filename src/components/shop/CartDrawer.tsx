@@ -25,6 +25,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
   const { cart, removeFromCart, updateQuantity, clearCart, updateTattooDetails } = useCart();
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   
+  // Lista de artistas disponíveis (em um sistema real, isso viria do backend)
+  const availableArtists = ["João Silva", "Maria Souza", "Pedro Alves", "Ana Lima"];
+  
   if (cart.items.length === 0) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
@@ -136,8 +139,11 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
                   </div>
                   
                   <div className="space-y-1">
+                    {item.tattoo_details.style && (
+                      <p><span className="font-medium">Estilo:</span> {item.tattoo_details.style}</p>
+                    )}
                     {item.tattoo_details.bodyPart && (
-                      <p><span className="font-medium">Parte do corpo:</span> {item.tattoo_details.bodyPart}</p>
+                      <p><span className="font-medium">Local:</span> {item.tattoo_details.bodyPart}</p>
                     )}
                     {item.tattoo_details.size && (
                       <p><span className="font-medium">Tamanho:</span> {item.tattoo_details.size}</p>
@@ -148,10 +154,27 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
                     {item.tattoo_details.estimatedSessions && (
                       <p><span className="font-medium">Sessões estimadas:</span> {item.tattoo_details.estimatedSessions}</p>
                     )}
+                    {item.tattoo_details.preferredArtist && (
+                      <p><span className="font-medium">Artista preferido:</span> {item.tattoo_details.preferredArtist}</p>
+                    )}
                     {item.tattoo_details.description && (
                       <p><span className="font-medium">Descrição:</span> {item.tattoo_details.description}</p>
                     )}
                   </div>
+                  
+                  {/* Reference images */}
+                  {item.tattoo_details.referenceImages && item.tattoo_details.referenceImages.length > 0 && (
+                    <div className="mt-2">
+                      <p className="font-medium mb-1">Imagens de referência:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {item.tattoo_details.referenceImages.map((img, idx) => (
+                          <div key={idx} className="w-14 h-14 rounded-md overflow-hidden">
+                            <img src={img} alt={`Referência ${idx + 1}`} className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -160,6 +183,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
                 <TattooDetailsForm
                   initialDetails={item.tattoo_details}
                   artistName={item.artist}
+                  availableArtists={availableArtists}
                   onSave={(details) => handleSaveTattooDetails(item.id, details)}
                 />
               )}
@@ -174,6 +198,15 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
                   >
                     Adicionar detalhes da tatuagem
                   </Button>
+                </div>
+              )}
+              
+              {/* Copyright notice for tattoos */}
+              {item.product_type === 'tattoo' && (
+                <div className="mt-3 text-xs italic text-gray-500 p-2 border-l-2 border-gray-200">
+                  Tatuagens são procedimentos artísticos e personalizados. Ao reservar essa arte você estará garantindo 
+                  uma obra feita especialmente para você. Todos os direitos autorais precisam ser preservados e essa arte 
+                  só poderá ser tatuada e reproduzida por {item.artist}.
                 </div>
               )}
             </div>
@@ -222,6 +255,15 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
               </Button>
             </SheetClose>
           </div>
+          
+          {/* Checkout message */}
+          {cart.items.some(item => item.product_type === 'tattoo') && (
+            <p className="text-xs text-gray-500 mt-4 text-center">
+              Após a confirmação do pagamento, o artista entrará em contato para discutir 
+              os detalhes da sua tatuagem, agendar a sessão e fornecer um orçamento final. 
+              Este valor é uma estimativa inicial.
+            </p>
+          )}
         </div>
       </SheetContent>
     </Sheet>
