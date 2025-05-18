@@ -22,3 +22,16 @@ export interface IProductService {
   // Get personalized recommendations based on user behavior
   getRecommendedProducts(userId?: string, limit?: number): Promise<any[]>;
 }
+
+// Product types for the tattoo studio
+export type ProductType = 'tattoo' | 'product';
+export type CategoryType = 'exclusive' | 'inspiration';
+
+// Interface for tattoo-specific details
+export interface TattooDetails {
+  bodyPart?: string;
+  size?: string;
+  description?: string;
+  estimatedTime?: string;
+  estimatedSessions?: number;
+}

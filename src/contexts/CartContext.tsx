@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { toast } from '@/components/ui/use-toast';
+import { ProductType, CategoryType, TattooDetails } from '@/services/interfaces/IProductService';
 
 // Definir o tipo para os itens do carrinho
 export type CartItem = {
@@ -11,6 +12,9 @@ export type CartItem = {
   artist: string;
   category: string;
   quantity: number;
+  product_type?: ProductType;
+  category_type?: CategoryType;
+  tattoo_details?: TattooDetails;
 };
 
 // Estado do carrinho
@@ -25,6 +29,7 @@ type CartAction =
   | { type: 'ADD_ITEM'; payload: CartItem }
   | { type: 'REMOVE_ITEM'; payload: { id: number } }
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
+  | { type: 'UPDATE_TATTOO_DETAILS'; payload: { id: number; tattoo_details: TattooDetails } }
   | { type: 'CLEAR_CART' };
 
 // Valores iniciais do carrinho
@@ -98,6 +103,19 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         ...totals,
       };
     }
+
+    case 'UPDATE_TATTOO_DETAILS': {
+      const { id, tattoo_details } = action.payload;
+      
+      const updatedItems = state.items.map(item => 
+        item.id === id ? { ...item, tattoo_details } : item
+      );
+      
+      return {
+        ...state,
+        items: updatedItems,
+      };
+    }
     
     case 'CLEAR_CART': {
       return initialState;
@@ -114,6 +132,7 @@ type CartContextType = {
   addToCart: (product: Omit<CartItem, 'quantity'>, quantity?: number) => void;
   removeFromCart: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
+  updateTattooDetails: (id: number, tattoo_details: TattooDetails) => void;
   clearCart: () => void;
 };
 
@@ -180,6 +199,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const updateQuantity = (id: number, quantity: number) => {
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
   };
+
+  const updateTattooDetails = (id: number, tattoo_details: TattooDetails) => {
+    dispatch({ type: 'UPDATE_TATTOO_DETAILS', payload: { id, tattoo_details } });
+  };
   
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
@@ -194,6 +217,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     addToCart,
     removeFromCart,
     updateQuantity,
+    updateTattooDetails,
     clearCart,
   };
   

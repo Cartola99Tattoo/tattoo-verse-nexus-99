@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -9,9 +9,12 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Trash2, Minus, Plus, ShoppingBag } from "lucide-react";
+import { Trash2, Minus, Plus, ShoppingBag, Info } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { Link } from "react-router-dom";
+import { TattooDetails } from "@/services/interfaces/IProductService";
+import TattooDetailsForm from "./TattooDetailsForm";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CartDrawerProps {
   open: boolean;
@@ -19,7 +22,8 @@ interface CartDrawerProps {
 }
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
-  const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart, updateTattooDetails } = useCart();
+  const [editingItemId, setEditingItemId] = useState<number | null>(null);
   
   if (cart.items.length === 0) {
     return (
@@ -46,6 +50,12 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
     );
   }
 
+  // Handle saving tattoo details
+  const handleSaveTattooDetails = (id: number, details: TattooDetails) => {
+    updateTattooDetails(id, details);
+    setEditingItemId(null);
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md flex flex-col">
@@ -55,48 +65,129 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
         
         <div className="flex-grow overflow-auto mb-4">
           {cart.items.map((item) => (
-            <div key={item.id} className="flex border-b py-4">
-              <div className="w-20 h-20 rounded-md overflow-hidden mr-4 flex-shrink-0">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              
-              <div className="flex-grow">
-                <h4 className="font-medium text-sm mb-1">{item.name}</h4>
-                <p className="text-gray-500 text-xs mb-2">Artista: {item.artist}</p>
-                <p className="font-bold mb-2">R$ {item.price}</p>
+            <div key={item.id} className="border-b py-4">
+              <div className="flex">
+                <div className="w-20 h-20 rounded-md overflow-hidden mr-4 flex-shrink-0">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 
-                <div className="flex items-center">
-                  <button
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    className="p-1 border rounded-md"
-                    aria-label="Diminuir quantidade"
-                  >
-                    <Minus className="h-3 w-3" />
-                  </button>
-                  <span className="mx-2 text-sm">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="p-1 border rounded-md"
-                    aria-label="Aumentar quantidade"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </button>
+                <div className="flex-grow">
+                  <h4 className="font-medium text-sm mb-1">{item.name}</h4>
+                  <p className="text-gray-500 text-xs mb-2">Artista: {item.artist}</p>
+                  <p className="font-bold mb-2">R$ {item.price}</p>
                   
-                  <button
-                    onClick={() => removeFromCart(item.id)}
-                    className="ml-auto p-1.5 text-red-500 hover:bg-red-50 rounded-md"
-                    aria-label="Remover item"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      className="p-1 border rounded-md"
+                      aria-label="Diminuir quantidade"
+                    >
+                      <Minus className="h-3 w-3" />
+                    </button>
+                    <span className="mx-2 text-sm">{item.quantity}</span>
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="p-1 border rounded-md"
+                      aria-label="Aumentar quantidade"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </button>
+                    
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="ml-auto p-1.5 text-red-500 hover:bg-red-50 rounded-md"
+                      aria-label="Remover item"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {/* Mostrar tipo do produto */}
+                  {item.product_type && (
+                    <div className="mt-2">
+                      <span className="inline-block px-2 py-1 text-xs rounded-full bg-gray-100">
+                        {item.product_type === 'tattoo' ? 'Tatuagem' : 'Produto'}
+                      </span>
+                      {item.category_type && (
+                        <span className="inline-block ml-2 px-2 py-1 text-xs rounded-full bg-gray-100">
+                          {item.category_type === 'exclusive' ? 'Arte Exclusiva' : 'Inspiração'}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
+
+              {/* Tattoo details summary (if product is a tattoo and details are provided) */}
+              {item.product_type === 'tattoo' && item.tattoo_details && editingItemId !== item.id && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-md text-sm">
+                  <div className="flex justify-between items-center mb-2">
+                    <h5 className="font-semibold text-sm">Detalhes da Tatuagem</h5>
+                    <button
+                      onClick={() => setEditingItemId(item.id)}
+                      className="text-xs text-blue-500 hover:underline"
+                    >
+                      Editar
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    {item.tattoo_details.bodyPart && (
+                      <p><span className="font-medium">Parte do corpo:</span> {item.tattoo_details.bodyPart}</p>
+                    )}
+                    {item.tattoo_details.size && (
+                      <p><span className="font-medium">Tamanho:</span> {item.tattoo_details.size}</p>
+                    )}
+                    {item.tattoo_details.estimatedTime && (
+                      <p><span className="font-medium">Tempo estimado:</span> {item.tattoo_details.estimatedTime}</p>
+                    )}
+                    {item.tattoo_details.estimatedSessions && (
+                      <p><span className="font-medium">Sessões estimadas:</span> {item.tattoo_details.estimatedSessions}</p>
+                    )}
+                    {item.tattoo_details.description && (
+                      <p><span className="font-medium">Descrição:</span> {item.tattoo_details.description}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Tattoo details form (if product is a tattoo and in edit mode) */}
+              {item.product_type === 'tattoo' && editingItemId === item.id && (
+                <TattooDetailsForm
+                  initialDetails={item.tattoo_details}
+                  artistName={item.artist}
+                  onSave={(details) => handleSaveTattooDetails(item.id, details)}
+                />
+              )}
+
+              {/* Add details button if product is a tattoo and no details are provided yet */}
+              {item.product_type === 'tattoo' && !item.tattoo_details && editingItemId !== item.id && (
+                <div className="mt-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setEditingItemId(item.id)}
+                    className="w-full text-sm"
+                  >
+                    Adicionar detalhes da tatuagem
+                  </Button>
+                </div>
+              )}
             </div>
           ))}
+          
+          {/* Alert for tattoo products without details */}
+          {cart.items.some(item => item.product_type === 'tattoo' && !item.tattoo_details) && (
+            <Alert className="mt-4 bg-amber-50 border-amber-200">
+              <Info className="h-5 w-5 text-amber-500" />
+              <AlertDescription className="text-amber-800 text-sm">
+                Por favor, adicione os detalhes necessários para sua(s) tatuagem(ns) antes de prosseguir para o checkout.
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
         
         <div className="border-t pt-4">
@@ -122,7 +213,11 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
               </Button>
             )}
             <SheetClose asChild>
-              <Button asChild className="flex-grow bg-red-500 hover:bg-red-600">
+              <Button 
+                asChild 
+                className="flex-grow bg-red-500 hover:bg-red-600"
+                disabled={cart.items.some(item => item.product_type === 'tattoo' && !item.tattoo_details)}
+              >
                 <Link to="/checkout">Finalizar Compra</Link>
               </Button>
             </SheetClose>

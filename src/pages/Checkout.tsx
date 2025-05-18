@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { useCart } from "@/contexts/CartContext";
@@ -17,15 +17,15 @@ import { Info } from "lucide-react";
 // Etapas do checkout
 type CheckoutStep = 'cart' | 'shipping' | 'payment' | 'confirmation';
 
-// Tipo para informações de envio
-type ShippingInfo = {
+// Tipo para informações de contato
+type ContactInfo = {
   name: string;
   email: string;
   phone: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
   notes?: string;
 };
 
@@ -43,22 +43,28 @@ const Checkout = () => {
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('cart');
   
   // Estados para formulários
-  const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
     name: '',
     email: '',
     phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
   });
   
   const [paymentMethod, setPaymentMethod] = useState<string>('credit_card');
   
   const [schedulingPreferences, setSchedulingPreferences] = useState<SchedulingPreferences>({});
+
+  // Verificar se há tatuagens no carrinho
+  const hasTattoos = cart.items.some(item => item.product_type === 'tattoo');
+  // Verificar se há produtos físicos no carrinho
+  const hasPhysicalProducts = cart.items.some(item => item.product_type === 'product');
+  
+  // Verificar se há tatuagens do tipo inspiração no carrinho
+  const hasInspirationTattoos = cart.items.some(
+    item => item.product_type === 'tattoo' && item.category_type === 'inspiration'
+  );
   
   // Manipuladores de eventos
-  const handleShippingSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep('payment');
   };
@@ -135,38 +141,89 @@ const Checkout = () => {
                   <CardContent>
                     <div className="space-y-4">
                       {cart.items.map((item) => (
-                        <div key={item.id} className="flex border-b pb-4">
-                          <div className="w-20 h-20 rounded-md overflow-hidden mr-4">
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="flex-grow">
-                            <h4 className="font-medium">{item.name}</h4>
-                            <p className="text-gray-500 text-sm">
-                              Artista: {item.artist} • Categoria: {item.category}
-                            </p>
-                            <div className="flex justify-between mt-2">
-                              <span>Qtd: {item.quantity}</span>
-                              <span className="font-bold">
-                                R$ {(item.price * item.quantity).toFixed(2)}
-                              </span>
+                        <div key={item.id} className="flex flex-col border-b pb-4">
+                          <div className="flex">
+                            <div className="w-20 h-20 rounded-md overflow-hidden mr-4">
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="flex-grow">
+                              <h4 className="font-medium">{item.name}</h4>
+                              <p className="text-gray-500 text-sm">
+                                Artista: {item.artist} • Categoria: {item.category}
+                              </p>
+                              <div className="flex justify-between mt-2">
+                                <span>Qtd: {item.quantity}</span>
+                                <span className="font-bold">
+                                  R$ {(item.price * item.quantity).toFixed(2)}
+                                </span>
+                              </div>
+                              {/* Mostrar tipo do produto */}
+                              {item.product_type && (
+                                <div className="mt-2">
+                                  <span className="inline-block px-2 py-1 text-xs rounded-full bg-gray-100">
+                                    {item.product_type === 'tattoo' ? 'Tatuagem' : 'Produto'}
+                                  </span>
+                                  {item.category_type && (
+                                    <span className="inline-block ml-2 px-2 py-1 text-xs rounded-full bg-gray-100">
+                                      {item.category_type === 'exclusive' ? 'Arte Exclusiva' : 'Inspiração'}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
+
+                          {/* Detalhes da tatuagem se existirem */}
+                          {item.product_type === 'tattoo' && item.tattoo_details && (
+                            <div className="mt-3 ml-24 bg-gray-50 p-3 rounded-md">
+                              <h5 className="text-sm font-semibold mb-1">Detalhes da Tatuagem:</h5>
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                {item.tattoo_details.bodyPart && (
+                                  <div>
+                                    <span className="font-medium">Parte do corpo:</span> {item.tattoo_details.bodyPart}
+                                  </div>
+                                )}
+                                {item.tattoo_details.size && (
+                                  <div>
+                                    <span className="font-medium">Tamanho:</span> {item.tattoo_details.size}
+                                  </div>
+                                )}
+                                {item.tattoo_details.estimatedTime && (
+                                  <div>
+                                    <span className="font-medium">Tempo estimado:</span> {item.tattoo_details.estimatedTime}
+                                  </div>
+                                )}
+                                {item.tattoo_details.estimatedSessions && (
+                                  <div>
+                                    <span className="font-medium">Sessões estimadas:</span> {item.tattoo_details.estimatedSessions}
+                                  </div>
+                                )}
+                                {item.tattoo_details.description && (
+                                  <div className="col-span-2">
+                                    <span className="font-medium">Descrição:</span> {item.tattoo_details.description}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
                     
-                    <Alert className="mt-6 bg-blue-50 border-blue-100">
-                      <Info className="h-5 w-5 text-blue-500" />
-                      <AlertDescription className="text-blue-800">
-                        Tatuagens são procedimentos artísticos e personalizados.
-                        Na próxima etapa, você poderá escolher datas preferenciais
-                        para agendar sua sessão.
-                      </AlertDescription>
-                    </Alert>
+                    {hasTattoos && (
+                      <Alert className="mt-6 bg-blue-50 border-blue-100">
+                        <Info className="h-5 w-5 text-blue-500" />
+                        <AlertDescription className="text-blue-800">
+                          Tatuagens são procedimentos artísticos e personalizados.
+                          Na próxima etapa, você poderá escolher datas preferenciais
+                          para agendar sua sessão.
+                        </AlertDescription>
+                      </Alert>
+                    )}
                     
                     <div className="flex justify-end mt-6">
                       <Button 
@@ -180,21 +237,22 @@ const Checkout = () => {
                 </Card>
               )}
               
-              {/* Etapa 2: Informações de envio */}
+              {/* Etapa 2: Informações de contato */}
               {currentStep === 'shipping' && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Informações de Contato</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <form onSubmit={handleShippingSubmit} className="space-y-4">
+                    <form onSubmit={handleContactSubmit} className="space-y-4">
+                      {/* Informações básicas de contato (sempre exibidas) */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="name">Nome completo</Label>
                           <Input
                             id="name"
-                            value={shippingInfo.name}
-                            onChange={(e) => setShippingInfo({...shippingInfo, name: e.target.value})}
+                            value={contactInfo.name}
+                            onChange={(e) => setContactInfo({...contactInfo, name: e.target.value})}
                             required
                           />
                         </div>
@@ -203,8 +261,8 @@ const Checkout = () => {
                           <Input
                             id="email"
                             type="email"
-                            value={shippingInfo.email}
-                            onChange={(e) => setShippingInfo({...shippingInfo, email: e.target.value})}
+                            value={contactInfo.email}
+                            onChange={(e) => setContactInfo({...contactInfo, email: e.target.value})}
                             required
                           />
                         </div>
@@ -215,114 +273,126 @@ const Checkout = () => {
                           <Label htmlFor="phone">Telefone</Label>
                           <Input
                             id="phone"
-                            value={shippingInfo.phone}
-                            onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
+                            value={contactInfo.phone}
+                            onChange={(e) => setContactInfo({...contactInfo, phone: e.target.value})}
                             required
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="address">Endereço</Label>
-                          <Input
-                            id="address"
-                            value={shippingInfo.address}
-                            onChange={(e) => setShippingInfo({...shippingInfo, address: e.target.value})}
-                            required
-                          />
-                        </div>
+                          
+                        {/* Campos de endereço (somente se houver produtos físicos) */}
+                        {hasPhysicalProducts && (
+                          <div className="space-y-2">
+                            <Label htmlFor="address">Endereço</Label>
+                            <Input
+                              id="address"
+                              value={contactInfo.address || ''}
+                              onChange={(e) => setContactInfo({...contactInfo, address: e.target.value})}
+                              required={hasPhysicalProducts}
+                            />
+                          </div>
+                        )}
                       </div>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="space-y-2 col-span-2">
-                          <Label htmlFor="city">Cidade</Label>
-                          <Input
-                            id="city"
-                            value={shippingInfo.city}
-                            onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
-                            required
-                          />
+                      {/* Mais campos de endereço (somente se houver produtos físicos) */}
+                      {hasPhysicalProducts && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="space-y-2 col-span-2">
+                            <Label htmlFor="city">Cidade</Label>
+                            <Input
+                              id="city"
+                              value={contactInfo.city || ''}
+                              onChange={(e) => setContactInfo({...contactInfo, city: e.target.value})}
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="state">Estado</Label>
+                            <Input
+                              id="state"
+                              value={contactInfo.state || ''}
+                              onChange={(e) => setContactInfo({...contactInfo, state: e.target.value})}
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="zipCode">CEP</Label>
+                            <Input
+                              id="zipCode"
+                              value={contactInfo.zipCode || ''}
+                              onChange={(e) => setContactInfo({...contactInfo, zipCode: e.target.value})}
+                              required
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="state">Estado</Label>
-                          <Input
-                            id="state"
-                            value={shippingInfo.state}
-                            onChange={(e) => setShippingInfo({...shippingInfo, state: e.target.value})}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="zipCode">CEP</Label>
-                          <Input
-                            id="zipCode"
-                            value={shippingInfo.zipCode}
-                            onChange={(e) => setShippingInfo({...shippingInfo, zipCode: e.target.value})}
-                            required
-                          />
-                        </div>
-                      </div>
+                      )}
                       
-                      {/* Preferências de agendamento */}
-                      <div className="mt-8 border-t pt-6">
-                        <h3 className="text-lg font-bold mb-4">Preferências de Agendamento</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="date1">Data preferencial 1</Label>
-                            <Input
-                              id="date1"
-                              type="date"
-                              value={schedulingPreferences.preferredDate1 || ''}
-                              onChange={(e) => setSchedulingPreferences({
-                                ...schedulingPreferences, 
-                                preferredDate1: e.target.value
-                              })}
-                            />
+                      {/* Preferências de agendamento - exibir apenas para tatuagens */}
+                      {hasTattoos && (
+                        <div className="mt-8 border-t pt-6">
+                          <h3 className="text-lg font-bold mb-4">Preferências de Agendamento</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="date1">Data preferencial 1</Label>
+                              <Input
+                                id="date1"
+                                type="date"
+                                value={schedulingPreferences.preferredDate1 || ''}
+                                onChange={(e) => setSchedulingPreferences({
+                                  ...schedulingPreferences, 
+                                  preferredDate1: e.target.value
+                                })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="date2">Data preferencial 2</Label>
+                              <Input
+                                id="date2"
+                                type="date"
+                                value={schedulingPreferences.preferredDate2 || ''}
+                                onChange={(e) => setSchedulingPreferences({
+                                  ...schedulingPreferences, 
+                                  preferredDate2: e.target.value
+                                })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="date3">Data preferencial 3</Label>
+                              <Input
+                                id="date3"
+                                type="date"
+                                value={schedulingPreferences.preferredDate3 || ''}
+                                onChange={(e) => setSchedulingPreferences({
+                                  ...schedulingPreferences, 
+                                  preferredDate3: e.target.value
+                                })}
+                              />
+                            </div>
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="date2">Data preferencial 2</Label>
-                            <Input
-                              id="date2"
-                              type="date"
-                              value={schedulingPreferences.preferredDate2 || ''}
-                              onChange={(e) => setSchedulingPreferences({
-                                ...schedulingPreferences, 
-                                preferredDate2: e.target.value
-                              })}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="date3">Data preferencial 3</Label>
-                            <Input
-                              id="date3"
-                              type="date"
-                              value={schedulingPreferences.preferredDate3 || ''}
-                              onChange={(e) => setSchedulingPreferences({
-                                ...schedulingPreferences, 
-                                preferredDate3: e.target.value
-                              })}
-                            />
-                          </div>
+                          
+                          {/* Mostrar campo de artista preferencial apenas para tatuagens do tipo "inspiração" */}
+                          {hasInspirationTattoos && (
+                            <div className="mt-4 space-y-2">
+                              <Label htmlFor="preferredArtist">Artista preferencial (opcional)</Label>
+                              <Input
+                                id="preferredArtist"
+                                value={schedulingPreferences.preferredArtist || ''}
+                                onChange={(e) => setSchedulingPreferences({
+                                  ...schedulingPreferences, 
+                                  preferredArtist: e.target.value
+                                })}
+                                placeholder="Se você tem preferência por algum artista específico"
+                              />
+                            </div>
+                          )}
                         </div>
-                        
-                        <div className="mt-4 space-y-2">
-                          <Label htmlFor="preferredArtist">Artista preferencial (opcional)</Label>
-                          <Input
-                            id="preferredArtist"
-                            value={schedulingPreferences.preferredArtist || ''}
-                            onChange={(e) => setSchedulingPreferences({
-                              ...schedulingPreferences, 
-                              preferredArtist: e.target.value
-                            })}
-                            placeholder="Se você tem preferência por algum artista específico"
-                          />
-                        </div>
-                      </div>
+                      )}
                       
                       <div className="mt-4 space-y-2">
                         <Label htmlFor="notes">Observações adicionais (opcional)</Label>
                         <Textarea
                           id="notes"
-                          value={shippingInfo.notes || ''}
-                          onChange={(e) => setShippingInfo({...shippingInfo, notes: e.target.value})}
+                          value={contactInfo.notes || ''}
+                          onChange={(e) => setContactInfo({...contactInfo, notes: e.target.value})}
                           placeholder="Informações adicionais, personalização desejada, etc."
                         />
                       </div>
@@ -455,7 +525,7 @@ const Checkout = () => {
                         Seu pedido foi recebido e está sendo processado.
                       </p>
                       <p className="text-gray-700">
-                        Você receberá um e-mail de confirmação e entramos em contato para confirmar o agendamento.
+                        Você receberá um e-mail de confirmação {hasTattoos && "e entramos em contato para confirmar o agendamento"}.
                       </p>
                     </div>
                     
@@ -479,9 +549,29 @@ const Checkout = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {cart.items.map((item) => (
-                      <div key={item.id} className="flex justify-between text-sm">
-                        <span>{item.quantity}x {item.name}</span>
-                        <span>R$ {(item.price * item.quantity).toFixed(2)}</span>
+                      <div key={item.id} className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>{item.quantity}x {item.name}</span>
+                          <span>R$ {(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+
+                        {/* Mostrar detalhes da tatuagem no resumo se disponíveis */}
+                        {item.product_type === 'tattoo' && item.tattoo_details && (
+                          <div className="pl-4 border-l-2 border-gray-200 text-xs text-gray-500 space-y-1">
+                            {item.tattoo_details.bodyPart && (
+                              <p>Local: {item.tattoo_details.bodyPart}</p>
+                            )}
+                            {item.tattoo_details.size && (
+                              <p>Tamanho: {item.tattoo_details.size}</p>
+                            )}
+                            {item.tattoo_details.estimatedTime && (
+                              <p>Tempo: {item.tattoo_details.estimatedTime}</p>
+                            )}
+                            {item.tattoo_details.estimatedSessions && (
+                              <p>Sessões: {item.tattoo_details.estimatedSessions}</p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                     
