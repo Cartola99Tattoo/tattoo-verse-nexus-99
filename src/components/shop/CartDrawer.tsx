@@ -19,7 +19,7 @@ interface CartDrawerProps {
 }
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
-  const { cart, removeFromCart, updateQuantity, clearCart, getTattooDetails } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
   
   if (cart.items.length === 0) {
     return (
@@ -54,71 +54,49 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
         </SheetHeader>
         
         <div className="flex-grow overflow-auto mb-4">
-          {cart.items.map((item) => {
-            const tattooDetails = item.product_type === 'tattoo' ? getTattooDetails(item.id) : null;
-            
-            return (
-              <div key={item.id} className="flex border-b py-4">
-                <div className="w-20 h-20 rounded-md overflow-hidden mr-4 flex-shrink-0">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+          {cart.items.map((item) => (
+            <div key={item.id} className="flex border-b py-4">
+              <div className="w-20 h-20 rounded-md overflow-hidden mr-4 flex-shrink-0">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              
+              <div className="flex-grow">
+                <h4 className="font-medium text-sm mb-1">{item.name}</h4>
+                <p className="text-gray-500 text-xs mb-2">Artista: {item.artist}</p>
+                <p className="font-bold mb-2">R$ {item.price}</p>
                 
-                <div className="flex-grow">
-                  <h4 className="font-medium text-sm mb-1">{item.name}</h4>
-                  <p className="text-gray-500 text-xs mb-2">Artista: {item.artist}</p>
-                  <p className="font-bold mb-2">R$ {item.price}</p>
+                <div className="flex items-center">
+                  <button
+                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    className="p-1 border rounded-md"
+                    aria-label="Diminuir quantidade"
+                  >
+                    <Minus className="h-3 w-3" />
+                  </button>
+                  <span className="mx-2 text-sm">{item.quantity}</span>
+                  <button
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    className="p-1 border rounded-md"
+                    aria-label="Aumentar quantidade"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </button>
                   
-                  {/* Detalhes da tatuagem, se disponíveis */}
-                  {item.product_type === 'tattoo' && tattooDetails && (
-                    <div className="text-xs text-gray-600 mb-2">
-                      {tattooDetails.bodyPart && (
-                        <p>Local: {tattooDetails.bodyPart}</p>
-                      )}
-                      {tattooDetails.size && (
-                        <p>Tamanho: {tattooDetails.size}</p>
-                      )}
-                      {tattooDetails.estimatedTime && (
-                        <p>Tempo: {tattooDetails.estimatedTime}</p>
-                      )}
-                      {tattooDetails.estimatedSessions && (
-                        <p>Sessões: {tattooDetails.estimatedSessions}</p>
-                      )}
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="p-1 border rounded-md"
-                      aria-label="Diminuir quantidade"
-                    >
-                      <Minus className="h-3 w-3" />
-                    </button>
-                    <span className="mx-2 text-sm">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="p-1 border rounded-md"
-                      aria-label="Aumentar quantidade"
-                    >
-                      <Plus className="h-3 w-3" />
-                    </button>
-                    
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="ml-auto p-1.5 text-red-500 hover:bg-red-50 rounded-md"
-                      aria-label="Remover item"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => removeFromCart(item.id)}
+                    className="ml-auto p-1.5 text-red-500 hover:bg-red-50 rounded-md"
+                    aria-label="Remover item"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
         
         <div className="border-t pt-4">
