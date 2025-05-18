@@ -106,7 +106,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
           </div>
           {cart.totalPrice > 0 && (
             <div className="flex justify-between mb-4">
-              <span className="text-gray-500">Total</span>
+              <span className="text-gray-500">Total Estimado</span>
               <span className="font-bold text-lg">R$ {cart.totalPrice.toFixed(2)}</span>
             </div>
           )}
@@ -123,10 +123,14 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) => {
             )}
             <SheetClose asChild>
               <Button asChild className="flex-grow bg-red-500 hover:bg-red-600">
-                <Link to="/checkout">Finalizar Compra</Link>
+                <Link to="/checkout">Agendar Tatuagem</Link>
               </Button>
             </SheetClose>
           </div>
+          
+          <p className="text-xs text-gray-500 text-center mt-4">
+            O valor pode variar após análise do artista.
+          </p>
         </div>
       </SheetContent>
     </Sheet>
