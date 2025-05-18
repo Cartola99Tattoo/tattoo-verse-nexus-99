@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -11,6 +10,17 @@ export type CartItem = {
   artist: string;
   category: string;
   quantity: number;
+  productType?: 'tattoo' | 'product';
+  categoryType?: 'exclusive' | 'inspiration';
+  // Campos específicos para tatuagens
+  bodyPart?: string;
+  size?: string;
+  artDescription?: string;
+  estimatedTime?: string;
+  estimatedSessions?: number;
+  // Campos específicos para produtos
+  packageSize?: string;
+  weight?: string;
 };
 
 // Estado do carrinho
@@ -25,7 +35,8 @@ type CartAction =
   | { type: 'ADD_ITEM'; payload: CartItem }
   | { type: 'REMOVE_ITEM'; payload: { id: number } }
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
-  | { type: 'CLEAR_CART' };
+  | { type: 'CLEAR_CART' }
+  | { type: 'UPDATE_ITEM'; payload: { id: number; data: Partial<CartItem> } };
 
 // Valores iniciais do carrinho
 const initialState: CartState = {
@@ -103,6 +114,18 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       return initialState;
     }
     
+    case 'UPDATE_ITEM': {
+      const { id, data } = action.payload;
+      const updatedItems = state.items.map(item => 
+        item.id === id ? { ...item, ...data } : item
+      );
+      
+      return {
+        ...state,
+        items: updatedItems,
+      };
+    }
+    
     default:
       return state;
   }
@@ -114,6 +137,7 @@ type CartContextType = {
   addToCart: (product: Omit<CartItem, 'quantity'>, quantity?: number) => void;
   removeFromCart: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
+  updateCartItem: (id: number, data: Partial<CartItem>) => void;
   clearCart: () => void;
 };
 
@@ -181,6 +205,13 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
   };
   
+  const updateCartItem = (id: number, data: Partial<CartItem>) => {
+    dispatch({ 
+      type: 'UPDATE_ITEM', 
+      payload: { id, data } 
+    });
+  };
+  
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
     toast({
@@ -194,6 +225,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     addToCart,
     removeFromCart,
     updateQuantity,
+    updateCartItem,
     clearCart,
   };
   
