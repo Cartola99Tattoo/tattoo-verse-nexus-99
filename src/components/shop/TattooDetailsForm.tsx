@@ -7,12 +7,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TattooDetails, TattooStyle, TattooSize, BodyPart } from "@/services/interfaces/IProductService";
 import ImageUploader from "./ImageUploader";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 interface TattooDetailsFormProps {
   initialDetails?: TattooDetails;
   artistName?: string;
   availableArtists: string[];
   onSave: (details: TattooDetails) => void;
+  onlyDisplay?: boolean;
 }
 
 const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
@@ -20,6 +23,7 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
   artistName,
   availableArtists,
   onSave,
+  onlyDisplay = false,
 }) => {
   const [details, setDetails] = useState<TattooDetails>(initialDetails || {});
   
@@ -67,6 +71,10 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
   const handleImagesChange = (images: string[]) => {
     handleChange('referenceImages', images);
   };
+
+  // Check if all required fields are filled
+  const isValid = details.style && details.bodyPart && details.size && 
+                  details.estimatedTime && details.estimatedSessions;
   
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4 bg-gray-50 p-4 rounded-md">
@@ -78,6 +86,7 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
           <Select
             value={details.style || ''}
             onValueChange={(value) => handleChange('style', value)}
+            disabled={onlyDisplay}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione um estilo" />
@@ -95,6 +104,7 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
           <Select
             value={details.bodyPart || ''}
             onValueChange={(value) => handleChange('bodyPart', value)}
+            disabled={onlyDisplay}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione o local do corpo" />
@@ -112,6 +122,7 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
           <Select
             value={details.size || ''}
             onValueChange={(value) => handleChange('size', value)}
+            disabled={onlyDisplay}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione um tamanho" />
@@ -129,6 +140,7 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
           <Select
             value={details.estimatedTime || ''}
             onValueChange={(value) => handleChange('estimatedTime', value)}
+            disabled={onlyDisplay}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione o tempo estimado" />
@@ -150,6 +162,7 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
             value={details.estimatedSessions || ''}
             onChange={(e) => handleChange('estimatedSessions', parseInt(e.target.value))}
             placeholder="Número de sessões necessárias"
+            disabled={onlyDisplay}
           />
         </div>
         
@@ -158,6 +171,7 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
           <Select
             value={details.preferredArtist || artistName || ''}
             onValueChange={(value) => handleChange('preferredArtist', value)}
+            disabled={onlyDisplay}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione o artista" />
@@ -178,6 +192,7 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
             placeholder="Descreva sua ideia de tatuagem com o máximo de detalhes possível..."
             rows={3}
             maxLength={1000}
+            disabled={onlyDisplay}
           />
           <p className="text-xs text-gray-500 mt-1">
             {(details.description?.length || 0)}/1000 caracteres
@@ -190,18 +205,31 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
             initialImages={details.referenceImages || []} 
             onImagesChange={handleImagesChange}
             maxImages={3}
+            disabled={onlyDisplay}
           />
         </div>
+
+        {!isValid && !onlyDisplay && (
+          <Alert className="mt-2 bg-amber-50 border-amber-100">
+            <Info className="h-4 w-4 text-amber-500" />
+            <AlertDescription className="text-amber-800 text-xs">
+              Por favor, preencha todos os campos obrigatórios marcados com *
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
       
-      <div className="flex justify-end pt-2">
-        <Button
-          type="submit"
-          className="bg-red-500 hover:bg-red-600"
-        >
-          Salvar Detalhes
-        </Button>
-      </div>
+      {!onlyDisplay && (
+        <div className="flex justify-end pt-2">
+          <Button
+            type="submit"
+            className="bg-red-500 hover:bg-red-600"
+            disabled={!isValid}
+          >
+            Salvar Detalhes
+          </Button>
+        </div>
+      )}
     </form>
   );
 };

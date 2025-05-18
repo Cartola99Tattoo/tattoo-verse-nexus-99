@@ -8,17 +8,19 @@ interface ImageUploaderProps {
   maxImages?: number;
   onImagesChange: (images: string[]) => void;
   initialImages?: string[];
+  disabled?: boolean;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
   maxImages = 3,
   onImagesChange,
   initialImages = [],
+  disabled = false,
 }) => {
   const [images, setImages] = useState<string[]>(initialImages);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+    if (!e.target.files || e.target.files.length === 0 || disabled) return;
     
     const newFiles = Array.from(e.target.files);
     
@@ -64,6 +66,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const removeImage = (index: number) => {
+    if (disabled) return;
     const newImages = [...images];
     newImages.splice(index, 1);
     setImages(newImages);
@@ -80,18 +83,20 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               alt={`Referência ${index + 1}`} 
               className="w-full h-full object-cover"
             />
-            <button
-              type="button"
-              onClick={() => removeImage(index)}
-              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center"
-              aria-label="Remover imagem"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            {!disabled && (
+              <button
+                type="button"
+                onClick={() => removeImage(index)}
+                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center"
+                aria-label="Remover imagem"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         ))}
         
-        {images.length < maxImages && (
+        {images.length < maxImages && !disabled && (
           <label className="flex flex-col items-center justify-center w-24 h-24 bg-gray-100 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
               <span className="text-2xl">+</span>

@@ -17,6 +17,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import TattooDetailsForm from "@/components/shop/TattooDetailsForm";
 import SchedulingPreferencesForm from "@/components/shop/SchedulingPreferencesForm";
 import { TattooDetails, SchedulingPreferences } from "@/services/interfaces/IProductService";
+import CheckoutSummary from "@/components/shop/CheckoutSummary";
+import TattooCopyrightNotice from "@/components/shop/TattooCopyrightNotice";
 
 // Etapas do checkout
 type CheckoutStep = 'cart' | 'shipping' | 'payment' | 'confirmation';
@@ -65,7 +67,7 @@ const Checkout = () => {
     item => item.product_type === 'tattoo' && item.category_type === 'inspiration'
   );
   
-  // Verificar se todos os itens obrigatórios estão preenchidos
+  // Verificar se todos os detalhes de tatuagem obrigatórios estão preenchidos
   const allTattooDetailsComplete = hasTattoos ? 
     !cart.items.some(item => 
       item.product_type === 'tattoo' && 
@@ -77,9 +79,50 @@ const Checkout = () => {
        !item.tattoo_details.estimatedSessions)
     ) : true;
   
+  // Verificar se todas as preferências de agendamento estão preenchidas
+  const allSchedulingPreferencesComplete = hasTattoos ?
+    !cart.items.some(item =>
+      item.product_type === 'tattoo' &&
+      (!item.scheduling_preferences ||
+       !item.scheduling_preferences.preferredDates ||
+       item.scheduling_preferences.preferredDates.length < 3 ||
+       !item.scheduling_preferences.preferredTime)
+    ) : true;
+  
   // Manipuladores de eventos
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validação de campos básicos antes de prosseguir
+    if (!contactInfo.name || !contactInfo.email || !contactInfo.phone) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validação de campos de endereço para produtos físicos
+    if (hasPhysicalProducts && (!contactInfo.address || !contactInfo.city || !contactInfo.state || !contactInfo.zipCode)) {
+      toast({
+        title: "Endereço incompleto",
+        description: "Por favor, preencha todos os campos de endereço.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Verificar se todas as preferências de agendamento estão preenchidas para tatuagens
+    if (hasTattoos && !allSchedulingPreferencesComplete) {
+      toast({
+        title: "Preferências de agendamento incompletas",
+        description: "Por favor, preencha todas as preferências de agendamento para suas tatuagens.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setCurrentStep('payment');
   };
   
@@ -100,6 +143,7 @@ const Checkout = () => {
     setTimeout(() => {
       setProcessingPayment(false);
       setCurrentStep('confirmation');
+      window.scrollTo(0, 0);
     }, 1500);
   };
   
@@ -117,11 +161,21 @@ const Checkout = () => {
   const handleUpdateTattooDetails = (id: number, details: TattooDetails) => {
     updateTattooDetails(id, details);
     setEditingItemId(null);
+    
+    toast({
+      title: "Detalhes atualizados",
+      description: "Os detalhes da sua tatuagem foram atualizados com sucesso.",
+    });
   };
   
   // Handler para atualizar preferências de agendamento
   const handleUpdateSchedulingPreferences = (id: number, preferences: SchedulingPreferences) => {
     updateSchedulingPreferences(id, preferences);
+    
+    toast({
+      title: "Preferências de agendamento atualizadas",
+      description: "Suas preferências de agendamento foram atualizadas com sucesso.",
+    });
   };
   
   // Verificação de carrinho vazio
@@ -142,6 +196,11 @@ const Checkout = () => {
       </Layout>
     );
   }
+
+  // Rolar para o topo da página ao mudar de etapa
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentStep]);
 
   return (
     <Layout>
@@ -313,12 +372,7 @@ const Checkout = () => {
                             
                             {/* Copyright notice for tattoos */}
                             {item.product_type === 'tattoo' && (
-                              <div className="mt-4 text-sm italic text-gray-500 p-3 border-l-2 border-gray-200">
-                                Tatuagens são procedimentos artísticos e personalizados para que cada traço da sua tattoo 
-                                seja único e exclusivo. Ao reservar essa arte você estará garantindo uma obra de arte feita 
-                                especialmente para você. Todos os direitos autorais precisam ser preservados e essa arte só 
-                                poderá ser tatuada e reproduzida por {item.artist}.
-                              </div>
+                              <TattooCopyrightNotice artistName={item.artist} />
                             )}
                           </div>
                         </div>
@@ -369,7 +423,7 @@ const Checkout = () => {
                       {/* Informações básicas de contato (sempre exibidas) */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="name">Nome completo</Label>
+                          <Label htmlFor="name">Nome completo*</Label>
                           <Input
                             id="name"
                             value={contactInfo.name}
@@ -378,7 +432,7 @@ const Checkout = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="email">Email</Label>
+                          <Label htmlFor="email">Email*</Label>
                           <Input
                             id="email"
                             type="email"
@@ -391,7 +445,7 @@ const Checkout = () => {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="phone">Telefone</Label>
+                          <Label htmlFor="phone">Telefone*</Label>
                           <Input
                             id="phone"
                             value={contactInfo.phone}
@@ -404,7 +458,7 @@ const Checkout = () => {
                         {/* Campos de endereço (somente se houver produtos físicos) */}
                         {hasPhysicalProducts && (
                           <div className="space-y-2">
-                            <Label htmlFor="address">Endereço</Label>
+                            <Label htmlFor="address">Endereço*</Label>
                             <Input
                               id="address"
                               value={contactInfo.address || ''}
@@ -419,7 +473,7 @@ const Checkout = () => {
                       {hasPhysicalProducts && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="space-y-2 col-span-2">
-                            <Label htmlFor="city">Cidade</Label>
+                            <Label htmlFor="city">Cidade*</Label>
                             <Input
                               id="city"
                               value={contactInfo.city || ''}
@@ -428,7 +482,7 @@ const Checkout = () => {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="state">Estado</Label>
+                            <Label htmlFor="state">Estado*</Label>
                             <Input
                               id="state"
                               value={contactInfo.state || ''}
@@ -437,7 +491,7 @@ const Checkout = () => {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="zipCode">CEP</Label>
+                            <Label htmlFor="zipCode">CEP*</Label>
                             <Input
                               id="zipCode"
                               value={contactInfo.zipCode || ''}
@@ -474,6 +528,14 @@ const Checkout = () => {
                               />
                             </div>
                           ))}
+                          
+                          <Alert className="mt-4 bg-blue-50 border-blue-100">
+                            <Info className="h-5 w-5 text-blue-500" />
+                            <AlertDescription className="text-blue-800">
+                              Por favor, selecione pelo menos 3 datas preferenciais para cada tatuagem. 
+                              O estúdio entrará em contato para confirmar o agendamento com base na disponibilidade dos artistas.
+                            </AlertDescription>
+                          </Alert>
                         </div>
                       )}
                       
@@ -574,20 +636,27 @@ const Checkout = () => {
                       
                       {/* Termos e condições */}
                       <div className="border-t pt-4 mt-6">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-start space-x-2">
                           <Checkbox 
                             id="terms" 
                             checked={acceptedTerms}
                             onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
                             required
+                            className="mt-1"
                           />
                           <label
                             htmlFor="terms"
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            className="text-sm leading-tight peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                           >
                             Li e aceito os <a href="#" className="text-blue-600 hover:underline">termos e condições</a> do estúdio,
                             incluindo a política de cancelamento, responsabilidade sobre condições de saúde, direitos autorais da arte e
                             concordo que o valor exibido é uma estimativa inicial.
+                            {hasTattoos && (
+                              <p className="mt-1 text-xs text-gray-600">
+                                Estou ciente que o artista entrará em contato para confirmar os detalhes da tatuagem e que o valor 
+                                final pode ser ajustado após avaliação presencial da complexidade do projeto.
+                              </p>
+                            )}
                           </label>
                         </div>
                       </div>
@@ -600,6 +669,7 @@ const Checkout = () => {
                         <div className="text-sm text-gray-600">
                           <p>Pagamento processado com segurança.</p>
                           <p>Todas as transações são criptografadas e seus dados estão protegidos.</p>
+                          <p className="mt-1 text-xs">Em breve: integração com Stripe para processamento de pagamentos.</p>
                         </div>
                       </div>
                       
@@ -645,6 +715,19 @@ const Checkout = () => {
                       <p className="text-gray-700">
                         Você receberá um e-mail de confirmação{hasTattoos ? " e entraremos em contato para confirmar o agendamento" : ""}.
                       </p>
+                      
+                      {hasTattoos && (
+                        <div className="mt-4 p-4 bg-blue-50 rounded-md text-left">
+                          <p className="text-sm font-medium text-blue-800 mb-2">Próximos passos:</p>
+                          <ol className="list-decimal list-inside text-sm text-blue-700 space-y-1">
+                            <li>Nosso artista analisará sua solicitação de tatuagem</li>
+                            <li>Entraremos em contato para confirmar detalhes e disponibilidade</li>
+                            <li>Agendaremos sua sessão conforme as datas indicadas</li>
+                            <li>O artista preparará os desenhos para sua aprovação</li>
+                            <li>Na data agendada, realizaremos sua tatuagem</li>
+                          </ol>
+                        </div>
+                      )}
                     </div>
                     
                     <Button 
@@ -660,57 +743,11 @@ const Checkout = () => {
             
             {/* Coluna lateral (resumo do pedido) */}
             <div className="md:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Resumo do Pedido</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {cart.items.map((item) => (
-                      <div key={item.id} className="space-y-2 pb-3 border-b">
-                        <div className="flex justify-between text-sm">
-                          <span className="font-medium">{item.quantity}x {item.name}</span>
-                          <span>R$ {(item.price * item.quantity).toFixed(2)}</span>
-                        </div>
-
-                        {/* Mostrar detalhes da tatuagem no resumo se disponíveis */}
-                        {item.product_type === 'tattoo' && item.tattoo_details && (
-                          <div className="pl-3 border-l-2 border-gray-200 text-xs text-gray-500 space-y-1">
-                            {item.tattoo_details.style && (
-                              <p>Estilo: {item.tattoo_details.style}</p>
-                            )}
-                            {item.tattoo_details.bodyPart && (
-                              <p>Local: {item.tattoo_details.bodyPart}</p>
-                            )}
-                            {item.tattoo_details.size && (
-                              <p>Tamanho: {item.tattoo_details.size}</p>
-                            )}
-                            {item.tattoo_details.estimatedTime && (
-                              <p>Tempo: {item.tattoo_details.estimatedTime}</p>
-                            )}
-                            {item.tattoo_details.estimatedSessions && (
-                              <p>Sessões: {item.tattoo_details.estimatedSessions}</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    
-                    <div className="pt-2">
-                      <div className="flex justify-between font-bold">
-                        <span>Total</span>
-                        <span>R$ {cart.totalPrice.toFixed(2)}</span>
-                      </div>
-                      
-                      {hasTattoos && (
-                        <p className="text-xs text-gray-500 mt-2 italic">
-                          * Valor estimado, sujeito a ajustes após consulta com o artista
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <CheckoutSummary 
+                items={cart.items}
+                totalPrice={cart.totalPrice}
+                hasTattoos={hasTattoos}
+              />
             </div>
           </div>
         </div>
