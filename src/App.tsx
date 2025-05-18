@@ -1,91 +1,71 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
-import Index from "./pages/index";
-import Shop from "./pages/Shop";
-import ProductDetail from "./pages/ProductDetail";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import Artists from "./pages/Artists";
-import ArtistDetail from "./pages/ArtistDetail";
-import Contact from "./pages/Contact";
-import Auth from "./pages/Auth";
-import AdminAuth from "./pages/AdminAuth";
-import ResetPassword from "./pages/ResetPassword";
-import Profile from "./pages/Profile";
-import UserProfile from "./pages/UserProfile";
-import NotFound from "./pages/NotFound";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import Checkout from "./pages/Checkout";
-import AdminUserSetup from "./pages/AdminUserSetup";
-import Events from "./pages/Events";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from './pages';
+import Shop from './pages/Shop';
+import ProductDetail from './pages/ProductDetail';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import Artists from './pages/Artists';
+import ArtistDetail from './pages/ArtistDetail';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
+import Contact from './pages/Contact';
+import Events from './pages/Events';
+import NotFound from './pages/NotFound';
+import Auth from './pages/Auth';
+import Profile from './pages/UserProfile';
+import ResetPassword from './pages/ResetPassword';
+import { CartProvider } from './contexts/CartContext';
+import { SonnerToaster } from './components/ui/sonner-toaster';
 
-// Dashboard do Admin
-import Dashboard from "./pages/admin/Dashboard";
-import Products from "./pages/admin/Products";
-import Loyalty from "./pages/admin/Loyalty";
-import Analytics from "./pages/admin/Analytics";
-import Security from "./pages/admin/Security";
+// Admin Routes
+import AdminAuth from './pages/AdminAuth';
+import AdminUserSetup from './pages/AdminUserSetup';
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminProducts from './pages/admin/Products';
+import AdminAnalytics from './pages/admin/Analytics';
+import AdminLoyalty from './pages/admin/Loyalty';
+import AdminSecurity from './pages/admin/Security';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
-// Configuração do React Query com configurações otimizadas
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutos
-      retry: 1,
-    },
-  },
-});
+import './App.css';
 
-const App = () => {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <HelmetProvider>
-          <BrowserRouter>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              {/* Rotas públicas */}
-              <Route path="/" element={<Index />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/shop/:id" element={<ProductDetail />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/artists" element={<Artists />} />
-              <Route path="/artists/:id" element={<ArtistDetail />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/admin-auth" element={<AdminAuth />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/admin-setup" element={<AdminUserSetup />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/user-profile" element={<UserProfile />} />
-              <Route path="/checkout" element={<Checkout />} />
-
-              {/* Rotas administrativas com ProtectedRoute - removendo requiredRole */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/admin" element={<Dashboard />} />
-                <Route path="/admin/products" element={<Products />} />
-                <Route path="/admin/loyalty" element={<Loyalty />} />
-                <Route path="/admin/analytics" element={<Analytics />} />
-                <Route path="/admin/security" element={<Security />} />
-              </Route>
-
-              {/* Rota 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </HelmetProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <Router>
+      <CartProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/artists" element={<Artists />} />
+          <Route path="/artist/:id" element={<ArtistDetail />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          
+          {/* Admin routes */}
+          <Route path="/admin/auth" element={<AdminAuth />} />
+          <Route path="/admin/setup" element={<AdminUserSetup />} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
+          <Route path="/admin/analytics" element={<ProtectedRoute><AdminAnalytics /></ProtectedRoute>} />
+          <Route path="/admin/loyalty" element={<ProtectedRoute><AdminLoyalty /></ProtectedRoute>} />
+          <Route path="/admin/security" element={<ProtectedRoute><AdminSecurity /></ProtectedRoute>} />
+          
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        
+        {/* Toast notifications container */}
+        <SonnerToaster />
+      </CartProvider>
+    </Router>
   );
-};
+}
 
 export default App;

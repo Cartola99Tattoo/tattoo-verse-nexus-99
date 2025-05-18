@@ -28,6 +28,7 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
 }) => {
   const [details, setDetails] = useState<TattooDetails>(initialDetails || {});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   
   const tattooStyles: TattooStyle[] = [
     'Realismo',
@@ -75,6 +76,7 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
   
   const handleChange = (field: keyof TattooDetails, value: any) => {
     setDetails(prev => ({ ...prev, [field]: value }));
+    setTouched(prev => ({ ...prev, [field]: true }));
     
     // Limpar erro quando o campo é preenchido
     if (errors[field] && value) {
@@ -86,6 +88,55 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
     }
   };
   
+  const handleBlur = (field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    validateField(field);
+  };
+  
+  const validateField = (field: string) => {
+    const newErrors = { ...errors };
+    
+    switch (field) {
+      case 'style':
+        if (!details.style) {
+          newErrors.style = "Por favor, selecione um estilo de tatuagem";
+        } else {
+          delete newErrors.style;
+        }
+        break;
+      case 'bodyPart':
+        if (!details.bodyPart) {
+          newErrors.bodyPart = "Por favor, selecione um local do corpo";
+        } else {
+          delete newErrors.bodyPart;
+        }
+        break;
+      case 'size':
+        if (!details.size) {
+          newErrors.size = "Por favor, selecione um tamanho";
+        } else {
+          delete newErrors.size;
+        }
+        break;
+      case 'estimatedTime':
+        if (!details.estimatedTime) {
+          newErrors.estimatedTime = "Por favor, selecione um tempo estimado";
+        } else {
+          delete newErrors.estimatedTime;
+        }
+        break;
+      case 'estimatedSessions':
+        if (!details.estimatedSessions || details.estimatedSessions < 1) {
+          newErrors.estimatedSessions = "Por favor, informe o número de sessões (mínimo 1)";
+        } else {
+          delete newErrors.estimatedSessions;
+        }
+        break;
+    }
+    
+    setErrors(newErrors);
+  };
+  
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     
@@ -94,9 +145,19 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
     if (!details.size) newErrors.size = "Por favor, selecione um tamanho";
     if (!details.estimatedTime) newErrors.estimatedTime = "Por favor, selecione um tempo estimado";
     if (!details.estimatedSessions || details.estimatedSessions < 1) 
-      newErrors.estimatedSessions = "Por favor, informe o número de sessões";
+      newErrors.estimatedSessions = "Por favor, informe o número de sessões (mínimo 1)";
     
     setErrors(newErrors);
+    // Marcar todos os campos como tocados para mostrar os erros
+    const allTouched: Record<string, boolean> = {
+      style: true,
+      bodyPart: true,
+      size: true,
+      estimatedTime: true,
+      estimatedSessions: true
+    };
+    setTouched(allTouched);
+    
     return Object.keys(newErrors).length === 0;
   };
   
@@ -122,15 +183,18 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
       
       <div className="space-y-3">
         <div>
-          <Label htmlFor="style" className="flex items-center">
-            Estilo da Tatuagem<span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="style" className="flex items-center form-required">
+            Estilo da Tatuagem
           </Label>
           <Select
             value={details.style || ''}
             onValueChange={(value) => handleChange('style', value)}
             disabled={onlyDisplay}
+            onOpenChange={() => !touched.style && setTouched({...touched, style: true})}
           >
-            <SelectTrigger className={`w-full ${errors.style ? 'border-red-500 focus:ring-red-500' : ''}`}>
+            <SelectTrigger 
+              className={`w-full ${(touched.style && errors.style) ? 'border-red-500 focus:ring-red-500' : ''}`}
+            >
               <SelectValue placeholder="Selecione um estilo" />
             </SelectTrigger>
             <SelectContent>
@@ -139,19 +203,22 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
               ))}
             </SelectContent>
           </Select>
-          {errors.style && <p className="text-red-500 text-xs mt-1">{errors.style}</p>}
+          {touched.style && errors.style && <p className="form-error-message">{errors.style}</p>}
         </div>
         
         <div>
-          <Label htmlFor="bodyPart" className="flex items-center">
-            Local do Corpo<span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="bodyPart" className="flex items-center form-required">
+            Local do Corpo
           </Label>
           <Select
             value={details.bodyPart || ''}
             onValueChange={(value) => handleChange('bodyPart', value)}
             disabled={onlyDisplay}
+            onOpenChange={() => !touched.bodyPart && setTouched({...touched, bodyPart: true})}
           >
-            <SelectTrigger className={`w-full ${errors.bodyPart ? 'border-red-500 focus:ring-red-500' : ''}`}>
+            <SelectTrigger 
+              className={`w-full ${(touched.bodyPart && errors.bodyPart) ? 'border-red-500 focus:ring-red-500' : ''}`}
+            >
               <SelectValue placeholder="Selecione o local do corpo" />
             </SelectTrigger>
             <SelectContent>
@@ -160,19 +227,22 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
               ))}
             </SelectContent>
           </Select>
-          {errors.bodyPart && <p className="text-red-500 text-xs mt-1">{errors.bodyPart}</p>}
+          {touched.bodyPart && errors.bodyPart && <p className="form-error-message">{errors.bodyPart}</p>}
         </div>
         
         <div>
-          <Label htmlFor="size" className="flex items-center">
-            Tamanho Aproximado<span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="size" className="flex items-center form-required">
+            Tamanho Aproximado
           </Label>
           <Select
             value={details.size || ''}
             onValueChange={(value) => handleChange('size', value)}
             disabled={onlyDisplay}
+            onOpenChange={() => !touched.size && setTouched({...touched, size: true})}
           >
-            <SelectTrigger className={`w-full ${errors.size ? 'border-red-500 focus:ring-red-500' : ''}`}>
+            <SelectTrigger 
+              className={`w-full ${(touched.size && errors.size) ? 'border-red-500 focus:ring-red-500' : ''}`}
+            >
               <SelectValue placeholder="Selecione um tamanho" />
             </SelectTrigger>
             <SelectContent>
@@ -181,19 +251,22 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
               ))}
             </SelectContent>
           </Select>
-          {errors.size && <p className="text-red-500 text-xs mt-1">{errors.size}</p>}
+          {touched.size && errors.size && <p className="form-error-message">{errors.size}</p>}
         </div>
         
         <div>
-          <Label htmlFor="estimatedTime" className="flex items-center">
-            Tempo Estimado<span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="estimatedTime" className="flex items-center form-required">
+            Tempo Estimado
           </Label>
           <Select
             value={details.estimatedTime || ''}
             onValueChange={(value) => handleChange('estimatedTime', value)}
             disabled={onlyDisplay}
+            onOpenChange={() => !touched.estimatedTime && setTouched({...touched, estimatedTime: true})}
           >
-            <SelectTrigger className={`w-full ${errors.estimatedTime ? 'border-red-500 focus:ring-red-500' : ''}`}>
+            <SelectTrigger 
+              className={`w-full ${(touched.estimatedTime && errors.estimatedTime) ? 'border-red-500 focus:ring-red-500' : ''}`}
+            >
               <SelectValue placeholder="Selecione o tempo estimado" />
             </SelectTrigger>
             <SelectContent>
@@ -203,23 +276,24 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
               <SelectItem value="Mais de 6 horas">Mais de 6 horas</SelectItem>
             </SelectContent>
           </Select>
-          {errors.estimatedTime && <p className="text-red-500 text-xs mt-1">{errors.estimatedTime}</p>}
+          {touched.estimatedTime && errors.estimatedTime && <p className="form-error-message">{errors.estimatedTime}</p>}
         </div>
         
         <div>
-          <Label htmlFor="estimatedSessions" className="flex items-center">
-            Sessões Estimadas<span className="text-red-500 ml-1">*</span>
+          <Label htmlFor="estimatedSessions" className="flex items-center form-required">
+            Sessões Estimadas
           </Label>
           <Input
             type="number"
             min="1"
             value={details.estimatedSessions || ''}
             onChange={(e) => handleChange('estimatedSessions', parseInt(e.target.value) || '')}
+            onBlur={() => handleBlur('estimatedSessions')}
             placeholder="Número de sessões necessárias"
             disabled={onlyDisplay}
-            className={errors.estimatedSessions ? 'border-red-500 focus:ring-red-500' : ''}
+            className={touched.estimatedSessions && errors.estimatedSessions ? 'border-red-500 focus:ring-red-500' : ''}
           />
-          {errors.estimatedSessions && <p className="text-red-500 text-xs mt-1">{errors.estimatedSessions}</p>}
+          {touched.estimatedSessions && errors.estimatedSessions && <p className="form-error-message">{errors.estimatedSessions}</p>}
         </div>
         
         <div>
@@ -262,7 +336,12 @@ const TattooDetailsForm: React.FC<TattooDetailsFormProps> = ({
             onImagesChange={handleImagesChange}
             maxImages={3}
             disabled={onlyDisplay}
+            fileTypes="image/png, image/jpeg, image/gif"
+            maxSizeMB={2}
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Formatos aceitos: JPG, PNG, GIF. Máximo 2MB por imagem.
+          </p>
         </div>
 
         {!isValid && !onlyDisplay && (

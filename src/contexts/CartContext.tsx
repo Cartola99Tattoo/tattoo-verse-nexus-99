@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { 
   ProductType, 
   CategoryType, 
@@ -206,12 +205,13 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       payload: { ...product, quantity } 
     });
     
-    // Notificação de toast melhorada com posição e estilo específicos
-    toast({
-      title: `${product.name} adicionado ao carrinho`,
+    // Notificação melhorada com posição específica e animação
+    toast(`${product.name} adicionado ao carrinho`, {
       description: `Quantidade: ${quantity} • Preço: R$ ${product.price.toFixed(2)}`,
-      variant: "default",
-      className: "bg-green-50 border-green-200 text-green-800",
+      position: 'top-right',
+      duration: 3000,
+      icon: '🛒',
+      className: 'cart-notification',
     });
   };
   
@@ -222,11 +222,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     
     dispatch({ type: 'REMOVE_ITEM', payload: { id } });
     
-    // Notificação mais específica para remoção
-    toast({
-      title: `${productName} removido`,
+    // Notificação mais específica para remoção utilizando Sonner
+    toast.error(`${productName} removido`, {
       description: "O item foi removido do seu carrinho.",
-      variant: "destructive",
+      position: 'top-right',
+      duration: 3000,
     });
   };
   
@@ -236,10 +236,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     if (quantity > 0) {
       const item = cart.items.find(item => item.id === id);
       if (item) {
-        toast({
-          title: "Quantidade atualizada",
+        toast.info("Quantidade atualizada", {
           description: `${item.name}: ${quantity} ${quantity === 1 ? 'unidade' : 'unidades'}`,
-          variant: "default",
+          position: 'top-right',
+          duration: 2000,
         });
       }
     }
@@ -248,12 +248,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const updateTattooDetails = (id: number, tattoo_details: TattooDetails) => {
     dispatch({ type: 'UPDATE_TATTOO_DETAILS', payload: { id, tattoo_details } });
     
-    // Mensagem mais informativa quando os detalhes da tatuagem são atualizados
-    toast({
-      title: "Detalhes da tatuagem atualizados",
+    // Mensagem mais informativa utilizando Sonner
+    toast.success("Detalhes da tatuagem atualizados", {
       description: "As especificações da sua tatuagem foram salvas com sucesso.",
-      variant: "default",
-      className: "bg-blue-50 border-blue-200 text-blue-800",
+      position: 'top-right',
+      duration: 3000,
     });
   };
   
@@ -263,23 +262,22 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       payload: { id, scheduling_preferences } 
     });
     
-    // Notificação para atualização das preferências de agendamento
-    toast({
-      title: "Preferências de agendamento salvas",
+    // Notificação utilizando Sonner
+    toast.success("Preferências de agendamento salvas", {
       description: "Suas datas e horários preferenciais foram registrados.",
-      variant: "default",
-      className: "bg-blue-50 border-blue-200 text-blue-800",
+      position: 'top-right',
+      duration: 3000,
     });
   };
   
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
     
-    // Notificação de limpeza do carrinho
-    toast({
-      title: "Carrinho esvaziado",
+    // Notificação de limpeza do carrinho utilizando Sonner
+    toast("Carrinho esvaziado", {
       description: "Todos os itens foram removidos do carrinho.",
-      variant: "default",
+      position: 'top-right',
+      duration: 3000,
     });
   };
   

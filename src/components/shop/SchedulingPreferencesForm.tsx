@@ -1,169 +1,385 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { SchedulingPreferences, PreferredTime } from "@/services/interfaces/IProductService";
-import DateSelector from "./DateSelector";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, Check } from "lucide-react";
+import { Info, Calendar as CalendarIcon, X } from "lucide-react";
+import { toast } from "sonner";
 
 interface SchedulingPreferencesFormProps {
   initialPreferences?: SchedulingPreferences;
   onSave: (preferences: SchedulingPreferences) => void;
-  onlyDisplay?: boolean;
-  artistName?: string;
+  readOnly?: boolean;
 }
+
+const MIN_DATES = 3;
 
 const SchedulingPreferencesForm: React.FC<SchedulingPreferencesFormProps> = ({
   initialPreferences,
   onSave,
-  onlyDisplay = false,
-  artistName
+  readOnly = false
 }) => {
-  const [preferences, setPreferences] = useState<SchedulingPreferences>(
-    initialPreferences || { 
-      preferredDates: [], 
-      preferredTime: "Qualquer horário", 
-      isFlexible: true 
+  const [preferences, setPreferences] = useState<SchedulingPreferences>(initialPreferences || {
+    preferredDates: [],
+    preferredTime: undefined,
+    isFlexible: false,
+    additionalNotes: ""
+  });
+  
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  
+  // Pegar as datas preferidas formatadas
+  const getSelectedDatesText = () => {
+    if (!preferences.preferredDates || preferences.preferredDates.length === 0) {
+      return "Selecione datas para agendamento";
     }
-  );
+    
+    if (preferences.preferredDates.length === 1) {
+      return format(new Date(preferences.preferredDates[0]), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    }
+    
+    return `${preferences.preferredDates.length} datas selecionadas`;
+  };
+
+  // Formatar as datas para exibição
+  const formatDateForDisplay = (dateString: string) => {
+    return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR });
+  };
   
-  const [saveAttempted, setSaveAttempted] = useState(false);
+  // Validar o formulário
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    // Verificar se foram selecionadas pelo menos 3 datas
+    if (!preferences.preferredDates || preferences.preferredDates.length < MIN_DATES) {
+      newErrors.preferredDates = `Por favor, selecione pelo menos ${MIN_DATES} datas preferidas.`;
+    }
+    
+    // Verificar se foi selecionado um horário preferido
+    if (!preferences.preferredTime) {
+      newErrors.preferredTime = "Por favor, selecione um horário preferido.";
+    }
+    
+    setErrors(newErrors);
+    setTouched({
+      preferredDates: true,
+      preferredTime: true
+    });
+    
+    return Object.keys(newErrors).length === 0;
+  };
   
-  const preferredTimes: PreferredTime[] = [
-    'Manhã',
-    'Tarde',
-    'Noite',
-    'Qualquer horário'
-  ];
-  
+  // Handler para atualizar o estado de preferências
   const handleChange = (field: keyof SchedulingPreferences, value: any) => {
     setPreferences(prev => ({ ...prev, [field]: value }));
-  };
-  
-  const handleDatesChange = (dates: Date[]) => {
-    const formattedDates = dates.map(date => date.toISOString());
-    handleChange('preferredDates', formattedDates);
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaveAttempted(true);
+    setTouched(prev => ({ ...prev, [field]: true }));
     
-    if (isValid) {
-      onSave(preferences);
+    // Limpar erro quando o campo é preenchido
+    if (errors[field]) {
+      if (field === "preferredDates" && (!value || value.length < MIN_DATES)) {
+        // Manter o erro se não tiver datas suficientes
+        return;
+      }
+      
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
   };
   
-  // Parse stored ISO strings back to Date objects
-  const selectedDates: Date[] = (preferences.preferredDates || []).map(dateStr => new Date(dateStr));
+  // Remover uma data específica
+  const removeDate = (dateToRemove: string) => {
+    if (preferences.preferredDates) {
+      const updatedDates = preferences.preferredDates.filter(date => date !== dateToRemove);
+      handleChange('preferredDates', updatedDates);
+      
+      // Verificar se ainda tem datas suficientes após a remoção
+      if (updatedDates.length < MIN_DATES) {
+        setErrors(prev => ({ 
+          ...prev, 
+          preferredDates: `Por favor, selecione pelo menos ${MIN_DATES} datas preferidas.`
+        }));
+      }
+    }
+  };
   
-  const isValid = selectedDates.length >= 3;
-  const showError = saveAttempted && !isValid;
+  // Adicionar uma data selecionada
+  const handleSelectDate = (date: Date | undefined) => {
+    if (!date) return;
+    
+    // Verificar se a data é futura
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (date < today) {
+      toast.error("Data inválida", { 
+        description: "Por favor, selecione datas futuras.",
+        position: "top-right"
+      });
+      return;
+    }
+    
+    const dateString = date.toISOString().split('T')[0];
+    
+    // Verificar se a data já foi selecionada
+    if (preferences.preferredDates && preferences.preferredDates.includes(dateString)) {
+      // Remover a data se já estiver selecionada (toggle)
+      const updatedDates = preferences.preferredDates.filter(d => d !== dateString);
+      handleChange('preferredDates', updatedDates);
+      
+      if (updatedDates.length < MIN_DATES) {
+        setErrors(prev => ({ 
+          ...prev, 
+          preferredDates: `Por favor, selecione pelo menos ${MIN_DATES} datas preferidas.`
+        }));
+      }
+      return;
+    }
+    
+    // Adicionar a nova data
+    const updatedDates = [...(preferences.preferredDates || []), dateString].sort();
+    handleChange('preferredDates', updatedDates);
+    
+    // Se atingiu o mínimo de datas, limpar o erro
+    if (updatedDates.length >= MIN_DATES && errors.preferredDates) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.preferredDates;
+        return newErrors;
+      });
+    }
+  };
+  
+  // Salvar as preferências
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
+    if (validateForm()) {
+      onSave(preferences);
+    } else {
+      toast.error("Por favor, preencha todos os campos obrigatórios.", {
+        position: "top-right"
+      });
+    }
+  };
+  
+  // Autosubmit on changes (for readOnly mode or when all valid fields are entered)
+  useEffect(() => {
+    if (readOnly) return;
+    
+    const hasRequiredFields = 
+      preferences.preferredDates && 
+      preferences.preferredDates.length >= MIN_DATES && 
+      preferences.preferredTime;
+    
+    if (hasRequiredFields && !errors.preferredDates && !errors.preferredTime) {
+      const debounceTimer = setTimeout(() => {
+        onSave(preferences);
+      }, 500);
+      
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [preferences, errors, readOnly]);
+  
+  const isDateSelected = (date: Date): boolean => {
+    const dateString = date.toISOString().split('T')[0];
+    return preferences.preferredDates ? preferences.preferredDates.includes(dateString) : false;
+  };
   
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <Label className="font-medium">Datas Preferenciais</Label>
-          {artistName && (
-            <span className="text-sm text-gray-500">para {artistName}</span>
+    <div className="space-y-4">
+      {!readOnly && (
+        <Alert className="bg-blue-50 border-blue-100">
+          <Info className="h-4 w-4 text-blue-500" />
+          <AlertDescription className="text-blue-800 text-xs">
+            Por favor, selecione pelo menos {MIN_DATES} datas preferidas para agendar sua tatuagem.
+            O estúdio entrará em contato para confirmar a disponibilidade.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      <div className="space-y-3">
+        {/* Seleção de datas */}
+        <div>
+          <Label className={`form-required ${touched.preferredDates && errors.preferredDates ? 'text-red-500' : ''}`}>
+            Datas Preferidas
+          </Label>
+          
+          <Popover open={calendarOpen && !readOnly} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={`w-full justify-start text-left font-normal ${
+                  touched.preferredDates && errors.preferredDates ? 'border-red-500 focus:ring-red-500' : ''
+                }`}
+                onClick={() => !readOnly && setCalendarOpen(true)}
+                disabled={readOnly}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {getSelectedDatesText()}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 pointer-events-auto">
+              <div className="p-3">
+                <p className="text-xs mb-2">
+                  Selecione ao menos {MIN_DATES} datas. Clique novamente em uma data para desmarcar.
+                </p>
+                <Calendar
+                  mode="multiple"
+                  selected={preferences.preferredDates?.map(d => new Date(d)) || []}
+                  onSelect={(dates) => {
+                    if (dates && dates.length > 0) {
+                      // Só atualiza se houver uma mudança real
+                      handleChange('preferredDates', dates.map(d => d.toISOString().split('T')[0]).sort());
+                    } else {
+                      handleChange('preferredDates', []);
+                      setErrors(prev => ({
+                        ...prev,
+                        preferredDates: `Por favor, selecione pelo menos ${MIN_DATES} datas preferidas.`
+                      }));
+                    }
+                  }}
+                  disabled={(date) => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    return date < today;
+                  }}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+                
+                <div className="border-t mt-3 pt-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => setCalendarOpen(false)}
+                  >
+                    Confirmar datas
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          
+          {/* Mostrar datas selecionadas em chips */}
+          {preferences.preferredDates && preferences.preferredDates.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {preferences.preferredDates.map((date) => (
+                <div 
+                  key={date} 
+                  className="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs flex items-center"
+                >
+                  {formatDateForDisplay(date)}
+                  {!readOnly && (
+                    <button 
+                      type="button" 
+                      className="ml-1 text-gray-500 hover:text-gray-700"
+                      onClick={() => removeDate(date)}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {touched.preferredDates && errors.preferredDates && (
+            <p className="form-error-message">{errors.preferredDates}</p>
           )}
         </div>
         
-        <p className="text-sm text-gray-500 mb-2">
-          Selecione pelo menos 3 datas preferidas para agendamento da sua sessão
-        </p>
-        <DateSelector
-          selectedDates={selectedDates}
-          onChange={handleDatesChange}
-          minDates={3}
-          maxDates={5}
-          disabled={onlyDisplay}
-        />
-        
-        {showError && (
-          <Alert className="mt-2 bg-amber-50 border-amber-100">
-            <Info className="h-4 w-4 text-amber-500" />
-            <AlertDescription className="text-amber-800 text-xs">
-              Selecione pelo menos 3 datas para prosseguir
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
-      
-      <div className="pt-2">
-        <Label className="font-medium">Horário Preferencial</Label>
-        <RadioGroup
-          value={preferences.preferredTime || 'Qualquer horário'}
-          onValueChange={(value) => handleChange('preferredTime', value as PreferredTime)}
-          className="mt-2 space-y-1"
-          disabled={onlyDisplay}
-        >
-          {preferredTimes.map((time) => (
-            <div key={time} className="flex items-center space-x-2">
-              <RadioGroupItem value={time} id={`time-${time}`} />
-              <Label htmlFor={`time-${time}`} className="text-sm">{time}</Label>
-            </div>
-          ))}
-        </RadioGroup>
-      </div>
-      
-      <div className="flex items-center space-x-2 pt-2">
-        <Switch
-          id="flexible"
-          checked={preferences.isFlexible}
-          onCheckedChange={(checked) => handleChange('isFlexible', checked)}
-          disabled={onlyDisplay}
-        />
-        <Label htmlFor="flexible">Tenho flexibilidade de horário</Label>
-      </div>
-      
-      <div className="pt-2">
-        <Label htmlFor="notes">Informações Adicionais (opcional)</Label>
-        <Textarea
-          id="notes"
-          value={preferences.additionalNotes || ''}
-          onChange={(e) => handleChange('additionalNotes', e.target.value)}
-          placeholder="Alguma alergia? Condição de saúde? Já possui tatuagens na mesma área?"
-          className="mt-1"
-          rows={3}
-          disabled={onlyDisplay}
-        />
-      </div>
-      
-      {!onlyDisplay && (
-        <div className="flex flex-col pt-2 space-y-2">
-          <Alert className="bg-blue-50 border-blue-100">
-            <Info className="h-4 w-4 text-blue-500" />
-            <AlertDescription className="text-blue-800 text-xs">
-              Após confirmação do seu pedido, o estúdio entrará em contato para confirmar
-              uma das suas datas preferenciais de acordo com a disponibilidade do artista.
-            </AlertDescription>
-          </Alert>
-          
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              className="bg-red-500 hover:bg-red-600"
-              disabled={!isValid}
+        {/* Horários preferidos */}
+        <div>
+          <Label 
+            htmlFor="preferredTime"
+            className={`form-required ${touched.preferredTime && errors.preferredTime ? 'text-red-500' : ''}`}
+          >
+            Horário Preferido
+          </Label>
+          <Select
+            value={preferences.preferredTime || ''}
+            onValueChange={(value: PreferredTime) => handleChange('preferredTime', value)}
+            disabled={readOnly}
+            onOpenChange={() => !touched.preferredTime && setTouched({...touched, preferredTime: true})}
+          >
+            <SelectTrigger 
+              className={`w-full ${touched.preferredTime && errors.preferredTime ? 'border-red-500 focus:ring-red-500' : ''}`}
             >
-              {isValid ? (
-                <>
-                  <Check className="h-4 w-4 mr-1" />
-                  Salvar Preferências
-                </>
-              ) : (
-                "Selecione pelo menos 3 datas"
-              )}
-            </Button>
-          </div>
+              <SelectValue placeholder="Selecione um horário preferido" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Manhã">Manhã (08:00 - 12:00)</SelectItem>
+              <SelectItem value="Tarde">Tarde (13:00 - 18:00)</SelectItem>
+              <SelectItem value="Noite">Noite (18:00 - 22:00)</SelectItem>
+              <SelectItem value="Qualquer horário">Qualquer horário</SelectItem>
+            </SelectContent>
+          </Select>
+          {touched.preferredTime && errors.preferredTime && (
+            <p className="form-error-message">{errors.preferredTime}</p>
+          )}
+        </div>
+        
+        {/* Flexibilidade */}
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="isFlexible"
+            checked={preferences.isFlexible || false}
+            onCheckedChange={(checked) => handleChange('isFlexible', checked === true)}
+            disabled={readOnly}
+          />
+          <label
+            htmlFor="isFlexible"
+            className="text-sm leading-none"
+          >
+            Tenho flexibilidade de horário
+          </label>
+        </div>
+        
+        {/* Observações adicionais */}
+        <div>
+          <Label htmlFor="additionalNotes">Observações Adicionais</Label>
+          <Textarea
+            id="additionalNotes"
+            value={preferences.additionalNotes || ''}
+            onChange={(e) => handleChange('additionalNotes', e.target.value)}
+            placeholder="Informações adicionais para o agendamento..."
+            className="resize-none"
+            disabled={readOnly}
+          />
+        </div>
+      </div>
+      
+      {!readOnly && (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            className="bg-red-500 hover:bg-red-600"
+            onClick={() => handleSubmit()}
+            disabled={
+              !preferences.preferredDates ||
+              preferences.preferredDates.length < MIN_DATES ||
+              !preferences.preferredTime
+            }
+          >
+            Salvar Preferências
+          </Button>
         </div>
       )}
-    </form>
+    </div>
   );
 };
 

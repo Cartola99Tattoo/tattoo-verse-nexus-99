@@ -1,25 +1,24 @@
 
 import React from "react";
-import { AlertTriangle } from "lucide-react";
+import { Info } from "lucide-react";
 
 interface TattooCopyrightNoticeProps {
-  artistName: string;
+  artistName?: string;
 }
 
-const TattooCopyrightNotice: React.FC<TattooCopyrightNoticeProps> = ({ artistName }) => {
+const TattooCopyrightNotice: React.FC<TattooCopyrightNoticeProps> = ({ 
+  artistName = "o artista" 
+}) => {
   return (
-    <div className="mt-4 text-sm text-gray-600 p-3 border-l-2 border-red-200 bg-red-50 rounded-r-md">
-      <div className="flex items-start space-x-2">
-        <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-        <div>
-          <h4 className="font-bold text-gray-800 text-sm mb-1">Direitos Autorais</h4>
-          <p className="italic">
-            Tatuagens são procedimentos artísticos e personalizados para que cada traço da sua tattoo 
-            seja único e exclusivo. Ao reservar essa arte você estará garantindo uma obra de arte feita 
-            especialmente para você. <span className="font-medium">Todos os direitos autorais precisam ser preservados</span> e essa arte só 
-            poderá ser tatuada e reproduzida por {artistName}.
-          </p>
-        </div>
+    <div className="mt-3 pt-2 border-t border-dashed border-gray-200">
+      <div className="flex text-xs text-gray-500 items-start">
+        <Info className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
+        <p>
+          Ao realizar o pagamento, você reconhece que o design da tatuagem é propriedade 
+          intelectual de {artistName} e não pode ser reproduzido sem autorização. 
+          O valor mostrado é uma estimativa inicial e o orçamento final poderá 
+          variar após análise detalhada pelo artista.
+        </p>
       </div>
     </div>
   );
