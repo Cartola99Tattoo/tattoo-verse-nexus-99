@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +9,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Clock, Tag, Trash, Upload, Image } from "lucide-react";
+import { Clock, Tag, Trash, Upload, Image, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 // Predefined options for checkboxes and selects
@@ -58,6 +57,10 @@ const productSchema = z.object({
   sizes: z.array(z.string()).optional().default([]),
   body_locations: z.array(z.string()).optional().default([]),
   style_tags: z.array(z.string()).optional().default([]),
+  package_size: z.string().optional(),
+  weight: z.string().optional(),
+  product_type: z.enum(['tattoo', 'product']).optional(),
+  category_type: z.enum(['exclusive', 'inspiration']).optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -99,6 +102,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
       sizes: initialData?.sizes || [],
       body_locations: initialData?.body_locations || [],
       style_tags: initialData?.style_tags || [],
+      package_size: initialData?.package_size || "",
+      weight: initialData?.weight || "",
+      product_type: initialData?.product_type || "tattoo",
+      category_type: initialData?.category_type || "exclusive",
     },
   });
 

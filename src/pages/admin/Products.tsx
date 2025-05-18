@@ -195,10 +195,12 @@ export default function Products() {
         sizes: data.sizes,
         body_locations: data.body_locations,
         style_tags: data.style_tags,
+        // Make sure we only include fields that are in the Product interface
+        // and in the ProductForm's expected values
+        product_type: currentProduct.product_type,
+        category_type: currentProduct.category_type,
         package_size: data.package_size,
         weight: data.weight,
-        // Explicitly include these fields in the API call instead of using them directly from data
-        // This way TypeScript knows they are supposed to be there
       };
       
       await productService.updateProduct(currentProduct.id, updateData);
@@ -419,7 +421,9 @@ export default function Products() {
                 style_tags: currentProduct.style_tags || [],
                 package_size: currentProduct.package_size || "",
                 weight: currentProduct.weight || "",
-                // We don't include product_type and category_type here as they're not in the expected type
+                // We need to pass these separately since they're not part of initialData
+                product_type: currentProduct.product_type,
+                category_type: currentProduct.category_type,
               }}
               onSubmit={handleEditProduct}
               onCancel={() => setIsEditDialogOpen(false)}
