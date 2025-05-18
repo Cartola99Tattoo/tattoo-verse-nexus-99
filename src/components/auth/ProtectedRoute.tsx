@@ -1,14 +1,10 @@
 
-import { ReactNode } from "react";
+import { Outlet } from "react-router-dom";
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
-
-// Updated ProtectedRoute component to accept children
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+// Completely removed authentication checks component
+const ProtectedRoute = () => {
   // Always render the child routes regardless of authentication state
-  return <>{children}</>;
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

@@ -1,14 +1,6 @@
-import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
-import { toast } from 'sonner';
-import { 
-  ProductType, 
-  CategoryType, 
-  TattooDetails, 
-  SchedulingPreferences,
-  TattooStyle,
-  TattooSize,
-  BodyPart
-} from '@/services/interfaces/IProductService';
+
+import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import { toast } from '@/components/ui/use-toast';
 
 // Definir o tipo para os itens do carrinho
 export type CartItem = {
@@ -19,10 +11,6 @@ export type CartItem = {
   artist: string;
   category: string;
   quantity: number;
-  product_type?: ProductType;
-  category_type?: CategoryType;
-  tattoo_details?: TattooDetails;
-  scheduling_preferences?: SchedulingPreferences;
 };
 
 // Estado do carrinho
@@ -37,8 +25,6 @@ type CartAction =
   | { type: 'ADD_ITEM'; payload: CartItem }
   | { type: 'REMOVE_ITEM'; payload: { id: number } }
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
-  | { type: 'UPDATE_TATTOO_DETAILS'; payload: { id: number; tattoo_details: TattooDetails } }
-  | { type: 'UPDATE_SCHEDULING_PREFERENCES'; payload: { id: number; scheduling_preferences: SchedulingPreferences } }
   | { type: 'CLEAR_CART' };
 
 // Valores iniciais do carrinho
@@ -112,32 +98,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         ...totals,
       };
     }
-
-    case 'UPDATE_TATTOO_DETAILS': {
-      const { id, tattoo_details } = action.payload;
-      
-      const updatedItems = state.items.map(item => 
-        item.id === id ? { ...item, tattoo_details } : item
-      );
-      
-      return {
-        ...state,
-        items: updatedItems,
-      };
-    }
-    
-    case 'UPDATE_SCHEDULING_PREFERENCES': {
-      const { id, scheduling_preferences } = action.payload;
-      
-      const updatedItems = state.items.map(item => 
-        item.id === id ? { ...item, scheduling_preferences } : item
-      );
-      
-      return {
-        ...state,
-        items: updatedItems,
-      };
-    }
     
     case 'CLEAR_CART': {
       return initialState;
@@ -154,8 +114,6 @@ type CartContextType = {
   addToCart: (product: Omit<CartItem, 'quantity'>, quantity?: number) => void;
   removeFromCart: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
-  updateTattooDetails: (id: number, tattoo_details: TattooDetails) => void;
-  updateSchedulingPreferences: (id: number, scheduling_preferences: SchedulingPreferences) => void;
   clearCart: () => void;
 };
 
@@ -179,12 +137,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, initialState);
   
   // Salvar no localStorage quando o carrinho mudar
-  useEffect(() => {
+  React.useEffect(() => {
     localStorage.setItem('99tattoo-cart', JSON.stringify(cart.items));
   }, [cart.items]);
   
   // Carregar do localStorage na inicialização
-  useEffect(() => {
+  React.useEffect(() => {
     const savedCart = localStorage.getItem('99tattoo-cart');
     if (savedCart) {
       try {
@@ -204,80 +162,30 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       type: 'ADD_ITEM', 
       payload: { ...product, quantity } 
     });
-    
-    // Notificação melhorada com posição específica e animação
-    toast(`${product.name} adicionado ao carrinho`, {
-      description: `Quantidade: ${quantity} • Preço: R$ ${product.price.toFixed(2)}`,
-      position: 'top-right',
-      duration: 3000,
-      icon: '🛒',
-      className: 'cart-notification',
+    toast({
+      title: 'Item adicionado',
+      description: `${product.name} foi adicionado ao seu carrinho.`,
     });
   };
   
   const removeFromCart = (id: number) => {
-    // Obtém o nome do produto antes de removê-lo para usar na notificação
-    const productToRemove = cart.items.find(item => item.id === id);
-    const productName = productToRemove ? productToRemove.name : "Item";
-    
     dispatch({ type: 'REMOVE_ITEM', payload: { id } });
-    
-    // Notificação mais específica para remoção utilizando Sonner
-    toast.error(`${productName} removido`, {
-      description: "O item foi removido do seu carrinho.",
-      position: 'top-right',
-      duration: 3000,
+    toast({
+      title: 'Item removido',
+      description: 'O item foi removido do seu carrinho.',
+      variant: 'destructive',
     });
   };
   
   const updateQuantity = (id: number, quantity: number) => {
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
-    
-    if (quantity > 0) {
-      const item = cart.items.find(item => item.id === id);
-      if (item) {
-        toast.info("Quantidade atualizada", {
-          description: `${item.name}: ${quantity} ${quantity === 1 ? 'unidade' : 'unidades'}`,
-          position: 'top-right',
-          duration: 2000,
-        });
-      }
-    }
-  };
-
-  const updateTattooDetails = (id: number, tattoo_details: TattooDetails) => {
-    dispatch({ type: 'UPDATE_TATTOO_DETAILS', payload: { id, tattoo_details } });
-    
-    // Mensagem mais informativa utilizando Sonner
-    toast.success("Detalhes da tatuagem atualizados", {
-      description: "As especificações da sua tatuagem foram salvas com sucesso.",
-      position: 'top-right',
-      duration: 3000,
-    });
-  };
-  
-  const updateSchedulingPreferences = (id: number, scheduling_preferences: SchedulingPreferences) => {
-    dispatch({ 
-      type: 'UPDATE_SCHEDULING_PREFERENCES', 
-      payload: { id, scheduling_preferences } 
-    });
-    
-    // Notificação utilizando Sonner
-    toast.success("Preferências de agendamento salvas", {
-      description: "Suas datas e horários preferenciais foram registrados.",
-      position: 'top-right',
-      duration: 3000,
-    });
   };
   
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
-    
-    // Notificação de limpeza do carrinho utilizando Sonner
-    toast("Carrinho esvaziado", {
-      description: "Todos os itens foram removidos do carrinho.",
-      position: 'top-right',
-      duration: 3000,
+    toast({
+      title: 'Carrinho limpo',
+      description: 'Todos os itens foram removidos do carrinho.',
     });
   };
   
@@ -286,8 +194,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     addToCart,
     removeFromCart,
     updateQuantity,
-    updateTattooDetails,
-    updateSchedulingPreferences,
     clearCart,
   };
   
