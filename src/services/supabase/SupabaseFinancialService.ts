@@ -1,10 +1,11 @@
-
 import { supabase, isSupabaseConnected } from "@/integrations/supabase/client";
 import { 
   IFinancialService, 
   TattooTransaction, 
   ArtistCommission, 
-  FinancialReport 
+  FinancialReport,
+  TransactionCategory,
+  FinancialTransaction
 } from "../interfaces/IFinancialService";
 import { toast } from "@/hooks/use-toast";
 
@@ -515,6 +516,278 @@ export class SupabaseFinancialService implements IFinancialService {
       };
     } catch (error) {
       console.error('Erro ao gerar DRE:', error);
+      throw error;
+    }
+  }
+
+  // Novos métodos para categorias de transações
+  async fetchTransactionCategories(type?: 'entrada' | 'saida'): Promise<TransactionCategory[]> {
+    if (!isSupabaseConnected()) {
+      // Retornar dados mock para desenvolvimento
+      const mockCategories: TransactionCategory[] = [
+        { id: '1', name: 'Venda de Tatuagem', type: 'entrada', created_at: '', updated_at: '' },
+        { id: '2', name: 'Venda de Produtos', type: 'entrada', created_at: '', updated_at: '' },
+        { id: '3', name: 'Materiais', type: 'saida', created_at: '', updated_at: '' },
+        { id: '4', name: 'Aluguel', type: 'saida', created_at: '', updated_at: '' },
+        { id: '5', name: 'Marketing', type: 'saida', created_at: '', updated_at: '' },
+      ];
+      return type ? mockCategories.filter(cat => cat.type === type) : mockCategories;
+    }
+
+    try {
+      let query = supabase.from('transaction_categories').select('*');
+      
+      if (type) {
+        query = query.eq('type', type);
+      }
+
+      const { data, error } = await query.order('name');
+      
+      if (error) throw error;
+      
+      return data || [];
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
+      return [];
+    }
+  }
+
+  async createTransactionCategory(categoryData: Omit<TransactionCategory, 'id' | 'created_at' | 'updated_at'>): Promise<TransactionCategory> {
+    if (!isSupabaseConnected()) {
+      // Mock para desenvolvimento
+      return {
+        id: Math.random().toString(),
+        ...categoryData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('transaction_categories')
+        .insert(categoryData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Erro ao criar categoria:', error);
+      throw error;
+    }
+  }
+
+  async updateTransactionCategory(id: string, categoryData: Partial<TransactionCategory>): Promise<TransactionCategory> {
+    if (!isSupabaseConnected()) {
+      throw new Error("Supabase não conectado");
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('transaction_categories')
+        .update(categoryData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Erro ao atualizar categoria:', error);
+      throw error;
+    }
+  }
+
+  async deleteTransactionCategory(id: string): Promise<void> {
+    if (!isSupabaseConnected()) {
+      throw new Error("Supabase não conectado");
+    }
+
+    try {
+      const { error } = await supabase
+        .from('transaction_categories')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Erro ao deletar categoria:', error);
+      throw error;
+    }
+  }
+
+  // Novos métodos para transações financeiras gerais
+  async fetchFinancialTransactions(options?: {
+    startDate?: string;
+    endDate?: string;
+    type?: 'entrada' | 'saida';
+    categoryId?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<FinancialTransaction[]> {
+    if (!isSupabaseConnected()) {
+      // Dados mock para desenvolvimento
+      const mockTransactions: FinancialTransaction[] = [
+        {
+          id: '1',
+          type: 'entrada',
+          amount: 1500,
+          date: new Date().toISOString().split('T')[0],
+          description: 'Venda de produtos físicos',
+          category_id: '2',
+          category_name: 'Venda de Produtos',
+          payment_method: 'cartao_credito',
+          observations: 'Venda no balcão',
+          created_at: '',
+          updated_at: ''
+        },
+        {
+          id: '2',
+          type: 'saida',
+          amount: 800,
+          date: new Date().toISOString().split('T')[0],
+          description: 'Compra de materiais',
+          category_id: '3',
+          category_name: 'Materiais',
+          payment_method: 'pix',
+          observations: 'Tintas e agulhas',
+          created_at: '',
+          updated_at: ''
+        }
+      ];
+      
+      let filtered = mockTransactions;
+      if (options?.type) {
+        filtered = filtered.filter(t => t.type === options.type);
+      }
+      return filtered;
+    }
+
+    try {
+      let query = supabase
+        .from('financial_transactions')
+        .select(`
+          *,
+          transaction_categories:category_id(name)
+        `);
+
+      if (options?.type) {
+        query = query.eq('type', options.type);
+      }
+
+      if (options?.categoryId) {
+        query = query.eq('category_id', options.categoryId);
+      }
+
+      if (options?.startDate) {
+        query = query.gte('date', options.startDate);
+      }
+
+      if (options?.endDate) {
+        query = query.lte('date', options.endDate);
+      }
+
+      if (options?.limit) {
+        query = query.limit(options.limit);
+      }
+
+      if (options?.offset) {
+        query = query.range(options.offset, options.offset + (options.limit || 50) - 1);
+      }
+
+      query = query.order('date', { ascending: false });
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      return data?.map(item => ({
+        ...item,
+        category_name: item.transaction_categories?.name || 'Sem categoria'
+      })) || [];
+
+    } catch (error) {
+      console.error('Erro ao buscar transações financeiras:', error);
+      return [];
+    }
+  }
+
+  async createFinancialTransaction(transactionData: Omit<FinancialTransaction, 'id' | 'created_at' | 'updated_at'>): Promise<FinancialTransaction> {
+    if (!isSupabaseConnected()) {
+      // Mock para desenvolvimento
+      return {
+        id: Math.random().toString(),
+        ...transactionData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('financial_transactions')
+        .insert(transactionData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Transação criada",
+        description: "A transação foi registrada com sucesso.",
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Erro ao criar transação financeira:', error);
+      toast({
+        title: "Erro ao criar transação",
+        description: "Não foi possível registrar a transação.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }
+
+  async updateFinancialTransaction(id: string, transactionData: Partial<FinancialTransaction>): Promise<FinancialTransaction> {
+    if (!isSupabaseConnected()) {
+      throw new Error("Supabase não conectado");
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('financial_transactions')
+        .update(transactionData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Erro ao atualizar transação financeira:', error);
+      throw error;
+    }
+  }
+
+  async deleteFinancialTransaction(id: string): Promise<void> {
+    if (!isSupabaseConnected()) {
+      throw new Error("Supabase não conectado");
+    }
+
+    try {
+      const { error } = await supabase
+        .from('financial_transactions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Erro ao deletar transação financeira:', error);
       throw error;
     }
   }

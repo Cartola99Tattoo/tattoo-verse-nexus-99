@@ -51,6 +51,29 @@ export interface FinancialReport {
   }>;
 }
 
+export interface TransactionCategory {
+  id: string;
+  name: string;
+  type: 'entrada' | 'saida';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FinancialTransaction {
+  id: string;
+  type: 'entrada' | 'saida';
+  amount: number;
+  date: string;
+  description: string;
+  category_id: string;
+  category_name?: string;
+  payment_method: 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'boleto' | 'transferencia';
+  observations?: string;
+  user_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface IFinancialService {
   // Transações de tatuagens
   fetchTattooTransactions(options?: {
@@ -96,4 +119,23 @@ export interface IFinancialService {
     commission: number;
     tattoo_count: number;
   }>>;
+
+  // Categorias de transações
+  fetchTransactionCategories(type?: 'entrada' | 'saida'): Promise<TransactionCategory[]>;
+  createTransactionCategory(categoryData: Omit<TransactionCategory, 'id' | 'created_at' | 'updated_at'>): Promise<TransactionCategory>;
+  updateTransactionCategory(id: string, categoryData: Partial<TransactionCategory>): Promise<TransactionCategory>;
+  deleteTransactionCategory(id: string): Promise<void>;
+
+  // Transações financeiras gerais
+  fetchFinancialTransactions(options?: {
+    startDate?: string;
+    endDate?: string;
+    type?: 'entrada' | 'saida';
+    categoryId?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<FinancialTransaction[]>;
+  createFinancialTransaction(transactionData: Omit<FinancialTransaction, 'id' | 'created_at' | 'updated_at'>): Promise<FinancialTransaction>;
+  updateFinancialTransaction(id: string, transactionData: Partial<FinancialTransaction>): Promise<FinancialTransaction>;
+  deleteFinancialTransaction(id: string): Promise<void>;
 }

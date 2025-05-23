@@ -12,9 +12,12 @@ import { DateRange } from "react-day-picker";
 import { CalendarDateRangePicker } from "@/components/ui/calendar-date-range-picker";
 import { getFinancialService } from "@/services/serviceFactory";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { TrendingUp, DollarSign, Users, PieChart, Search, Filter, Receipt, FileBarChart } from "lucide-react";
+import { TrendingUp, DollarSign, Users, PieChart, Search, Filter, Receipt, FileBarChart, Settings } from "lucide-react";
 import ExpenseManagement from "@/components/admin/ExpenseManagement";
 import DREReport from "@/components/admin/DREReport";
+import CashFlowReport from "@/components/admin/CashFlowReport";
+import CategoryManagement from "@/components/admin/CategoryManagement";
+import FinancialTransactionManagement from "@/components/admin/FinancialTransactionManagement";
 
 const Financial = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -176,14 +179,16 @@ const Financial = () => {
           </div>
         )}
 
-        {/* Tabs para diferentes visualizações - ATUALIZADA */}
+        {/* Tabs para diferentes visualizações */}
         <Tabs defaultValue="transactions" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="transactions">Transações</TabsTrigger>
+            <TabsTrigger value="financial">Financeiro</TabsTrigger>
             <TabsTrigger value="commissions">Comissões</TabsTrigger>
             <TabsTrigger value="expenses">Despesas</TabsTrigger>
+            <TabsTrigger value="categories">Categorias</TabsTrigger>
             <TabsTrigger value="dre">DRE</TabsTrigger>
-            <TabsTrigger value="reports">Relatórios</TabsTrigger>
+            <TabsTrigger value="cashflow">Fluxo de Caixa</TabsTrigger>
           </TabsList>
 
           <TabsContent value="transactions" className="space-y-4">
@@ -265,6 +270,11 @@ const Financial = () => {
             </Card>
           </TabsContent>
 
+          {/* Nova aba de Transações Financeiras */}
+          <TabsContent value="financial" className="space-y-4">
+            <FinancialTransactionManagement />
+          </TabsContent>
+
           <TabsContent value="commissions" className="space-y-4">
             <Card>
               <CardHeader>
@@ -332,80 +342,24 @@ const Financial = () => {
             </Card>
           </TabsContent>
 
-          {/* Nova aba de Despesas */}
+          {/* Aba de Despesas */}
           <TabsContent value="expenses" className="space-y-4">
             <ExpenseManagement />
           </TabsContent>
 
-          {/* Nova aba de DRE */}
+          {/* Nova aba de Categorias */}
+          <TabsContent value="categories" className="space-y-4">
+            <CategoryManagement />
+          </TabsContent>
+
+          {/* Aba de DRE */}
           <TabsContent value="dre" className="space-y-4">
             <DREReport />
           </TabsContent>
 
-          <TabsContent value="reports" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Artistas por Receita</CardTitle>
-                  <CardDescription>
-                    Artistas que mais geraram receita no período
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {report && report.top_artists.length > 0 ? (
-                    <div className="space-y-4">
-                      {report.top_artists.map((artist, index) => (
-                        <div key={artist.artist_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                              {index + 1}
-                            </div>
-                            <div>
-                              <p className="font-medium">{artist.artist_name}</p>
-                              <p className="text-sm text-gray-500">{artist.tattoo_count} tatuagens</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold">{formatCurrency(artist.revenue)}</p>
-                            <p className="text-sm text-gray-500">Comissão: {formatCurrency(artist.commission)}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center text-gray-500">Nenhum dado disponível para o período selecionado</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Receita por Estilo</CardTitle>
-                  <CardDescription>
-                    Distribuição de receita por estilo de tatuagem
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {report && report.revenue_by_style.length > 0 ? (
-                    <div className="space-y-4">
-                      {report.revenue_by_style.map((style) => (
-                        <div key={style.style} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium">{style.style}</p>
-                            <p className="text-sm text-gray-500">{style.count} tatuagens</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold">{formatCurrency(style.revenue)}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center text-gray-500">Nenhum dado disponível para o período selecionado</p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+          {/* Nova aba de Fluxo de Caixa */}
+          <TabsContent value="cashflow" className="space-y-4">
+            <CashFlowReport />
           </TabsContent>
         </Tabs>
       </div>
