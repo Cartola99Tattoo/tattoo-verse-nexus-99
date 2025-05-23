@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { getClientService } from "@/services/serviceFactory";
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Plus, Filter, Calendar as CalendarIcon, Clock, User, Eye } from "lucide-react";
@@ -31,7 +30,7 @@ const localizer = dateFnsLocalizer({
 });
 
 const Appointments = () => {
-  const [view, setView] = useState<'month' | 'week' | 'day' | 'agenda'>('week');
+  const [view, setView] = useState<View>('week');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedArtist, setSelectedArtist] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -132,6 +131,10 @@ const Appointments = () => {
     { id: '2', name: 'Maria Santos' },
     { id: '3', name: 'Pedro Costa' },
   ];
+
+  const handleViewChange = (newView: View) => {
+    setView(newView);
+  };
 
   return (
     <AdminLayout 
@@ -276,28 +279,28 @@ const Appointments = () => {
                 <Button
                   variant={view === 'day' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setView('day')}
+                  onClick={() => handleViewChange('day')}
                 >
                   Dia
                 </Button>
                 <Button
                   variant={view === 'week' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setView('week')}
+                  onClick={() => handleViewChange('week')}
                 >
                   Semana
                 </Button>
                 <Button
                   variant={view === 'month' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setView('month')}
+                  onClick={() => handleViewChange('month')}
                 >
                   Mês
                 </Button>
                 <Button
                   variant={view === 'agenda' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setView('agenda')}
+                  onClick={() => handleViewChange('agenda')}
                 >
                   Agenda
                 </Button>
@@ -313,7 +316,7 @@ const Appointments = () => {
                 endAccessor="end"
                 style={{ height: '100%' }}
                 view={view}
-                onView={setView}
+                onView={handleViewChange}
                 date={selectedDate}
                 onNavigate={setSelectedDate}
                 onSelectSlot={handleSelectSlot}
