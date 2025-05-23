@@ -1,4 +1,3 @@
-
 import { faker } from '@faker-js/faker';
 import { IClientService, Client, ClientInteraction, ClientStats } from '../interfaces/IClientService';
 import { generateMockId, delay } from './mockUtils';
@@ -21,7 +20,7 @@ class MockClientService implements IClientService {
         phone: faker.phone.number(),
         address: faker.location.streetAddress(),
         birth_date: faker.date.birthdate({ min: 18, max: 65, mode: 'age' }).toISOString().split('T')[0],
-        status: faker.helpers.arrayElement(['new', 'active', 'inactive', 'vip']),
+        status: faker.helpers.arrayElement(['new', 'interested', 'pending', 'completed', 'returning', 'vip']),
         tags: faker.helpers.arrayElements(['Old School', 'Realismo', 'Minimalista', 'Blackwork', 'Colorido'], { min: 0, max: 3 }),
         total_spent: faker.number.int({ min: 200, max: 5000 }),
         total_orders: faker.number.int({ min: 1, max: 10 }),
@@ -139,6 +138,8 @@ class MockClientService implements IClientService {
       vip_clients: this.mockClients.filter(c => c.status === 'vip').length,
       average_order_value: this.mockClients.reduce((sum, c) => sum + c.total_spent, 0) / Math.max(this.mockClients.reduce((sum, c) => sum + c.total_orders, 0), 1),
       client_retention_rate: 85.5,
+      conversion_rate: 24.5,
+      average_conversion_time: 12
     };
   }
 
