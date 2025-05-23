@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -10,16 +9,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getClientService } from "@/services/serviceFactory";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Users, Search, Filter, Plus, Eye, UserCheck, Crown, UserX } from "lucide-react";
+import { Users, Search, Filter, Plus, Eye, UserCheck, Crown, UserX, LayoutGrid, List, TrendingUp, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import CreateClientForm from "@/components/admin/CreateClientForm";
+import ClientsKanban from "@/components/admin/ClientsKanban";
 
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
   
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -47,6 +49,10 @@ const Clients = () => {
       active: { class: "bg-green-100 text-green-800 border-green-300", icon: UserCheck },
       inactive: { class: "bg-gray-100 text-gray-800 border-gray-300", icon: UserX },
       vip: { class: "bg-purple-100 text-purple-800 border-purple-300", icon: Crown },
+      interested: { class: "bg-yellow-100 text-yellow-800 border-yellow-300", icon: Eye },
+      pending: { class: "bg-orange-100 text-orange-800 border-orange-300", icon: Clock },
+      completed: { class: "bg-green-100 text-green-800 border-green-300", icon: UserCheck },
+      returning: { class: "bg-purple-100 text-purple-800 border-purple-300", icon: TrendingUp },
     };
     
     const labels = {
@@ -54,6 +60,10 @@ const Clients = () => {
       active: "Ativo", 
       inactive: "Inativo",
       vip: "VIP",
+      interested: "Interessado",
+      pending: "Pendente",
+      completed: "Concluído",
+      returning: "Retorno",
     };
 
     const variant = variants[status as keyof typeof variants];
@@ -77,9 +87,9 @@ const Clients = () => {
       description="Gestão completa de relacionamento com clientes (CRM)"
     >
       <div className="space-y-6">
-        {/* Cards de Estatísticas */}
+        {/* Cards de Estatísticas Aprimoradas */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
@@ -95,26 +105,26 @@ const Clients = () => {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Novos este Mês</CardTitle>
-                <UserCheck className="h-4 w-4 text-green-600" />
+                <CardTitle className="text-sm font-medium">Taxa de Conversão</CardTitle>
+                <TrendingUp className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{stats.new_clients_this_month}</div>
+                <div className="text-2xl font-bold text-green-600">{stats.conversion_rate}%</div>
                 <p className="text-xs text-muted-foreground">
-                  Clientes novos
+                  Lead para agendamento
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Clientes VIP</CardTitle>
-                <Crown className="h-4 w-4 text-purple-600" />
+                <CardTitle className="text-sm font-medium">Tempo Médio</CardTitle>
+                <Clock className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-purple-600">{stats.vip_clients}</div>
+                <div className="text-2xl font-bold text-blue-600">{stats.average_conversion_time}d</div>
                 <p className="text-xs text-muted-foreground">
-                  Status premium
+                  Para conversão
                 </p>
               </CardContent>
             </Card>
@@ -127,7 +137,7 @@ const Clients = () => {
               <CardContent>
                 <div className="text-2xl font-bold">{formatCurrency(stats.average_order_value)}</div>
                 <p className="text-xs text-muted-foreground">
-                  Por pedido
+                  Por cliente
                 </p>
               </CardContent>
             </Card>
@@ -154,122 +164,169 @@ const Clients = () => {
               <SelectContent>
                 <SelectItem value="all">Todos os Status</SelectItem>
                 <SelectItem value="new">Novo</SelectItem>
-                <SelectItem value="active">Ativo</SelectItem>
-                <SelectItem value="inactive">Inativo</SelectItem>
+                <SelectItem value="interested">Interessado</SelectItem>
+                <SelectItem value="pending">Pendente</SelectItem>
+                <SelectItem value="completed">Concluído</SelectItem>
+                <SelectItem value="returning">Retorno</SelectItem>
                 <SelectItem value="vip">VIP</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Cliente
+          <div className="flex gap-2">
+            <div className="flex border rounded-lg">
+              <Button
+                variant={viewMode === "kanban" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("kanban")}
+                className="rounded-r-none"
+              >
+                <LayoutGrid className="h-4 w-4 mr-1" />
+                Kanban
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Cadastrar Novo Cliente</DialogTitle>
-                <DialogDescription>
-                  Adicione um novo cliente ao sistema CRM
-                </DialogDescription>
-              </DialogHeader>
-              <CreateClientForm 
-                onSuccess={() => {
-                  setIsCreateDialogOpen(false);
-                  queryClient.invalidateQueries({ queryKey: ['clients'] });
-                  queryClient.invalidateQueries({ queryKey: ['client-stats'] });
-                }}
-              />
-            </DialogContent>
-          </Dialog>
+              <Button
+                variant={viewMode === "table" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+                className="rounded-l-none"
+              >
+                <List className="h-4 w-4 mr-1" />
+                Tabela
+              </Button>
+            </div>
+
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Cliente
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Cadastrar Novo Cliente</DialogTitle>
+                  <DialogDescription>
+                    Adicione um novo cliente ao sistema CRM
+                  </DialogDescription>
+                </DialogHeader>
+                <CreateClientForm 
+                  onSuccess={() => {
+                    setIsCreateDialogOpen(false);
+                    queryClient.invalidateQueries({ queryKey: ['clients'] });
+                    queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
-        {/* Tabela de Clientes */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Lista de Clientes</CardTitle>
-            <CardDescription>
-              Visualize e gerencie todos os clientes cadastrados
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Total Gasto</TableHead>
-                    <TableHead>Pedidos</TableHead>
-                    <TableHead>Estilo Preferido</TableHead>
-                    <TableHead>Cadastrado em</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {clientsLoading ? (
+        {/* Conteúdo Principal */}
+        {viewMode === "kanban" ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Pipeline de Clientes</CardTitle>
+              <CardDescription>
+                Visualize e gerencie o status dos clientes arrastando os cartões entre as colunas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {clientsLoading ? (
+                <div className="text-center py-8">Carregando clientes...</div>
+              ) : (
+                <ClientsKanban 
+                  clients={clients} 
+                  onViewClient={handleViewClient}
+                />
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          // ... keep existing code (table view)
+          <Card>
+            <CardHeader>
+              <CardTitle>Lista de Clientes</CardTitle>
+              <CardDescription>
+                Visualize e gerencie todos os clientes cadastrados
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center">
-                        Carregando clientes...
-                      </TableCell>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Total Gasto</TableHead>
+                      <TableHead>Pedidos</TableHead>
+                      <TableHead>Estilo Preferido</TableHead>
+                      <TableHead>Cadastrado em</TableHead>
+                      <TableHead>Ações</TableHead>
                     </TableRow>
-                  ) : clients.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center">
-                        Nenhum cliente encontrado
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    clients.map((client) => (
-                      <TableRow key={client.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{client.name}</div>
-                            <div className="text-sm text-gray-500">{client.email}</div>
-                            {client.phone && (
-                              <div className="text-sm text-gray-500">{client.phone}</div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(client.status)}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {formatCurrency(client.total_spent)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            {client.total_orders} pedidos
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {client.preferred_style || (
-                            <span className="text-gray-400">Não definido</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {formatDate(client.created_at)}
-                        </TableCell>
-                        <TableCell>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleViewClient(client.id)}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Ver Perfil
-                          </Button>
+                  </TableHeader>
+                  <TableBody>
+                    {clientsLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center">
+                          Carregando clientes...
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                    ) : clients.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center">
+                          Nenhum cliente encontrado
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      clients.map((client) => (
+                        <TableRow key={client.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{client.name}</div>
+                              <div className="text-sm text-gray-500">{client.email}</div>
+                              {client.phone && (
+                                <div className="text-sm text-gray-500">{client.phone}</div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {getStatusBadge(client.status)}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {formatCurrency(client.total_spent)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">
+                              {client.total_orders} pedidos
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {client.preferred_style || (
+                              <span className="text-gray-400">Não definido</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {formatDate(client.created_at)}
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleViewClient(client.id)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Ver Perfil
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </AdminLayout>
   );

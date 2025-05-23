@@ -6,7 +6,7 @@ export interface Client {
   phone?: string;
   address?: string;
   birth_date?: string;
-  status: 'new' | 'active' | 'inactive' | 'vip';
+  status: 'new' | 'active' | 'inactive' | 'vip' | 'interested' | 'pending' | 'completed' | 'returning';
   tags?: string[];
   total_spent: number;
   total_orders: number;
@@ -35,6 +35,8 @@ export interface ClientStats {
   vip_clients: number;
   average_order_value: number;
   client_retention_rate: number;
+  conversion_rate: number;
+  average_conversion_time: number;
 }
 
 export interface IClientService {
