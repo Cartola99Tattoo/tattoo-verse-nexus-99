@@ -45,6 +45,15 @@ const CashFlowReport = () => {
   const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
   const cashFlow = totalRevenue - totalExpenses;
 
+  // Calculate expenses by category with proper typing
+  const expensesByCategory = expenses.reduce((acc, expense) => {
+    const category = expense.category;
+    const amount = Number(expense.amount || 0);
+    if (!acc[category]) acc[category] = 0;
+    acc[category] += amount;
+    return acc;
+  }, {} as Record<string, number>);
+
   return (
     <div className="space-y-6">
       <div>
@@ -144,15 +153,7 @@ const CashFlowReport = () => {
           <CardContent>
             {expenses.length > 0 ? (
               <div className="space-y-4">
-                {Object.entries(
-                  expenses.reduce((acc, expense) => {
-                    const category = expense.category;
-                    const amount = Number(expense.amount || 0);
-                    if (!acc[category]) acc[category] = 0;
-                    acc[category] += amount;
-                    return acc;
-                  }, {} as Record<string, number>)
-                ).map(([category, amount]) => (
+                {Object.entries(expensesByCategory).map(([category, amount]) => (
                   <div key={category} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium">{category}</p>
