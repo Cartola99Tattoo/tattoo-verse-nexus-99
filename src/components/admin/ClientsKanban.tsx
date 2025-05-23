@@ -76,18 +76,20 @@ const ClientsKanban = ({ clients, onViewClient }: ClientsKanbanProps) => {
   ];
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4">
-      {columns.map((column) => (
-        <KanbanColumn
-          key={column.status}
-          title={column.title}
-          status={column.status}
-          clients={column.clients}
-          onViewClient={onViewClient}
-          onDrop={handleStatusChange}
-          count={column.clients.length}
-        />
-      ))}
+    <div className="w-full overflow-x-auto">
+      <div className="flex gap-4 min-w-max pb-4" style={{ minWidth: `${columns.length * 300}px` }}>
+        {columns.map((column) => (
+          <KanbanColumn
+            key={column.status}
+            title={column.title}
+            status={column.status}
+            clients={column.clients}
+            onViewClient={onViewClient}
+            onDrop={handleStatusChange}
+            count={column.clients.length}
+          />
+        ))}
+      </div>
     </div>
   );
 };

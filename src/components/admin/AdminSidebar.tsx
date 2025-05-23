@@ -1,142 +1,120 @@
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { 
-  BarChart, 
-  ShoppingCart, 
-  FileText, 
+  LayoutDashboard, 
+  ShoppingBag, 
+  DollarSign, 
   Users, 
-  Calendar, 
-  Package, 
-  Settings,
-  LayoutDashboard,
-  Award,
+  Calendar,
+  Heart, 
+  BarChart3, 
   Shield,
-  LineChart
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
+  Settings
+} from "lucide-react";
 
-export default function AdminSidebar() {
+const AdminSidebar = () => {
   const location = useLocation();
-  const { profile } = useAuth();
-
-  const isActive = (path: string) => {
-    return location.pathname.startsWith(path);
-  };
-
-  const isAdmin = profile?.role === 'admin';
-  const isArtist = profile?.role === 'artista';
 
   const menuItems = [
     {
-      title: 'Dashboard',
-      path: '/admin',
-      icon: <LayoutDashboard size={20} />,
-      access: true, // Todos têm acesso
+      title: "Dashboard",
+      href: "/admin",
+      icon: LayoutDashboard,
+      description: "Visão geral do negócio"
     },
     {
-      title: 'Produtos',
-      path: '/admin/products',
-      icon: <Package size={20} />,
-      access: isAdmin || isArtist,
+      title: "Produtos",
+      href: "/admin/products",
+      icon: ShoppingBag,
+      description: "Gestão de produtos e catálogo"
     },
     {
-      title: 'Pedidos',
-      path: '/admin/orders',
-      icon: <ShoppingCart size={20} />,
-      access: isAdmin || isArtist,
+      title: "Financeiro",
+      href: "/admin/finance",
+      icon: DollarSign,
+      description: "Controle financeiro e relatórios"
     },
     {
-      title: 'Clientes',
-      path: '/admin/customers',
-      icon: <Users size={20} />,
-      access: isAdmin || isArtist,
+      title: "Clientes",
+      href: "/admin/clients",
+      icon: Users,
+      description: "CRM e gestão de relacionamento"
     },
     {
-      title: 'Blog',
-      path: '/admin/blog',
-      icon: <FileText size={20} />,
-      access: isAdmin || isArtist,
+      title: "Agendamentos",
+      href: "/admin/appointments",
+      icon: Calendar,
+      description: "Calendário e gestão de agendamentos"
     },
     {
-      title: 'Agendamentos',
-      path: '/admin/appointments',
-      icon: <Calendar size={20} />,
-      access: isAdmin || isArtist,
+      title: "Fidelidade",
+      href: "/admin/loyalty",
+      icon: Heart,
+      description: "Programa de fidelidade"
     },
     {
-      title: 'Finanças',
-      path: '/admin/finance',
-      icon: <BarChart size={20} />,
-      access: isAdmin, // Apenas administradores
+      title: "Analytics",
+      href: "/admin/analytics",
+      icon: BarChart3,
+      description: "Análises e relatórios"
     },
     {
-      title: 'Programa de Fidelidade',
-      path: '/admin/loyalty',
-      icon: <Award size={20} />,
-      access: isAdmin, // Apenas administradores
-    },
-    {
-      title: 'Analytics',
-      path: '/admin/analytics',
-      icon: <LineChart size={20} />,
-      access: isAdmin, // Apenas administradores
-    },
-    {
-      title: 'Segurança',
-      path: '/admin/security',
-      icon: <Shield size={20} />,
-      access: isAdmin, // Apenas administradores
-    },
-    {
-      title: 'Configurações',
-      path: '/admin/settings',
-      icon: <Settings size={20} />,
-      access: isAdmin, // Apenas administradores
-    },
+      title: "Segurança",
+      href: "/admin/security",
+      icon: Shield,
+      description: "Configurações de segurança"
+    }
   ];
 
   return (
-    <aside className="bg-black text-white w-64 min-h-screen flex flex-col overflow-y-auto">
-      <div className="p-6">
-        <Link to="/" className="flex items-center">
-          <h1 className="text-xl font-bold">99Tattoo Admin</h1>
-        </Link>
+    <div className="flex h-screen w-64 flex-col bg-gray-900 text-white">
+      {/* Logo/Header */}
+      <div className="flex h-16 items-center justify-center border-b border-gray-700">
+        <h1 className="text-xl font-bold text-red-500">99Tattoo Admin</h1>
       </div>
-      
-      <nav className="flex-1 px-4 pb-4">
-        <ul className="space-y-1">
-          {menuItems
-            .filter((item) => item.access)
-            .map((item) => (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all hover:bg-gray-800",
-                    isActive(item.path) ? "bg-gray-800 font-medium" : ""
-                  )}
-                >
-                  {item.icon}
-                  <span>{item.title}</span>
-                </Link>
-              </li>
-            ))}
-        </ul>
+
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 px-2 py-4">
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.href;
+          const Icon = item.icon;
+          
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={cn(
+                "group flex items-center rounded-md px-2 py-2 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-red-600 text-white"
+                  : "text-gray-300 hover:bg-gray-700 hover:text-white"
+              )}
+            >
+              <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
+              <div className="flex-1">
+                <div>{item.title}</div>
+                <div className="text-xs text-gray-400 group-hover:text-gray-300">
+                  {item.description}
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </nav>
-      
-      <div className="p-4 border-t border-gray-800">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-            {profile?.first_name?.charAt(0) || 'U'}
-          </div>
-          <div>
-            <p className="text-sm font-medium">{profile?.first_name || 'Usuário'} {profile?.last_name || ''}</p>
-            <p className="text-xs text-gray-400 capitalize">{profile?.role || 'Sem Função'}</p>
+
+      {/* Footer */}
+      <div className="border-t border-gray-700 p-4">
+        <div className="flex items-center">
+          <div className="ml-3">
+            <p className="text-sm font-medium text-white">Admin User</p>
+            <p className="text-xs text-gray-400">admin@99tattoo.com</p>
           </div>
         </div>
       </div>
-    </aside>
+    </div>
   );
-}
+};
+
+export default AdminSidebar;

@@ -34,12 +34,12 @@ const KanbanColumn = ({
 
   return (
     <div 
-      className="flex-1 min-w-[280px]"
+      className="flex-shrink-0 w-72 min-w-[280px]"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
       <Card className="h-full">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 sticky top-0 bg-white z-10 border-b">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
             <Badge variant="secondary" className="text-xs">
@@ -47,7 +47,7 @@ const KanbanColumn = ({
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 max-h-[600px] overflow-y-auto">
+        <CardContent className="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto">
           {clients.length === 0 ? (
             <div className="text-center text-gray-500 text-sm py-8">
               Nenhum cliente neste estágio

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { Client } from "@/services/interfaces/IClientService";
-import { Eye, Calendar, Phone, Mail, AlertCircle, Thermometer, Flame } from "lucide-react";
+import { Eye, Calendar, Phone, Mail, AlertCircle, Thermometer, Flame, User } from "lucide-react";
 
 interface ClientCardProps {
   client: Client;
@@ -65,7 +65,7 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
   };
 
   const getTemperatureConfig = () => {
-    const temp = calculateTemperature();
+    const temp = client.temperature_score || calculateTemperature();
     
     if (temp >= 6) {
       return {
@@ -99,21 +99,21 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
   const TemperatureIcon = temperatureConfig.icon;
 
   return (
-    <Card className={`cursor-pointer transition-all hover:shadow-md ${isDragging ? 'opacity-50 rotate-2' : ''} ${temperatureConfig.bgColor}`}>
+    <Card className={`cursor-pointer transition-all hover:shadow-md ${isDragging ? 'opacity-50 rotate-2' : ''} ${temperatureConfig.bgColor} w-full max-w-sm`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-10 w-10">
+          <div className="flex items-center space-x-3 min-w-0 flex-1">
+            <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarFallback className="bg-blue-100 text-blue-800">
                 {client.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <h3 className="font-medium text-sm truncate max-w-[120px]">{client.name}</h3>
-              <p className="text-xs text-gray-500 truncate max-w-[120px]">{client.email}</p>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-medium text-sm truncate">{client.name}</h3>
+              <p className="text-xs text-gray-500 truncate">{client.email}</p>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-end gap-1 flex-shrink-0">
             {hasNotification && (
               <AlertCircle className="h-4 w-4 text-orange-500" />
             )}
@@ -133,13 +133,13 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
 
         <div className="space-y-2 text-xs text-gray-600">
           <div className="flex items-center space-x-1">
-            <Calendar className="h-3 w-3" />
-            <span>Último contato: {formatDate(client.updated_at)}</span>
+            <Calendar className="h-3 w-3 flex-shrink-0" />
+            <span className="truncate">Último contato: {formatDate(client.updated_at)}</span>
           </div>
           
           {client.phone && (
             <div className="flex items-center space-x-1">
-              <Phone className="h-3 w-3" />
+              <Phone className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">{client.phone}</span>
             </div>
           )}
@@ -151,24 +151,56 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
 
           {client.preferred_style && (
             <div className="flex items-center space-x-1">
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs truncate">
                 {client.preferred_style}
               </Badge>
             </div>
           )}
 
-          {/* Informações de agendamento (preparação para módulo futuro) */}
+          {client.preferred_artist_id && (
+            <div className="flex items-center space-x-1">
+              <User className="h-3 w-3 flex-shrink-0" />
+              <span className="text-xs truncate">Artista preferencial</span>
+            </div>
+          )}
+
+          {/* Informações de agendamento */}
           <div className="border-t pt-2 mt-2">
             <div className="text-xs text-gray-500">
-              Próximo agendamento: <span className="text-gray-400">Não agendado</span>
+              {client.next_appointment_date ? (
+                <div>
+                  <span className="font-medium">Próximo agendamento:</span>
+                  <div className="text-green-600">{formatDate(client.next_appointment_date)}</div>
+                  {client.next_appointment_artist && (
+                    <div className="text-gray-400">Com: {client.next_appointment_artist}</div>
+                  )}
+                </div>
+              ) : (
+                <span className="text-gray-400">Não agendado</span>
+              )}
             </div>
           </div>
+        </div>
+
+        {/* Ações rápidas */}
+        <div className="flex gap-1 mt-3">
+          {client.phone && (
+            <Button variant="outline" size="sm" className="flex-1 text-xs p-1">
+              <Phone className="h-3 w-3" />
+            </Button>
+          )}
+          <Button variant="outline" size="sm" className="flex-1 text-xs p-1">
+            <Mail className="h-3 w-3" />
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1 text-xs p-1">
+            <Calendar className="h-3 w-3" />
+          </Button>
         </div>
 
         <Button 
           variant="outline" 
           size="sm" 
-          className="w-full mt-3 text-xs"
+          className="w-full mt-2 text-xs"
           onClick={() => onViewClient(client.id)}
         >
           <Eye className="h-3 w-3 mr-1" />
