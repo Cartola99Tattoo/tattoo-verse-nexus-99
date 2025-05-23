@@ -153,19 +153,22 @@ const CashFlowReport = () => {
           <CardContent>
             {expenses.length > 0 ? (
               <div className="space-y-4">
-                {Object.entries(expensesByCategory).map(([category, amount]) => (
-                  <div key={category} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="font-medium">{category}</p>
-                      <p className="text-sm text-gray-500">
-                        {totalExpenses > 0 ? ((amount / totalExpenses) * 100).toFixed(1) : 0}% do total
-                      </p>
+                {Object.entries(expensesByCategory).map(([category, amount]) => {
+                  const numericAmount = Number(amount);
+                  return (
+                    <div key={category} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="font-medium">{category}</p>
+                        <p className="text-sm text-gray-500">
+                          {totalExpenses > 0 ? ((numericAmount / totalExpenses) * 100).toFixed(1) : 0}% do total
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-red-600">{formatCurrency(numericAmount)}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-red-600">{formatCurrency(amount)}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-center text-gray-500">Nenhuma despesa no período</p>
