@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DateRange } from "react-day-picker";
-import { CalendarDateRangePicker } from "@/components/ui/calendar";
+import { CalendarDateRangePicker } from "@/components/ui/calendar-date-range-picker";
 import { getFinancialService } from "@/services/serviceFactory";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { TrendingUp, DollarSign, Users, PieChart, Search, Filter } from "lucide-react";
