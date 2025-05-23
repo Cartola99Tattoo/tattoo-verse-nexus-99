@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +29,7 @@ import Products from "./pages/admin/Products";
 import Loyalty from "./pages/admin/Loyalty";
 import Analytics from "./pages/admin/Analytics";
 import Security from "./pages/admin/Security";
+import Financial from "./pages/admin/Financial";
 
 // Configuração do React Query com configurações otimizadas
 const queryClient = new QueryClient({
@@ -69,10 +69,11 @@ const App = () => {
               <Route path="/user-profile" element={<UserProfile />} />
               <Route path="/checkout" element={<Checkout />} />
 
-              {/* Rotas administrativas com ProtectedRoute - removendo requiredRole */}
+              {/* Rotas administrativas com ProtectedRoute */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/admin" element={<Dashboard />} />
                 <Route path="/admin/products" element={<Products />} />
+                <Route path="/admin/financial" element={<Financial />} />
                 <Route path="/admin/loyalty" element={<Loyalty />} />
                 <Route path="/admin/analytics" element={<Analytics />} />
                 <Route path="/admin/security" element={<Security />} />

@@ -7,6 +7,7 @@ import { IProductService } from "./interfaces/IProductService";
 import { IDashboardService } from "./interfaces/IDashboardService";
 import { IArtistsService } from "./interfaces/IArtistsService";
 import { ITrackingService } from "./interfaces/ITrackingService";
+import { IFinancialService } from './interfaces/IFinancialService';
 
 // Mock services
 import { mockBlogService } from "./mock/mockBlogService";
@@ -15,6 +16,7 @@ import { mockProductService } from "./mock/mockProductService";
 import { mockDashboardService } from "./mock/mockDashboardService";
 import { mockArtistsService } from "./mock/mockArtistsService";
 import { mockTrackingService } from "./mock/mockTrackingService";
+import { mockFinancialService } from './mock/mockFinancialService';
 
 // Supabase services (imported lazily when needed)
 import { handleSupabaseError } from "./supabaseService";
@@ -72,6 +74,17 @@ export const getArtistsService = (): IArtistsService => {
   // This would be a real implementation that uses Supabase
   // For now we'll return the mock service
   return mockArtistsService;
+};
+
+// Financial service factory
+export const getFinancialService = (): IFinancialService => {
+  if (appConfig.dataSource.useMockData) {
+    return mockFinancialService;
+  }
+  
+  // TODO: Implementar SupabaseFinancialService quando integração estiver pronta
+  console.warn("Supabase Financial Service not implemented yet, using mock data");
+  return mockFinancialService;
 };
 
 // Export the error handler for convenience
