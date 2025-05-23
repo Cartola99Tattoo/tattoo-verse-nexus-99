@@ -42,7 +42,7 @@ const CashFlowReport = () => {
   });
 
   const totalRevenue = transactions.reduce((sum, t) => sum + (t.final_amount || t.amount), 0);
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
   const cashFlow = totalRevenue - totalExpenses;
 
   return (
@@ -147,8 +147,9 @@ const CashFlowReport = () => {
                 {Object.entries(
                   expenses.reduce((acc, expense) => {
                     const category = expense.category;
+                    const amount = Number(expense.amount || 0);
                     if (!acc[category]) acc[category] = 0;
-                    acc[category] += expense.amount;
+                    acc[category] += amount;
                     return acc;
                   }, {} as Record<string, number>)
                 ).map(([category, amount]) => (
@@ -156,7 +157,7 @@ const CashFlowReport = () => {
                     <div>
                       <p className="font-medium">{category}</p>
                       <p className="text-sm text-gray-500">
-                        {((amount / totalExpenses) * 100).toFixed(1)}% do total
+                        {totalExpenses > 0 ? ((amount / totalExpenses) * 100).toFixed(1) : 0}% do total
                       </p>
                     </div>
                     <div className="text-right">
