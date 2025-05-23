@@ -31,6 +31,8 @@ import Loyalty from "./pages/admin/Loyalty";
 import Analytics from "./pages/admin/Analytics";
 import Security from "./pages/admin/Security";
 import Financial from "./pages/admin/Financial";
+import Clients from "./pages/admin/Clients";
+import ClientDetail from "./pages/admin/ClientDetail";
 
 // Configuração do React Query com configurações otimizadas
 const queryClient = new QueryClient({
@@ -75,6 +77,8 @@ const App = () => {
                 <Route path="/admin" element={<Dashboard />} />
                 <Route path="/admin/products" element={<Products />} />
                 <Route path="/admin/finance" element={<Financial />} />
+                <Route path="/admin/clients" element={<Clients />} />
+                <Route path="/admin/clients/:id" element={<ClientDetail />} />
                 <Route path="/admin/loyalty" element={<Loyalty />} />
                 <Route path="/admin/analytics" element={<Analytics />} />
                 <Route path="/admin/security" element={<Security />} />

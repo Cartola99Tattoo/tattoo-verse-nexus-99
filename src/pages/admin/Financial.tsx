@@ -18,6 +18,7 @@ import DREReport from "@/components/admin/DREReport";
 import CashFlowReport from "@/components/admin/CashFlowReport";
 import CategoryManagement from "@/components/admin/CategoryManagement";
 import FinancialTransactionManagement from "@/components/admin/FinancialTransactionManagement";
+import FinancialSettings from "@/components/admin/FinancialSettings";
 
 const Financial = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -181,7 +182,7 @@ const Financial = () => {
 
         {/* Tabs para diferentes visualizações */}
         <Tabs defaultValue="transactions" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="transactions">Transações</TabsTrigger>
             <TabsTrigger value="financial">Financeiro</TabsTrigger>
             <TabsTrigger value="commissions">Comissões</TabsTrigger>
@@ -189,6 +190,7 @@ const Financial = () => {
             <TabsTrigger value="categories">Categorias</TabsTrigger>
             <TabsTrigger value="dre">DRE</TabsTrigger>
             <TabsTrigger value="cashflow">Fluxo de Caixa</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
           </TabsList>
 
           <TabsContent value="transactions" className="space-y-4">
@@ -360,6 +362,11 @@ const Financial = () => {
           {/* Nova aba de Fluxo de Caixa */}
           <TabsContent value="cashflow" className="space-y-4">
             <CashFlowReport />
+          </TabsContent>
+
+          {/* Nova aba de Configurações */}
+          <TabsContent value="settings" className="space-y-4">
+            <FinancialSettings />
           </TabsContent>
         </Tabs>
       </div>

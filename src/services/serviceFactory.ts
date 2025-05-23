@@ -9,6 +9,7 @@ import { IDashboardService } from "./interfaces/IDashboardService";
 import { IArtistsService } from "./interfaces/IArtistsService";
 import { ITrackingService } from "./interfaces/ITrackingService";
 import { IFinancialService } from './interfaces/IFinancialService';
+import { IClientService } from './interfaces/IClientService';
 
 // Mock services
 import { mockBlogService } from "./mock/mockBlogService";
@@ -18,6 +19,7 @@ import { mockDashboardService } from "./mock/mockDashboardService";
 import { mockArtistsService } from "./mock/mockArtistsService";
 import { mockTrackingService } from "./mock/mockTrackingService";
 import { mockFinancialService } from './mock/mockFinancialService';
+import { mockClientService } from './mock/mockClientService';
 
 // Supabase services
 import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
@@ -87,6 +89,18 @@ export const getFinancialService = (): IFinancialService => {
   
   console.log("Using Supabase financial service");
   return supabaseFinancialService;
+};
+
+// Client Service Factory
+export const getClientService = (): IClientService => {
+  console.log(`Using ${appConfig.dataSource.useMockData ? 'mock' : 'supabase'} client service`);
+  
+  if (appConfig.dataSource.useMockData) {
+    return mockClientService;
+  }
+  
+  // TODO: Implementar SupabaseClientService quando conectado ao Supabase
+  throw new Error('Supabase client service não implementado ainda');
 };
 
 // Export the error handler for convenience
