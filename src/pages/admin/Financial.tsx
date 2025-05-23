@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -13,7 +12,9 @@ import { DateRange } from "react-day-picker";
 import { CalendarDateRangePicker } from "@/components/ui/calendar-date-range-picker";
 import { getFinancialService } from "@/services/serviceFactory";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { TrendingUp, DollarSign, Users, PieChart, Search, Filter } from "lucide-react";
+import { TrendingUp, DollarSign, Users, PieChart, Search, Filter, Receipt, FileBarChart } from "lucide-react";
+import ExpenseManagement from "@/components/admin/ExpenseManagement";
+import DREReport from "@/components/admin/DREReport";
 
 const Financial = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -82,7 +83,7 @@ const Financial = () => {
   return (
     <AdminLayout 
       title="Módulo Financeiro" 
-      description="Gestão financeira de tatuagens e comissões de artistas"
+      description="Gestão financeira completa de tatuagens, despesas e análise de resultados"
     >
       <div className="space-y-6">
         {/* Filtros e Controles */}
@@ -175,11 +176,13 @@ const Financial = () => {
           </div>
         )}
 
-        {/* Tabs para diferentes visualizações */}
+        {/* Tabs para diferentes visualizações - ATUALIZADA */}
         <Tabs defaultValue="transactions" className="space-y-4">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="transactions">Transações</TabsTrigger>
             <TabsTrigger value="commissions">Comissões</TabsTrigger>
+            <TabsTrigger value="expenses">Despesas</TabsTrigger>
+            <TabsTrigger value="dre">DRE</TabsTrigger>
             <TabsTrigger value="reports">Relatórios</TabsTrigger>
           </TabsList>
 
@@ -327,6 +330,16 @@ const Financial = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Nova aba de Despesas */}
+          <TabsContent value="expenses" className="space-y-4">
+            <ExpenseManagement />
+          </TabsContent>
+
+          {/* Nova aba de DRE */}
+          <TabsContent value="dre" className="space-y-4">
+            <DREReport />
           </TabsContent>
 
           <TabsContent value="reports" className="space-y-4">

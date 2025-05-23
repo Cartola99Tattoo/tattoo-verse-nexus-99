@@ -1,4 +1,5 @@
 import { appConfig } from "@/config/appConfig";
+import { isSupabaseConnected } from "@/integrations/supabase/client";
 
 // Interfaces
 import { IBlogService } from "./interfaces/IBlogService";
@@ -18,7 +19,8 @@ import { mockArtistsService } from "./mock/mockArtistsService";
 import { mockTrackingService } from "./mock/mockTrackingService";
 import { mockFinancialService } from './mock/mockFinancialService';
 
-// Supabase services (imported lazily when needed)
+// Supabase services
+import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
 import { handleSupabaseError } from "./supabaseService";
 
 // Blog service factory
@@ -76,15 +78,15 @@ export const getArtistsService = (): IArtistsService => {
   return mockArtistsService;
 };
 
-// Financial service factory
+// Financial service factory - agora usa Supabase quando conectado
 export const getFinancialService = (): IFinancialService => {
-  if (appConfig.dataSource.useMockData) {
+  if (appConfig.dataSource.useMockData || !isSupabaseConnected()) {
+    console.log("Using mock financial service");
     return mockFinancialService;
   }
   
-  // TODO: Implementar SupabaseFinancialService quando integração estiver pronta
-  console.warn("Supabase Financial Service not implemented yet, using mock data");
-  return mockFinancialService;
+  console.log("Using Supabase financial service");
+  return supabaseFinancialService;
 };
 
 // Export the error handler for convenience
