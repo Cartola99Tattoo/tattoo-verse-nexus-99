@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -9,19 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getClientService } from "@/services/serviceFactory";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Users, Search, Filter, Plus, Eye, UserCheck, Crown, UserX, LayoutGrid, List } from "lucide-react";
+import { Users, Search, Filter, Plus, Eye, UserCheck, Crown, UserX } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import CreateClientForm from "@/components/admin/CreateClientForm";
-import ClientsKanban from "@/components/admin/ClientsKanban";
 
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('kanban');
   
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -163,146 +161,115 @@ const Clients = () => {
             </Select>
           </div>
           
-          <div className="flex gap-2">
-            <div className="flex rounded-md border">
-              <Button
-                variant={viewMode === 'kanban' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('kanban')}
-                className="rounded-r-none"
-              >
-                <LayoutGrid className="h-4 w-4 mr-2" />
-                Kanban
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Cliente
               </Button>
-              <Button
-                variant={viewMode === 'table' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('table')}
-                className="rounded-l-none"
-              >
-                <List className="h-4 w-4 mr-2" />
-                Lista
-              </Button>
-            </div>
-
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Cliente
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Cadastrar Novo Cliente</DialogTitle>
-                  <DialogDescription>
-                    Adicione um novo cliente ao sistema CRM
-                  </DialogDescription>
-                </DialogHeader>
-                <CreateClientForm 
-                  onSuccess={() => {
-                    setIsCreateDialogOpen(false);
-                    queryClient.invalidateQueries({ queryKey: ['clients'] });
-                    queryClient.invalidateQueries({ queryKey: ['client-stats'] });
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
-          </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Cadastrar Novo Cliente</DialogTitle>
+                <DialogDescription>
+                  Adicione um novo cliente ao sistema CRM
+                </DialogDescription>
+              </DialogHeader>
+              <CreateClientForm 
+                onSuccess={() => {
+                  setIsCreateDialogOpen(false);
+                  queryClient.invalidateQueries({ queryKey: ['clients'] });
+                  queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+                }}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
 
-        {/* Visualização Kanban ou Tabela */}
-        {viewMode === 'kanban' ? (
-          <ClientsKanban 
-            searchTerm={searchTerm}
-            statusFilter={statusFilter}
-            onClientClick={handleViewClient}
-          />
-        ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>Lista de Clientes</CardTitle>
-              <CardDescription>
-                Visualize e gerencie todos os clientes cadastrados
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
+        {/* Tabela de Clientes */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Lista de Clientes</CardTitle>
+            <CardDescription>
+              Visualize e gerencie todos os clientes cadastrados
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Total Gasto</TableHead>
+                    <TableHead>Pedidos</TableHead>
+                    <TableHead>Estilo Preferido</TableHead>
+                    <TableHead>Cadastrado em</TableHead>
+                    <TableHead>Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {clientsLoading ? (
                     <TableRow>
-                      <TableHead>Cliente</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Total Gasto</TableHead>
-                      <TableHead>Pedidos</TableHead>
-                      <TableHead>Estilo Preferido</TableHead>
-                      <TableHead>Cadastrado em</TableHead>
-                      <TableHead>Ações</TableHead>
+                      <TableCell colSpan={7} className="text-center">
+                        Carregando clientes...
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {clientsLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center">
-                          Carregando clientes...
-                        </TableCell>
-                      </TableRow>
-                    ) : clients.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center">
-                          Nenhum cliente encontrado
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      clients.map((client) => (
-                        <TableRow key={client.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{client.name}</div>
-                              <div className="text-sm text-gray-500">{client.email}</div>
-                              {client.phone && (
-                                <div className="text-sm text-gray-500">{client.phone}</div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(client.status)}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {formatCurrency(client.total_spent)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">
-                              {client.total_orders} pedidos
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {client.preferred_style || (
-                              <span className="text-gray-400">Não definido</span>
+                  ) : clients.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center">
+                        Nenhum cliente encontrado
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    clients.map((client) => (
+                      <TableRow key={client.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{client.name}</div>
+                            <div className="text-sm text-gray-500">{client.email}</div>
+                            {client.phone && (
+                              <div className="text-sm text-gray-500">{client.phone}</div>
                             )}
-                          </TableCell>
-                          <TableCell>
-                            {formatDate(client.created_at)}
-                          </TableCell>
-                          <TableCell>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleViewClient(client.id)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              Ver Perfil
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(client.status)}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {formatCurrency(client.total_spent)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {client.total_orders} pedidos
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {client.preferred_style || (
+                            <span className="text-gray-400">Não definido</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {formatDate(client.created_at)}
+                        </TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewClient(client.id)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver Perfil
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   );
