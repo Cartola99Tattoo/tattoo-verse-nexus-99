@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { IFinancialService, TattooTransaction, ArtistCommission, FinancialReport } from '../interfaces/IFinancialService';
+import { IFinancialService, TattooTransaction, ArtistCommission, FinancialReport, TransactionCategory, FinancialTransaction } from '../interfaces/IFinancialService';
 import { generateMockId, delay } from './mockUtils';
 
 interface FetchTransactionsOptions {
@@ -21,12 +21,44 @@ interface FetchCommissionsOptions {
 class MockFinancialService implements IFinancialService {
   private mockTransactions: TattooTransaction[] = [];
   private mockCommissions: ArtistCommission[] = [];
+  private mockCategories: TransactionCategory[] = [];
+  private mockFinancialTransactions: FinancialTransaction[] = [];
 
   constructor() {
     this.generateMockData();
   }
 
   private generateMockData() {
+    // Gerar categorias mock
+    this.mockCategories = [
+      { id: '1', name: 'Venda de Tatuagem', type: 'entrada', created_at: '', updated_at: '' },
+      { id: '2', name: 'Venda de Produtos', type: 'entrada', created_at: '', updated_at: '' },
+      { id: '3', name: 'Materiais', type: 'saida', created_at: '', updated_at: '' },
+      { id: '4', name: 'Aluguel', type: 'saida', created_at: '', updated_at: '' },
+      { id: '5', name: 'Marketing', type: 'saida', created_at: '', updated_at: '' },
+    ];
+
+    // Gerar transações financeiras mock
+    for (let i = 0; i < 20; i++) {
+      const type = faker.helpers.arrayElement(['entrada', 'saida']) as 'entrada' | 'saida';
+      const category = this.mockCategories.find(cat => cat.type === type) || this.mockCategories[0];
+      
+      const transaction: FinancialTransaction = {
+        id: generateMockId(),
+        type,
+        amount: faker.number.int({ min: 100, max: 2000 }),
+        date: faker.date.recent({ days: 30 }).toISOString().split('T')[0],
+        description: faker.lorem.sentence(),
+        category_id: category.id,
+        category_name: category.name,
+        payment_method: faker.helpers.arrayElement(['dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'boleto', 'transferencia']),
+        observations: faker.datatype.boolean() ? faker.lorem.sentence() : undefined,
+        created_at: faker.date.recent({ days: 30 }).toISOString(),
+        updated_at: faker.date.recent({ days: 10 }).toISOString(),
+      };
+      this.mockFinancialTransactions.push(transaction);
+    }
+
     // Gerar transações mock
     for (let i = 0; i < 50; i++) {
       const transaction: TattooTransaction = {
@@ -251,6 +283,132 @@ class MockFinancialService implements IFinancialService {
       { artist_id: '4', artist_name: 'Maria Oliveira', revenue: 6800, commission: 2040, tattoo_count: 4 },
       { artist_id: '5', artist_name: 'Pedro Lima', revenue: 5900, commission: 1770, tattoo_count: 3 },
     ].slice(0, limit);
+  }
+
+  // New methods for transaction categories
+  async fetchTransactionCategories(type?: 'entrada' | 'saida'): Promise<TransactionCategory[]> {
+    await delay(500);
+    let filtered = [...this.mockCategories];
+    
+    if (type) {
+      filtered = filtered.filter(cat => cat.type === type);
+    }
+    
+    return filtered;
+  }
+
+  async createTransactionCategory(categoryData: Omit<TransactionCategory, 'id' | 'created_at' | 'updated_at'>): Promise<TransactionCategory> {
+    await delay(800);
+    const newCategory: TransactionCategory = {
+      ...categoryData,
+      id: generateMockId(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    this.mockCategories.push(newCategory);
+    return newCategory;
+  }
+
+  async updateTransactionCategory(id: string, categoryData: Partial<TransactionCategory>): Promise<TransactionCategory> {
+    await delay(600);
+    const index = this.mockCategories.findIndex(cat => cat.id === id);
+    if (index === -1) {
+      throw new Error('Categoria não encontrada');
+    }
+    
+    this.mockCategories[index] = {
+      ...this.mockCategories[index],
+      ...categoryData,
+      updated_at: new Date().toISOString(),
+    };
+    
+    return this.mockCategories[index];
+  }
+
+  async deleteTransactionCategory(id: string): Promise<void> {
+    await delay(500);
+    const index = this.mockCategories.findIndex(cat => cat.id === id);
+    if (index === -1) {
+      throw new Error('Categoria não encontrada');
+    }
+    
+    this.mockCategories.splice(index, 1);
+  }
+
+  // New methods for financial transactions
+  async fetchFinancialTransactions(options?: {
+    startDate?: string;
+    endDate?: string;
+    type?: 'entrada' | 'saida';
+    categoryId?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<FinancialTransaction[]> {
+    await delay(700);
+    let filtered = [...this.mockFinancialTransactions];
+
+    if (options?.type) {
+      filtered = filtered.filter(t => t.type === options.type);
+    }
+
+    if (options?.categoryId) {
+      filtered = filtered.filter(t => t.category_id === options.categoryId);
+    }
+
+    if (options?.startDate) {
+      filtered = filtered.filter(t => new Date(t.date) >= new Date(options.startDate!));
+    }
+
+    if (options?.endDate) {
+      filtered = filtered.filter(t => new Date(t.date) <= new Date(options.endDate!));
+    }
+
+    if (options?.limit) {
+      filtered = filtered.slice(0, options.limit);
+    }
+
+    return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  async createFinancialTransaction(transactionData: Omit<FinancialTransaction, 'id' | 'created_at' | 'updated_at'>): Promise<FinancialTransaction> {
+    await delay(900);
+    const category = this.mockCategories.find(cat => cat.id === transactionData.category_id);
+    
+    const newTransaction: FinancialTransaction = {
+      ...transactionData,
+      id: generateMockId(),
+      category_name: category?.name,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    this.mockFinancialTransactions.unshift(newTransaction);
+    return newTransaction;
+  }
+
+  async updateFinancialTransaction(id: string, transactionData: Partial<FinancialTransaction>): Promise<FinancialTransaction> {
+    await delay(700);
+    const index = this.mockFinancialTransactions.findIndex(t => t.id === id);
+    if (index === -1) {
+      throw new Error('Transação não encontrada');
+    }
+    
+    this.mockFinancialTransactions[index] = {
+      ...this.mockFinancialTransactions[index],
+      ...transactionData,
+      updated_at: new Date().toISOString(),
+    };
+    
+    return this.mockFinancialTransactions[index];
+  }
+
+  async deleteFinancialTransaction(id: string): Promise<void> {
+    await delay(500);
+    const index = this.mockFinancialTransactions.findIndex(t => t.id === id);
+    if (index === -1) {
+      throw new Error('Transação não encontrada');
+    }
+    
+    this.mockFinancialTransactions.splice(index, 1);
   }
 }
 
