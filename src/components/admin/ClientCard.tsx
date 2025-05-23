@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { Client } from "@/services/interfaces/IClientService";
-import { Eye, Calendar, Phone, Mail, AlertCircle } from "lucide-react";
+import { Eye, Calendar, Phone, Mail, AlertCircle, Thermometer, Flame } from "lucide-react";
 
 interface ClientCardProps {
   client: Client;
@@ -39,10 +39,67 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
     return labels[status as keyof typeof labels] || status;
   };
 
+  // Calcular temperatura baseada em critérios automáticos
+  const calculateTemperature = () => {
+    let score = 0;
+    
+    // Pontuação baseada no valor gasto
+    if (client.total_spent > 2000) score += 3;
+    else if (client.total_spent > 1000) score += 2;
+    else if (client.total_spent > 500) score += 1;
+    
+    // Pontuação baseada no número de pedidos
+    if (client.total_orders > 5) score += 2;
+    else if (client.total_orders > 2) score += 1;
+    
+    // Pontuação baseada no status
+    if (client.status === 'interested' || client.status === 'pending') score += 2;
+    else if (client.status === 'vip') score += 3;
+    
+    // Pontuação baseada na recência da última atualização
+    const daysSinceUpdate = Math.floor((Date.now() - new Date(client.updated_at).getTime()) / (1000 * 60 * 60 * 24));
+    if (daysSinceUpdate < 7) score += 2;
+    else if (daysSinceUpdate < 30) score += 1;
+    
+    return Math.min(score, 8); // Máximo 8 pontos
+  };
+
+  const getTemperatureConfig = () => {
+    const temp = calculateTemperature();
+    
+    if (temp >= 6) {
+      return {
+        level: "hot",
+        color: "text-red-500",
+        bgColor: "bg-red-50 border-red-200",
+        icon: Flame,
+        label: "Muito Interessado"
+      };
+    } else if (temp >= 3) {
+      return {
+        level: "warm",
+        color: "text-orange-500",
+        bgColor: "bg-orange-50 border-orange-200",
+        icon: Thermometer,
+        label: "Moderadamente Interessado"
+      };
+    } else {
+      return {
+        level: "cold",
+        color: "text-blue-500",
+        bgColor: "bg-blue-50 border-blue-200",
+        icon: Thermometer,
+        label: "Pouco Interessado"
+      };
+    }
+  };
+
   const hasNotification = client.status === 'interested' || client.status === 'pending';
+  const temperatureConfig = getTemperatureConfig();
+  const TemperatureIcon = temperatureConfig.icon;
 
   return (
-    <Card className={`cursor-pointer transition-all hover:shadow-md ${isDragging ? 'opacity-50 rotate-2' : ''}`}>
+    <Card className={`cursor-pointer transition-all hover:shadow-md ${isDragging ? 'opacity-50 rotate-2' : ''} ${temperatureConfig.bgColor}`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3">
@@ -56,9 +113,18 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
               <p className="text-xs text-gray-500 truncate max-w-[120px]">{client.email}</p>
             </div>
           </div>
-          {hasNotification && (
-            <AlertCircle className="h-4 w-4 text-orange-500" />
-          )}
+          <div className="flex flex-col items-end gap-1">
+            {hasNotification && (
+              <AlertCircle className="h-4 w-4 text-orange-500" />
+            )}
+            <div className="flex items-center gap-1" title={temperatureConfig.label}>
+              <TemperatureIcon className={`h-3 w-3 ${temperatureConfig.color}`} />
+              <span className={`text-xs ${temperatureConfig.color}`}>
+                {temperatureConfig.level === 'hot' ? '🔥' : 
+                 temperatureConfig.level === 'warm' ? '🌡️' : '❄️'}
+              </span>
+            </div>
+          </div>
         </div>
 
         <Badge className={`text-xs mb-2 ${getStatusColor(client.status)}`}>
@@ -90,6 +156,13 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
               </Badge>
             </div>
           )}
+
+          {/* Informações de agendamento (preparação para módulo futuro) */}
+          <div className="border-t pt-2 mt-2">
+            <div className="text-xs text-gray-500">
+              Próximo agendamento: <span className="text-gray-400">Não agendado</span>
+            </div>
+          </div>
         </div>
 
         <Button 

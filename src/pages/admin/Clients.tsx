@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -12,15 +13,17 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getClientService } from "@/services/serviceFactory";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Users, Search, Filter, Plus, Eye, UserCheck, Crown, UserX, LayoutGrid, List, TrendingUp, Clock } from "lucide-react";
+import { Users, Search, Filter, Plus, Eye, UserCheck, Crown, UserX, LayoutGrid, List, TrendingUp, Clock, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import CreateClientForm from "@/components/admin/CreateClientForm";
 import ClientsKanban from "@/components/admin/ClientsKanban";
+import KanbanSettings from "@/components/admin/KanbanSettings";
 
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
   
   const navigate = useNavigate();
@@ -86,8 +89,8 @@ const Clients = () => {
       title="Módulo de Clientes" 
       description="Gestão completa de relacionamento com clientes (CRM)"
     >
-      <div className="space-y-6">
-        {/* Cards de Estatísticas Aprimoradas */}
+      <div className="p-6 space-y-6">
+        {/* Cards de Estatísticas */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
@@ -163,11 +166,11 @@ const Clients = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os Status</SelectItem>
-                <SelectItem value="new">Novo</SelectItem>
+                <SelectItem value="new">Novo Lead</SelectItem>
                 <SelectItem value="interested">Interessado</SelectItem>
-                <SelectItem value="pending">Pendente</SelectItem>
-                <SelectItem value="completed">Concluído</SelectItem>
-                <SelectItem value="returning">Retorno</SelectItem>
+                <SelectItem value="pending">Agendamento Pendente</SelectItem>
+                <SelectItem value="completed">Tatuagem Concluída</SelectItem>
+                <SelectItem value="returning">Retorno Esperado</SelectItem>
                 <SelectItem value="vip">VIP</SelectItem>
               </SelectContent>
             </Select>
@@ -194,6 +197,28 @@ const Clients = () => {
                 Tabela
               </Button>
             </div>
+
+            {viewMode === "kanban" && (
+              <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Settings className="h-4 w-4 mr-1" />
+                    Configurar Estágios
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle>Configurações do Kanban</DialogTitle>
+                    <DialogDescription>
+                      Configure os estágios e suas propriedades no painel Kanban
+                    </DialogDescription>
+                  </DialogHeader>
+                  <KanbanSettings 
+                    onClose={() => setIsSettingsDialogOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
 
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
@@ -223,24 +248,16 @@ const Clients = () => {
 
         {/* Conteúdo Principal */}
         {viewMode === "kanban" ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Pipeline de Clientes</CardTitle>
-              <CardDescription>
-                Visualize e gerencie o status dos clientes arrastando os cartões entre as colunas
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {clientsLoading ? (
-                <div className="text-center py-8">Carregando clientes...</div>
-              ) : (
-                <ClientsKanban 
-                  clients={clients} 
-                  onViewClient={handleViewClient}
-                />
-              )}
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg">
+            {clientsLoading ? (
+              <div className="text-center py-8">Carregando clientes...</div>
+            ) : (
+              <ClientsKanban 
+                clients={clients} 
+                onViewClient={handleViewClient}
+              />
+            )}
+          </div>
         ) : (
           // ... keep existing code (table view)
           <Card>

@@ -1,18 +1,44 @@
 import { faker } from '@faker-js/faker';
-import { IClientService, Client, ClientInteraction, ClientStats } from '../interfaces/IClientService';
+import { IClientService, Client, ClientInteraction, ClientStats, KanbanStage, Appointment } from '../interfaces/IClientService';
 import { generateMockId, delay } from './mockUtils';
 
 class MockClientService implements IClientService {
   private mockClients: Client[] = [];
   private mockInteractions: ClientInteraction[] = [];
+  private mockKanbanStages: KanbanStage[] = [];
+  private mockAppointments: Appointment[] = [];
 
   constructor() {
     this.generateMockData();
   }
 
   private generateMockData() {
+    // Gerar estágios padrão do Kanban
+    this.mockKanbanStages = [
+      { id: "1", name: "Novos Leads", status_key: "new", order: 1, color: "blue", active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: "2", name: "Interessados", status_key: "interested", order: 2, color: "yellow", active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: "3", name: "Agendamento Pendente", status_key: "pending", order: 3, color: "orange", active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: "4", name: "Tatuagem Concluída", status_key: "completed", order: 4, color: "green", active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: "5", name: "Retorno Esperado", status_key: "returning", order: 5, color: "purple", active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: "6", name: "VIP/Fidelidade", status_key: "vip", order: 6, color: "pink", active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    ];
+
     // Gerar clientes mock
     for (let i = 0; i < 50; i++) {
+      const totalSpent = faker.number.int({ min: 200, max: 5000 });
+      const totalOrders = faker.number.int({ min: 1, max: 10 });
+      
+      // Calcular temperatura baseada em critérios
+      let temperatureScore = 0;
+      if (totalSpent > 2000) temperatureScore += 3;
+      else if (totalSpent > 1000) temperatureScore += 2;
+      else if (totalSpent > 500) temperatureScore += 1;
+      
+      if (totalOrders > 5) temperatureScore += 2;
+      else if (totalOrders > 2) temperatureScore += 1;
+
+      const temperature = temperatureScore >= 4 ? 'hot' : temperatureScore >= 2 ? 'warm' : 'cold';
+      
       const client: Client = {
         id: generateMockId(),
         name: faker.person.fullName(),
@@ -22,11 +48,16 @@ class MockClientService implements IClientService {
         birth_date: faker.date.birthdate({ min: 18, max: 65, mode: 'age' }).toISOString().split('T')[0],
         status: faker.helpers.arrayElement(['new', 'interested', 'pending', 'completed', 'returning', 'vip']),
         tags: faker.helpers.arrayElements(['Old School', 'Realismo', 'Minimalista', 'Blackwork', 'Colorido'], { min: 0, max: 3 }),
-        total_spent: faker.number.int({ min: 200, max: 5000 }),
-        total_orders: faker.number.int({ min: 1, max: 10 }),
+        total_spent: totalSpent,
+        total_orders: totalOrders,
         preferred_artist_id: generateMockId(),
         preferred_style: faker.helpers.arrayElement(['Realismo', 'Old School', 'Minimalista', 'Blackwork']),
         notes: faker.datatype.boolean() ? faker.lorem.sentence() : undefined,
+        temperature,
+        temperature_score: temperatureScore,
+        next_appointment_date: faker.datatype.boolean() ? faker.date.future().toISOString() : undefined,
+        next_appointment_artist: faker.datatype.boolean() ? faker.person.fullName() : undefined,
+        appointment_status: faker.helpers.arrayElement(['scheduled', 'confirmed', 'cancelled']),
         created_at: faker.date.recent({ days: 365 }).toISOString(),
         updated_at: faker.date.recent({ days: 30 }).toISOString(),
       };
@@ -50,9 +81,29 @@ class MockClientService implements IClientService {
         this.mockInteractions.push(interaction);
       }
     });
+
+    // Gerar agendamentos mock
+    for (let i = 0; i < 20; i++) {
+      const appointment: Appointment = {
+        id: generateMockId(),
+        client_id: faker.helpers.arrayElement(this.mockClients).id,
+        artist_id: generateMockId(),
+        date: faker.date.future().toISOString(),
+        time: faker.helpers.arrayElement(['09:00', '10:30', '14:00', '15:30', '17:00']),
+        duration_minutes: faker.helpers.arrayElement([60, 90, 120, 180, 240]),
+        service_type: faker.helpers.arrayElement(['tattoo', 'piercing', 'consultation']),
+        service_description: faker.lorem.sentence(),
+        estimated_price: faker.number.int({ min: 300, max: 2000 }),
+        status: faker.helpers.arrayElement(['scheduled', 'confirmed', 'completed', 'cancelled']),
+        notes: faker.datatype.boolean() ? faker.lorem.sentence() : undefined,
+        created_at: faker.date.recent({ days: 30 }).toISOString(),
+        updated_at: faker.date.recent({ days: 7 }).toISOString(),
+      };
+      this.mockAppointments.push(appointment);
+    }
   }
 
-  async fetchClients(options: { search?: string; status?: string; limit?: number; offset?: number } = {}): Promise<Client[]> {
+  async fetchClients(options: { search?: string; status?: string; temperature?: string; limit?: number; offset?: number } = {}): Promise<Client[]> {
     await delay(600);
     let filtered = [...this.mockClients];
 
@@ -67,6 +118,10 @@ class MockClientService implements IClientService {
 
     if (options.status) {
       filtered = filtered.filter(client => client.status === options.status);
+    }
+
+    if (options.temperature) {
+      filtered = filtered.filter(client => client.temperature === options.temperature);
     }
 
     if (options.limit) {
@@ -88,6 +143,8 @@ class MockClientService implements IClientService {
       id: generateMockId(),
       total_spent: 0,
       total_orders: 0,
+      temperature: 'cold',
+      temperature_score: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -105,6 +162,23 @@ class MockClientService implements IClientService {
     this.mockClients[index] = {
       ...this.mockClients[index],
       ...clientData,
+      updated_at: new Date().toISOString(),
+    };
+    
+    return this.mockClients[index];
+  }
+
+  async updateClientTemperature(id: string, temperature: 'hot' | 'warm' | 'cold', score?: number): Promise<Client> {
+    await delay(500);
+    const index = this.mockClients.findIndex(client => client.id === id);
+    if (index === -1) {
+      throw new Error('Cliente não encontrado');
+    }
+    
+    this.mockClients[index] = {
+      ...this.mockClients[index],
+      temperature,
+      temperature_score: score || this.mockClients[index].temperature_score,
       updated_at: new Date().toISOString(),
     };
     
@@ -136,10 +210,15 @@ class MockClientService implements IClientService {
       new_clients_this_month: newClientsThisMonth,
       active_clients: this.mockClients.filter(c => c.status === 'active').length,
       vip_clients: this.mockClients.filter(c => c.status === 'vip').length,
+      hot_clients: this.mockClients.filter(c => c.temperature === 'hot').length,
+      warm_clients: this.mockClients.filter(c => c.temperature === 'warm').length,
+      cold_clients: this.mockClients.filter(c => c.temperature === 'cold').length,
       average_order_value: this.mockClients.reduce((sum, c) => sum + c.total_spent, 0) / Math.max(this.mockClients.reduce((sum, c) => sum + c.total_orders, 0), 1),
       client_retention_rate: 85.5,
       conversion_rate: 24.5,
-      average_conversion_time: 12
+      average_conversion_time: 12,
+      scheduled_appointments: this.mockAppointments.filter(a => a.status === 'scheduled').length,
+      confirmed_appointments: this.mockAppointments.filter(a => a.status === 'confirmed').length,
     };
   }
 
@@ -163,7 +242,6 @@ class MockClientService implements IClientService {
 
   async fetchClientPurchaseHistory(clientId: string): Promise<any[]> {
     await delay(600);
-    // Mock purchase history
     return [
       {
         id: generateMockId(),
@@ -185,27 +263,91 @@ class MockClientService implements IClientService {
     ];
   }
 
-  async fetchClientAppointments(clientId: string): Promise<any[]> {
+  async fetchClientAppointments(clientId: string): Promise<Appointment[]> {
     await delay(600);
-    // Mock appointments
-    return [
-      {
-        id: generateMockId(),
-        date: faker.date.future().toISOString(),
-        time: '14:00',
-        artist: 'Ana Costa',
-        service: 'Tatuagem Realismo',
-        status: 'scheduled'
-      },
-      {
-        id: generateMockId(),
-        date: faker.date.recent({ days: 15 }).toISOString(),
-        time: '10:30',
-        artist: 'João Santos',
-        service: 'Consulta',
-        status: 'completed'
-      }
-    ];
+    return this.mockAppointments
+      .filter(appointment => appointment.client_id === clientId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  async fetchUpcomingAppointments(limit?: number): Promise<Appointment[]> {
+    await delay(600);
+    const upcoming = this.mockAppointments
+      .filter(appointment => new Date(appointment.date) > new Date() && appointment.status !== 'cancelled')
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    return limit ? upcoming.slice(0, limit) : upcoming;
+  }
+
+  async createAppointment(appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at'>): Promise<Appointment> {
+    await delay(700);
+    const newAppointment: Appointment = {
+      ...appointmentData,
+      id: generateMockId(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    this.mockAppointments.unshift(newAppointment);
+    return newAppointment;
+  }
+
+  async updateAppointmentStatus(id: string, status: Appointment['status']): Promise<Appointment> {
+    await delay(500);
+    const index = this.mockAppointments.findIndex(appointment => appointment.id === id);
+    if (index === -1) {
+      throw new Error('Agendamento não encontrado');
+    }
+    
+    this.mockAppointments[index] = {
+      ...this.mockAppointments[index],
+      status,
+      updated_at: new Date().toISOString(),
+    };
+    
+    return this.mockAppointments[index];
+  }
+
+  async fetchKanbanStages(): Promise<KanbanStage[]> {
+    await delay(400);
+    return this.mockKanbanStages.sort((a, b) => a.order - b.order);
+  }
+
+  async createKanbanStage(stageData: Omit<KanbanStage, 'id' | 'created_at' | 'updated_at'>): Promise<KanbanStage> {
+    await delay(600);
+    const newStage: KanbanStage = {
+      ...stageData,
+      id: generateMockId(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    this.mockKanbanStages.push(newStage);
+    return newStage;
+  }
+
+  async updateKanbanStage(id: string, stageData: Partial<KanbanStage>): Promise<KanbanStage> {
+    await delay(500);
+    const index = this.mockKanbanStages.findIndex(stage => stage.id === id);
+    if (index === -1) {
+      throw new Error('Estágio não encontrado');
+    }
+    
+    this.mockKanbanStages[index] = {
+      ...this.mockKanbanStages[index],
+      ...stageData,
+      updated_at: new Date().toISOString(),
+    };
+    
+    return this.mockKanbanStages[index];
+  }
+
+  async deleteKanbanStage(id: string): Promise<void> {
+    await delay(400);
+    const index = this.mockKanbanStages.findIndex(stage => stage.id === id);
+    if (index === -1) {
+      throw new Error('Estágio não encontrado');
+    }
+    
+    this.mockKanbanStages.splice(index, 1);
   }
 }
 
