@@ -14,3 +14,13 @@ export const simulateError = async (): Promise<boolean> => {
   const errorRate = appConfig.mockData.errorRate;
   return Math.random() < errorRate;
 };
+
+// Helper to generate mock IDs
+export const generateMockId = (): string => {
+  return Math.random().toString(36).substr(2, 9);
+};
+
+// Helper for delay
+export const delay = async (ms: number = 500): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};

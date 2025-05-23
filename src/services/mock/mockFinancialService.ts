@@ -1,7 +1,22 @@
-
 import { faker } from '@faker-js/faker';
 import { IFinancialService, TattooTransaction, ArtistCommission, FinancialReport } from '../interfaces/IFinancialService';
 import { generateMockId, delay } from './mockUtils';
+
+interface FetchTransactionsOptions {
+  startDate?: string;
+  endDate?: string;
+  artistId?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}
+
+interface FetchCommissionsOptions {
+  artistId?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+}
 
 class MockFinancialService implements IFinancialService {
   private mockTransactions: TattooTransaction[] = [];
@@ -52,7 +67,7 @@ class MockFinancialService implements IFinancialService {
     }
   }
 
-  async fetchTattooTransactions(options = {}): Promise<TattooTransaction[]> {
+  async fetchTattooTransactions(options: FetchTransactionsOptions = {}): Promise<TattooTransaction[]> {
     await delay(800);
     let filtered = [...this.mockTransactions];
 
@@ -112,7 +127,7 @@ class MockFinancialService implements IFinancialService {
     return this.mockTransactions[index];
   }
 
-  async fetchArtistCommissions(options = {}): Promise<ArtistCommission[]> {
+  async fetchArtistCommissions(options: FetchCommissionsOptions = {}): Promise<ArtistCommission[]> {
     await delay(600);
     let filtered = [...this.mockCommissions];
 
@@ -205,7 +220,6 @@ class MockFinancialService implements IFinancialService {
   }>> {
     await delay(800);
     
-    // Simulação de dados de receita por período
     const data = [];
     const start = new Date(startDate);
     const end = new Date(endDate);
