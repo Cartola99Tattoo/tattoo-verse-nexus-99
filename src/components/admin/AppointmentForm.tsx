@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -62,10 +61,22 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   });
 
   const createAppointmentMutation = useMutation({
-    mutationFn: (data: AppointmentFormData) => clientService.createAppointment({
-      ...data,
-      status: 'scheduled',
-    }),
+    mutationFn: (data: AppointmentFormData) => {
+      // Ensure all required fields are present
+      const appointmentData = {
+        client_id: data.client_id,
+        artist_id: data.artist_id,
+        date: data.date,
+        time: data.time,
+        duration_minutes: data.duration_minutes,
+        service_type: data.service_type,
+        status: 'scheduled' as const,
+        service_description: data.service_description || '',
+        estimated_price: data.estimated_price || 0,
+        notes: data.notes || '',
+      };
+      return clientService.createAppointment(appointmentData);
+    },
     onSuccess: () => {
       toast({
         title: "Agendamento criado",
