@@ -23,6 +23,7 @@ import { mockClientService } from './mock/mockClientService';
 
 // Supabase services
 import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
+import { supabaseArtistService } from './supabase/SupabaseArtistService';
 import { handleSupabaseError } from "./supabaseService";
 
 // Blog service factory
@@ -69,15 +70,15 @@ export const getDashboardService = (): IDashboardService => {
   return mockDashboardService;
 };
 
-// Artists service factory
+// Artists service factory - agora usa Supabase quando conectado
 export const getArtistsService = (): IArtistsService => {
-  if (appConfig.dataSource.useMockData) {
+  if (appConfig.dataSource.useMockData || !isSupabaseConnected()) {
+    console.log("Using mock artists service");
     return mockArtistsService;
   }
   
-  // This would be a real implementation that uses Supabase
-  // For now we'll return the mock service
-  return mockArtistsService;
+  console.log("Using Supabase artists service");
+  return supabaseArtistService;
 };
 
 // Financial service factory - agora usa Supabase quando conectado

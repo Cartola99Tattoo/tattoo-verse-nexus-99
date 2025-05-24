@@ -11,7 +11,7 @@ import {
   Heart, 
   BarChart3, 
   Shield,
-  Settings
+  Palette
 } from "lucide-react";
 
 const AdminSidebar = () => {
@@ -47,6 +47,12 @@ const AdminSidebar = () => {
       href: "/admin/appointments",
       icon: Calendar,
       description: "Calendário e gestão de agendamentos"
+    },
+    {
+      title: "Tatuadores",
+      href: "/admin/artists",
+      icon: Palette,
+      description: "Gestão de artistas e portfólios"
     },
     {
       title: "Fidelidade",

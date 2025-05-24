@@ -6,6 +6,8 @@ export interface Artist {
   id: string;
   first_name: string;
   last_name: string;
+  email: string;
+  phone?: string;
   bio: string;
   avatar_url: string;
   specialties: string[];
@@ -16,9 +18,15 @@ export interface Artist {
     email?: string;
     instagram?: string;
     facebook?: string;
+    tiktok?: string;
   };
   rating?: number;
   total_reviews?: number;
+  status: 'active' | 'inactive';
+  commission_percentage: number;
+  availability_description?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 /**
@@ -26,9 +34,11 @@ export interface Artist {
  */
 export interface PortfolioItem {
   id: string;
+  artist_id: string;
   image_url: string;
   description?: string;
   category?: string;
+  is_featured: boolean;
   created_at: string;
 }
 
@@ -41,6 +51,7 @@ export interface ArtistsQueryParams {
   specialties?: string[];
   style?: string;
   search?: string;
+  status?: 'active' | 'inactive' | 'all';
 }
 
 /**
@@ -73,4 +84,36 @@ export interface IArtistsService {
     offset?: number;
     category?: string;
   }) => Promise<PortfolioItem[]>;
+
+  /**
+   * Create a new artist
+   * @param artistData Artist data without ID
+   */
+  createArtist?: (artistData: Omit<Artist, 'id'>) => Promise<Artist>;
+
+  /**
+   * Update an existing artist
+   * @param id Artist ID
+   * @param artistData Partial artist data
+   */
+  updateArtist?: (id: string | number, artistData: Partial<Artist>) => Promise<Artist>;
+
+  /**
+   * Delete an artist
+   * @param id Artist ID
+   */
+  deleteArtist?: (id: string | number) => Promise<boolean>;
+
+  /**
+   * Add portfolio item to artist
+   * @param artistId Artist ID
+   * @param portfolioData Portfolio item data
+   */
+  addPortfolioItem?: (artistId: string | number, portfolioData: Omit<PortfolioItem, 'id' | 'created_at'>) => Promise<PortfolioItem>;
+
+  /**
+   * Remove portfolio item
+   * @param portfolioId Portfolio item ID
+   */
+  removePortfolioItem?: (portfolioId: string | number) => Promise<boolean>;
 }

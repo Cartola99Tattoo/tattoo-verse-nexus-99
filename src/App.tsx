@@ -34,6 +34,7 @@ import Financial from "./pages/admin/Financial";
 import Clients from "./pages/admin/Clients";
 import ClientDetail from "./pages/admin/ClientDetail";
 import Appointments from "./pages/admin/Appointments";
+import AdminArtists from "./pages/admin/AdminArtists";
 
 // Configuração do React Query com configurações otimizadas
 const queryClient = new QueryClient({
@@ -81,6 +82,7 @@ const App = () => {
                 <Route path="/admin/clients" element={<Clients />} />
                 <Route path="/admin/clients/:id" element={<ClientDetail />} />
                 <Route path="/admin/appointments" element={<Appointments />} />
+                <Route path="/admin/artists" element={<AdminArtists />} />
                 <Route path="/admin/loyalty" element={<Loyalty />} />
                 <Route path="/admin/analytics" element={<Analytics />} />
                 <Route path="/admin/security" element={<Security />} />
