@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
-import { BarChart3, Users, FileText, Calendar, User, Package, DollarSign, TrendingUp, Gift, Shield } from "lucide-react";
+import { BarChart3, Users, FileText, Calendar, User, Package, DollarSign, TrendingUp, Gift, Shield, Package2 } from "lucide-react";
 
 const AdminSidebar = () => {
   const location = useLocation();
@@ -13,6 +13,7 @@ const AdminSidebar = () => {
     { name: "Agendamentos", path: "/admin/appointments", icon: Calendar },
     { name: "Clientes", path: "/admin/clients", icon: User },
     { name: "Produtos", path: "/admin/products", icon: Package },
+    { name: "Estoque", path: "/admin/stock", icon: Package2 },
     { name: "Financeiro", path: "/admin/financial", icon: DollarSign },
     { name: "Analytics", path: "/admin/analytics", icon: TrendingUp },
     { name: "Fidelidade", path: "/admin/loyalty", icon: Gift },

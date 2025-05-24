@@ -22,6 +22,7 @@ import Appointments from './pages/admin/Appointments';
 import Clients from './pages/admin/Clients';
 import ClientDetail from './pages/admin/ClientDetail';
 import Products from './pages/admin/Products';
+import Stock from './pages/admin/Stock';
 import Financial from './pages/admin/Financial';
 import Analytics from './pages/admin/Analytics';
 import Loyalty from './pages/admin/Loyalty';
@@ -69,6 +70,7 @@ function App() {
           <Route path="clients" element={<Clients />} />
           <Route path="clients/:id" element={<ClientDetail />} />
           <Route path="products" element={<Products />} />
+          <Route path="stock" element={<Stock />} />
           <Route path="financial" element={<Financial />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="loyalty" element={<Loyalty />} />
