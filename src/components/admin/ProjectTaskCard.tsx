@@ -114,11 +114,11 @@ const ProjectTaskCard = ({ task, onTaskRefresh }: ProjectTaskCardProps) => {
           )}
 
           <div className="flex items-center gap-2">
-            <Badge className={getPriorityColor(task.priority)} size="sm">
+            <Badge className={getPriorityColor(task.priority)}>
               {getPriorityLabel(task.priority)}
             </Badge>
             {isOverdue && (
-              <Badge variant="destructive" size="sm">
+              <Badge variant="destructive">
                 <AlertCircle className="h-3 w-3 mr-1" />
                 Atrasada
               </Badge>

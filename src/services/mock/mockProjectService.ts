@@ -1,6 +1,6 @@
 
 import { IProject, IProjectTask, IKanbanStage, IProjectService } from '@/services/interfaces/IProjectService';
-import { mockUtils } from './mockUtils';
+import { simulateNetworkDelay } from './mockUtils';
 
 class MockProjectService implements IProjectService {
   private projects: IProject[] = [
@@ -71,13 +71,13 @@ class MockProjectService implements IProjectService {
 
   async fetchProjects(): Promise<IProject[]> {
     console.log('MockProjectService: fetchProjects called');
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     return this.projects;
   }
 
   async createProject(project: Omit<IProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<IProject> {
     console.log('MockProjectService: createProject called with:', project);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     
     const newProject: IProject = {
       ...project,
@@ -94,7 +94,7 @@ class MockProjectService implements IProjectService {
 
   async updateProject(id: string, project: Partial<IProject>): Promise<IProject> {
     console.log('MockProjectService: updateProject called with id:', id, 'data:', project);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     
     const index = this.projects.findIndex(p => p.id === id);
     if (index === -1) {
@@ -112,7 +112,7 @@ class MockProjectService implements IProjectService {
 
   async deleteProject(id: string): Promise<void> {
     console.log('MockProjectService: deleteProject called with id:', id);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     
     this.projects = this.projects.filter(p => p.id !== id);
     this.tasks = this.tasks.filter(t => t.projectId !== id);
@@ -121,13 +121,13 @@ class MockProjectService implements IProjectService {
 
   async fetchProjectTasks(projectId: string): Promise<IProjectTask[]> {
     console.log('MockProjectService: fetchProjectTasks called with projectId:', projectId);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     return this.tasks.filter(task => task.projectId === projectId);
   }
 
   async createTask(task: Omit<IProjectTask, 'id' | 'createdAt' | 'updatedAt'>): Promise<IProjectTask> {
     console.log('MockProjectService: createTask called with:', task);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     
     const newTask: IProjectTask = {
       ...task,
@@ -149,7 +149,7 @@ class MockProjectService implements IProjectService {
 
   async updateTask(id: string, task: Partial<IProjectTask>): Promise<IProjectTask> {
     console.log('MockProjectService: updateTask called with id:', id, 'data:', task);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     
     const index = this.tasks.findIndex(t => t.id === id);
     if (index === -1) {
@@ -177,7 +177,7 @@ class MockProjectService implements IProjectService {
 
   async deleteTask(id: string): Promise<void> {
     console.log('MockProjectService: deleteTask called with id:', id);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     
     const task = this.tasks.find(t => t.id === id);
     if (task) {
@@ -195,7 +195,7 @@ class MockProjectService implements IProjectService {
 
   async fetchKanbanStages(projectId: string): Promise<IKanbanStage[]> {
     console.log('MockProjectService: fetchKanbanStages called with projectId:', projectId);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     return this.stages
       .filter(stage => stage.projectId === projectId)
       .sort((a, b) => a.order - b.order);
@@ -203,7 +203,7 @@ class MockProjectService implements IProjectService {
 
   async createKanbanStage(stage: Omit<IKanbanStage, 'id' | 'createdAt'>): Promise<IKanbanStage> {
     console.log('MockProjectService: createKanbanStage called with:', stage);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     
     const newStage: IKanbanStage = {
       ...stage,
@@ -217,7 +217,7 @@ class MockProjectService implements IProjectService {
 
   async updateKanbanStage(id: string, stage: Partial<IKanbanStage>): Promise<IKanbanStage> {
     console.log('MockProjectService: updateKanbanStage called with id:', id, 'data:', stage);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     
     const index = this.stages.findIndex(s => s.id === id);
     if (index === -1) {
@@ -234,7 +234,7 @@ class MockProjectService implements IProjectService {
 
   async deleteKanbanStage(id: string): Promise<void> {
     console.log('MockProjectService: deleteKanbanStage called with id:', id);
-    await mockUtils.simulateDelay();
+    await simulateNetworkDelay();
     
     this.stages = this.stages.filter(s => s.id !== id);
     // Note: In a real implementation, you might want to move tasks to another stage
