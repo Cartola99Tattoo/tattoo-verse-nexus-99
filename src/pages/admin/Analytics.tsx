@@ -11,18 +11,18 @@ export default function Analytics() {
   const [timeRange, setTimeRange] = useState("30");
 
   return (
-    <div className="p-6">
+    <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-lg font-medium">Visão Geral</h2>
+          <h2 className="text-lg font-medium text-gray-800">Visão Geral</h2>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">Período:</span>
           <Select defaultValue="30" onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] shadow-md bg-white border-gray-300">
               <SelectValue placeholder="Selecione o período" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white shadow-xl border-gray-200">
               <SelectItem value="7">Últimos 7 dias</SelectItem>
               <SelectItem value="30">Últimos 30 dias</SelectItem>
               <SelectItem value="90">Últimos 3 meses</SelectItem>
@@ -33,71 +33,79 @@ export default function Analytics() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Visitantes</CardTitle>
+        <Card className="shadow-xl bg-gradient-to-br from-white to-blue-50 border-blue-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+          <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-lg">
+            <CardTitle className="text-sm font-medium text-gray-700">Visitantes</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <div className="flex items-center">
-              <Users className="h-5 w-5 text-muted-foreground mr-2" />
-              <span className="text-2xl font-bold">3,427</span>
-              <span className="ml-2 text-xs text-green-600">+5.2%</span>
+              <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg shadow-md mr-3">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
+              <span className="text-2xl font-bold text-gray-800">3,427</span>
+              <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full shadow-sm">+5.2%</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Conversões</CardTitle>
+        <Card className="shadow-xl bg-gradient-to-br from-white to-green-50 border-green-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+          <CardHeader className="pb-2 bg-gradient-to-r from-green-50 to-green-100 rounded-t-lg">
+            <CardTitle className="text-sm font-medium text-gray-700">Conversões</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <div className="flex items-center">
-              <Repeat className="h-5 w-5 text-muted-foreground mr-2" />
-              <span className="text-2xl font-bold">12.3%</span>
-              <span className="ml-2 text-xs text-green-600">+1.8%</span>
+              <div className="p-2 bg-gradient-to-r from-green-100 to-green-50 rounded-lg shadow-md mr-3">
+                <Repeat className="h-5 w-5 text-green-600" />
+              </div>
+              <span className="text-2xl font-bold text-gray-800">12.3%</span>
+              <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full shadow-sm">+1.8%</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pedidos</CardTitle>
+        <Card className="shadow-xl bg-gradient-to-br from-white to-purple-50 border-purple-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+          <CardHeader className="pb-2 bg-gradient-to-r from-purple-50 to-purple-100 rounded-t-lg">
+            <CardTitle className="text-sm font-medium text-gray-700">Pedidos</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <div className="flex items-center">
-              <ShoppingCart className="h-5 w-5 text-muted-foreground mr-2" />
-              <span className="text-2xl font-bold">284</span>
-              <span className="ml-2 text-xs text-green-600">+12.5%</span>
+              <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-50 rounded-lg shadow-md mr-3">
+                <ShoppingCart className="h-5 w-5 text-purple-600" />
+              </div>
+              <span className="text-2xl font-bold text-gray-800">284</span>
+              <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full shadow-sm">+12.5%</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Agendamentos</CardTitle>
+        <Card className="shadow-xl bg-gradient-to-br from-white to-orange-50 border-orange-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+          <CardHeader className="pb-2 bg-gradient-to-r from-orange-50 to-orange-100 rounded-t-lg">
+            <CardTitle className="text-sm font-medium text-gray-700">Agendamentos</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <div className="flex items-center">
-              <Calendar className="h-5 w-5 text-muted-foreground mr-2" />
-              <span className="text-2xl font-bold">156</span>
-              <span className="ml-2 text-xs text-green-600">+8.2%</span>
+              <div className="p-2 bg-gradient-to-r from-orange-100 to-orange-50 rounded-lg shadow-md mr-3">
+                <Calendar className="h-5 w-5 text-orange-600" />
+              </div>
+              <span className="text-2xl font-bold text-gray-800">156</span>
+              <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full shadow-sm">+8.2%</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="traffic" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="traffic">Tráfego</TabsTrigger>
-          <TabsTrigger value="sales">Vendas</TabsTrigger>
-          <TabsTrigger value="customers">Clientes</TabsTrigger>
-          <TabsTrigger value="appointments">Agendamentos</TabsTrigger>
+        <TabsList className="bg-gradient-to-r from-gray-100 to-gray-200 shadow-lg border border-gray-300 rounded-lg p-1">
+          <TabsTrigger value="traffic" className="bg-white shadow-md hover:shadow-lg transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-400 data-[state=active]:text-white">Tráfego</TabsTrigger>
+          <TabsTrigger value="sales" className="bg-white shadow-md hover:shadow-lg transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-400 data-[state=active]:text-white">Vendas</TabsTrigger>
+          <TabsTrigger value="customers" className="bg-white shadow-md hover:shadow-lg transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-400 data-[state=active]:text-white">Clientes</TabsTrigger>
+          <TabsTrigger value="appointments" className="bg-white shadow-md hover:shadow-lg transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-400 data-[state=active]:text-white">Agendamentos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="traffic" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Análise de Tráfego</CardTitle>
+          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+              <CardTitle className="text-gray-800">Análise de Tráfego</CardTitle>
               <CardDescription>Origem e comportamento dos visitantes</CardDescription>
             </CardHeader>
             <CardContent>
@@ -112,9 +120,9 @@ export default function Analytics() {
         </TabsContent>
 
         <TabsContent value="sales" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Análise de Vendas</CardTitle>
+          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+              <CardTitle className="text-gray-800">Análise de Vendas</CardTitle>
               <CardDescription>Performance de vendas e produtos</CardDescription>
             </CardHeader>
             <CardContent>
@@ -129,9 +137,9 @@ export default function Analytics() {
         </TabsContent>
 
         <TabsContent value="customers" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Análise de Clientes</CardTitle>
+          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+              <CardTitle className="text-gray-800">Análise de Clientes</CardTitle>
               <CardDescription>Comportamento e segmentação de clientes</CardDescription>
             </CardHeader>
             <CardContent>
@@ -146,9 +154,9 @@ export default function Analytics() {
         </TabsContent>
 
         <TabsContent value="appointments" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Análise de Agendamentos</CardTitle>
+          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+              <CardTitle className="text-gray-800">Análise de Agendamentos</CardTitle>
               <CardDescription>Ocupação e eficiência dos agendamentos</CardDescription>
             </CardHeader>
             <CardContent>

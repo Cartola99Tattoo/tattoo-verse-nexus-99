@@ -30,7 +30,7 @@ const StatCard = ({ title, value, change, icon, loading }: StatCardProps) => {
 
   if (loading) {
     return (
-      <Card className="animate-pulse">
+      <Card className="animate-pulse shadow-lg bg-gradient-to-br from-white to-gray-100 border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
             <div className="h-4 bg-gray-200 rounded w-24"></div>
@@ -46,17 +46,19 @@ const StatCard = ({ title, value, change, icon, loading }: StatCardProps) => {
   }
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
+    <Card className="hover:shadow-2xl transition-all duration-300 transform hover:scale-105 shadow-lg bg-gradient-to-br from-white via-gray-50 to-white border-gray-200 hover:border-red-200">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-gradient-to-r from-gray-50 to-white rounded-t-lg">
+        <CardTitle className="text-sm font-medium text-gray-700">{title}</CardTitle>
+        <div className="p-2 bg-gradient-to-r from-red-100 to-red-50 rounded-lg shadow-md">
+          {icon}
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+      <CardContent className="pt-4">
+        <div className="text-2xl font-bold text-gray-800 mb-2">{value}</div>
         {change !== undefined && (
-          <div className={`flex items-center text-xs ${getChangeColor()}`}>
+          <div className={`flex items-center text-xs ${getChangeColor()} bg-gray-50 px-2 py-1 rounded-full shadow-sm`}>
             {getChangeIcon()}
-            <span className="ml-1">{Math.abs(change)}%</span>
+            <span className="ml-1 font-medium">{Math.abs(change)}%</span>
           </div>
         )}
       </CardContent>
@@ -66,33 +68,33 @@ const StatCard = ({ title, value, change, icon, loading }: StatCardProps) => {
 
 const OptimizedStatsCards = ({ stats, loading }: OptimizedStatsCardsProps) => {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       <StatCard
         title="Vendas Totais"
         value={`R$ ${stats.totalSales?.toLocaleString('pt-BR') || '0'}`}
         change={12.5}
-        icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+        icon={<TrendingUp className="h-4 w-4 text-red-600" />}
         loading={loading}
       />
       <StatCard
         title="Novos Clientes"
         value={stats.newCustomers || 0}
         change={8.2}
-        icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+        icon={<TrendingUp className="h-4 w-4 text-green-600" />}
         loading={loading}
       />
       <StatCard
         title="Pedidos Pendentes"
         value={stats.pendingOrders || 0}
         change={-2.1}
-        icon={<Minus className="h-4 w-4 text-muted-foreground" />}
+        icon={<Minus className="h-4 w-4 text-gray-600" />}
         loading={loading}
       />
       <StatCard
         title="Próximos Agendamentos"
         value={stats.upcomingAppointments || 0}
         change={15.3}
-        icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+        icon={<TrendingUp className="h-4 w-4 text-blue-600" />}
         loading={loading}
       />
     </div>

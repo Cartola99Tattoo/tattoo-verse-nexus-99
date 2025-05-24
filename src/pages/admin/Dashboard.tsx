@@ -38,20 +38,20 @@ const Dashboard = () => {
   const safeStats = stats || defaultStats;
 
   return (
-    <div className="p-6">
+    <div className="space-y-6">
       <OptimizedStatsCards stats={safeStats} loading={loading} />
 
-      <Tabs defaultValue="overview" className="mt-6">
-        <TabsList>
-          <TabsTrigger value="overview" className="flex items-center gap-2">
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="bg-gradient-to-r from-gray-100 to-gray-200 shadow-lg border border-gray-300 rounded-lg p-1">
+          <TabsTrigger value="overview" className="flex items-center gap-2 bg-white shadow-md hover:shadow-lg transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-400 data-[state=active]:text-white">
             <BarChart className="h-4 w-4" />
             <span>Visão Geral</span>
           </TabsTrigger>
-          <TabsTrigger value="sales" className="flex items-center gap-2">
+          <TabsTrigger value="sales" className="flex items-center gap-2 bg-white shadow-md hover:shadow-lg transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-400 data-[state=active]:text-white">
             <LineChart className="h-4 w-4" />
             <span>Vendas</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
+          <TabsTrigger value="analytics" className="flex items-center gap-2 bg-white shadow-md hover:shadow-lg transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-400 data-[state=active]:text-white">
             <PieChart className="h-4 w-4" />
             <span>Análises</span>
           </TabsTrigger>
@@ -59,9 +59,9 @@ const Dashboard = () => {
         
         <TabsContent value="overview">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="lg:col-span-4">
-              <CardHeader>
-                <CardTitle>Vendas Recentes</CardTitle>
+            <Card className="lg:col-span-4 shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+                <CardTitle className="text-gray-800">Vendas Recentes</CardTitle>
                 <CardDescription>Últimos 30 dias</CardDescription>
               </CardHeader>
               <CardContent>
@@ -69,9 +69,9 @@ const Dashboard = () => {
               </CardContent>
             </Card>
             
-            <Card className="lg:col-span-3">
-              <CardHeader>
-                <CardTitle>Agendamentos</CardTitle>
+            <Card className="lg:col-span-3 shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+                <CardTitle className="text-gray-800">Agendamentos</CardTitle>
                 <CardDescription>Próximos agendamentos</CardDescription>
               </CardHeader>
               <CardContent>
@@ -81,9 +81,9 @@ const Dashboard = () => {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pedidos Recentes</CardTitle>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+                <CardTitle className="text-gray-800">Pedidos Recentes</CardTitle>
                 <CardDescription>Últimos pedidos realizados</CardDescription>
               </CardHeader>
               <CardContent>
@@ -91,9 +91,9 @@ const Dashboard = () => {
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Novos Clientes</CardTitle>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+                <CardTitle className="text-gray-800">Novos Clientes</CardTitle>
                 <CardDescription>Clientes cadastrados recentemente</CardDescription>
               </CardHeader>
               <CardContent>
@@ -105,9 +105,9 @@ const Dashboard = () => {
         
         <TabsContent value="sales">
           <div className="grid gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Análise de Vendas Detalhada</CardTitle>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+                <CardTitle className="text-gray-800">Análise de Vendas Detalhada</CardTitle>
                 <CardDescription>Desempenho de vendas por categoria e período</CardDescription>
               </CardHeader>
               <CardContent>
@@ -121,9 +121,9 @@ const Dashboard = () => {
         
         <TabsContent value="analytics">
           <div className="grid gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Análise de Tendências</CardTitle>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+                <CardTitle className="text-gray-800">Análise de Tendências</CardTitle>
                 <CardDescription>Insights sobre o desempenho do estúdio</CardDescription>
               </CardHeader>
               <CardContent>
