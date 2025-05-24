@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
@@ -53,7 +54,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/user-profile" element={<UserProfile />} />
 
-        {/* Admin routes */}
+        {/* Admin routes - SINGLE AdminLayout instance */}
         <Route
           path="/admin"
           element={

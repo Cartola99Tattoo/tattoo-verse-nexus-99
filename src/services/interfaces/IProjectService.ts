@@ -35,6 +35,72 @@ export interface IKanbanStage {
   createdAt: string;
 }
 
+export interface IProjectBudgetItem {
+  id: string;
+  projectId: string;
+  description: string;
+  estimatedCost: number;
+  realCost: number;
+  status: 'estimated' | 'paid' | 'pending';
+  createdAt: string;
+}
+
+export interface IProjectImprovementAction {
+  id: string;
+  projectId: string;
+  title: string;
+  description?: string;
+  responsible?: string;
+  priority: 'low' | 'medium' | 'high';
+  status: 'pending' | 'in_progress' | 'completed';
+  dueDate?: string;
+  createdAt: string;
+}
+
+export interface IProjectExpansionResource {
+  id: string;
+  projectId: string;
+  resource: string;
+  justification: string;
+  estimatedCost: number;
+  status: 'planning' | 'researching' | 'approved' | 'acquired';
+  createdAt: string;
+}
+
+export interface IProjectSustainabilityAction {
+  id: string;
+  projectId: string;
+  title: string;
+  description?: string;
+  responsible?: string;
+  deadline?: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  createdAt: string;
+}
+
+export interface IProjectCategoryGoal {
+  id: string;
+  projectId: string;
+  category: string;
+  title: string;
+  description?: string;
+  responsible?: string;
+  deadline?: string;
+  status: 'not_started' | 'in_progress' | 'achieved' | 'partially_achieved';
+  createdAt: string;
+}
+
+export interface IProjectSmartGoal {
+  id: string;
+  projectId: string;
+  title: string;
+  metric: string;
+  deadline?: string;
+  responsible?: string;
+  progress: number;
+  createdAt: string;
+}
+
 export interface IProjectService {
   fetchProjects(): Promise<IProject[]>;
   createProject(project: Omit<IProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<IProject>;
@@ -50,4 +116,35 @@ export interface IProjectService {
   createKanbanStage(stage: Omit<IKanbanStage, 'id' | 'createdAt'>): Promise<IKanbanStage>;
   updateKanbanStage(id: string, stage: Partial<IKanbanStage>): Promise<IKanbanStage>;
   deleteKanbanStage(id: string): Promise<void>;
+
+  // New planning methods
+  fetchProjectBudgetItems(projectId: string): Promise<IProjectBudgetItem[]>;
+  createBudgetItem(item: Omit<IProjectBudgetItem, 'id' | 'createdAt'>): Promise<IProjectBudgetItem>;
+  updateBudgetItem(id: string, item: Partial<IProjectBudgetItem>): Promise<IProjectBudgetItem>;
+  deleteBudgetItem(id: string): Promise<void>;
+  
+  fetchProjectImprovementActions(projectId: string): Promise<IProjectImprovementAction[]>;
+  createImprovementAction(action: Omit<IProjectImprovementAction, 'id' | 'createdAt'>): Promise<IProjectImprovementAction>;
+  updateImprovementAction(id: string, action: Partial<IProjectImprovementAction>): Promise<IProjectImprovementAction>;
+  deleteImprovementAction(id: string): Promise<void>;
+  
+  fetchProjectExpansionResources(projectId: string): Promise<IProjectExpansionResource[]>;
+  createExpansionResource(resource: Omit<IProjectExpansionResource, 'id' | 'createdAt'>): Promise<IProjectExpansionResource>;
+  updateExpansionResource(id: string, resource: Partial<IProjectExpansionResource>): Promise<IProjectExpansionResource>;
+  deleteExpansionResource(id: string): Promise<void>;
+  
+  fetchProjectSustainabilityActions(projectId: string): Promise<IProjectSustainabilityAction[]>;
+  createSustainabilityAction(action: Omit<IProjectSustainabilityAction, 'id' | 'createdAt'>): Promise<IProjectSustainabilityAction>;
+  updateSustainabilityAction(id: string, action: Partial<IProjectSustainabilityAction>): Promise<IProjectSustainabilityAction>;
+  deleteSustainabilityAction(id: string): Promise<void>;
+  
+  fetchProjectCategoryGoals(projectId: string): Promise<IProjectCategoryGoal[]>;
+  createCategoryGoal(goal: Omit<IProjectCategoryGoal, 'id' | 'createdAt'>): Promise<IProjectCategoryGoal>;
+  updateCategoryGoal(id: string, goal: Partial<IProjectCategoryGoal>): Promise<IProjectCategoryGoal>;
+  deleteCategoryGoal(id: string): Promise<void>;
+  
+  fetchProjectSmartGoals(projectId: string): Promise<IProjectSmartGoal[]>;
+  createSmartGoal(goal: Omit<IProjectSmartGoal, 'id' | 'createdAt'>): Promise<IProjectSmartGoal>;
+  updateSmartGoal(id: string, goal: Partial<IProjectSmartGoal>): Promise<IProjectSmartGoal>;
+  deleteSmartGoal(id: string): Promise<void>;
 }
