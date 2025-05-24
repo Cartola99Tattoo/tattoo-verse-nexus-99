@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -159,7 +158,7 @@ const AdminArtists = () => {
       <div className="p-6 space-y-6">
         {/* Cards de Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
+          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total de Artistas</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
@@ -172,7 +171,7 @@ const AdminArtists = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Artistas Ativos</CardTitle>
               <Palette className="h-4 w-4 text-green-600" />
@@ -187,7 +186,7 @@ const AdminArtists = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Estilos Diferentes</CardTitle>
               <Star className="h-4 w-4 text-blue-600" />
@@ -202,7 +201,7 @@ const AdminArtists = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Comissão Média</CardTitle>
               <Star className="h-4 w-4 text-orange-600" />
@@ -260,16 +259,19 @@ const AdminArtists = () => {
             </Select>
           </div>
           
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Button 
+            onClick={() => setIsCreateDialogOpen(true)}
+            className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Novo Tatuador
           </Button>
         </div>
 
         {/* Tabela de Artistas */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Tatuadores Cadastrados</CardTitle>
+        <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+            <CardTitle className="text-gray-800">Tatuadores Cadastrados</CardTitle>
             <CardDescription>
               Gerencie os perfis dos tatuadores e suas configurações
             </CardDescription>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -92,8 +91,8 @@ const Clients = () => {
       <div className="p-6 space-y-6">
         {/* Cards de Estatísticas */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
@@ -106,7 +105,7 @@ const Clients = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Taxa de Conversão</CardTitle>
                 <TrendingUp className="h-4 w-4 text-green-600" />
@@ -119,7 +118,7 @@ const Clients = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Tempo Médio</CardTitle>
                 <Clock className="h-4 w-4 text-blue-600" />
@@ -132,7 +131,7 @@ const Clients = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
@@ -222,7 +221,7 @@ const Clients = () => {
 
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
                   <Plus className="h-4 w-4 mr-2" />
                   Novo Cliente
                 </Button>
@@ -260,9 +259,9 @@ const Clients = () => {
           </div>
         ) : (
           // ... keep existing code (table view)
-          <Card>
-            <CardHeader>
-              <CardTitle>Lista de Clientes</CardTitle>
+          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+              <CardTitle className="text-gray-800">Lista de Clientes</CardTitle>
               <CardDescription>
                 Visualize e gerencie todos os clientes cadastrados
               </CardDescription>
