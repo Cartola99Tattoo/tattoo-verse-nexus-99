@@ -1,15 +1,14 @@
 
 import { ReactNode } from "react";
-import { Outlet } from "react-router-dom";
 
 interface ProtectedRouteProps {
-  children?: ReactNode;
+  children: ReactNode;
 }
 
-// Completely removed authentication checks component
+// Component that renders children without additional layout wrapping
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  // Always render the child routes regardless of authentication state
-  return children ? <>{children}</> : <Outlet />;
+  // Always render the child routes directly without any wrapper
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

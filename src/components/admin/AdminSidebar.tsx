@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
-import { BarChart3, Users, FileText, Calendar, User, Package, DollarSign, TrendingUp, Gift, Shield, Package2 } from "lucide-react";
+import { BarChart3, Users, FileText, Calendar, User, Package, DollarSign, TrendingUp, Gift, Shield, Package2, FolderKanban } from "lucide-react";
 
 const AdminSidebar = () => {
   const location = useLocation();
@@ -14,6 +14,7 @@ const AdminSidebar = () => {
     { name: "Clientes", path: "/admin/clients", icon: User },
     { name: "Produtos", path: "/admin/products", icon: Package },
     { name: "Estoque", path: "/admin/stock", icon: Package2 },
+    { name: "Projetos", path: "/admin/projects", icon: FolderKanban },
     { name: "Financeiro", path: "/admin/financial", icon: DollarSign },
     { name: "Analytics", path: "/admin/analytics", icon: TrendingUp },
     { name: "Fidelidade", path: "/admin/loyalty", icon: Gift },

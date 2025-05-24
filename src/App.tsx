@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
@@ -32,6 +31,7 @@ import AdminAuth from './pages/AdminAuth';
 import AdminUserSetup from './pages/AdminUserSetup';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
+import Projects from './pages/admin/Projects';
 
 function App() {
   return (
@@ -71,6 +71,7 @@ function App() {
           <Route path="clients/:id" element={<ClientDetail />} />
           <Route path="products" element={<Products />} />
           <Route path="stock" element={<Stock />} />
+          <Route path="projects" element={<Projects />} />
           <Route path="financial" element={<Financial />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="loyalty" element={<Loyalty />} />

@@ -10,6 +10,7 @@ import { IArtistsService } from "./interfaces/IArtistsService";
 import { ITrackingService } from "./interfaces/ITrackingService";
 import { IFinancialService } from './interfaces/IFinancialService';
 import { IClientService } from './interfaces/IClientService';
+import { IProjectService } from './interfaces/IProjectService';
 
 // Mock services
 import { mockBlogService } from "./mock/mockBlogService";
@@ -20,6 +21,7 @@ import { mockArtistsService } from "./mock/mockArtistsService";
 import { mockTrackingService } from "./mock/mockTrackingService";
 import { mockFinancialService } from './mock/mockFinancialService';
 import { mockClientService } from './mock/mockClientService';
+import mockProjectService from './mock/mockProjectService';
 
 // Supabase services
 import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
@@ -115,4 +117,14 @@ export function getTrackingService(): ITrackingService {
   
   // Otherwise return the mock implementation
   return mockTrackingService;
+}
+
+export function getProjectService(): IProjectService {
+  if (appConfig.dataSource.useMockData) {
+    console.log('Using mock project service');
+    return mockProjectService;
+  } else {
+    // TODO: Implement SupabaseProjectService when needed
+    throw new Error('Supabase Project Service not implemented yet');
+  }
 }
