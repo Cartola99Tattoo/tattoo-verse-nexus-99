@@ -258,7 +258,6 @@ const Clients = () => {
             )}
           </div>
         ) : (
-          // ... keep existing code (table view)
           <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
             <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
               <CardTitle className="text-gray-800">Lista de Clientes</CardTitle>
