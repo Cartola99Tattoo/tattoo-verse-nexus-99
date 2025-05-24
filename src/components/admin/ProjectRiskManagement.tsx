@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,10 +46,15 @@ const ProjectRiskManagement = ({ project }: ProjectRiskManagementProps) => {
 
   const [showForm, setShowForm] = useState(false);
   const [editingRisk, setEditingRisk] = useState<ProjectRisk | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    description: string;
+    probability: 'low' | 'medium' | 'high';
+    impact: 'low' | 'medium' | 'high';
+    mitigation: string;
+  }>({
     description: '',
-    probability: 'medium' as const,
-    impact: 'medium' as const,
+    probability: 'medium',
+    impact: 'medium',
     mitigation: ''
   });
 
@@ -181,7 +185,7 @@ const ProjectRiskManagement = ({ project }: ProjectRiskManagementProps) => {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div>
                       <label className="text-sm font-medium">Probabilidade</label>
-                      <Select value={formData.probability} onValueChange={(value: any) => setFormData({ ...formData, probability: value })}>
+                      <Select value={formData.probability} onValueChange={(value: 'low' | 'medium' | 'high') => setFormData({ ...formData, probability: value })}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -195,7 +199,7 @@ const ProjectRiskManagement = ({ project }: ProjectRiskManagementProps) => {
                     
                     <div>
                       <label className="text-sm font-medium">Impacto</label>
-                      <Select value={formData.impact} onValueChange={(value: any) => setFormData({ ...formData, impact: value })}>
+                      <Select value={formData.impact} onValueChange={(value: 'low' | 'medium' | 'high') => setFormData({ ...formData, impact: value })}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
