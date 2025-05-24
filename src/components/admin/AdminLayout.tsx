@@ -5,13 +5,9 @@ import AdminSidebar from "./AdminSidebar";
 
 interface AdminLayoutProps {
   children?: ReactNode;
-  title?: string;
-  description?: string;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ 
-  children
-}) => {
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-black">
       <AdminSidebar />
@@ -22,7 +18,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
             <p>Este site está em modo de desenvolvimento com acesso administrativo irrestrito. Todo o conteúdo está disponível sem necessidade de login.</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow min-h-[600px]">
+          <div className="bg-white rounded-lg shadow min-h-[600px] p-6">
             {children || <Outlet />}
           </div>
         </div>

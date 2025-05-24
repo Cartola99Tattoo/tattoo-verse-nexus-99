@@ -1,6 +1,7 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ProjectDashboard from "./ProjectDashboard";
+import ProjectRiskManagement from "./ProjectRiskManagement";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +25,7 @@ interface ProjectPlanningTabsProps {
 }
 
 const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const completedTasks = tasks.filter(task => task.status === 'completed').length;
   const progressPercentage = tasks.length > 0 ? (completedTasks / tasks.length) * 100 : 0;
@@ -95,119 +96,22 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="budget">Orçamento</TabsTrigger>
+          <TabsTrigger value="risks">Riscos</TabsTrigger>
           <TabsTrigger value="improvements">Melhorias</TabsTrigger>
           <TabsTrigger value="expansion">Expansão</TabsTrigger>
           <TabsTrigger value="sustainability">Sustentabilidade</TabsTrigger>
           <TabsTrigger value="goals">Metas SMART</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Progresso Geral</CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{Math.round(progressPercentage)}%</div>
-                <Progress value={progressPercentage} className="mt-2" />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {completedTasks} de {tasks.length} tarefas concluídas
-                </p>
-              </CardContent>
-            </Card>
+        <TabsContent value="dashboard" className="space-y-4">
+          <ProjectDashboard project={project} tasks={tasks} />
+        </TabsContent>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Orçamento Total</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">R$ 2.000</div>
-                <p className="text-xs text-muted-foreground">
-                  R$ 730 executados
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Metas Atingidas</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">2/3</div>
-                <p className="text-xs text-muted-foreground">
-                  Metas por categoria
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Dias Restantes</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">5</div>
-                <p className="text-xs text-muted-foreground">
-                  Até o deadline
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Resumo do Projeto</CardTitle>
-              <CardDescription>{project.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <h4 className="font-medium text-sm text-gray-600 mb-2">Informações Gerais</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Data de Início:</span>
-                      <span>{project.startDate ? new Date(project.startDate).toLocaleDateString('pt-BR') : 'Não definida'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Data de Fim:</span>
-                      <span>{project.endDate ? new Date(project.endDate).toLocaleDateString('pt-BR') : 'Não definida'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Status:</span>
-                      <Badge className={getStatusColor(project.status)}>
-                        {project.status === 'active' ? 'Ativo' : 
-                         project.status === 'planning' ? 'Planejamento' :
-                         project.status === 'completed' ? 'Concluído' : 'Em Espera'}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-gray-600 mb-2">Estatísticas</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Total de Tarefas:</span>
-                      <span>{tasks.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Tarefas Concluídas:</span>
-                      <span>{completedTasks}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Tarefas Pendentes:</span>
-                      <span>{tasks.length - completedTasks}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="risks" className="space-y-4">
+          <ProjectRiskManagement project={project} />
         </TabsContent>
 
         <TabsContent value="budget" className="space-y-4">
@@ -215,7 +119,7 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Orçamento do Projeto</CardTitle>
-                <CardDescription>Controle de custos estimados e reais</CardDescription>
+                <CardDescription>Controle de custos estimados e reais por categoria</CardDescription>
               </div>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -229,6 +133,7 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
                     <div className="flex-1">
                       <h4 className="font-medium">{item.description}</h4>
                       <div className="flex gap-4 text-sm text-gray-600 mt-1">
+                        <span>Categoria: Marketing</span>
                         <span>Estimado: R$ {item.estimated}</span>
                         <span>Real: R$ {item.real}</span>
                       </div>
@@ -238,7 +143,7 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
                     </Badge>
                   </div>
                 ))}
-                <div className="border-t pt-4">
+                <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between font-medium">
                     <span>Total Estimado:</span>
                     <span>R$ {mockBudgetItems.reduce((sum, item) => sum + item.estimated, 0)}</span>
@@ -246,6 +151,10 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
                   <div className="flex justify-between font-medium text-green-600">
                     <span>Total Real:</span>
                     <span>R$ {mockBudgetItems.reduce((sum, item) => sum + item.real, 0)}</span>
+                  </div>
+                  <div className="flex justify-between font-medium text-blue-600">
+                    <span>Disponível:</span>
+                    <span>R$ {mockBudgetItems.reduce((sum, item) => sum + item.estimated, 0) - mockBudgetItems.reduce((sum, item) => sum + item.real, 0)}</span>
                   </div>
                 </div>
               </div>
@@ -258,7 +167,7 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Ações de Otimização</CardTitle>
-                <CardDescription>Melhorias nos processos e execução</CardDescription>
+                <CardDescription>Melhorias nos processos e execução com alocação de recursos</CardDescription>
               </div>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -274,6 +183,10 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
                       <div className="flex gap-4 text-sm text-gray-600 mt-1">
                         <span>Responsável: {action.responsible}</span>
                         <span>Prioridade: {action.priority === 'high' ? 'Alta' : action.priority === 'medium' ? 'Média' : 'Baixa'}</span>
+                        <span>Recursos: Equipamento XYZ</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Critério de Qualidade: Reduzir tempo de espera em 50%
                       </div>
                     </div>
                     <Badge className={getStatusColor(action.status)}>
@@ -292,7 +205,7 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Recursos para Expansão</CardTitle>
-                <CardDescription>Planejamento de crescimento e necessidades</CardDescription>
+                <CardDescription>Planejamento de crescimento com verificação de disponibilidade</CardDescription>
               </div>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -307,8 +220,10 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
                       <div className="flex-1">
                         <h4 className="font-medium">{resource.resource}</h4>
                         <p className="text-sm text-gray-600 mt-1">{resource.justification}</p>
-                        <div className="text-sm text-gray-600 mt-2">
-                          Custo Estimado: R$ {resource.cost}
+                        <div className="text-sm text-gray-600 mt-2 space-y-1">
+                          <div>Custo Estimado: R$ {resource.cost}</div>
+                          <div>Disponibilidade: {resource.resource.includes('tatuador') ? 'Verificar agenda' : 'Em estoque'}</div>
+                          <div>Impacto: Aumento de 30% na capacidade</div>
                         </div>
                       </div>
                       <Badge className={getStatusColor(resource.status)}>
@@ -328,7 +243,7 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Sustentabilidade e Relacionamento</CardTitle>
-                <CardDescription>Ações para manutenção a longo prazo</CardDescription>
+                <CardDescription>Ações para manutenção a longo prazo e integração com CRM</CardDescription>
               </div>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -344,6 +259,10 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
                       <div className="flex gap-4 text-sm text-gray-600 mt-1">
                         <span>Responsável: {action.responsible}</span>
                         <span>Prazo: {new Date(action.deadline).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Integração: {action.title.includes('post') ? 'Redes Sociais' : 
+                                    action.title.includes('email') ? 'CRM/Email Marketing' : 'Sistema de Feedback'}
                       </div>
                     </div>
                     <Badge className={getStatusColor(action.status)}>
@@ -362,7 +281,7 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
             <Card>
               <CardHeader>
                 <CardTitle>Metas por Categoria</CardTitle>
-                <CardDescription>Objetivos específicos por área</CardDescription>
+                <CardDescription>Objetivos específicos por área com marcos</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -383,6 +302,10 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
                             <span>Responsável: {goal.responsible}</span>
                             <span className="ml-3">Prazo: {new Date(goal.deadline).toLocaleDateString('pt-BR')}</span>
                           </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Marco: {goal.category === 'Marketing' ? '500 seguidores alcançados' : 
+                                    goal.category === 'Vendas' ? '25 tatuagens concluídas' : 'Zero incidentes registrados'}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -393,8 +316,8 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Metas SMART</CardTitle>
-                <CardDescription>Objetivos específicos e mensuráveis</CardDescription>
+                <CardTitle>Metas SMART Interativas</CardTitle>
+                <CardDescription>Objetivos específicos e mensuráveis com KPIs</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -405,6 +328,7 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
                         <div>Métrica: {goal.metric}</div>
                         <div>Responsável: {goal.responsible}</div>
                         <div>Prazo: {new Date(goal.deadline).toLocaleDateString('pt-BR')}</div>
+                        <div>Status: {goal.progress >= 100 ? 'Concluída' : goal.progress >= 80 ? 'Quase lá' : 'Em andamento'}</div>
                       </div>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -412,6 +336,9 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
                           <span>{goal.progress}%</span>
                         </div>
                         <Progress value={goal.progress} className="h-2" />
+                        <div className="text-xs text-gray-500">
+                          KPI Atual: {goal.progress >= 85 ? 'R$ 12.750' : 'R$ 10.200'} de faturamento
+                        </div>
                       </div>
                     </div>
                   ))}
