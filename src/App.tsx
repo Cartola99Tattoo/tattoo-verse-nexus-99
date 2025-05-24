@@ -32,7 +32,7 @@ import AdminBlog from './pages/admin/Blog';
 import AdminAuth from './pages/AdminAuth';
 import AdminUserSetup from './pages/AdminUserSetup';
 import NotFound from './pages/NotFound';
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 import { BarChart3, Users, FileText, Calendar, User, Package, DollarSign, TrendingUp, Gift, Shield } from 'lucide-react';
 
 function App() {
@@ -62,9 +62,7 @@ function App() {
               path="/admin"
               element={
                 <ProtectedRoute>
-                  <AdminLayout>
-                    <div />
-                  </AdminLayout>
+                  <AdminLayout />
                 </ProtectedRoute>
               }
             >
