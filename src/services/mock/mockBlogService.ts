@@ -1,375 +1,256 @@
 
-import { appConfig } from "@/config/appConfig";
-import { BlogPostSummary } from "@/components/blog/BlogCard";
-import { BlogPost } from "@/hooks/useBlogPost";
-import { BlogPaginatedResponse, BlogQueryParams, IBlogService } from "../interfaces/IBlogService";
-import { simulateNetworkDelay, simulateError } from "./mockUtils";
+import { 
+  IBlogService, 
+  BlogQueryParams, 
+  BlogPaginatedResponse,
+  BlogCategory,
+  CreateBlogPostData,
+  UpdateBlogPostData
+} from '../interfaces/IBlogService';
+import { BlogPostSummary } from '@/components/blog/BlogCard';
+import { BlogPost } from '@/hooks/useBlogPost';
 
-// Mock blog post data
+// Mock data for categories
+const mockCategories: BlogCategory[] = [
+  {
+    id: '1',
+    name: 'Cuidados Pós-Tatuagem',
+    description: 'Dicas e orientações para cuidar da sua tatuagem após a sessão',
+    created_at: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: '2',
+    name: 'Estilos de Tatuagem',
+    description: 'Explorando diferentes estilos e técnicas de tatuagem',
+    created_at: '2024-01-02T00:00:00Z'
+  },
+  {
+    id: '3',
+    name: 'Notícias do Estúdio',
+    description: 'Novidades e atualizações do estúdio 99Tattoo',
+    created_at: '2024-01-03T00:00:00Z'
+  },
+  {
+    id: '4',
+    name: 'Dicas de Design',
+    description: 'Inspiração e orientações para design de tatuagens',
+    created_at: '2024-01-04T00:00:00Z'
+  }
+];
+
+// Enhanced mock posts with more fields
 const mockBlogPosts: BlogPost[] = [
   {
-    id: "1",
-    title: "A História da Tatuagem no Brasil",
-    slug: "historia-tatuagem-brasil",
+    id: '1',
+    title: 'Como cuidar da sua tatuagem nos primeiros dias',
+    slug: 'como-cuidar-da-sua-tatuagem-nos-primeiros-dias',
     content: `
-      <p>A história da tatuagem no Brasil remonta aos povos indígenas que utilizavam pigmentos naturais para marcar a pele em rituais importantes. Estas marcações tinham significados culturais profundos, relacionados a passagens de vida, status tribal e conexões espirituais.</p>
-      
-      <h2>A chegada da tatuagem moderna</h2>
-      
-      <p>A tatuagem moderna, no entanto, chegou ao Brasil principalmente através dos marinheiros europeus durante os séculos XIX e XX. Inicialmente associada a marinheiros e presidiários, a arte da tatuagem carregou um estigma por muitas décadas no país.</p>
-      
-      <p>Foi apenas na década de 1980 que começou a ganhar maior aceitação social, com a chegada dos primeiros tatuadores profissionais formados no exterior e o estabelecimento de estúdios especializados nas grandes cidades.</p>
-      
-      <h2>A revolução dos anos 90 e 2000</h2>
-      
-      <p>Durante os anos 1990 e 2000, houve uma verdadeira revolução na cena da tatuagem brasileira. Artistas nacionais começaram a desenvolver seus próprios estilos e técnicas, enquanto convenções internacionais de tatuagem passaram a incluir o Brasil em seus circuitos.</p>
-      
-      <p>O país viu nascer talentos reconhecidos mundialmente como:</p>
-      
-      <ul>
-        <li>Adão Rosa, pioneiro da tatuagem realista no Brasil</li>
-        <li>Mari Moreno, especialista em aquarela</li>
-        <li>Tiago Ashanti, mestre do estilo neotribal</li>
-      </ul>
-      
-      <h2>A tatuagem contemporânea brasileira</h2>
-      
-      <p>Atualmente, o Brasil possui uma das mais vibrantes cenas de tatuagem do mundo. Com um estilo próprio que muitas vezes incorpora elementos da rica cultura visual brasileira, os tatuadores brasileiros são reconhecidos internacionalmente por sua técnica, criatividade e abordagem única.</p>
-      
-      <p>A legislação e as normas sanitárias também evoluíram, tornando a prática mais segura e regulamentada. Hoje, existem mais de 80 mil estúdios de tatuagem registrados no país, demonstrando como esta forma de arte se tornou parte integrante da cultura contemporânea brasileira.</p>
-      
-      <blockquote>
-        <p>"A tatuagem brasileira tem um DNA próprio, que mistura influências globais com nossa rica diversidade cultural. Isso criou um estilo que é imediatamente reconhecível em todo o mundo."</p>
-        <cite>— Carlos Falcão, historiador da arte corporal</cite>
-      </blockquote>
-      
-      <p>Os últimos anos têm visto um interesse crescente por estilos que resgatam elementos da cultura indígena brasileira e da arte popular, fechando um ciclo histórico que conecta as origens ancestrais da marcação corporal no território brasileiro com sua expressão contemporânea.</p>
+# Como cuidar da sua tatuagem nos primeiros dias
+
+Os primeiros dias após fazer uma tatuagem são **cruciais** para a cicatrização adequada. Aqui estão algumas dicas importantes:
+
+## Primeiras 24 horas
+- Mantenha o filme protetor por 2-4 horas
+- Lave suavemente com sabão neutro
+- Aplique pomada cicatrizante
+
+## Dias 2-7
+- Continue lavando 2-3 vezes ao dia
+- Use pomada específica para tatuagem
+- Evite exposição solar direta
+
+## O que evitar
+- Não coce ou esfregue a tatuagem
+- Evite piscinas e mar
+- Não use produtos com álcool
+
+Lembre-se: uma boa cicatrização garante que sua tatuagem ficará linda por muitos anos!
     `,
-    excerpt: "Conheça a rica história da tatuagem no Brasil, desde os povos indígenas até os estúdios modernos.",
-    cover_image: "https://images.unsplash.com/photo-1598971639058-a2335bde0a49?q=80&w=2148&auto=format&fit=crop",
-    published_at: "2024-05-01T14:30:00Z",
-    reading_time: 8,
-    view_count: 345,
-    tags: ["História", "Cultura Brasileira", "Tatuagens Indígenas"],
-    profiles: {
-      id: "1",
-      first_name: "João",
-      last_name: "Silva",
-      avatar_url: null
-    },
-    blog_categories: {
-      id: "1",
-      name: "História",
-      description: "Artigos sobre a história da tatuagem"
-    }
-  },
-  {
-    id: "2",
-    title: "Cuidados Após Fazer uma Tatuagem",
-    slug: "cuidados-apos-tatuagem",
-    content: `
-      <p>Os primeiros dias após uma tatuagem são cruciais para garantir uma boa cicatrização. Manter a área limpa e devidamente hidratada é essencial para preservar a qualidade da arte e evitar complicações.</p>
-      
-      <h2>Primeiras 24-48 horas</h2>
-      
-      <p>Durante as primeiras 24 a 48 horas, é fundamental seguir estas orientações:</p>
-      
-      <ul>
-        <li>Mantenha o curativo original pelo tempo recomendado pelo seu tatuador (geralmente de 2 a 24 horas)</li>
-        <li>Ao remover o curativo, lave delicadamente a área com água morna e sabão neutro</li>
-        <li>Não esfregue a região; apenas faça movimentos suaves com as pontas dos dedos</li>
-        <li>Seque com toalha limpa, pressionando suavemente (sem esfregar)</li>
-        <li>Aplique uma fina camada do hidratante recomendado pelo seu tatuador</li>
-      </ul>
-      
-      <h2>Primeira semana</h2>
-      
-      <p>Durante a primeira semana, você notará que a tatuagem começará a formar uma casquinha. Nesta fase:</p>
-      
-      <ul>
-        <li>Continue lavando a área 2-3 vezes ao dia com sabão neutro</li>
-        <li>Mantenha a hidratação com aplicações leves do produto recomendado</li>
-        <li><strong>Nunca arranque as casquinhas</strong> que se formarem</li>
-        <li>Evite exposição solar direta</li>
-        <li>Não submerja a tatuagem em piscinas, mar, banheiras ou saunas</li>
-      </ul>
-      
-      <blockquote>
-        <p>"A cicatrização adequada é tão importante quanto a própria sessão de tatuagem. Um bom cuidado nos primeiros dias garante uma tatuagem bonita por muitos anos."</p>
-        <cite>— Ana Mendes, tatuadora profissional</cite>
-      </blockquote>
-      
-      <h2>Semanas seguintes</h2>
-      
-      <p>Após a primeira semana, a tatuagem entrará em uma fase de descamação mais leve e depois estabilizará. Neste período:</p>
-      
-      <ul>
-        <li>Continue mantendo a área hidratada</li>
-        <li>Comece a usar protetor solar (fator 30 ou superior) quando expor a área</li>
-        <li>Evite roupas muito justas que possam friccionar contra a tatuagem</li>
-      </ul>
-      
-      <h2>Cuidados de longo prazo</h2>
-      
-      <p>Para manter sua tatuagem vibrante por anos, adote estes cuidados permanentes:</p>
-      
-      <ul>
-        <li>Use sempre protetor solar na área tatuada quando exposta ao sol</li>
-        <li>Mantenha a pele hidratada regularmente</li>
-        <li>Evite exposição prolongada ao sol, que pode desbotar os pigmentos</li>
-      </ul>
-      
-      <p>Lembre-se que cada organismo reage de forma diferente, e alguns podem precisar de cuidados específicos. Em caso de vermelhidão excessiva, inchaço, secreções ou qualquer sinal de infecção, consulte imediatamente um médico.</p>
-    `,
-    excerpt: "Aprenda os cuidados essenciais para garantir a melhor cicatrização da sua nova tatuagem.",
-    cover_image: "https://images.unsplash.com/photo-1565058398932-9a36a1a3c2b9?q=80&w=2148&auto=format&fit=crop",
-    published_at: "2024-05-05T10:15:00Z",
+    excerpt: 'Aprenda os cuidados essenciais para garantir uma cicatrização perfeita da sua nova tatuagem.',
+    cover_image: 'https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop',
+    published_at: '2024-01-15T10:00:00Z',
+    category_id: '1',
+    author_id: 'admin',
     reading_time: 5,
-    view_count: 521,
-    tags: ["Cuidados", "Cicatrização", "Iniciantes"],
+    tags: ['cuidados', 'cicatrização', 'pós-tatuagem'],
+    view_count: 1250,
+    meta_description: 'Guia completo de cuidados pós-tatuagem para uma cicatrização perfeita',
+    meta_keywords: 'tatuagem, cuidados, cicatrização, pós-tatuagem',
     profiles: {
-      id: "2",
-      first_name: "Maria",
-      last_name: "Oliveira",
+      first_name: 'Equipe',
+      last_name: '99Tattoo',
       avatar_url: null
     },
     blog_categories: {
-      id: "2",
-      name: "Cuidados",
-      description: "Dicas de cuidados para tatuagens"
+      id: '1',
+      name: 'Cuidados Pós-Tatuagem',
+      description: 'Dicas e orientações para cuidar da sua tatuagem após a sessão'
     }
   },
   {
-    id: "3",
-    title: "Tendências de Tatuagem para 2024",
-    slug: "tendencias-tatuagem-2024",
+    id: '2',
+    title: 'Tendências de tatuagem para 2024',
+    slug: 'tendencias-de-tatuagem-para-2024',
     content: `
-      <p>O mundo da tatuagem está sempre em evolução. Em 2024, vemos o ressurgimento de estilos vintage misturados com tecnologias modernas e uma crescente conscientização ambiental influenciando as escolhas de desenhos e técnicas.</p>
-      
-      <h2>Minimalismo Sofisticado</h2>
-      
-      <p>O minimalismo continua forte, mas com uma nova sofisticação. Linhas finas e precisas são usadas para criar desenhos complexos que, à primeira vista, parecem simples. Estes designs frequentemente incorporam:</p>
-      
-      <ul>
-        <li>Detalhes microscópicos que só são percebidos em uma observação mais próxima</li>
-        <li>Composições geométricas com significados pessoais</li>
-        <li>Uso estratégico de espaço negativo</li>
-      </ul>
-      
-      <h2>Neo-Tradicional Contemporâneo</h2>
-      
-      <p>O estilo neo-tradicional está sendo reinventado com uma abordagem contemporânea, misturando elementos clássicos com técnicas modernas:</p>
-      
-      <ul>
-        <li>Paletas de cores mais amplas e menos convencionais</li>
-        <li>Temas tradicionais reinterpretados com perspectivas atuais</li>
-        <li>Combinação de contornos bold com sombreamento suave</li>
-      </ul>
-      
-      <h2>Tatuagens Biodinâmicas</h2>
-      
-      <p>As tatuagens biodinâmicas, que seguem o fluxo natural dos músculos e contornos do corpo, estão ganhando popularidade:</p>
-      
-      <ul>
-        <li>Designs que parecem fluir com o movimento corporal</li>
-        <li>Trabalhos que amplificam a anatomia natural em vez de apenas se posicionar sobre ela</li>
-        <li>Combinação de estilos como biomecânica e ornamental</li>
-      </ul>
-      
-      <h2>Tatuagens Expandidas por AR</h2>
-      
-      <p>Uma das inovações mais interessantes de 2024 é a integração de realidade aumentada com tatuagens:</p>
-      
-      <ul>
-        <li>Tatuagens que funcionam como códigos QR para experiências de AR personalizadas</li>
-        <li>Designs que ganham movimento e dimensões extras quando vistos através de apps específicos</li>
-        <li>Possibilidade de atualizar o conteúdo digital associado à tatuagem ao longo do tempo</li>
-      </ul>
-      
-      <blockquote>
-        <p>"As tatuagens de 2024 são multidimensionais - não apenas visualmente, mas também em termos de significado e interatividade. Estamos vendo o início de uma nova era onde a arte corporal transcende as limitações físicas."</p>
-        <cite>— Marcos Veiga, especialista em tendências de tatuagem</cite>
-      </blockquote>
-      
-      <h2>Pigmentos Sustentáveis</h2>
-      
-      <p>A crescente consciência ambiental está impulsionando a popularidade de tintas orgânicas e veganas:</p>
-      
-      <ul>
-        <li>Pigmentos derivados de plantas</li>
-        <li>Formulações livres de químicos tóxicos</li>
-        <li>Cores que envelhecem de forma mais natural e suave</li>
-      </ul>
-      
-      <p>Estas tendências refletem não apenas evoluções estéticas, mas também mudanças culturais mais amplas em nossa relação com a expressão corporal e a tecnologia. À medida que avançamos, podemos esperar ainda mais inovações que continuarão a expandir as fronteiras desta antiga forma de arte.</p>
+# Tendências de tatuagem para 2024
+
+Este ano promete trazer **novidades incríveis** no mundo da tatuagem. Confira as principais tendências:
+
+## Fine Line
+Traços finos e delicados continuam em alta, especialmente para:
+- Desenhos minimalistas
+- Elementos florais
+- Símbolos geométricos
+
+## Aquarela
+O estilo aquarela ganhou força com:
+- Cores vibrantes
+- Efeitos de tinta escorrida
+- Combinação com elementos realistas
+
+## Blackwork
+O preto absoluto domina com:
+- Preenchimentos sólidos
+- Contrastes marcantes
+- Designs abstratos
+
+Qual estilo mais combina com você?
     `,
-    excerpt: "Descubra as principais tendências de tatuagem que estão bombando em 2024.",
-    cover_image: "https://images.unsplash.com/photo-1590246815107-56d48602592f?q=80&w=2148&auto=format&fit=crop",
-    published_at: "2024-05-10T16:45:00Z",
-    reading_time: 6,
-    view_count: 278,
-    tags: ["Tendências", "2024", "Estilos"],
-    profiles: {
-      id: "3",
-      first_name: "André",
-      last_name: "Mendes",
-      avatar_url: null
-    },
-    blog_categories: {
-      id: "3",
-      name: "Tendências",
-      description: "Novidades e tendências no mundo das tatuagens"
-    }
-  },
-  {
-    id: "4",
-    title: "Os Diferentes Estilos de Tatuagem Explicados",
-    slug: "estilos-tatuagem-explicados",
-    content: "<p>Conheça os diferentes estilos de tatuagem, desde o tradicional americano até o watercolor...</p>",
-    excerpt: "Um guia completo sobre os diferentes estilos de tatuagem para ajudar você a escolher o melhor para seu próximo trabalho.",
-    cover_image: "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?q=80&w=2148&auto=format&fit=crop",
-    published_at: "2024-04-22T09:15:00Z",
-    reading_time: 10,
-    view_count: 410,
-    tags: ["Estilos", "Guia", "Técnicas"],
-    profiles: {
-      id: "4",
-      first_name: "Carolina",
-      last_name: "Santos",
-      avatar_url: null
-    },
-    blog_categories: {
-      id: "4",
-      name: "Estilos",
-      description: "Diferentes estilos artísticos de tatuagem"
-    }
-  },
-  {
-    id: "5",
-    title: "Como Escolher o Melhor Tatuador para o Seu Projeto",
-    slug: "escolher-melhor-tatuador",
-    content: "<p>Dicas importantes para encontrar um profissional qualificado que entenda sua visão...</p>",
-    excerpt: "Saiba como pesquisar, avaliar e escolher o tatuador ideal para transformar sua ideia em arte na pele.",
-    cover_image: "https://images.unsplash.com/photo-1632397294790-78d4f9abc0ad?q=80&w=2148&auto=format&fit=crop",
-    published_at: "2024-04-15T14:20:00Z",
+    excerpt: 'Descubra as principais tendências de tatuagem que dominarão 2024 e inspire-se para sua próxima tattoo.',
+    cover_image: 'https://images.unsplash.com/photo-1590246815107-56d48602592f?w=800&auto=format&fit=crop&q=60',
+    published_at: '2024-01-10T14:30:00Z',
+    category_id: '2',
+    author_id: 'admin',
     reading_time: 7,
-    view_count: 325,
-    tags: ["Escolha", "Tatuadores", "Dicas"],
+    tags: ['tendências', '2024', 'estilos', 'fine-line', 'aquarela'],
+    view_count: 890,
+    meta_description: 'Conheça as principais tendências de tatuagem para 2024',
+    meta_keywords: 'tendências tatuagem, 2024, estilos, fine line, aquarela',
     profiles: {
-      id: "1",
-      first_name: "João",
-      last_name: "Silva",
-      avatar_url: null
+      first_name: 'Carlos',
+      last_name: 'Silva',
+      avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
     },
     blog_categories: {
-      id: "5",
-      name: "Artistas",
-      description: "Perfis de artistas renomados"
+      id: '2',
+      name: 'Estilos de Tatuagem',
+      description: 'Explorando diferentes estilos e técnicas de tatuagem'
+    }
+  },
+  {
+    id: '3',
+    title: 'Novidade no estúdio: Equipamentos de última geração',
+    slug: 'novidade-no-studio-equipamentos-de-ultima-geracao',
+    content: `
+# Novidade no estúdio: Equipamentos de última geração
+
+Estamos **super empolgados** em anunciar que acabamos de adquirir novos equipamentos para oferecer ainda mais qualidade nos nossos trabalhos!
+
+## Novas máquinas
+- Máquinas rotativas de última geração
+- Menor vibração = mais conforto
+- Precisão milimétrica nos traços
+
+## Agulhas premium
+- Agulhas esterilizadas individuais
+- Diversos tipos para cada técnica
+- Qualidade internacional
+
+## Tintas de alta qualidade
+- Pigmentos premium importados
+- Cores mais vivas e duradouras
+- Segurança e qualidade garantidas
+
+Venha conhecer nosso estúdio renovado!
+    `,
+    excerpt: 'Conheça os novos equipamentos de última geração que adquirimos para oferecer ainda mais qualidade.',
+    cover_image: 'https://images.unsplash.com/photo-1565058398932-9a36a1a3c2b9?w=800&auto=format&fit=crop&q=60',
+    published_at: '2024-01-05T09:00:00Z',
+    category_id: '3',
+    author_id: 'admin',
+    reading_time: 3,
+    tags: ['novidades', 'equipamentos', 'qualidade', 'estúdio'],
+    view_count: 456,
+    meta_description: 'Conheça os novos equipamentos de última geração do nosso estúdio',
+    meta_keywords: 'equipamentos tatuagem, máquinas, qualidade, estúdio',
+    profiles: {
+      first_name: 'Ana',
+      last_name: 'Costa',
+      avatar_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
+    },
+    blog_categories: {
+      id: '3',
+      name: 'Notícias do Estúdio',
+      description: 'Novidades e atualizações do estúdio 99Tattoo'
     }
   }
 ];
 
-// Mock blog categories
-const mockBlogCategories = [
-  { id: "1", name: "História", description: "Artigos sobre a história da tatuagem" },
-  { id: "2", name: "Cuidados", description: "Dicas de cuidados para tatuagens" },
-  { id: "3", name: "Tendências", description: "Novidades e tendências no mundo das tatuagens" },
-  { id: "4", name: "Estilos", description: "Diferentes estilos artísticos de tatuagem" },
-  { id: "5", name: "Artistas", description: "Perfis de artistas renomados" }
-];
-
-// Mock tags list extracted from all posts
-const generateTagsList = (): string[] => {
-  const allTags = new Set<string>();
-  mockBlogPosts.forEach(post => {
-    if (post.tags && post.tags.length > 0) {
-      post.tags.forEach(tag => allTags.add(tag));
-    }
-  });
-  return Array.from(allTags);
+// Simple slug generator
+const generateSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 };
 
-// Mock BlogService implementation
-export class MockBlogService implements IBlogService {
+export const mockBlogService: IBlogService = {
   async fetchBlogPosts(params: BlogQueryParams = {}): Promise<BlogPaginatedResponse> {
-    if (appConfig.dataSource.logServiceCalls) {
-      console.log("MockBlogService: fetchBlogPosts called with params:", params);
-    }
+    console.log('MockBlogService: fetchBlogPosts called with params:', params);
     
-    await simulateNetworkDelay();
-    if (await simulateError()) {
-      throw new Error("Failed to fetch blog posts");
-    }
-    
-    // Get all posts and apply filters
     let filteredPosts = [...mockBlogPosts];
-    
-    // Filter by category if specified
-    if (params.category && params.category !== 'Todos') {
-      filteredPosts = filteredPosts.filter(post => {
-        if (!post.blog_categories) return false;
-        
-        if (Array.isArray(post.blog_categories)) {
-          return post.blog_categories.some(cat => cat.name === params.category);
-        }
-        
-        return post.blog_categories.name === params.category;
-      });
-    }
-    
-    // Filter by tag if specified
-    if (params.tag) {
-      filteredPosts = filteredPosts.filter(post => 
-        post.tags?.includes(params.tag as string) ?? false
-      );
-    }
-    
-    // Apply search if specified
+
+    // Apply filters
     if (params.search) {
       const searchLower = params.search.toLowerCase();
       filteredPosts = filteredPosts.filter(post => 
         post.title.toLowerCase().includes(searchLower) ||
-        post.excerpt?.toLowerCase().includes(searchLower) ||
         post.content.toLowerCase().includes(searchLower) ||
-        post.tags?.some(tag => tag.toLowerCase().includes(searchLower)) ||
-        false
+        post.excerpt?.toLowerCase().includes(searchLower)
       );
     }
-    
-    // Apply sorting
-    if (params.sort) {
-      switch(params.sort) {
-        case 'latest':
-          filteredPosts.sort((a, b) => 
-            new Date(b.published_at || '').getTime() - new Date(a.published_at || '').getTime()
-          );
-          break;
-        case 'oldest':
-          filteredPosts.sort((a, b) => 
-            new Date(a.published_at || '').getTime() - new Date(b.published_at || '').getTime()
-          );
-          break;
-        case 'popular':
-          filteredPosts.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
-          break;
+
+    if (params.category) {
+      filteredPosts = filteredPosts.filter(post => post.category_id === params.category);
+    }
+
+    if (params.status && params.status !== 'all') {
+      // For mock, we'll assume all posts are published
+      if (params.status !== 'published') {
+        filteredPosts = [];
       }
-    } else {
-      // Default sort by latest
-      filteredPosts.sort((a, b) => 
-        new Date(b.published_at || '').getTime() - new Date(a.published_at || '').getTime()
+    }
+
+    if (params.author_id) {
+      filteredPosts = filteredPosts.filter(post => post.author_id === params.author_id);
+    }
+
+    if (params.tag) {
+      filteredPosts = filteredPosts.filter(post => 
+        post.tags?.includes(params.tag!)
       );
     }
-    
-    // Calculate pagination
-    const totalPosts = filteredPosts.length;
+
+    // Apply sorting
+    if (params.sort === 'oldest') {
+      filteredPosts.sort((a, b) => new Date(a.published_at || 0).getTime() - new Date(b.published_at || 0).getTime());
+    } else {
+      filteredPosts.sort((a, b) => new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime());
+    }
+
+    // Apply pagination
+    const page = params.page || 1;
     const limit = params.limit || 10;
-    const totalPages = Math.ceil(totalPosts / limit);
-    const currentPage = params.page || 1;
-    const startIndex = (currentPage - 1) * limit;
+    const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    
-    // Get current page posts
-    const paginatedPosts = filteredPosts.slice(startIndex, endIndex).map(post => ({
+    const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+
+    // Convert to BlogPostSummary format
+    const posts: BlogPostSummary[] = paginatedPosts.map(post => ({
       id: post.id,
       title: post.title,
       excerpt: post.excerpt,
@@ -379,119 +260,39 @@ export class MockBlogService implements IBlogService {
       profiles: post.profiles,
       blog_categories: post.blog_categories
     }));
-    
-    return {
-      posts: paginatedPosts,
-      totalPosts,
-      totalPages,
-      currentPage
-    };
-  }
 
-  async fetchBlogCategories(): Promise<{ id: string; name: string; description: string | null }[]> {
-    if (appConfig.dataSource.logServiceCalls) {
-      console.log("MockBlogService: fetchBlogCategories called");
-    }
-    
-    await simulateNetworkDelay();
-    if (await simulateError()) {
-      throw new Error("Failed to fetch blog categories");
-    }
-    
-    return [...mockBlogCategories];
-  }
+    return {
+      posts,
+      totalPosts: filteredPosts.length,
+      totalPages: Math.ceil(filteredPosts.length / limit),
+      currentPage: page
+    };
+  },
+
+  async fetchBlogCategories(): Promise<BlogCategory[]> {
+    console.log('MockBlogService: fetchBlogCategories called');
+    return [...mockCategories];
+  },
 
   async fetchBlogPost(idOrSlug: string): Promise<BlogPost | null> {
-    if (appConfig.dataSource.logServiceCalls) {
-      console.log("MockBlogService: fetchBlogPost called with idOrSlug:", idOrSlug);
-    }
-    
-    await simulateNetworkDelay();
-    if (await simulateError()) {
-      throw new Error("Failed to fetch blog post");
-    }
+    console.log('MockBlogService: fetchBlogPost called with:', idOrSlug);
     
     const post = mockBlogPosts.find(p => p.id === idOrSlug || p.slug === idOrSlug);
-    
-    if (post) {
-      // Simulate view count increment
-      const postWithIncrementedView = {
-        ...post,
-        view_count: (post.view_count || 0) + 1
-      };
-      
-      return postWithIncrementedView;
-    }
-    
-    return null;
-  }
-  
+    return post || null;
+  },
+
   async fetchRelatedPosts(postId: string, limit: number = 3): Promise<BlogPostSummary[]> {
-    if (appConfig.dataSource.logServiceCalls) {
-      console.log("MockBlogService: fetchRelatedPosts called with postId:", postId, "limit:", limit);
-    }
+    console.log('MockBlogService: fetchRelatedPosts called with postId:', postId, 'limit:', limit);
     
-    await simulateNetworkDelay();
-    if (await simulateError()) {
-      throw new Error("Failed to fetch related posts");
-    }
-    
-    // Find the current post
-    const currentPost = mockBlogPosts.find(p => p.id === postId || p.slug === postId);
-    if (!currentPost) {
-      return [];
-    }
-    
-    // Get the category of the current post
-    let currentCategory = null;
-    if (currentPost.blog_categories) {
-      if (Array.isArray(currentPost.blog_categories) && currentPost.blog_categories.length > 0) {
-        currentCategory = currentPost.blog_categories[0].name;
-      } else if (!Array.isArray(currentPost.blog_categories)) {
-        currentCategory = currentPost.blog_categories.name;
-      }
-    }
-    
-    // Find related posts by category or tags
-    let relatedPosts = mockBlogPosts.filter(post => {
-      // Don't include the current post
-      if (post.id === currentPost.id) {
-        return false;
-      }
-      
-      // Check if there's a category match
-      let categoryMatch = false;
-      if (currentCategory && post.blog_categories) {
-        if (Array.isArray(post.blog_categories)) {
-          categoryMatch = post.blog_categories.some(cat => cat.name === currentCategory);
-        } else {
-          categoryMatch = post.blog_categories.name === currentCategory;
-        }
-      }
-      
-      // Check if there are matching tags
-      let tagMatch = false;
-      if (currentPost.tags && currentPost.tags.length > 0 && post.tags && post.tags.length > 0) {
-        tagMatch = post.tags.some(tag => currentPost.tags?.includes(tag));
-      }
-      
-      return categoryMatch || tagMatch;
-    });
-    
-    // If we don't have enough related posts, add more recent posts
-    if (relatedPosts.length < limit) {
-      const otherPosts = mockBlogPosts
-        .filter(post => post.id !== currentPost.id && !relatedPosts.includes(post))
-        .sort((a, b) => 
-          new Date(b.published_at || '').getTime() - new Date(a.published_at || '').getTime()
-        )
-        .slice(0, limit - relatedPosts.length);
-      
-      relatedPosts = [...relatedPosts, ...otherPosts];
-    }
-    
-    // Get only the first 'limit' posts and format them
-    return relatedPosts.slice(0, limit).map(post => ({
+    const currentPost = mockBlogPosts.find(p => p.id === postId);
+    if (!currentPost) return [];
+
+    // Get posts from same category, excluding current post
+    const relatedPosts = mockBlogPosts
+      .filter(p => p.id !== postId && p.category_id === currentPost.category_id)
+      .slice(0, limit);
+
+    return relatedPosts.map(post => ({
       id: post.id,
       title: post.title,
       excerpt: post.excerpt,
@@ -501,58 +302,128 @@ export class MockBlogService implements IBlogService {
       profiles: post.profiles,
       blog_categories: post.blog_categories
     }));
-  }
-  
-  async fetchTagsList(): Promise<string[]> {
-    if (appConfig.dataSource.logServiceCalls) {
-      console.log("MockBlogService: fetchTagsList called");
-    }
-    
-    await simulateNetworkDelay();
-    if (await simulateError()) {
-      throw new Error("Failed to fetch tags list");
-    }
-    
-    return generateTagsList();
-  }
-  
-  async searchBlogPosts(query: string): Promise<BlogPostSummary[]> {
-    if (appConfig.dataSource.logServiceCalls) {
-      console.log("MockBlogService: searchBlogPosts called with query:", query);
-    }
-    
-    await simulateNetworkDelay();
-    if (await simulateError()) {
-      throw new Error("Failed to search blog posts");
-    }
-    
-    if (!query || query.trim() === '') {
-      return [];
-    }
-    
-    const queryLower = query.toLowerCase();
-    const matchedPosts = mockBlogPosts
-      .filter(post => 
-        post.title.toLowerCase().includes(queryLower) ||
-        post.excerpt?.toLowerCase().includes(queryLower) ||
-        post.content.toLowerCase().includes(queryLower) ||
-        post.tags?.some(tag => tag.toLowerCase().includes(queryLower)) ||
-        false
-      )
-      .map(post => ({
-        id: post.id,
-        title: post.title,
-        excerpt: post.excerpt,
-        cover_image: post.cover_image,
-        published_at: post.published_at,
-        slug: post.slug,
-        profiles: post.profiles,
-        blog_categories: post.blog_categories
-      }));
-    
-    return matchedPosts;
-  }
-}
+  },
 
-// Export a singleton instance of the service
-export const mockBlogService = new MockBlogService();
+  async fetchTagsList(): Promise<string[]> {
+    console.log('MockBlogService: fetchTagsList called');
+    
+    const allTags = mockBlogPosts.flatMap(post => post.tags || []);
+    return [...new Set(allTags)].sort();
+  },
+
+  async searchBlogPosts(query: string): Promise<BlogPostSummary[]> {
+    console.log('MockBlogService: searchBlogPosts called with query:', query);
+    
+    const result = await this.fetchBlogPosts({ search: query, limit: 10 });
+    return result.posts;
+  },
+
+  // Admin methods
+  async createBlogPost(data: CreateBlogPostData): Promise<BlogPost> {
+    console.log('MockBlogService: createBlogPost called with data:', data);
+    
+    const newPost: BlogPost = {
+      id: Date.now().toString(),
+      title: data.title,
+      slug: data.slug || generateSlug(data.title),
+      content: data.content,
+      excerpt: data.excerpt || '',
+      cover_image: data.cover_image || null,
+      published_at: data.published_at || new Date().toISOString(),
+      category_id: data.category_id,
+      author_id: data.author_id,
+      reading_time: Math.ceil(data.content.length / 1000), // Rough estimate
+      tags: data.tags || [],
+      view_count: 0,
+      meta_description: data.meta_description || '',
+      meta_keywords: data.meta_keywords || '',
+      profiles: {
+        first_name: 'Equipe',
+        last_name: '99Tattoo',
+        avatar_url: null
+      },
+      blog_categories: mockCategories.find(c => c.id === data.category_id) || null
+    };
+
+    mockBlogPosts.unshift(newPost);
+    return newPost;
+  },
+
+  async updateBlogPost(data: UpdateBlogPostData): Promise<BlogPost> {
+    console.log('MockBlogService: updateBlogPost called with data:', data);
+    
+    const index = mockBlogPosts.findIndex(p => p.id === data.id);
+    if (index === -1) {
+      throw new Error('Post not found');
+    }
+
+    const updatedPost = {
+      ...mockBlogPosts[index],
+      ...data,
+      slug: data.slug || mockBlogPosts[index].slug
+    };
+
+    mockBlogPosts[index] = updatedPost;
+    return updatedPost;
+  },
+
+  async deleteBlogPost(id: string): Promise<boolean> {
+    console.log('MockBlogService: deleteBlogPost called with id:', id);
+    
+    const index = mockBlogPosts.findIndex(p => p.id === id);
+    if (index === -1) {
+      return false;
+    }
+
+    mockBlogPosts.splice(index, 1);
+    return true;
+  },
+
+  async createBlogCategory(data: { name: string; description?: string }): Promise<BlogCategory> {
+    console.log('MockBlogService: createBlogCategory called with data:', data);
+    
+    const newCategory: BlogCategory = {
+      id: Date.now().toString(),
+      name: data.name,
+      description: data.description || null,
+      created_at: new Date().toISOString()
+    };
+
+    mockCategories.push(newCategory);
+    return newCategory;
+  },
+
+  async updateBlogCategory(id: string, data: { name: string; description?: string }): Promise<BlogCategory> {
+    console.log('MockBlogService: updateBlogCategory called with id:', id, 'data:', data);
+    
+    const index = mockCategories.findIndex(c => c.id === id);
+    if (index === -1) {
+      throw new Error('Category not found');
+    }
+
+    const updatedCategory = {
+      ...mockCategories[index],
+      ...data,
+      description: data.description || null
+    };
+
+    mockCategories[index] = updatedCategory;
+    return updatedCategory;
+  },
+
+  async deleteBlogCategory(id: string): Promise<boolean> {
+    console.log('MockBlogService: deleteBlogCategory called with id:', id);
+    
+    const index = mockCategories.findIndex(c => c.id === id);
+    if (index === -1) {
+      return false;
+    }
+
+    mockCategories.splice(index, 1);
+    return true;
+  },
+
+  generateSlug(title: string): string {
+    return generateSlug(title);
+  }
+};
