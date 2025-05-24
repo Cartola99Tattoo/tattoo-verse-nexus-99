@@ -14,7 +14,7 @@ import SalesChart from "@/components/admin/dashboard/SalesChart";
 import OrdersTable from "@/components/admin/dashboard/OrdersTable";
 import AppointmentsWidget from "@/components/admin/dashboard/AppointmentsWidget";
 import RecentCustomers from "@/components/admin/dashboard/RecentCustomers";
-import StatsCards from "@/components/admin/dashboard/StatsCards";
+import OptimizedStatsCards from "@/components/admin/dashboard/OptimizedStatsCards";
 
 // Default stats to prevent null errors
 const defaultStats: IDashboardStats = {
@@ -39,7 +39,7 @@ const Dashboard = () => {
 
   return (
     <div className="p-6">
-      <StatsCards stats={safeStats} loading={loading} />
+      <OptimizedStatsCards stats={safeStats} loading={loading} />
 
       <Tabs defaultValue="overview" className="mt-6">
         <TabsList>

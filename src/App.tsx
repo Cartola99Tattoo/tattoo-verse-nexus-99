@@ -54,7 +54,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/user-profile" element={<UserProfile />} />
 
-        {/* Admin routes - SINGLE AdminLayout instance */}
+        {/* Admin routes - SINGLE AdminLayout instance with dynamic titles */}
         <Route
           path="/admin"
           element={
@@ -64,19 +64,71 @@ function App() {
           }
         >
           <Route index element={<Navigate to="/admin/dashboard" />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="artists" element={<AdminArtists />} />
-          <Route path="blog" element={<AdminBlog />} />
-          <Route path="appointments" element={<Appointments />} />
-          <Route path="clients" element={<Clients />} />
-          <Route path="clients/:id" element={<ClientDetail />} />
-          <Route path="products" element={<Products />} />
-          <Route path="stock" element={<Stock />} />
-          <Route path="projects" element={<Projects />} />
-          <Route path="financial" element={<Financial />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="loyalty" element={<Loyalty />} />
-          <Route path="security" element={<Security />} />
+          <Route path="dashboard" element={
+            <AdminLayout title="Dashboard" description="Visão geral e métricas do estúdio">
+              <Dashboard />
+            </AdminLayout>
+          } />
+          <Route path="artists" element={
+            <AdminLayout title="Tatuadores" description="Gerencie os tatuadores e seus portfólios">
+              <AdminArtists />
+            </AdminLayout>
+          } />
+          <Route path="blog" element={
+            <AdminLayout title="Blog" description="Gerencie artigos e conteúdo do blog">
+              <AdminBlog />
+            </AdminLayout>
+          } />
+          <Route path="appointments" element={
+            <AdminLayout title="Agendamentos" description="Gerencie agendamentos e calendário">
+              <Appointments />
+            </AdminLayout>
+          } />
+          <Route path="clients" element={
+            <AdminLayout title="Clientes" description="Gerencie clientes e relacionamentos">
+              <Clients />
+            </AdminLayout>
+          } />
+          <Route path="clients/:id" element={
+            <AdminLayout title="Detalhes do Cliente" description="Informações detalhadas do cliente">
+              <ClientDetail />
+            </AdminLayout>
+          } />
+          <Route path="products" element={
+            <AdminLayout title="Produtos" description="Gerencie produtos e catálogo">
+              <Products />
+            </AdminLayout>
+          } />
+          <Route path="stock" element={
+            <AdminLayout title="Estoque" description="Controle de estoque e inventário">
+              <Stock />
+            </AdminLayout>
+          } />
+          <Route path="projects" element={
+            <AdminLayout title="Projetos" description="Gerencie projetos e tarefas do estúdio">
+              <Projects />
+            </AdminLayout>
+          } />
+          <Route path="financial" element={
+            <AdminLayout title="Financeiro" description="Controle financeiro e relatórios">
+              <Financial />
+            </AdminLayout>
+          } />
+          <Route path="analytics" element={
+            <AdminLayout title="Analytics" description="Análise de dados e performance do estúdio">
+              <Analytics />
+            </AdminLayout>
+          } />
+          <Route path="loyalty" element={
+            <AdminLayout title="Programa de Fidelidade" description="Gerencie o programa de fidelidade do estúdio">
+              <Loyalty />
+            </AdminLayout>
+          } />
+          <Route path="security" element={
+            <AdminLayout title="Segurança" description="Configurações de segurança e acesso">
+              <Security />
+            </AdminLayout>
+          } />
         </Route>
 
         <Route path="/admin/auth" element={<AdminAuth />} />
