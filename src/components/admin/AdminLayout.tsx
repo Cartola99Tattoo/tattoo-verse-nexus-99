@@ -1,11 +1,12 @@
 
 import React, { ReactNode } from "react";
+import { Outlet } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
 
 interface AdminLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
   title?: string;
   description?: string;
 }
@@ -32,7 +33,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         </div>
 
         <div className="bg-white rounded-lg shadow">
-          {children}
+          {children || <Outlet />}
         </div>
       </div>
     </div>

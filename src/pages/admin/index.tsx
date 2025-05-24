@@ -1,6 +1,7 @@
-export { default as AdminArtists } from './Artists';
-export { default as AdminAuth } from './Auth';
-export { default as AdminUserSetup } from './UserSetup';
+
+export { default as AdminArtists } from './AdminArtists';
+export { default as AdminAuth } from '../AdminAuth';
+export { default as AdminUserSetup } from '../AdminUserSetup';
 export { default as Appointments } from './Appointments';
 export { default as Clients } from './Clients';
 export { default as ClientDetail } from './ClientDetail';

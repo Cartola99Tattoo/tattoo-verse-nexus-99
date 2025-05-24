@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -18,7 +19,7 @@ import Profile from './pages/Profile';
 import UserProfile from './pages/UserProfile';
 import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
-import AdminArtists from './pages/admin/Artists';
+import AdminArtists from './pages/admin/AdminArtists';
 import Appointments from './pages/admin/Appointments';
 import Clients from './pages/admin/Clients';
 import ClientDetail from './pages/admin/ClientDetail';
@@ -27,10 +28,11 @@ import Financial from './pages/admin/Financial';
 import Analytics from './pages/admin/Analytics';
 import Loyalty from './pages/admin/Loyalty';
 import Security from './pages/admin/Security';
+import AdminBlog from './pages/admin/Blog';
 import AdminAuth from './pages/AdminAuth';
 import AdminUserSetup from './pages/AdminUserSetup';
 import NotFound from './pages/NotFound';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import { BarChart3, Users, FileText, Calendar, User, Package, DollarSign, TrendingUp, Gift, Shield } from 'lucide-react';
 
 function App() {
@@ -60,7 +62,9 @@ function App() {
               path="/admin"
               element={
                 <ProtectedRoute>
-                  <AdminLayout />
+                  <AdminLayout>
+                    <div />
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             >
