@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { BarChart3, Users, FileText, Calendar, User, Package, DollarSign, TrendingUp, Gift, Shield } from "lucide-react";
@@ -19,18 +20,23 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-gray-100 h-full py-4 px-3">
-      <h2 className="text-2xl font-bold mb-6 text-center">Admin Panel</h2>
-      <nav className="flex flex-col space-y-2">
+    <div className="w-64 bg-black border-r border-red-600 h-full py-4 px-3">
+      <div className="mb-6 text-center">
+        <h2 className="text-2xl font-bold text-red-500">99Tattoo</h2>
+        <p className="text-red-300 text-sm">Admin Panel</p>
+      </div>
+      <nav className="flex flex-col space-y-1">
         {menuItems.map((item) => (
           <Link
             key={item.name}
             to={item.path}
-            className={`flex items-center px-4 py-2 rounded-md hover:bg-gray-200 ${
-              location.pathname === item.path ? "bg-gray-200 font-semibold" : ""
+            className={`flex items-center px-4 py-3 rounded-md transition-colors duration-200 ${
+              location.pathname === item.path 
+                ? "bg-red-600 text-white font-semibold shadow-md" 
+                : "text-gray-300 hover:bg-red-700 hover:text-white"
             }`}
           >
-            <item.icon className="h-5 w-5 mr-2" />
+            <item.icon className="h-5 w-5 mr-3" />
             {item.name}
           </Link>
         ))}

@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Eye, Upload, X } from "lucide-react";
+import { ArrowLeft, Save, Eye, X } from "lucide-react";
 import { getBlogService } from "@/services/serviceFactory";
 import { BlogCategory, CreateBlogPostData, UpdateBlogPostData } from "@/services/interfaces/IBlogService";
 import { toast } from "@/hooks/use-toast";
-import RichTextEditor from "@/components/admin/RichTextEditor";
+import EnhancedRichTextEditor from "@/components/admin/EnhancedRichTextEditor";
+import BlogPreview from "@/components/admin/BlogPreview";
 
 interface BlogPostFormProps {
   post?: any;
@@ -26,7 +27,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
     content: '',
     excerpt: '',
     cover_image: '',
-    author_id: 'admin', // Default to admin
+    author_id: 'admin',
     category_id: '',
     status: 'draft' as 'draft' | 'published' | 'archived',
     published_at: '',
@@ -37,8 +38,8 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
   });
 
   const [currentTag, setCurrentTag] = useState('');
-  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const blogService = getBlogService();
 
@@ -99,16 +100,6 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
     }));
   };
 
-  const handleCoverImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setCoverImageFile(file);
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
-      setFormData(prev => ({ ...prev, cover_image: previewUrl }));
-    }
-  };
-
   const handleSave = async () => {
     if (!formData.title.trim()) {
       toast({
@@ -123,7 +114,6 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
 
     try {
       if (post) {
-        // Update existing post
         if (blogService.updateBlogPost) {
           const updateData: UpdateBlogPostData = {
             id: post.id,
@@ -142,7 +132,6 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
           });
         }
       } else {
-        // Create new post
         if (blogService.createBlogPost) {
           const createData: CreateBlogPostData = {
             ...formData,
@@ -172,6 +161,8 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
     }
   };
 
+  const selectedCategory = categories.find(cat => cat.id === formData.category_id);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -187,17 +178,18 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => {
-              if (formData.slug) {
-                window.open(`/blog/${formData.slug}`, '_blank');
-              }
-            }}
-            disabled={!formData.slug}
+            onClick={() => setShowPreview(true)}
+            disabled={!formData.title || !formData.content}
+            className="border-red-600 text-red-600 hover:bg-red-50"
           >
             <Eye className="h-4 w-4 mr-2" />
-            Visualizar
+            Pré-visualizar
           </Button>
-          <Button onClick={handleSave} disabled={isLoading}>
+          <Button 
+            onClick={handleSave} 
+            disabled={isLoading}
+            className="bg-red-600 hover:bg-red-700"
+          >
             <Save className="h-4 w-4 mr-2" />
             {isLoading ? 'Salvando...' : 'Salvar'}
           </Button>
@@ -209,7 +201,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Conteúdo do Artigo</CardTitle>
+              <CardTitle className="text-red-700">Conteúdo do Artigo</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -219,6 +211,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                   value={formData.title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   placeholder="Digite o título do artigo..."
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
 
@@ -229,6 +222,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                   value={formData.slug}
                   onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                   placeholder="meu-artigo-sobre-tatuagem"
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
 
@@ -240,12 +234,13 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                   onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
                   placeholder="Breve descrição do artigo..."
                   rows={3}
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
 
               <div>
                 <Label>Conteúdo *</Label>
-                <RichTextEditor
+                <EnhancedRichTextEditor
                   value={formData.content}
                   onChange={(content) => setFormData(prev => ({ ...prev, content }))}
                 />
@@ -259,7 +254,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
           {/* Publicação */}
           <Card>
             <CardHeader>
-              <CardTitle>Publicação</CardTitle>
+              <CardTitle className="text-red-700">Publicação</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -268,7 +263,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                   id="status"
                   value={formData.status}
                   onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-3 py-2 border border-red-200 rounded-md focus:border-red-500 focus:outline-none"
                 >
                   <option value="draft">Rascunho</option>
                   <option value="published">Publicado</option>
@@ -283,6 +278,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                   type="date"
                   value={formData.published_at}
                   onChange={(e) => setFormData(prev => ({ ...prev, published_at: e.target.value }))}
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
 
@@ -292,7 +288,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                   id="category"
                   value={formData.category_id}
                   onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-3 py-2 border border-red-200 rounded-md focus:border-red-500 focus:outline-none"
                 >
                   <option value="">Selecione uma categoria</option>
                   {categories.map((category) => (
@@ -308,7 +304,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
           {/* Imagem Destacada */}
           <Card>
             <CardHeader>
-              <CardTitle>Imagem Destacada</CardTitle>
+              <CardTitle className="text-red-700">Imagem Destacada</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {formData.cover_image && (
@@ -332,7 +328,22 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                 <Input
                   type="file"
                   accept="image/*"
-                  onChange={handleCoverImageUpload}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const imageUrl = URL.createObjectURL(file);
+                      setFormData(prev => ({ ...prev, cover_image: imageUrl }));
+                    }
+                  }}
+                  className="border-red-200 focus:border-red-500"
+                />
+              </div>
+              <div>
+                <Input
+                  value={formData.cover_image}
+                  onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))}
+                  placeholder="Ou cole a URL da imagem..."
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
             </CardContent>
@@ -341,7 +352,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
           {/* Tags */}
           <Card>
             <CardHeader>
-              <CardTitle>Tags</CardTitle>
+              <CardTitle className="text-red-700">Tags</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-2">
@@ -349,15 +360,20 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                   value={currentTag}
                   onChange={(e) => setCurrentTag(e.target.value)}
                   placeholder="Nova tag..."
-                  onKeyPress={(e) => e.key === 'Enter' && addTag()}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                  className="border-red-200 focus:border-red-500"
                 />
-                <Button onClick={addTag} disabled={!currentTag.trim()}>
+                <Button 
+                  onClick={addTag} 
+                  disabled={!currentTag.trim()}
+                  className="bg-red-600 hover:bg-red-700"
+                >
                   +
                 </Button>
               </div>
               <div className="flex flex-wrap gap-1">
                 {formData.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="cursor-pointer">
+                  <Badge key={tag} variant="secondary" className="cursor-pointer bg-red-100 text-red-800">
                     {tag}
                     <X
                       className="h-3 w-3 ml-1"
@@ -372,7 +388,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
           {/* SEO */}
           <Card>
             <CardHeader>
-              <CardTitle>SEO</CardTitle>
+              <CardTitle className="text-red-700">SEO</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -382,6 +398,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                   value={formData.meta_title}
                   onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
                   placeholder="Título para SEO..."
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
               <div>
@@ -392,6 +409,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                   onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
                   placeholder="Descrição para SEO..."
                   rows={3}
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
               <div>
@@ -401,12 +419,26 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                   value={formData.meta_keywords}
                   onChange={(e) => setFormData(prev => ({ ...prev, meta_keywords: e.target.value }))}
                   placeholder="palavra1, palavra2, palavra3..."
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {showPreview && (
+        <BlogPreview
+          title={formData.title}
+          content={formData.content}
+          excerpt={formData.excerpt}
+          coverImage={formData.cover_image}
+          tags={formData.tags}
+          category={selectedCategory?.name}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </div>
   );
 };
