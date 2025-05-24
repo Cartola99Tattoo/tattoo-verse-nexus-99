@@ -71,15 +71,17 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
     }
   };
 
+  // Ensure tasks is an array before filtering
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
   const filteredTasks = filter === 'all' 
-    ? tasks 
-    : tasks.filter(task => task.priority === filter);
+    ? safeTasks 
+    : safeTasks.filter(task => task.priority === filter);
 
   if (showCreateTask) {
     return (
       <CreateTaskForm
         project={project}
-        stages={stages}
+        stages={stages || []}
         onTaskCreated={handleTaskCreated}
         onCancel={() => setShowCreateTask(false)}
       />
@@ -109,7 +111,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
               <Badge className={getStatusColor(project.status)}>
                 {getStatusLabel(project.status)}
               </Badge>
-              <span className="text-gray-600">{tasks.length} tarefas</span>
+              <span className="text-gray-600">{safeTasks.length} tarefas</span>
             </div>
           </div>
         </div>
@@ -175,7 +177,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
             </Card>
           ))}
         </div>
-      ) : stages.length === 0 ? (
+      ) : (stages || []).length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Settings className="h-12 w-12 text-gray-400 mb-4" />
@@ -193,7 +195,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
         </Card>
       ) : (
         <div className="flex gap-6 overflow-x-auto pb-4">
-          {stages.map((stage) => (
+          {(stages || []).map((stage) => (
             <ProjectKanbanColumn
               key={stage.id}
               stage={stage}
