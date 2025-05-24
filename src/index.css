@@ -123,8 +123,8 @@
   @apply transition-transform duration-200 hover:scale-105;
 }
 
-.hover-scale-102 {
-  @apply transition-transform duration-200 hover:scale-102;
+.hover-scale-105 {
+  @apply transition-transform duration-200 hover:scale-105;
 }
 
 .hover-lift {
