@@ -1,5 +1,4 @@
-
-import { IArtistsService, Artist, ArtistsQueryParams, PortfolioItem } from "../interfaces/IArtistsService";
+import { IArtistsService, Artist, ArtistsQueryParams, PortfolioItem, ArtistPricing, WeeklySchedule, UnavailablePeriod } from "../interfaces/IArtistsService";
 
 // Dados mock atualizados com todas as propriedades necessárias
 const mockArtists: Artist[] = [
@@ -24,6 +23,47 @@ const mockArtists: Artist[] = [
     status: "active",
     commission_percentage: 50,
     availability_description: "Atende de terça a sábado, das 9h às 18h",
+    internal_notes: "Artista muito pontual e dedicado. Excelente com clientes novos.",
+    pricing: {
+      minimum_session_price: 200,
+      hourly_rate: 150,
+      services: [
+        {
+          id: "service-1",
+          name: "Retrato Realista",
+          description: "Retratos fotorrealistas em preto e cinza",
+          price: 800,
+          price_type: "fixed"
+        },
+        {
+          id: "service-2",
+          name: "Cover-up",
+          description: "Cobertura de tatuagens antigas",
+          price: 200,
+          price_type: "hourly"
+        }
+      ]
+    },
+    work_schedule: {
+      tuesday: { is_working: true, start_time: "09:00", end_time: "18:00", break_start: "12:00", break_end: "13:00" },
+      wednesday: { is_working: true, start_time: "09:00", end_time: "18:00", break_start: "12:00", break_end: "13:00" },
+      thursday: { is_working: true, start_time: "09:00", end_time: "18:00", break_start: "12:00", break_end: "13:00" },
+      friday: { is_working: true, start_time: "09:00", end_time: "18:00", break_start: "12:00", break_end: "13:00" },
+      saturday: { is_working: true, start_time: "10:00", end_time: "16:00" },
+      sunday: { is_working: false },
+      monday: { is_working: false }
+    },
+    unavailable_periods: [
+      {
+        id: "period-1",
+        artist_id: "1",
+        start_date: "2024-07-01",
+        end_date: "2024-07-15",
+        reason: "Férias de inverno",
+        type: "vacation",
+        created_at: "2024-05-01T10:00:00Z"
+      }
+    ],
     created_at: "2024-01-15T10:00:00Z",
     updated_at: "2024-05-20T14:30:00Z",
     portfolio: [
@@ -32,8 +72,10 @@ const mockArtists: Artist[] = [
         artist_id: "1",
         image_url: "/placeholder.svg",
         description: "Retrato realista em preto e cinza",
+        caption: "Retrato de cliente em estilo fotorrealista",
         category: "Realismo",
         is_featured: true,
+        order_index: 0,
         created_at: "2024-03-10T12:00:00Z"
       },
       {
@@ -41,8 +83,10 @@ const mockArtists: Artist[] = [
         artist_id: "1",
         image_url: "/placeholder.svg",
         description: "Trabalho blackwork detalhado",
+        caption: "Arte geométrica em blackwork",
         category: "Blackwork",
         is_featured: false,
+        order_index: 1,
         created_at: "2024-04-05T15:30:00Z"
       }
     ]
@@ -68,6 +112,30 @@ const mockArtists: Artist[] = [
     status: "active",
     commission_percentage: 45,
     availability_description: "Disponível de segunda a sexta, com agendamentos especiais aos sábados",
+    internal_notes: "Especialista em trabalhos delicados. Muito popular entre o público feminino.",
+    pricing: {
+      minimum_session_price: 180,
+      hourly_rate: 120,
+      services: [
+        {
+          id: "service-3",
+          name: "Aquarela Floral",
+          description: "Tatuagens florais em estilo aquarela",
+          price: 400,
+          price_type: "fixed"
+        }
+      ]
+    },
+    work_schedule: {
+      monday: { is_working: true, start_time: "09:00", end_time: "17:00" },
+      tuesday: { is_working: true, start_time: "09:00", end_time: "17:00" },
+      wednesday: { is_working: true, start_time: "09:00", end_time: "17:00" },
+      thursday: { is_working: true, start_time: "09:00", end_time: "17:00" },
+      friday: { is_working: true, start_time: "09:00", end_time: "17:00" },
+      saturday: { is_working: true, start_time: "10:00", end_time: "14:00" },
+      sunday: { is_working: false }
+    },
+    unavailable_periods: [],
     created_at: "2024-02-01T09:00:00Z",
     updated_at: "2024-05-18T16:45:00Z",
     portfolio: [
@@ -76,8 +144,10 @@ const mockArtists: Artist[] = [
         artist_id: "2",
         image_url: "/placeholder.svg",
         description: "Tatuagem aquarela floral",
+        caption: "Flores em aquarela vibrante",
         category: "Aquarela",
         is_featured: true,
+        order_index: 0,
         created_at: "2024-03-15T14:00:00Z"
       }
     ]
@@ -111,8 +181,10 @@ const mockArtists: Artist[] = [
         artist_id: "3",
         image_url: "/placeholder.svg",
         description: "Pin-up old school clássica",
+        caption: "Pin-up clássico com detalhes modernos",
         category: "Old School",
         is_featured: true,
+        order_index: 0,
         created_at: "2024-02-20T10:30:00Z"
       },
       {
@@ -120,8 +192,10 @@ const mockArtists: Artist[] = [
         artist_id: "3",
         image_url: "/placeholder.svg",
         description: "Tribal contemporâneo",
+        caption: "Tribal com elementos modernos",
         category: "Tribal",
         is_featured: false,
+        order_index: 1,
         created_at: "2024-04-12T13:45:00Z"
       }
     ]
@@ -155,8 +229,10 @@ const mockArtists: Artist[] = [
         artist_id: "4",
         image_url: "/placeholder.svg",
         description: "Mandala geométrica detalhada",
+        caption: "Mandala com detalhes geométricos",
         category: "Geométrico",
         is_featured: true,
+        order_index: 0,
         created_at: "2024-04-01T16:00:00Z"
       }
     ]
@@ -330,6 +406,62 @@ export class MockArtistsService implements IArtistsService {
     }
     
     throw new Error('Item do portfólio não encontrado');
+  }
+
+  async updatePortfolioOrder(portfolioItems: { id: string; order_index: number }[]) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    for (const artist of mockArtists) {
+      if (artist.portfolio) {
+        for (const portfolioItem of portfolioItems) {
+          const itemIndex = artist.portfolio.findIndex(p => p.id === portfolioItem.id);
+          if (itemIndex !== -1) {
+            artist.portfolio[itemIndex].order_index = portfolioItem.order_index;
+          }
+        }
+      }
+    }
+    
+    return true;
+  }
+
+  async addUnavailablePeriod(artistId: string | number, periodData: Omit<UnavailablePeriod, 'id' | 'artist_id' | 'created_at'>) {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    const artist = mockArtists.find(a => a.id === artistId.toString());
+    if (!artist) {
+      throw new Error('Artista não encontrado');
+    }
+    
+    const newPeriod: UnavailablePeriod = {
+      ...periodData,
+      id: `period-${Date.now()}`,
+      artist_id: artistId.toString(),
+      created_at: new Date().toISOString()
+    };
+    
+    if (!artist.unavailable_periods) {
+      artist.unavailable_periods = [];
+    }
+    
+    artist.unavailable_periods.push(newPeriod);
+    return newPeriod;
+  }
+
+  async removeUnavailablePeriod(periodId: string | number) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    for (const artist of mockArtists) {
+      if (artist.unavailable_periods) {
+        const index = artist.unavailable_periods.findIndex(p => p.id === periodId.toString());
+        if (index !== -1) {
+          artist.unavailable_periods.splice(index, 1);
+          return true;
+        }
+      }
+    }
+    
+    throw new Error('Período de indisponibilidade não encontrado');
   }
 }
 
