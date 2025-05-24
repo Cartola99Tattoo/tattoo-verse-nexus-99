@@ -22,11 +22,11 @@ const OptimizedCartButton = ({
   size = "default",
   className = ""
 }: OptimizedCartButtonProps) => {
-  const { addToCart, items } = useCart();
+  const { addToCart, cart } = useCart();
   const [isAdding, setIsAdding] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
-  const isInCart = items.some(item => item.id === productId);
+  const isInCart = cart.items.some(item => item.id === parseInt(productId));
 
   const handleAddToCart = async () => {
     if (isAdding || justAdded) return;
@@ -35,11 +35,12 @@ const OptimizedCartButton = ({
     
     try {
       await addToCart({
-        id: productId,
+        id: parseInt(productId),
         name: productName,
         price: price,
-        quantity: 1,
-        image: '/placeholder.svg'
+        image: '/placeholder.svg',
+        artist: 'Unknown Artist',
+        category: 'Tattoo'
       });
 
       setJustAdded(true);
