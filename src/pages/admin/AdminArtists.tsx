@@ -42,11 +42,12 @@ const AdminArtists = () => {
 
   // Mutation para criar artista
   const createArtistMutation = useMutation({
-    mutationFn: (data: any) => {
+    mutationFn: async (data: any) => {
       if (!artistsService.createArtist) {
         throw new Error('Serviço de criação não disponível');
       }
-      return artistsService.createArtist(data);
+      const result = await artistsService.createArtist(data);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-artists'] });
@@ -67,11 +68,12 @@ const AdminArtists = () => {
 
   // Mutation para atualizar artista
   const updateArtistMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string, data: any }) => {
+    mutationFn: async ({ id, data }: { id: string, data: any }) => {
       if (!artistsService.updateArtist) {
         throw new Error('Serviço de atualização não disponível');
       }
-      return artistsService.updateArtist(id, data);
+      const result = await artistsService.updateArtist(id, data);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-artists'] });
@@ -123,6 +125,19 @@ const AdminArtists = () => {
   const handleDeleteArtist = async (artist: Artist) => {
     if (window.confirm(`Tem certeza que deseja remover ${artist.first_name} ${artist.last_name}?`)) {
       deleteArtistMutation.mutate(artist.id);
+    }
+  };
+
+  const handleCreateSubmit = async (data: any) => {
+    await createArtistMutation.mutateAsync(data);
+  };
+
+  const handleUpdateSubmit = async (data: any) => {
+    if (selectedArtist) {
+      await updateArtistMutation.mutateAsync({ 
+        id: selectedArtist.id, 
+        data 
+      });
     }
   };
 
@@ -361,7 +376,7 @@ const AdminArtists = () => {
               </DialogDescription>
             </DialogHeader>
             <ArtistForm
-              onSubmit={(data) => createArtistMutation.mutateAsync(data)}
+              onSubmit={handleCreateSubmit}
               onCancel={() => setIsCreateDialogOpen(false)}
               isLoading={createArtistMutation.isPending}
             />
@@ -380,10 +395,7 @@ const AdminArtists = () => {
             {selectedArtist && (
               <ArtistForm
                 artist={selectedArtist}
-                onSubmit={(data) => updateArtistMutation.mutateAsync({ 
-                  id: selectedArtist.id, 
-                  data 
-                })}
+                onSubmit={handleUpdateSubmit}
                 onCancel={() => {
                   setIsEditDialogOpen(false);
                   setSelectedArtist(null);

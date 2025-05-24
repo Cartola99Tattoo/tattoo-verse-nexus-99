@@ -4,28 +4,37 @@ import { IArtistsService, Artist, ArtistsQueryParams, PortfolioItem } from "../i
 
 export class SupabaseArtistService implements IArtistsService {
   async fetchArtists(options: ArtistsQueryParams = {}) {
-    const { limit = 50, offset = 0, specialties, style, search } = options;
+    const { limit = 50, offset = 0, specialties, style, search, status = 'active' } = options;
     
     let query = supabase
       .from('artists')
       .select(`
         *,
         portfolio:artist_portfolio(*)
-      `)
-      .eq('status', 'active')
-      .range(offset, offset + limit - 1);
+      `);
 
+    // Apply status filter
+    if (status !== 'all') {
+      query = query.eq('status', status);
+    }
+
+    // Apply search filter
     if (search) {
       query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
     }
 
+    // Apply style filter
     if (style) {
       query = query.eq('style', style);
     }
 
+    // Apply specialties filter
     if (specialties && specialties.length > 0) {
       query = query.contains('specialties', specialties);
     }
+
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1);
 
     const { data, error, count } = await query;
 
@@ -70,7 +79,11 @@ export class SupabaseArtistService implements IArtistsService {
     };
   }
 
-  async fetchArtistPortfolio(artistId: string | number, options = {}) {
+  async fetchArtistPortfolio(artistId: string | number, options: {
+    limit?: number;
+    offset?: number;
+    category?: string;
+  } = {}) {
     const { limit = 50, offset = 0, category } = options;
     
     let query = supabase
