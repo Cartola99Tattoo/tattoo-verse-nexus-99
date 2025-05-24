@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -137,10 +138,7 @@ const Appointments = () => {
   };
 
   return (
-    <AdminLayout 
-      title="Módulo de Agendamentos" 
-      description="Gestão completa de agendamentos e calendário"
-    >
+    <AdminLayout>
       <div className="p-6 space-y-6">
         {/* Cards de Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -84,10 +85,7 @@ const Clients = () => {
   };
 
   return (
-    <AdminLayout 
-      title="Módulo de Clientes" 
-      description="Gestão completa de relacionamento com clientes (CRM)"
-    >
+    <AdminLayout>
       <div className="p-6 space-y-6">
         {/* Cards de Estatísticas */}
         {stats && (
