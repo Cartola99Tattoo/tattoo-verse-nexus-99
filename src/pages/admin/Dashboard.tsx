@@ -8,6 +8,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getDashboardService, getClientService, getProductService, getFinancialService } from "@/services/serviceFactory";
 import { IDashboardStats } from "@/services/interfaces/IDashboardService";
+import { DashboardMetrics } from "@/services/interfaces/IFinancialService";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 
@@ -59,7 +60,7 @@ const Dashboard = () => {
   );
 
   // Dados financeiros
-  const { data: financialData } = useDataQuery(
+  const { data: financialData } = useDataQuery<DashboardMetrics>(
     () => financialService.fetchDashboardMetrics(),
     []
   );

@@ -74,6 +74,13 @@ export interface FinancialTransaction {
   updated_at: string;
 }
 
+export interface DashboardMetrics {
+  totalRevenue: number;
+  totalExpenses: number;
+  netProfit: number;
+  monthlyGrowth: number;
+}
+
 export interface IFinancialService {
   // Transações de tatuagens
   fetchTattooTransactions(options?: {
@@ -119,6 +126,9 @@ export interface IFinancialService {
     commission: number;
     tattoo_count: number;
   }>>;
+
+  // Dashboard metrics
+  fetchDashboardMetrics(): Promise<DashboardMetrics>;
 
   // Categorias de transações
   fetchTransactionCategories(type?: 'entrada' | 'saida'): Promise<TransactionCategory[]>;

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -349,7 +348,7 @@ const Loyalty = () => {
                               <div className="flex items-center gap-2 mb-2">
                                 <Award className="h-4 w-4" />
                                 <span className="font-medium">{level.name}</span>
-                                <Badge className={level.color} size="sm">
+                                <Badge className={level.color}>
                                   {level.minPoints}+ pts
                                 </Badge>
                               </div>
