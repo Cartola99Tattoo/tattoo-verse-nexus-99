@@ -125,6 +125,9 @@ export default {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 				'red-gradient': 'linear-gradient(to right, #d61f3f, #ea384c, #ff596f)',
 				'dark-gradient': 'linear-gradient(to bottom, #000000, #1a1a1a, #000000)',
+			},
+			boxShadow: {
+				'red-glow': '0 0 20px rgba(239, 68, 68, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15)',
 			}
 		}
 	},
