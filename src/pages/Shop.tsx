@@ -110,25 +110,30 @@ const Shop = () => {
 
   return (
     <Layout>
-      {/* Shop header */}
-      <div className="bg-gray-900 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold mb-4">Catálogo de Tatuagens</h1>
-          <p className="text-xl max-w-2xl mx-auto">
+      {/* Shop header with enhanced gradient */}
+      <div className="hero-gradient text-white py-20 relative overflow-hidden">
+        <div className="absolute inset-0 hero-overlay"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 via-transparent to-red-600/20"></div>
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h1 className="text-5xl font-bold mb-6 text-gradient-red">Catálogo de Tatuagens</h1>
+          <p className="text-xl max-w-2xl mx-auto leading-relaxed">
             Escolha entre nossa seleção de tatuagens exclusivas, criadas por artistas talentosos.
           </p>
+          <div className="mt-8">
+            <div className="section-divider max-w-md mx-auto"></div>
+          </div>
         </div>
       </div>
 
-      {/* Shop content */}
-      <div className="container mx-auto px-4 py-12">
+      {/* Shop content with enhanced styling */}
+      <div className="container mx-auto px-4 py-12 bg-gradient-to-b from-gray-50 to-white">
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Filters sidebar */}
+          {/* Enhanced Filters sidebar */}
           <div className="md:w-1/4">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-              <h2 className="text-2xl font-bold mb-6 pb-4 border-b">Filtros</h2>
+            <div className="card-enhanced p-6 sticky top-24">
+              <h2 className="text-2xl font-bold mb-6 pb-4 border-b border-gray-200 text-gradient-dark">Filtros</h2>
               
-              {/* Search */}
+              {/* Enhanced Search */}
               <div className="mb-6">
                 <h3 className="text-lg font-bold mb-3">Buscar</h3>
                 <Input 
@@ -136,17 +141,20 @@ const Shop = () => {
                   placeholder="Busque por nome, artista..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  className="form-input-enhanced"
                 />
               </div>
               
-              {/* Categories */}
-              <CategoryFilter 
-                categories={categories}
-                activeCategory={activeCategory}
-                setActiveCategory={setActiveCategory}
-              />
+              {/* Enhanced Categories */}
+              <div className="mb-6">
+                <CategoryFilter 
+                  categories={categories}
+                  activeCategory={activeCategory}
+                  setActiveCategory={setActiveCategory}
+                />
+              </div>
               
-              {/* Price range */}
+              {/* Enhanced Price range */}
               <div className="mb-6">
                 <h3 className="text-lg font-bold mb-3">Faixa de Preço</h3>
                 <div className="px-2">
@@ -158,46 +166,46 @@ const Shop = () => {
                     onValueChange={setPriceRange}
                     className="mb-4"
                   />
-                  <div className="flex justify-between text-sm text-gray-500">
+                  <div className="flex justify-between text-sm text-gray-600 font-medium">
                     <span>R$ {priceRange[0]}</span>
                     <span>R$ {priceRange[1]}</span>
                   </div>
                 </div>
               </div>
               
-              {/* Artist filter would go here */}
+              {/* Enhanced Artist filter */}
               <div className="mb-6">
                 <h3 className="text-lg font-bold mb-3">Artistas</h3>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center">
-                    <input id="artist-mariana" type="checkbox" className="h-4 w-4 text-red-500" />
-                    <label htmlFor="artist-mariana" className="ml-2 text-gray-700">Mariana Silva</label>
+                    <input id="artist-mariana" type="checkbox" className="h-4 w-4 text-red-500 focus:ring-red-500 border-gray-300 rounded" />
+                    <label htmlFor="artist-mariana" className="ml-3 text-gray-700 hover:text-red-600 transition-colors cursor-pointer">Mariana Silva</label>
                   </div>
                   <div className="flex items-center">
-                    <input id="artist-rafael" type="checkbox" className="h-4 w-4 text-red-500" />
-                    <label htmlFor="artist-rafael" className="ml-2 text-gray-700">Rafael Costa</label>
+                    <input id="artist-rafael" type="checkbox" className="h-4 w-4 text-red-500 focus:ring-red-500 border-gray-300 rounded" />
+                    <label htmlFor="artist-rafael" className="ml-3 text-gray-700 hover:text-red-600 transition-colors cursor-pointer">Rafael Costa</label>
                   </div>
                   <div className="flex items-center">
-                    <input id="artist-juliana" type="checkbox" className="h-4 w-4 text-red-500" />
-                    <label htmlFor="artist-juliana" className="ml-2 text-gray-700">Juliana Mendes</label>
+                    <input id="artist-juliana" type="checkbox" className="h-4 w-4 text-red-500 focus:ring-red-500 border-gray-300 rounded" />
+                    <label htmlFor="artist-juliana" className="ml-3 text-gray-700 hover:text-red-600 transition-colors cursor-pointer">Juliana Mendes</label>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           
-          {/* Main content */}
+          {/* Enhanced Main content */}
           <div className="md:w-3/4">
-            {/* Sort controls */}
-            <div className="flex justify-between items-center mb-8">
-              <p className="text-gray-600">{filteredTattoos.length} resultados encontrados</p>
+            {/* Enhanced Sort controls */}
+            <div className="flex justify-between items-center mb-8 card-enhanced p-4">
+              <p className="text-gray-600 font-medium">{filteredTattoos.length} resultados encontrados</p>
               <div className="flex items-center">
-                <span className="text-gray-700 mr-2">Ordenar por:</span>
+                <span className="text-gray-700 mr-3 font-medium">Ordenar por:</span>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px] form-input-enhanced">
                     <SelectValue placeholder="Popularidade" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white shadow-elevation-3 border-gray-200">
                     <SelectItem value="popularity">Popularidade</SelectItem>
                     <SelectItem value="price-asc">Menor Preço</SelectItem>
                     <SelectItem value="price-desc">Maior Preço</SelectItem>
@@ -207,30 +215,32 @@ const Shop = () => {
               </div>
             </div>
             
-            {/* Tattoo grid */}
+            {/* Enhanced Tattoo grid */}
             {filteredTattoos.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredTattoos.map((tattoo) => (
-                  <TattooCard key={tattoo.id} tattoo={tattoo} />
+                  <div key={tattoo.id} className="product-card">
+                    <TattooCard tattoo={tattoo} />
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <h3 className="text-xl font-bold mb-2">Nenhum resultado encontrado</h3>
-                <p className="text-gray-600">Tente ajustar seus filtros para encontrar mais opções.</p>
+              <div className="text-center py-16 card-enhanced">
+                <h3 className="text-2xl font-bold mb-4 text-gray-800">Nenhum resultado encontrado</h3>
+                <p className="text-gray-600 text-lg">Tente ajustar seus filtros para encontrar mais opções.</p>
               </div>
             )}
             
-            {/* Pagination */}
-            <div className="flex justify-center mt-12">
-              <nav className="inline-flex">
-                <button className="px-4 py-2 text-gray-500 bg-gray-200 rounded-l-md hover:bg-gray-300">
+            {/* Enhanced Pagination */}
+            <div className="flex justify-center mt-16">
+              <nav className="inline-flex shadow-elevation-2 rounded-lg overflow-hidden">
+                <button className="px-6 py-3 text-gray-700 bg-white hover:bg-gray-50 border-r border-gray-200 transition-colors font-medium">
                   Anterior
                 </button>
-                <button className="px-4 py-2 text-white bg-red-500">1</button>
-                <button className="px-4 py-2 text-gray-500 bg-gray-200 hover:bg-gray-300">2</button>
-                <button className="px-4 py-2 text-gray-500 bg-gray-200 hover:bg-gray-300">3</button>
-                <button className="px-4 py-2 text-gray-500 bg-gray-200 rounded-r-md hover:bg-gray-300">
+                <button className="px-6 py-3 text-white btn-gradient">1</button>
+                <button className="px-6 py-3 text-gray-700 bg-white hover:bg-gray-50 border-l border-gray-200 transition-colors font-medium">2</button>
+                <button className="px-6 py-3 text-gray-700 bg-white hover:bg-gray-50 border-l border-gray-200 transition-colors font-medium">3</button>
+                <button className="px-6 py-3 text-gray-700 bg-white hover:bg-gray-50 border-l border-gray-200 transition-colors font-medium">
                   Próxima
                 </button>
               </nav>

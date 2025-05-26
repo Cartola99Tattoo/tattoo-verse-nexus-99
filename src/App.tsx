@@ -54,16 +54,16 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/user-profile" element={<UserProfile />} />
 
-        {/* Admin routes - SINGLE AdminLayout instance */}
+        {/* Admin routes - SINGLE AdminLayout instance with proper nesting */}
         <Route
-          path="/admin"
+          path="/admin/*"
           element={
             <ProtectedRoute>
               <AdminLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/admin/dashboard" />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="artists" element={<AdminArtists />} />
           <Route path="blog" element={<AdminBlog />} />
@@ -79,6 +79,7 @@ function App() {
           <Route path="security" element={<Security />} />
         </Route>
 
+        {/* Standalone admin auth routes */}
         <Route path="/admin/auth" element={<AdminAuth />} />
         <Route path="/admin/setup" element={<AdminUserSetup />} />
 
