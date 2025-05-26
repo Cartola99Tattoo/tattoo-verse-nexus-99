@@ -168,114 +168,6 @@
   @apply bg-gradient-to-r from-gray-800 to-gray-600;
 }
 
-/* Enhanced shadow utilities */
-.shadow-soft {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.shadow-medium {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.shadow-intense {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-}
-
-.shadow-red {
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.shadow-red-glow {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.shadow-colored {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-}
-
-.shadow-elevation-1 {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-.shadow-elevation-2 {
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-}
-
-.shadow-elevation-3 {
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-}
-
-.shadow-elevation-4 {
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
-@keyframes glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
-  }
-}
-
-.animate-slide-in {
-  animation: slideIn 0.4s ease-out forwards;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.3s ease-out forwards;
-}
-
-.animate-pulse-soft {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
-
 /* Enhanced Button utilities - 99Tattoo Theme */
 .btn-gradient {
   @apply bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-elevation-2 hover:shadow-elevation-3 transition-all duration-300 transform hover:scale-105;
@@ -336,7 +228,7 @@
 }
 
 .product-card {
-  @apply card-elevated hover:shadow-red;
+  @apply card-elevated hover:shadow-red-glow;
 }
 
 .blog-card {
