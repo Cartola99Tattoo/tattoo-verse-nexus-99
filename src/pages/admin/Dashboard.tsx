@@ -68,16 +68,25 @@ const Dashboard = () => {
   // Use default stats or fetched stats, ensuring we never have null values
   const safeStats = stats || defaultStats;
 
-  // Calcular métricas do dia
+  // Calcular métricas do dia - with null safety
   const today = new Date().toISOString().split('T')[0];
-  const todayAppointments = appointments.filter(apt => apt.date === today);
-  const confirmedAppointments = todayAppointments.filter(apt => apt.status === 'confirmed');
+  const safeAppointments = Array.isArray(appointments) ? appointments : [];
+  const todayAppointments = safeAppointments.filter(apt => apt && apt.date === today);
+  const confirmedAppointments = todayAppointments.filter(apt => apt && apt.status === 'confirmed');
 
   // Alertas de estoque baixo (simulado)
   const lowStockItems = [
     { name: "Tinta Preta", quantity: 2, minimum: 5 },
     { name: "Agulhas 5RL", quantity: 3, minimum: 10 }
   ];
+
+  // Safe access to financial data
+  const safeFinancialData = financialData || {
+    totalRevenue: 15420,
+    totalExpenses: 8750,
+    netProfit: 6670,
+    monthlyGrowth: 12.5
+  };
 
   return (
     <div className="space-y-6">
@@ -111,7 +120,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(financialData?.totalRevenue || 15420)}
+              {formatCurrency(safeFinancialData.totalRevenue)}
             </div>
             <p className="text-xs text-muted-foreground">
               +12% vs mês anterior
@@ -159,7 +168,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-indigo-600">
-              {products.length || 24}
+              {Array.isArray(products) ? products.length : 24}
             </div>
             <p className="text-xs text-muted-foreground">
               Na loja online
@@ -230,19 +239,19 @@ const Dashboard = () => {
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Receita</span>
               <span className="font-semibold text-green-600">
-                {formatCurrency(financialData?.totalRevenue || 15420)}
+                {formatCurrency(safeFinancialData.totalRevenue)}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Despesas</span>
               <span className="font-semibold text-red-600">
-                {formatCurrency(financialData?.totalExpenses || 8750)}
+                {formatCurrency(safeFinancialData.totalExpenses)}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Lucro</span>
               <span className="font-semibold text-green-600">
-                {formatCurrency((financialData?.totalRevenue || 15420) - (financialData?.totalExpenses || 8750))}
+                {formatCurrency(safeFinancialData.totalRevenue - safeFinancialData.totalExpenses)}
               </span>
             </div>
           </CardContent>
