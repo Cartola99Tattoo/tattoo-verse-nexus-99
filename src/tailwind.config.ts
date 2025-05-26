@@ -111,10 +111,6 @@ export default {
 				glow: {
 					'0%, 100%': { boxShadow: '0 0 20px rgba(239, 68, 68, 0.4)' },
 					'50%': { boxShadow: '0 0 30px rgba(239, 68, 68, 0.6)' }
-				},
-				'scale-in': {
-					'0%': { transform: 'scale(0.95)', opacity: '0' },
-					'100%': { transform: 'scale(1)', opacity: '1' }
 				}
 			},
 			animation: {
@@ -123,8 +119,7 @@ export default {
 				'fade-in': 'fadeIn 0.3s ease-out',
 				'fade-out': 'fadeOut 0.3s ease-out',
 				'slide-in': 'slideIn 0.4s ease-out',
-				'glow': 'glow 2s ease-in-out infinite',
-				'scale-in': 'scale-in 0.3s ease-out'
+				'glow': 'glow 2s ease-in-out infinite'
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
