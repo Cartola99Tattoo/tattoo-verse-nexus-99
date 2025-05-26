@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { IFinancialService, TattooTransaction, ArtistCommission, FinancialReport, TransactionCategory, FinancialTransaction } from '../interfaces/IFinancialService';
+import { IFinancialService, TattooTransaction, ArtistCommission, FinancialReport, TransactionCategory, FinancialTransaction, DashboardMetrics } from '../interfaces/IFinancialService';
 import { generateMockId, delay } from './mockUtils';
 
 interface FetchTransactionsOptions {
@@ -97,6 +97,28 @@ class MockFinancialService implements IFinancialService {
       };
       this.mockCommissions.push(commission);
     }
+  }
+
+  async fetchDashboardMetrics(): Promise<DashboardMetrics> {
+    await delay(600);
+    
+    const totalRevenue = this.mockFinancialTransactions
+      .filter(t => t.type === 'entrada')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    const totalExpenses = this.mockFinancialTransactions
+      .filter(t => t.type === 'saida')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    const netProfit = totalRevenue - totalExpenses;
+    const monthlyGrowth = faker.number.float({ min: -5, max: 25, fractionDigits: 1 });
+    
+    return {
+      totalRevenue,
+      totalExpenses,
+      netProfit,
+      monthlyGrowth
+    };
   }
 
   async fetchTattooTransactions(options: FetchTransactionsOptions = {}): Promise<TattooTransaction[]> {
