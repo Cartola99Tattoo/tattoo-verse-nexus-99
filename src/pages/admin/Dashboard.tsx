@@ -35,44 +35,71 @@ const Dashboard = () => {
   const productService = getProductService();
   const financialService = getFinancialService();
   
+  console.log('Dashboard: Initializing services');
+  
   // Dashboard stats
   const { data: stats, loading } = useDataQuery<IDashboardStats>(
-    () => dashboardService.fetchDashboardStats() as Promise<IDashboardStats>,
+    () => {
+      console.log('Dashboard: Fetching dashboard stats');
+      return dashboardService.fetchDashboardStats() as Promise<IDashboardStats>;
+    },
     []
   );
 
   // Dados de clientes
   const { data: clientStats } = useDataQuery(
-    () => clientService.fetchClientStats(),
+    () => {
+      console.log('Dashboard: Fetching client stats');
+      return clientService.fetchClientStats();
+    },
     []
   );
 
   // Dados de agendamentos
   const { data: appointments = [] } = useDataQuery(
-    () => clientService.fetchUpcomingAppointments(10),
+    () => {
+      console.log('Dashboard: Fetching appointments');
+      return clientService.fetchUpcomingAppointments(10);
+    },
     []
   );
 
   // Dados de produtos
   const { data: products = [] } = useDataQuery(
-    () => productService.fetchProducts({ limit: 5 }),
+    () => {
+      console.log('Dashboard: Fetching products');
+      return productService.fetchProducts({ limit: 5 });
+    },
     []
   );
 
   // Dados financeiros
   const { data: financialData } = useDataQuery<DashboardMetrics>(
-    () => financialService.fetchDashboardMetrics(),
+    () => {
+      console.log('Dashboard: Fetching financial metrics');
+      return financialService.fetchDashboardMetrics();
+    },
     []
   );
+
+  console.log('Dashboard: Data received', { stats, clientStats, appointments, products, financialData });
 
   // Use default stats or fetched stats, ensuring we never have null values
   const safeStats = stats || defaultStats;
 
-  // Calcular métricas do dia - with null safety
+  // Calcular métricas do dia - with comprehensive null safety
   const today = new Date().toISOString().split('T')[0];
   const safeAppointments = Array.isArray(appointments) ? appointments : [];
-  const todayAppointments = safeAppointments.filter(apt => apt && apt.date === today);
-  const confirmedAppointments = todayAppointments.filter(apt => apt && apt.status === 'confirmed');
+  console.log('Dashboard: Safe appointments', safeAppointments);
+  
+  const todayAppointments = safeAppointments.filter(apt => {
+    console.log('Dashboard: Filtering appointment', apt);
+    return apt && apt.date === today;
+  });
+  const confirmedAppointments = todayAppointments.filter(apt => {
+    console.log('Dashboard: Checking appointment status', apt);
+    return apt && apt.status === 'confirmed';
+  });
 
   // Alertas de estoque baixo (simulado)
   const lowStockItems = [
@@ -87,6 +114,8 @@ const Dashboard = () => {
     netProfit: 6670,
     monthlyGrowth: 12.5
   };
+
+  console.log('Dashboard: Safe financial data', safeFinancialData);
 
   return (
     <div className="space-y-6">

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { handleSupabaseError } from '@/services/serviceFactory';
@@ -17,9 +18,14 @@ export default function RecentCustomers() {
   const dashboardService = getDashboardService();
   
   const { data: customers = [], loading: loading } = useDataQuery<Customer[]>(
-    () => dashboardService.fetchRecentCustomers(5),
+    () => {
+      console.log('RecentCustomers: Fetching customers');
+      return dashboardService.fetchRecentCustomers(5);
+    },
     []
   );
+
+  console.log('RecentCustomers: Received customers', customers);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -35,6 +41,7 @@ export default function RecentCustomers() {
   };
 
   if (loading) {
+    console.log('RecentCustomers: Loading state');
     return (
       <div className="space-y-4">
         {[...Array(5)].map((_, index) => (
@@ -50,7 +57,12 @@ export default function RecentCustomers() {
     );
   }
 
-  if (customers.length === 0) {
+  // Ensure we have an array before filtering
+  const safeCustomers = Array.isArray(customers) ? customers : [];
+  console.log('RecentCustomers: Safe customers', safeCustomers);
+
+  if (safeCustomers.length === 0) {
+    console.log('RecentCustomers: No customers found');
     return (
       <div className="text-center py-8 text-muted-foreground">
         Nenhum cliente encontrado.
@@ -60,29 +72,32 @@ export default function RecentCustomers() {
 
   return (
     <div className="space-y-4">
-      {customers.map((customer) => (
-        <div key={customer.id} className="flex items-center gap-3">
-          {customer.avatar_url ? (
-            <img
-              src={customer.avatar_url}
-              alt={`${customer.first_name} ${customer.last_name}`}
-              className="h-9 w-9 rounded-full object-cover"
-            />
-          ) : (
-            <div className="h-9 w-9 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center text-sm font-medium">
-              {getInitials(customer.first_name, customer.last_name)}
+      {safeCustomers.map((customer) => {
+        console.log('RecentCustomers: Rendering customer', customer);
+        return (
+          <div key={customer.id} className="flex items-center gap-3">
+            {customer.avatar_url ? (
+              <img
+                src={customer.avatar_url}
+                alt={`${customer.first_name} ${customer.last_name}`}
+                className="h-9 w-9 rounded-full object-cover"
+              />
+            ) : (
+              <div className="h-9 w-9 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center text-sm font-medium">
+                {getInitials(customer.first_name, customer.last_name)}
+              </div>
+            )}
+            <div>
+              <h4 className="font-medium text-sm">
+                {customer.first_name || 'Nome'} {customer.last_name || 'Sobrenome'}
+              </h4>
+              <p className="text-xs text-gray-500">
+                {customer.email || 'Sem email'} • {formatDate(customer.created_at)}
+              </p>
             </div>
-          )}
-          <div>
-            <h4 className="font-medium text-sm">
-              {customer.first_name} {customer.last_name}
-            </h4>
-            <p className="text-xs text-gray-500">
-              {customer.email || 'Sem email'} • {formatDate(customer.created_at)}
-            </p>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

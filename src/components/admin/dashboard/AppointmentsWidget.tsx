@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Calendar } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,9 +19,14 @@ export default function AppointmentsWidget() {
   const dashboardService = getDashboardService();
   
   const { data: appointments = [], loading } = useDataQuery<Appointment[]>(
-    () => dashboardService.fetchUpcomingAppointments(5),
+    () => {
+      console.log('AppointmentsWidget: Fetching appointments');
+      return dashboardService.fetchUpcomingAppointments(5);
+    },
     []
   );
+
+  console.log('AppointmentsWidget: Received appointments', appointments);
 
   const formatDateTime = (dateTimeString: string) => {
     const date = new Date(dateTimeString);
@@ -41,6 +47,7 @@ export default function AppointmentsWidget() {
   };
 
   if (loading) {
+    console.log('AppointmentsWidget: Loading state');
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, index) => (
@@ -56,7 +63,12 @@ export default function AppointmentsWidget() {
     );
   }
 
-  if (appointments.length === 0) {
+  // Ensure we have an array before filtering
+  const safeAppointments = Array.isArray(appointments) ? appointments : [];
+  console.log('AppointmentsWidget: Safe appointments', safeAppointments);
+
+  if (safeAppointments.length === 0) {
+    console.log('AppointmentsWidget: No appointments found');
     return (
       <div className="text-center py-8 text-muted-foreground">
         Nenhum agendamento próximo encontrado.
@@ -66,29 +78,32 @@ export default function AppointmentsWidget() {
 
   return (
     <div className="space-y-4">
-      {appointments.map((appointment) => (
-        <div key={appointment.id} className="flex gap-4 items-start">
-          <div className="bg-purple-100 text-purple-800 p-2 rounded-md">
-            <Calendar size={20} />
-          </div>
-          <div>
-            <h4 className="font-medium">
-              {appointment.client_name} 
-              <span className="text-gray-500 text-sm ml-1">
-                com {appointment.artist_name}
-              </span>
-            </h4>
-            <p className="text-sm text-gray-500">
-              {formatDateTime(appointment.start_date)} - {formatTimeOnly(appointment.end_date)}
-            </p>
-            {appointment.description && (
-              <p className="text-xs text-gray-500 mt-1 truncate max-w-xs">
-                {appointment.description}
+      {safeAppointments.map((appointment) => {
+        console.log('AppointmentsWidget: Rendering appointment', appointment);
+        return (
+          <div key={appointment.id} className="flex gap-4 items-start">
+            <div className="bg-purple-100 text-purple-800 p-2 rounded-md">
+              <Calendar size={20} />
+            </div>
+            <div>
+              <h4 className="font-medium">
+                {appointment.client_name || 'Cliente não informado'} 
+                <span className="text-gray-500 text-sm ml-1">
+                  com {appointment.artist_name || 'Artista não informado'}
+                </span>
+              </h4>
+              <p className="text-sm text-gray-500">
+                {formatDateTime(appointment.start_date)} - {formatTimeOnly(appointment.end_date)}
               </p>
-            )}
+              {appointment.description && (
+                <p className="text-xs text-gray-500 mt-1 truncate max-w-xs">
+                  {appointment.description}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
