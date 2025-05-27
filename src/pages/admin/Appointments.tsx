@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getClientService, getBedService } from "@/services/serviceFactory";
-import { formatDate, formatTime } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { Calendar, Clock, User, Plus, Search, Filter, Eye, Edit, Trash2, CheckCircle, XCircle, Bed, LayoutGrid, List } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import QuickAppointmentForm from "@/components/admin/QuickAppointmentForm";

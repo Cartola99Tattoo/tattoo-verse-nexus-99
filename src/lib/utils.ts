@@ -32,3 +32,17 @@ export function formatDateTime(dateString: string): string {
     minute: '2-digit'
   }).format(date);
 }
+
+export function formatTime(timeString: string): string {
+  // If timeString is already in HH:MM format, return as is
+  if (timeString && timeString.includes(':')) {
+    return timeString;
+  }
+  
+  // If it's a full datetime, extract time
+  const date = new Date(timeString);
+  return new Intl.DateTimeFormat('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+}
