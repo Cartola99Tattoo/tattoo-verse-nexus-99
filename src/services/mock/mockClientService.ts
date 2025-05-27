@@ -103,6 +103,27 @@ class MockClientService implements IClientService {
     }
   }
 
+  // Base CRUD operations implementation
+  async create(clientData: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'total_spent' | 'total_orders'>): Promise<Client> {
+    return this.createClient(clientData);
+  }
+
+  async fetchAll(options: { search?: string; status?: string; temperature?: string; limit?: number; offset?: number } = {}): Promise<Client[]> {
+    return this.fetchClients(options);
+  }
+
+  async fetchById(id: string): Promise<Client | null> {
+    return this.fetchClientById(id);
+  }
+
+  async update(id: string, clientData: Partial<Client>): Promise<Client> {
+    return this.updateClient(id, clientData);
+  }
+
+  async delete(id: string): Promise<void> {
+    return this.deleteClient(id);
+  }
+
   async fetchClients(options: { search?: string; status?: string; temperature?: string; limit?: number; offset?: number } = {}): Promise<Client[]> {
     await delay(600);
     let filtered = [...this.mockClients];

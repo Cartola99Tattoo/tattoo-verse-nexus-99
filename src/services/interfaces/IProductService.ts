@@ -12,6 +12,19 @@ export interface Product {
   status: 'available' | 'unavailable' | 'limited';
   created_at: string;
   updated_at: string;
+  // Extended properties for UI display
+  category?: string;
+  category_name?: string;
+  artist_name?: string;
+  average_time?: string;
+  sizes?: string[];
+  body_locations?: string[];
+  style_tags?: string[];
+  // Join fields from related tables
+  profiles?: {
+    first_name?: string;
+    last_name?: string;
+  };
 }
 
 export interface ProductFilters {
