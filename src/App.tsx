@@ -1,4 +1,3 @@
-
 import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
@@ -17,7 +16,6 @@ const Contact = lazy(() => import('./pages/Contact'));
 const Auth = lazy(() => import('./pages/Auth'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Checkout = lazy(() => import('./pages/Checkout'));
-const Profile = lazy(() => import('./pages/Profile'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
 
 // Lazy load páginas administrativas
@@ -104,11 +102,14 @@ function App() {
             <Checkout />
           </LazyLoader>
         } />
+        
+        {/* Redirect /profile to /user-profile */}
         <Route path="/profile" element={
           <LazyLoader>
-            <Profile />
+            <UserProfile />
           </LazyLoader>
         } />
+        
         <Route path="/user-profile" element={
           <LazyLoader>
             <UserProfile />
