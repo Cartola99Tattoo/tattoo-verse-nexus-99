@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { Client, Appointment } from "@/services/interfaces/IClientService";
-import { getClientService } from "@/services/serviceFactory";
-import { useMutation } from "@tanstack/react-query";
+import { Bed } from "@/services/interfaces/IBedService";
+import { getClientService, getBedService } from "@/services/serviceFactory";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 
 interface QuickAppointmentFormProps {
@@ -18,6 +19,7 @@ interface QuickAppointmentFormProps {
   onConflict: (message: string) => void;
   checkConflicts: (appointment: {
     artist_id: string;
+    bed_id?: string;
     date: string;
     time: string;
     duration_minutes: number;
@@ -35,6 +37,7 @@ const QuickAppointmentForm = ({
   const [newClientName, setNewClientName] = useState("");
   const [newClientPhone, setNewClientPhone] = useState("");
   const [artistId, setArtistId] = useState("");
+  const [bedId, setBedId] = useState("");
   const [date, setDate] = useState(
     selectedSlot ? format(selectedSlot.start, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')
   );
@@ -47,12 +50,34 @@ const QuickAppointmentForm = ({
   const [createNewClient, setCreateNewClient] = useState(false);
 
   const clientService = getClientService();
+  const bedService = getBedService();
+
+  // Buscar macas disponíveis
+  const { data: beds = [], isLoading: bedsLoading } = useQuery({
+    queryKey: ['beds'],
+    queryFn: () => bedService.fetchBeds(),
+  });
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at'>) => {
-      // Verificar conflitos antes de criar
+      // Verificar conflitos de maca se selecionada
+      if (appointmentData.bed_id) {
+        const isAvailable = await bedService.checkBedAvailability(
+          appointmentData.bed_id,
+          appointmentData.date,
+          appointmentData.time,
+          format(new Date(new Date(`${appointmentData.date}T${appointmentData.time}`).getTime() + appointmentData.duration_minutes * 60000), 'HH:mm')
+        );
+        
+        if (!isAvailable) {
+          throw new Error('A maca selecionada não está disponível no horário escolhido');
+        }
+      }
+
+      // Verificar conflitos de artista
       const conflicts = checkConflicts({
         artist_id: appointmentData.artist_id,
+        bed_id: appointmentData.bed_id,
         date: appointmentData.date,
         time: appointmentData.time,
         duration_minutes: appointmentData.duration_minutes
@@ -130,6 +155,7 @@ const QuickAppointmentForm = ({
     createAppointmentMutation.mutate({
       client_id: finalClientId,
       artist_id: artistId,
+      bed_id: bedId || undefined,
       date,
       time,
       duration_minutes: duration,
@@ -145,6 +171,9 @@ const QuickAppointmentForm = ({
     { id: '2', name: 'Maria Santos' },
     { id: '3', name: 'Pedro Costa' },
   ];
+
+  // Filtrar macas ativas
+  const activeBeds = beds.filter(bed => bed.isActive);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -216,6 +245,30 @@ const QuickAppointmentForm = ({
                 {artist.name}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Maca */}
+      <div className="space-y-2">
+        <Label>Maca</Label>
+        <Select value={bedId} onValueChange={setBedId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione a maca (opcional)" />
+          </SelectTrigger>
+          <SelectContent>
+            {bedsLoading ? (
+              <SelectItem value="" disabled>Carregando macas...</SelectItem>
+            ) : (
+              <>
+                <SelectItem value="">Nenhuma maca específica</SelectItem>
+                {activeBeds.map((bed) => (
+                  <SelectItem key={bed.id} value={bed.id}>
+                    {bed.name} (Maca {bed.number})
+                  </SelectItem>
+                ))}
+              </>
+            )}
           </SelectContent>
         </Select>
       </div>

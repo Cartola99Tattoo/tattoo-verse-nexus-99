@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,15 +12,16 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Search } from "lucide-react";
+import { CalendarIcon, Search, Bed } from "lucide-react";
 import { Client } from "@/services/interfaces/IClientService";
-import { getClientService } from "@/services/serviceFactory";
-import { useMutation } from "@tanstack/react-query";
+import { getClientService, getBedService } from "@/services/serviceFactory";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 
 const appointmentSchema = z.object({
   client_id: z.string().min(1, "Selecione um cliente"),
   artist_id: z.string().min(1, "Selecione um artista"),
+  bed_id: z.string().optional(),
   date: z.string().min(1, "Selecione uma data"),
   time: z.string().min(1, "Selecione um horário"),
   duration_minutes: z.number().min(30, "Duração mínima é 30 minutos"),
@@ -42,6 +44,13 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   const [clientSearch, setClientSearch] = useState("");
   
   const clientService = getClientService();
+  const bedService = getBedService();
+
+  // Buscar macas disponíveis
+  const { data: beds = [], isLoading: bedsLoading } = useQuery({
+    queryKey: ['beds'],
+    queryFn: () => bedService.fetchBeds(),
+  });
 
   const {
     register,
@@ -61,11 +70,31 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   });
 
   const createAppointmentMutation = useMutation({
-    mutationFn: (data: AppointmentFormData) => {
+    mutationFn: async (data: AppointmentFormData) => {
+      // Verificar disponibilidade da maca se selecionada
+      if (data.bed_id) {
+        const endTime = format(
+          new Date(new Date(`${data.date}T${data.time}`).getTime() + data.duration_minutes * 60000), 
+          'HH:mm'
+        );
+        
+        const isAvailable = await bedService.checkBedAvailability(
+          data.bed_id,
+          data.date,
+          data.time,
+          endTime
+        );
+        
+        if (!isAvailable) {
+          throw new Error('A maca selecionada não está disponível no horário escolhido');
+        }
+      }
+
       // Ensure all required fields are present
       const appointmentData = {
         client_id: data.client_id,
         artist_id: data.artist_id,
+        bed_id: data.bed_id || undefined,
         date: data.date,
         time: data.time,
         duration_minutes: data.duration_minutes,
@@ -84,10 +113,10 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
       });
       onSuccess();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Erro",
-        description: "Não foi possível criar o agendamento.",
+        description: error.message || "Não foi possível criar o agendamento.",
         variant: "destructive",
       });
     },
@@ -115,6 +144,9 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
       timeSlots.push(time);
     }
   }
+
+  // Filtrar macas ativas
+  const activeBeds = beds.filter(bed => bed.isActive);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -169,6 +201,33 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
           {errors.artist_id && (
             <p className="text-sm text-red-600">{errors.artist_id.message}</p>
           )}
+        </div>
+
+        {/* Maca */}
+        <div className="space-y-2">
+          <Label htmlFor="bed_id">Maca</Label>
+          <Select onValueChange={(value) => setValue('bed_id', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione a maca (opcional)" />
+            </SelectTrigger>
+            <SelectContent>
+              {bedsLoading ? (
+                <SelectItem value="" disabled>Carregando macas...</SelectItem>
+              ) : (
+                <>
+                  <SelectItem value="">Nenhuma maca específica</SelectItem>
+                  {activeBeds.map((bed) => (
+                    <SelectItem key={bed.id} value={bed.id}>
+                      <div className="flex items-center gap-2">
+                        <Bed className="h-4 w-4" />
+                        <span>{bed.name} (Maca {bed.number})</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </>
+              )}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Data */}

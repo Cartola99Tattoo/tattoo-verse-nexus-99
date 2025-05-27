@@ -1,3 +1,4 @@
+
 import { appConfig } from "@/config/appConfig";
 import { isSupabaseConnected } from "@/integrations/supabase/client";
 
@@ -11,6 +12,7 @@ import { ITrackingService } from "./interfaces/ITrackingService";
 import { IFinancialService } from './interfaces/IFinancialService';
 import { IClientService } from './interfaces/IClientService';
 import { IProjectService } from './interfaces/IProjectService';
+import { IBedService } from './interfaces/IBedService';
 
 // Mock services
 import { mockBlogService } from "./mock/mockBlogService";
@@ -22,6 +24,7 @@ import { mockTrackingService } from "./mock/mockTrackingService";
 import { mockFinancialService } from './mock/mockFinancialService';
 import { mockClientService } from './mock/mockClientService';
 import mockProjectService from './mock/mockProjectService';
+import { mockBedService } from './mock/mockBedService';
 
 // Supabase services
 import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
@@ -104,6 +107,18 @@ export const getClientService = (): IClientService => {
   
   // TODO: Implementar SupabaseClientService quando conectado ao Supabase
   throw new Error('Supabase client service não implementado ainda');
+};
+
+// Bed Service Factory
+export const getBedService = (): IBedService => {
+  console.log(`Using ${appConfig.dataSource.useMockData ? 'mock' : 'supabase'} bed service`);
+  
+  if (appConfig.dataSource.useMockData) {
+    return mockBedService;
+  }
+  
+  // TODO: Implementar SupabaseBedService quando conectado ao Supabase
+  throw new Error('Supabase bed service não implementado ainda');
 };
 
 // Export the error handler for convenience
