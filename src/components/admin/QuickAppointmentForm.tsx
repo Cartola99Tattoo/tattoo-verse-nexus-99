@@ -37,7 +37,7 @@ const QuickAppointmentForm = ({
   const [newClientName, setNewClientName] = useState("");
   const [newClientPhone, setNewClientPhone] = useState("");
   const [artistId, setArtistId] = useState("");
-  const [bedId, setBedId] = useState("");
+  const [bedId, setBedId] = useState("none");
   const [date, setDate] = useState(
     selectedSlot ? format(selectedSlot.start, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')
   );
@@ -155,7 +155,7 @@ const QuickAppointmentForm = ({
     createAppointmentMutation.mutate({
       client_id: finalClientId,
       artist_id: artistId,
-      bed_id: bedId || undefined,
+      bed_id: bedId === "none" ? undefined : bedId,
       date,
       time,
       duration_minutes: duration,
@@ -258,10 +258,10 @@ const QuickAppointmentForm = ({
           </SelectTrigger>
           <SelectContent>
             {bedsLoading ? (
-              <SelectItem value="" disabled>Carregando macas...</SelectItem>
+              <SelectItem value="loading" disabled>Carregando macas...</SelectItem>
             ) : (
               <>
-                <SelectItem value="">Nenhuma maca específica</SelectItem>
+                <SelectItem value="none">Nenhuma maca específica</SelectItem>
                 {activeBeds.map((bed) => (
                   <SelectItem key={bed.id} value={bed.id}>
                     {bed.name} (Maca {bed.number})

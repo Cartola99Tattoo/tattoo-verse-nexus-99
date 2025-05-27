@@ -72,7 +72,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   const createAppointmentMutation = useMutation({
     mutationFn: async (data: AppointmentFormData) => {
       // Verificar disponibilidade da maca se selecionada
-      if (data.bed_id) {
+      if (data.bed_id && data.bed_id !== "none") {
         const endTime = format(
           new Date(new Date(`${data.date}T${data.time}`).getTime() + data.duration_minutes * 60000), 
           'HH:mm'
@@ -94,7 +94,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
       const appointmentData = {
         client_id: data.client_id,
         artist_id: data.artist_id,
-        bed_id: data.bed_id || undefined,
+        bed_id: data.bed_id === "none" ? undefined : data.bed_id,
         date: data.date,
         time: data.time,
         duration_minutes: data.duration_minutes,
@@ -206,16 +206,16 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         {/* Maca */}
         <div className="space-y-2">
           <Label htmlFor="bed_id">Maca</Label>
-          <Select onValueChange={(value) => setValue('bed_id', value)}>
+          <Select onValueChange={(value) => setValue('bed_id', value)} defaultValue="none">
             <SelectTrigger>
               <SelectValue placeholder="Selecione a maca (opcional)" />
             </SelectTrigger>
             <SelectContent>
               {bedsLoading ? (
-                <SelectItem value="" disabled>Carregando macas...</SelectItem>
+                <SelectItem value="loading" disabled>Carregando macas...</SelectItem>
               ) : (
                 <>
-                  <SelectItem value="">Nenhuma maca específica</SelectItem>
+                  <SelectItem value="none">Nenhuma maca específica</SelectItem>
                   {activeBeds.map((bed) => (
                     <SelectItem key={bed.id} value={bed.id}>
                       <div className="flex items-center gap-2">

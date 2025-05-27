@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -407,6 +406,7 @@ const Appointments = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as Macas</SelectItem>
+                  <SelectItem value="none">Sem Maca Específica</SelectItem>
                   {beds.filter(bed => bed.isActive).map((bed) => (
                     <SelectItem key={bed.id} value={bed.id}>
                       {bed.name}
