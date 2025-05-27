@@ -1,4 +1,6 @@
 
+import { CRUDOperations } from '../base/BaseService';
+
 export interface IProject {
   id: string;
   name: string;
@@ -10,11 +12,70 @@ export interface IProject {
   updatedAt: string;
   taskCount?: number;
   completedTasksCount?: number;
+  
+  // Lean Startup fields
+  mainHypothesis?: string;
+  validationMetrics?: string;
+  learningCycles?: ILearningCycle[];
+  
+  // Scrum fields
+  currentSprint?: string;
+  sprints?: ISprint[];
+  
+  // Blue Ocean Strategy fields
+  valueCurve?: string;
+  valueInnovations?: string[];
+  
+  // SMART Goals enhanced
+  smartGoals?: IEnhancedSmartGoal[];
+}
+
+export interface ILearningCycle {
+  id: string;
+  projectId: string;
+  hypothesis: string;
+  experiment: string;
+  results: string;
+  learnings: string;
+  nextAction: string;
+  date: string;
+  createdAt: string;
+}
+
+export interface ISprint {
+  id: string;
+  projectId: string;
+  name: string;
+  goal: string;
+  startDate: string;
+  endDate: string;
+  status: 'planning' | 'active' | 'completed' | 'cancelled';
+  storyPoints: number;
+  completedPoints: number;
+  createdAt: string;
+}
+
+export interface IEnhancedSmartGoal {
+  id: string;
+  projectId: string;
+  title: string;
+  specific: string;
+  measurable: string;
+  achievable: string;
+  relevant: string;
+  timeBound: string;
+  currentMetric: number;
+  targetMetric: number;
+  deadline: string;
+  responsible?: string;
+  progress: number;
+  createdAt: string;
 }
 
 export interface IProjectTask {
   id: string;
   projectId: string;
+  sprintId?: string;
   title: string;
   description?: string;
   status: string;
@@ -24,6 +85,7 @@ export interface IProjectTask {
   createdAt: string;
   updatedAt: string;
   order: number;
+  storyPoints?: number;
 }
 
 export interface IKanbanStage {
@@ -101,7 +163,7 @@ export interface IProjectSmartGoal {
   createdAt: string;
 }
 
-export interface IProjectService {
+export interface IProjectService extends CRUDOperations<IProject> {
   fetchProjects(): Promise<IProject[]>;
   createProject(project: Omit<IProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<IProject>;
   updateProject(id: string, project: Partial<IProject>): Promise<IProject>;
@@ -147,4 +209,20 @@ export interface IProjectService {
   createSmartGoal(goal: Omit<IProjectSmartGoal, 'id' | 'createdAt'>): Promise<IProjectSmartGoal>;
   updateSmartGoal(id: string, goal: Partial<IProjectSmartGoal>): Promise<IProjectSmartGoal>;
   deleteSmartGoal(id: string): Promise<void>;
+
+  // New methods for enhanced functionality
+  fetchLearningCycles(projectId: string): Promise<ILearningCycle[]>;
+  createLearningCycle(cycle: Omit<ILearningCycle, 'id' | 'createdAt'>): Promise<ILearningCycle>;
+  updateLearningCycle(id: string, cycle: Partial<ILearningCycle>): Promise<ILearningCycle>;
+  deleteLearningCycle(id: string): Promise<void>;
+
+  fetchSprints(projectId: string): Promise<ISprint[]>;
+  createSprint(sprint: Omit<ISprint, 'id' | 'createdAt'>): Promise<ISprint>;
+  updateSprint(id: string, sprint: Partial<ISprint>): Promise<ISprint>;
+  deleteSprint(id: string): Promise<void>;
+
+  fetchEnhancedSmartGoals(projectId: string): Promise<IEnhancedSmartGoal[]>;
+  createEnhancedSmartGoal(goal: Omit<IEnhancedSmartGoal, 'id' | 'createdAt'>): Promise<IEnhancedSmartGoal>;
+  updateEnhancedSmartGoal(id: string, goal: Partial<IEnhancedSmartGoal>): Promise<IEnhancedSmartGoal>;
+  deleteEnhancedSmartGoal(id: string): Promise<void>;
 }
