@@ -1,0 +1,33 @@
+
+/* Enhanced gradient utilities - 99Tattoo Theme */
+.gradient-red {
+  @apply bg-gradient-to-r from-red-600 to-red-400;
+}
+
+.gradient-dark {
+  @apply bg-gradient-to-b from-black via-gray-900 to-black;
+}
+
+.gradient-red-soft {
+  @apply bg-gradient-to-r from-red-500 to-red-400;
+}
+
+.gradient-red-intense {
+  @apply bg-gradient-to-r from-red-700 to-red-500;
+}
+
+.gradient-red-black {
+  @apply bg-gradient-to-br from-red-600 via-red-800 to-black;
+}
+
+.gradient-black-red {
+  @apply bg-gradient-to-br from-black via-gray-900 to-red-900;
+}
+
+.gradient-gray-light {
+  @apply bg-gradient-to-r from-gray-50 to-gray-100;
+}
+
+.gradient-gray-dark {
+  @apply bg-gradient-to-r from-gray-800 to-gray-600;
+}

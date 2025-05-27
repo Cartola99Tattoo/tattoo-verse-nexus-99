@@ -1,90 +1,217 @@
 
-import React from 'react';
+import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Home from './pages/Home';
-import Blog from './pages/Blog';
-import BlogPost from './pages/BlogPost';
-import Artists from './pages/Artists';
-import ArtistDetail from './pages/ArtistDetail';
-import Shop from './pages/Shop';
-import ProductDetail from './pages/ProductDetail';
-import Events from './pages/Events';
-import Contact from './pages/Contact';
-import Auth from './pages/Auth';
-import ResetPassword from './pages/ResetPassword';
-import Checkout from './pages/Checkout';
-import Profile from './pages/Profile';
-import UserProfile from './pages/UserProfile';
-import AdminLayout from './components/admin/AdminLayout';
-import Dashboard from './pages/admin/Dashboard';
-import AdminArtists from './pages/admin/AdminArtists';
-import Appointments from './pages/admin/Appointments';
-import Clients from './pages/admin/Clients';
-import ClientDetail from './pages/admin/ClientDetail';
-import Products from './pages/admin/Products';
-import Stock from './pages/admin/Stock';
-import Financial from './pages/admin/Financial';
-import Analytics from './pages/admin/Analytics';
-import Loyalty from './pages/admin/Loyalty';
-import Security from './pages/admin/Security';
-import AdminBlog from './pages/admin/Blog';
-import AdminAuth from './pages/AdminAuth';
-import AdminUserSetup from './pages/AdminUserSetup';
-import NotFound from './pages/NotFound';
+import LazyLoader from './components/common/LazyLoader';
 import ProtectedRoute from './components/ProtectedRoute';
-import Projects from './pages/admin/Projects';
+
+// Lazy load páginas públicas
+const Home = lazy(() => import('./pages/Home'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
+const Artists = lazy(() => import('./pages/Artists'));
+const ArtistDetail = lazy(() => import('./pages/ArtistDetail'));
+const Shop = lazy(() => import('./pages/Shop'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Events = lazy(() => import('./pages/Events'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Auth = lazy(() => import('./pages/Auth'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Profile = lazy(() => import('./pages/Profile'));
+const UserProfile = lazy(() => import('./pages/UserProfile'));
+
+// Lazy load páginas administrativas
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminArtists = lazy(() => import('./pages/admin/AdminArtists'));
+const Appointments = lazy(() => import('./pages/admin/Appointments'));
+const Clients = lazy(() => import('./pages/admin/Clients'));
+const ClientDetail = lazy(() => import('./pages/admin/ClientDetail'));
+const Products = lazy(() => import('./pages/admin/Products'));
+const Stock = lazy(() => import('./pages/admin/Stock'));
+const Financial = lazy(() => import('./pages/admin/Financial'));
+const Analytics = lazy(() => import('./pages/admin/Analytics'));
+const Loyalty = lazy(() => import('./pages/admin/Loyalty'));
+const Security = lazy(() => import('./pages/admin/Security'));
+const AdminBlog = lazy(() => import('./pages/admin/Blog'));
+const AdminAuth = lazy(() => import('./pages/AdminAuth'));
+const AdminUserSetup = lazy(() => import('./pages/AdminUserSetup'));
+const Projects = lazy(() => import('./pages/admin/Projects'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 function App() {
   return (
     <Router>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:slug" element={<BlogPost />} />
-        <Route path="/artists" element={<Artists />} />
-        <Route path="/artists/:id" element={<ArtistDetail />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/shop/:id" element={<ProductDetail />} />
-        <Route path="/events" element={<Events />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/user-profile" element={<UserProfile />} />
+        <Route path="/" element={
+          <LazyLoader>
+            <Home />
+          </LazyLoader>
+        } />
+        <Route path="/blog" element={
+          <LazyLoader>
+            <Blog />
+          </LazyLoader>
+        } />
+        <Route path="/blog/:slug" element={
+          <LazyLoader>
+            <BlogPost />
+          </LazyLoader>
+        } />
+        <Route path="/artists" element={
+          <LazyLoader>
+            <Artists />
+          </LazyLoader>
+        } />
+        <Route path="/artists/:id" element={
+          <LazyLoader>
+            <ArtistDetail />
+          </LazyLoader>
+        } />
+        <Route path="/shop" element={
+          <LazyLoader>
+            <Shop />
+          </LazyLoader>
+        } />
+        <Route path="/shop/:id" element={
+          <LazyLoader>
+            <ProductDetail />
+          </LazyLoader>
+        } />
+        <Route path="/events" element={
+          <LazyLoader>
+            <Events />
+          </LazyLoader>
+        } />
+        <Route path="/contact" element={
+          <LazyLoader>
+            <Contact />
+          </LazyLoader>
+        } />
+        <Route path="/auth" element={
+          <LazyLoader>
+            <Auth />
+          </LazyLoader>
+        } />
+        <Route path="/reset-password" element={
+          <LazyLoader>
+            <ResetPassword />
+          </LazyLoader>
+        } />
+        <Route path="/checkout" element={
+          <LazyLoader>
+            <Checkout />
+          </LazyLoader>
+        } />
+        <Route path="/profile" element={
+          <LazyLoader>
+            <Profile />
+          </LazyLoader>
+        } />
+        <Route path="/user-profile" element={
+          <LazyLoader>
+            <UserProfile />
+          </LazyLoader>
+        } />
 
         {/* Admin routes - SINGLE AdminLayout instance with proper nesting */}
         <Route
           path="/admin/*"
           element={
             <ProtectedRoute>
-              <AdminLayout />
+              <LazyLoader>
+                <AdminLayout />
+              </LazyLoader>
             </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="artists" element={<AdminArtists />} />
-          <Route path="blog" element={<AdminBlog />} />
-          <Route path="appointments" element={<Appointments />} />
-          <Route path="clients" element={<Clients />} />
-          <Route path="clients/:id" element={<ClientDetail />} />
-          <Route path="products" element={<Products />} />
-          <Route path="stock" element={<Stock />} />
-          <Route path="projects" element={<Projects />} />
-          <Route path="financial" element={<Financial />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="loyalty" element={<Loyalty />} />
-          <Route path="security" element={<Security />} />
+          <Route path="dashboard" element={
+            <LazyLoader>
+              <Dashboard />
+            </LazyLoader>
+          } />
+          <Route path="artists" element={
+            <LazyLoader>
+              <AdminArtists />
+            </LazyLoader>
+          } />
+          <Route path="blog" element={
+            <LazyLoader>
+              <AdminBlog />
+            </LazyLoader>
+          } />
+          <Route path="appointments" element={
+            <LazyLoader>
+              <Appointments />
+            </LazyLoader>
+          } />
+          <Route path="clients" element={
+            <LazyLoader>
+              <Clients />
+            </LazyLoader>
+          } />
+          <Route path="clients/:id" element={
+            <LazyLoader>
+              <ClientDetail />
+            </LazyLoader>
+          } />
+          <Route path="products" element={
+            <LazyLoader>
+              <Products />
+            </LazyLoader>
+          } />
+          <Route path="stock" element={
+            <LazyLoader>
+              <Stock />
+            </LazyLoader>
+          } />
+          <Route path="projects" element={
+            <LazyLoader>
+              <Projects />
+            </LazyLoader>
+          } />
+          <Route path="financial" element={
+            <LazyLoader>
+              <Financial />
+            </LazyLoader>
+          } />
+          <Route path="analytics" element={
+            <LazyLoader>
+              <Analytics />
+            </LazyLoader>
+          } />
+          <Route path="loyalty" element={
+            <LazyLoader>
+              <Loyalty />
+            </LazyLoader>
+          } />
+          <Route path="security" element={
+            <LazyLoader>
+              <Security />
+            </LazyLoader>
+          } />
         </Route>
 
         {/* Standalone admin auth routes */}
-        <Route path="/admin/auth" element={<AdminAuth />} />
-        <Route path="/admin/setup" element={<AdminUserSetup />} />
+        <Route path="/admin/auth" element={
+          <LazyLoader>
+            <AdminAuth />
+          </LazyLoader>
+        } />
+        <Route path="/admin/setup" element={
+          <LazyLoader>
+            <AdminUserSetup />
+          </LazyLoader>
+        } />
 
         {/* 404 */}
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={
+          <LazyLoader>
+            <NotFound />
+          </LazyLoader>
+        } />
       </Routes>
     </Router>
   );

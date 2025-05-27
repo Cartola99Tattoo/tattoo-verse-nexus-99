@@ -1,0 +1,46 @@
+
+/* Enhanced Button utilities - 99Tattoo Theme */
+.btn-gradient {
+  @apply bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+}
+
+.btn-gradient-secondary {
+  @apply bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-700 hover:to-gray-600 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+}
+
+.btn-gradient-black {
+  @apply bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-black shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+}
+
+.btn-glow {
+  @apply bg-gradient-to-r from-red-600 to-red-500 hover:animate-glow transition-all duration-300 transform hover:scale-105;
+}
+
+/* Enhanced Card utilities - 99Tattoo Theme */
+.card-enhanced {
+  @apply shadow-lg bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02];
+}
+
+.card-elevated {
+  @apply shadow-xl bg-white border-gray-200 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1;
+}
+
+.card-dark {
+  @apply shadow-lg bg-gradient-to-br from-gray-900 to-black border-gray-800 hover:shadow-xl transition-all duration-300;
+}
+
+.card-red-accent {
+  @apply shadow-lg bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-red-glow transition-all duration-300 transform hover:scale-[1.02];
+}
+
+.card-header-gradient {
+  @apply bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg;
+}
+
+.card-header-red {
+  @apply bg-gradient-to-r from-red-50 to-red-100 rounded-t-lg;
+}
+
+.card-header-dark {
+  @apply bg-gradient-to-r from-gray-800 to-black rounded-t-lg;
+}
