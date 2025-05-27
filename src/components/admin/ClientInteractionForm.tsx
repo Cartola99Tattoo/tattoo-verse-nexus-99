@@ -69,12 +69,13 @@ const ClientInteractionForm = ({ clientId, onSuccess }: ClientInteractionFormPro
       title: formData.title,
       description: formData.description,
       date: formData.date,
+      user_id: "admin-user-id", // Adding the missing user_id field
     });
   };
 
   const typeLabels = {
     call: "Ligação",
-    email: "Email",
+    email: "Email", 
     visit: "Visita",
     note: "Nota",
     appointment: "Agendamento",
