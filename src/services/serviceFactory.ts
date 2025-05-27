@@ -22,8 +22,6 @@ import { mockTrackingService } from "./mock/mockTrackingService";
 import { mockFinancialService } from './mock/mockFinancialService';
 import { mockClientService } from './mock/mockClientService';
 import mockProjectService from './mock/mockProjectService';
-import { MockUserProfileService } from './mock/mockUserProfileService';
-import type { IUserProfileService } from './interfaces/IUserProfileService';
 
 // Supabase services
 import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
@@ -130,13 +128,3 @@ export function getProjectService(): IProjectService {
     throw new Error('Supabase Project Service not implemented yet');
   }
 }
-
-// User Profile Service
-export const getUserProfileService = (): IUserProfileService => {
-  if (appConfig.dataSource.useMockData) {
-    return new MockUserProfileService();
-  }
-  
-  // TODO: Implement SupabaseUserProfileService when Supabase is integrated
-  throw new Error('Supabase User Profile Service not implemented yet');
-};
