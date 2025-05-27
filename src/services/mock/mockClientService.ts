@@ -291,7 +291,7 @@ class MockClientService implements IClientService {
     return newAppointment;
   }
 
-  async updateAppointmentStatus(id: string, status: Appointment['status']): Promise<Appointment> {
+  async updateAppointmentStatus(id: string, status: Appointment['status']): Promise<void> {
     await delay(500);
     const index = this.mockAppointments.findIndex(appointment => appointment.id === id);
     if (index === -1) {
@@ -303,8 +303,6 @@ class MockClientService implements IClientService {
       status,
       updated_at: new Date().toISOString(),
     };
-    
-    return this.mockAppointments[index];
   }
 
   async fetchKanbanStages(): Promise<KanbanStage[]> {
@@ -348,6 +346,36 @@ class MockClientService implements IClientService {
     }
     
     this.mockKanbanStages.splice(index, 1);
+  }
+
+  async fetchAppointmentsByClient(clientId: string): Promise<Appointment[]> {
+    return this.fetchClientAppointments(clientId);
+  }
+
+  async updateAppointment(id: string, updates: Partial<Appointment>): Promise<Appointment> {
+    await delay(500);
+    const index = this.mockAppointments.findIndex(appointment => appointment.id === id);
+    if (index === -1) {
+      throw new Error('Agendamento não encontrado');
+    }
+    
+    this.mockAppointments[index] = {
+      ...this.mockAppointments[index],
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
+    
+    return this.mockAppointments[index];
+  }
+
+  async deleteAppointment(id: string): Promise<void> {
+    await delay(500);
+    const index = this.mockAppointments.findIndex(appointment => appointment.id === id);
+    if (index === -1) {
+      throw new Error('Agendamento não encontrado');
+    }
+    
+    this.mockAppointments.splice(index, 1);
   }
 }
 

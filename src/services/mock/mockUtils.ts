@@ -24,3 +24,23 @@ export const generateMockId = (): string => {
 export const delay = async (ms: number = 500): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
+
+// Simulação de delay
+export const simulateDelay = async (): Promise<void> => {
+  return delay(500);
+};
+
+// Gerar ID
+export const generateId = (): string => {
+  return generateMockId();
+};
+
+// Export default object for convenience
+export const mockUtils = {
+  simulateNetworkDelay,
+  simulateError,
+  generateMockId,
+  delay,
+  simulateDelay,
+  generateId
+};
