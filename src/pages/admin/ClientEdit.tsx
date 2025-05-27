@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,13 +24,15 @@ const ClientEdit = () => {
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', id],
     queryFn: () => clientService.fetchClientById(id!),
-    enabled: !!id,
-    onSuccess: (data) => {
-      if (data) {
-        setFormData(data);
-      }
-    }
+    enabled: !!id
   });
+
+  // Use useEffect to update formData when client data is loaded
+  useEffect(() => {
+    if (client) {
+      setFormData(client);
+    }
+  }, [client]);
 
   const updateMutation = useMutation({
     mutationFn: (updates: Partial<Client>) => 

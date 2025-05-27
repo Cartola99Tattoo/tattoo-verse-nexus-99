@@ -1,4 +1,4 @@
-import { IProject, IProjectTask, IKanbanStage, IProjectService, IProjectBudgetItem, IProjectImprovementAction, IProjectExpansionResource, IProjectSustainabilityAction, IProjectCategoryGoal, IProjectSmartGoal } from '@/services/interfaces/IProjectService';
+import { IProject, IProjectTask, IKanbanStage, IProjectService, IProjectBudgetItem, IProjectImprovementAction, IProjectExpansionResource, IProjectSustainabilityAction, IProjectCategoryGoal, IProjectSmartGoal, ILearningCycle, ISprint, IEnhancedSmartGoal } from '@/services/interfaces/IProjectService';
 import { simulateNetworkDelay } from './mockUtils';
 
 class MockProjectService implements IProjectService {
@@ -13,7 +13,11 @@ class MockProjectService implements IProjectService {
       createdAt: '2024-01-01T10:00:00Z',
       updatedAt: '2024-01-01T10:00:00Z',
       taskCount: 8,
-      completedTasksCount: 3
+      completedTasksCount: 3,
+      mainHypothesis: 'Clientes preferem tatuagens temáticas de verão durante a temporada',
+      validationMetrics: 'Aumentar vendas em 30% comparado ao mês anterior',
+      valueCurve: 'Diferenciação por designs exclusivos e ambiente climatizado',
+      valueInnovations: ['Designs exclusivos', 'Ambiente temático', 'Preços promocionais']
     },
     {
       id: '2',
@@ -41,7 +45,8 @@ class MockProjectService implements IProjectService {
       dueDate: '2024-01-10',
       createdAt: '2024-01-01T10:00:00Z',
       updatedAt: '2024-01-01T10:00:00Z',
-      order: 1
+      order: 1,
+      storyPoints: 8
     },
     {
       id: '2',
@@ -54,7 +59,8 @@ class MockProjectService implements IProjectService {
       dueDate: '2024-01-20',
       createdAt: '2024-01-01T10:00:00Z',
       updatedAt: '2024-01-01T10:00:00Z',
-      order: 2
+      order: 2,
+      storyPoints: 5
     }
   ];
 
@@ -91,6 +97,66 @@ class MockProjectService implements IProjectService {
 
   private smartGoals: IProjectSmartGoal[] = [
     { id: '1', projectId: '1', title: 'Aumentar faturamento em 30%', metric: 'R$ 15.000 vs R$ 12.000', deadline: '2024-02-15', responsible: 'Gerente', progress: 85, createdAt: '2024-01-01T10:00:00Z' }
+  ];
+
+  private learningCycles: ILearningCycle[] = [
+    {
+      id: '1',
+      projectId: '1',
+      hypothesis: 'Clientes preferem designs menores no verão',
+      experiment: 'Oferecemos 50% designs pequenos no evento',
+      results: '70% das vendas foram designs pequenos',
+      learnings: 'Hipótese confirmada - focar em designs menores',
+      nextAction: 'Criar mais designs pequenos para próximo evento',
+      date: '2024-01-10',
+      createdAt: '2024-01-10T10:00:00Z'
+    }
+  ];
+
+  private sprints: ISprint[] = [
+    {
+      id: '1',
+      projectId: '1',
+      name: 'Sprint 1 - Preparação',
+      goal: 'Finalizar designs e materiais de divulgação',
+      startDate: '2024-01-01',
+      endDate: '2024-01-14',
+      status: 'completed',
+      storyPoints: 20,
+      completedPoints: 18,
+      createdAt: '2024-01-01T10:00:00Z'
+    },
+    {
+      id: '2',
+      projectId: '1',
+      name: 'Sprint 2 - Execução',
+      goal: 'Realizar evento e coletar feedback',
+      startDate: '2024-01-15',
+      endDate: '2024-01-28',
+      status: 'active',
+      storyPoints: 15,
+      completedPoints: 8,
+      createdAt: '2024-01-15T10:00:00Z'
+    }
+  ];
+
+  private enhancedSmartGoals: IEnhancedSmartGoal[] = [
+    {
+      id: '1',
+      projectId: '1',
+      title: 'Aumentar participação no evento',
+      specific: 'Atrair 100 clientes para o Flash Day',
+      measurable: 'Número de clientes atendidos',
+      achievable: 'Com base na capacidade do estúdio',
+      relevant: 'Importante para aumentar receita mensal',
+      timeBound: 'Durante o evento de 15-28 de Janeiro',
+      currentMetric: 65,
+      targetMetric: 100,
+      deadline: '2024-01-28',
+      responsible: 'Equipe completa',
+      progress: 65,
+      createdAt: '2024-01-01T10:00:00Z'
+    }
   ];
 
   async fetchProjects(): Promise<IProject[]> {
@@ -501,6 +567,149 @@ class MockProjectService implements IProjectService {
     console.log('MockProjectService: deleteSmartGoal called with id:', id);
     await simulateNetworkDelay();
     this.smartGoals = this.smartGoals.filter(g => g.id !== id);
+  }
+
+  // Learning Cycles (Lean Startup)
+  async fetchLearningCycles(projectId: string): Promise<ILearningCycle[]> {
+    console.log('MockProjectService: fetchLearningCycles called with projectId:', projectId);
+    await simulateNetworkDelay();
+    return this.learningCycles.filter(cycle => cycle.projectId === projectId);
+  }
+
+  async createLearningCycle(cycle: Omit<ILearningCycle, 'id' | 'createdAt'>): Promise<ILearningCycle> {
+    console.log('MockProjectService: createLearningCycle called with:', cycle);
+    await simulateNetworkDelay();
+    
+    const newCycle: ILearningCycle = {
+      ...cycle,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString()
+    };
+    
+    this.learningCycles.push(newCycle);
+    return newCycle;
+  }
+
+  async updateLearningCycle(id: string, cycle: Partial<ILearningCycle>): Promise<ILearningCycle> {
+    console.log('MockProjectService: updateLearningCycle called with id:', id, 'data:', cycle);
+    await simulateNetworkDelay();
+    
+    const index = this.learningCycles.findIndex(c => c.id === id);
+    if (index === -1) {
+      throw new Error('Learning cycle not found');
+    }
+    
+    this.learningCycles[index] = { ...this.learningCycles[index], ...cycle };
+    return this.learningCycles[index];
+  }
+
+  async deleteLearningCycle(id: string): Promise<void> {
+    console.log('MockProjectService: deleteLearningCycle called with id:', id);
+    await simulateNetworkDelay();
+    this.learningCycles = this.learningCycles.filter(c => c.id !== id);
+  }
+
+  // Sprints (Scrum)
+  async fetchSprints(projectId: string): Promise<ISprint[]> {
+    console.log('MockProjectService: fetchSprints called with projectId:', projectId);
+    await simulateNetworkDelay();
+    return this.sprints.filter(sprint => sprint.projectId === projectId);
+  }
+
+  async createSprint(sprint: Omit<ISprint, 'id' | 'createdAt'>): Promise<ISprint> {
+    console.log('MockProjectService: createSprint called with:', sprint);
+    await simulateNetworkDelay();
+    
+    const newSprint: ISprint = {
+      ...sprint,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString()
+    };
+    
+    this.sprints.push(newSprint);
+    return newSprint;
+  }
+
+  async updateSprint(id: string, sprint: Partial<ISprint>): Promise<ISprint> {
+    console.log('MockProjectService: updateSprint called with id:', id, 'data:', sprint);
+    await simulateNetworkDelay();
+    
+    const index = this.sprints.findIndex(s => s.id === id);
+    if (index === -1) {
+      throw new Error('Sprint not found');
+    }
+    
+    this.sprints[index] = { ...this.sprints[index], ...sprint };
+    return this.sprints[index];
+  }
+
+  async deleteSprint(id: string): Promise<void> {
+    console.log('MockProjectService: deleteSprint called with id:', id);
+    await simulateNetworkDelay();
+    this.sprints = this.sprints.filter(s => s.id !== id);
+  }
+
+  // Enhanced SMART Goals
+  async fetchEnhancedSmartGoals(projectId: string): Promise<IEnhancedSmartGoal[]> {
+    console.log('MockProjectService: fetchEnhancedSmartGoals called with projectId:', projectId);
+    await simulateNetworkDelay();
+    return this.enhancedSmartGoals.filter(goal => goal.projectId === projectId);
+  }
+
+  async createEnhancedSmartGoal(goal: Omit<IEnhancedSmartGoal, 'id' | 'createdAt'>): Promise<IEnhancedSmartGoal> {
+    console.log('MockProjectService: createEnhancedSmartGoal called with:', goal);
+    await simulateNetworkDelay();
+    
+    const newGoal: IEnhancedSmartGoal = {
+      ...goal,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString()
+    };
+    
+    this.enhancedSmartGoals.push(newGoal);
+    return newGoal;
+  }
+
+  async updateEnhancedSmartGoal(id: string, goal: Partial<IEnhancedSmartGoal>): Promise<IEnhancedSmartGoal> {
+    console.log('MockProjectService: updateEnhancedSmartGoal called with id:', id, 'data:', goal);
+    await simulateNetworkDelay();
+    
+    const index = this.enhancedSmartGoals.findIndex(g => g.id === id);
+    if (index === -1) {
+      throw new Error('Enhanced SMART goal not found');
+    }
+    
+    this.enhancedSmartGoals[index] = { ...this.enhancedSmartGoals[index], ...goal };
+    return this.enhancedSmartGoals[index];
+  }
+
+  async deleteEnhancedSmartGoal(id: string): Promise<void> {
+    console.log('MockProjectService: deleteEnhancedSmartGoal called with id:', id);
+    await simulateNetworkDelay();
+    this.enhancedSmartGoals = this.enhancedSmartGoals.filter(g => g.id !== id);
+  }
+
+  // Base CRUD operations (from CRUDOperations interface)
+  async create(item: Omit<IProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<IProject> {
+    return this.createProject(item);
+  }
+
+  async fetchAll(): Promise<IProject[]> {
+    return this.fetchProjects();
+  }
+
+  async fetchById(id: string): Promise<IProject | null> {
+    console.log('MockProjectService: fetchById called with id:', id);
+    await simulateNetworkDelay();
+    return this.projects.find(p => p.id === id) || null;
+  }
+
+  async update(id: string, item: Partial<IProject>): Promise<IProject> {
+    return this.updateProject(id, item);
+  }
+
+  async delete(id: string): Promise<void> {
+    return this.deleteProject(id);
   }
 }
 
