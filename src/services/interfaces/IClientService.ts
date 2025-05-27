@@ -1,3 +1,6 @@
+
+import { CRUDOperations } from '../base/BaseService';
+
 export interface Client {
   id: string;
   name: string;

@@ -12,25 +12,7 @@ import { getProductService, getArtistsService } from "@/services/serviceFactory"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import ProductForm from "@/components/admin/ProductForm";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  images: string[];
-  category_id: string | null;
-  artist_id: string | null;
-  status: string;
-  category_name?: string;
-  artist_name?: string;
-  category?: string;
-  profiles?: any;
-  average_time?: string;
-  sizes?: string[];
-  body_locations?: string[];
-  style_tags?: string[];
-}
+import { Product } from "@/services/interfaces/IProductService";
 
 interface Category {
   id: string;

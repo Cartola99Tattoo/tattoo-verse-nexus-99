@@ -1,7 +1,8 @@
-import { IProductService } from "../interfaces/IProductService";
+
+import { IProductService, Product, ProductFilters } from "../interfaces/IProductService";
 
 // Mock data for products
-const mockProducts = [
+const mockProducts: Product[] = [
   {
     id: "prod_1",
     name: "Tatuagem Blackwork",
@@ -11,6 +12,8 @@ const mockProducts = [
     category_id: "cat_1",
     artist_id: "artist_1",
     status: "available",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
   {
     id: "prod_2",
@@ -21,6 +24,8 @@ const mockProducts = [
     category_id: "cat_2",
     artist_id: "artist_2",
     status: "available",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
   {
     id: "prod_3",
@@ -31,6 +36,8 @@ const mockProducts = [
     category_id: "cat_3",
     artist_id: "artist_3",
     status: "unavailable",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
   {
     id: "prod_4",
@@ -41,6 +48,8 @@ const mockProducts = [
     category_id: "cat_4",
     artist_id: "artist_1",
     status: "limited",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
   {
     id: "prod_5",
@@ -51,23 +60,37 @@ const mockProducts = [
     category_id: "cat_5",
     artist_id: "artist_2",
     status: "available",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
 ];
 
-// Add the new CRUD methods to the mockProductService
 export const mockProductService: IProductService = {
-  async fetchProducts(options?: { category?: string; search?: string; limit?: number; offset?: number; userId?: string | undefined; }): Promise<any[]> {
-    // Simulate API delay
+  // Base CRUD operations
+  async create(productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<Product> {
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    
+    const newProduct: Product = {
+      ...productData,
+      id: `prod_${Math.random().toString(36).substring(2, 11)}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    
+    mockProducts.push(newProduct);
+    console.log("MockProductService: create called with data:", productData);
+    return newProduct;
+  },
+
+  async fetchAll(options?: ProductFilters): Promise<Product[]> {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     let filteredProducts = [...mockProducts];
 
-    // Apply category filter
     if (options?.category) {
       filteredProducts = filteredProducts.filter(product => product.category_id === options.category);
     }
 
-    // Apply search filter
     if (options?.search) {
       const searchTerm = options.search.toLowerCase();
       filteredProducts = filteredProducts.filter(product =>
@@ -76,106 +99,110 @@ export const mockProductService: IProductService = {
       );
     }
 
-    // Apply limit and offset for pagination
     if (options?.limit) {
       const offset = options.offset || 0;
       filteredProducts = filteredProducts.slice(offset, offset + options.limit);
     }
 
-    console.log("MockProductService: fetchProducts called with options:", options, "returning", filteredProducts.length, "products");
+    console.log("MockProductService: fetchAll called with options:", options, "returning", filteredProducts.length, "products");
     return filteredProducts;
   },
 
-  async fetchProductById(id: string | number): Promise<any | null> {
-    // Simulate API delay
+  async fetchById(id: string): Promise<Product | null> {
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     const product = mockProducts.find(product => product.id === id);
-
-    console.log("MockProductService: fetchProductById called with id:", id, "returning", product ? product.name : 'null');
+    console.log("MockProductService: fetchById called with id:", id, "returning", product ? product.name : 'null');
     return product || null;
   },
 
-  // New method for creating a product
-  async createProduct(productData: any): Promise<any> {
-    // Simulate API delay
+  async update(id: string, productData: Partial<Product>): Promise<Product> {
     await new Promise((resolve) => setTimeout(resolve, 800));
     
-    console.log("MockProductService: createProduct called with data:", productData);
-    
-    // Generate a new ID for the product
-    const newProduct = {
-      id: `prod_${Math.random().toString(36).substring(2, 11)}`,
-      ...productData,
-      created_at: new Date().toISOString()
-    };
-    
-    // Add the new product to the mockProducts array (in a real app, this would be stored in a database)
-    mockProducts.push(newProduct);
-    
-    return newProduct;
-  },
-  
-  // New method for updating a product
-  async updateProduct(id: string | number, productData: any): Promise<any> {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    
-    console.log(`MockProductService: updateProduct called for id ${id} with data:`, productData);
-    
-    // Find the product by ID
     const productIndex = mockProducts.findIndex(product => product.id === id);
     
     if (productIndex === -1) {
       throw new Error(`Product with ID ${id} not found`);
     }
     
-    // Update the product
-    const updatedProduct = {
+    const updatedProduct: Product = {
       ...mockProducts[productIndex],
       ...productData,
       updated_at: new Date().toISOString()
     };
     
     mockProducts[productIndex] = updatedProduct;
-    
+    console.log(`MockProductService: update called for id ${id} with data:`, productData);
     return updatedProduct;
   },
-  
-  // New method for deleting a product
-  async deleteProduct(id: string | number): Promise<boolean> {
-    // Simulate API delay
+
+  async delete(id: string): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 800));
     
-    console.log(`MockProductService: deleteProduct called for id ${id}`);
-    
-    // Find the product by ID
     const productIndex = mockProducts.findIndex(product => product.id === id);
     
     if (productIndex === -1) {
       throw new Error(`Product with ID ${id} not found`);
     }
     
-    // Remove the product
     mockProducts.splice(productIndex, 1);
-    
-    return true;
+    console.log(`MockProductService: delete called for id ${id}`);
+  },
+
+  // IProductService specific methods
+  async fetchProducts(options?: ProductFilters): Promise<Product[]> {
+    return this.fetchAll(options);
+  },
+
+  async fetchProductById(id: string | number): Promise<Product | null> {
+    return this.fetchById(String(id));
+  },
+
+  async createProduct(productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<Product> {
+    return this.create(productData);
+  },
+
+  async updateProduct(id: string | number, productData: Partial<Product>): Promise<Product> {
+    return this.update(String(id), productData);
+  },
+
+  async deleteProduct(id: string | number): Promise<boolean> {
+    try {
+      await this.delete(String(id));
+      return true;
+    } catch (error) {
+      return false;
+    }
   },
   
   async trackProductView(productId: string | number, userId?: string): Promise<void> {
     console.log(`MockProductService: trackProductView called for product ${productId} and user ${userId || 'anonymous'}`);
-    // In a real app, this would track user interactions with products
   },
   
-  async getRecommendedProducts(userId?: string, limit: number = 4): Promise<any[]> {
-    // Simulate API delay
+  async getRecommendedProducts(userId?: string, limit: number = 4): Promise<Product[]> {
     await new Promise((resolve) => setTimeout(resolve, 500));
     
     console.log(`MockProductService: getRecommendedProducts called for user ${userId || 'anonymous'} with limit ${limit}`);
     
-    // In a real app, this would return personalized recommendations
-    // For the mock, just return random products
     const shuffled = [...mockProducts].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, limit);
+  },
+
+  async uploadProductImage(productId: string, imageFile: File): Promise<string> {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    console.log('MockProductService: Uploading product image', productId, imageFile.name);
+    
+    const mockImageUrl = `/uploads/products/${productId}/${imageFile.name}`;
+    return mockImageUrl;
+  },
+
+  async deleteProductImage(productId: string, imageUrl: string): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    console.log('MockProductService: Deleting product image', productId, imageUrl);
+  },
+
+  async reorderProductImages(productId: string, imageUrls: string[]): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    console.log('MockProductService: Reordering product images', productId, imageUrls);
   }
 };
