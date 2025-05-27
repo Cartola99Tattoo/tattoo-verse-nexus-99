@@ -1,4 +1,3 @@
-
 export interface Client {
   id: string;
   name: string;
@@ -77,42 +76,29 @@ export interface KanbanStage {
   updated_at: string;
 }
 
-export interface IClientService {
-  fetchClients(options?: { 
-    limit?: number; 
-    offset?: number; 
-    search?: string; 
-    status?: string; 
-    temperature?: string;
-  }): Promise<Client[]>;
-  fetchClientById(id: string): Promise<Client>;
-  createClient(client: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'total_spent' | 'total_orders'>): Promise<Client>;
-  updateClient(id: string, updates: Partial<Client>): Promise<Client>;
-  updateClientTemperature(id: string, temperature: 'hot' | 'warm' | 'cold', score?: number): Promise<Client>;
+export interface IClientService extends CRUDOperations<Client> {
+  // Existing methods
+  fetchClients(options?: { search?: string; status?: string; temperature?: string; limit?: number; offset?: number }): Promise<Client[]>;
+  fetchClientById(id: string): Promise<Client | null>;
+  createClient(clientData: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'total_spent' | 'total_orders'>): Promise<Client>;
+  updateClient(id: string, clientData: Partial<Client>): Promise<Client>;
   deleteClient(id: string): Promise<void>;
   
-  // Stats methods
+  // Extended methods
   fetchClientStats(): Promise<ClientStats>;
-  
-  // Interaction methods
+  updateClientTemperature(id: string, temperature: 'hot' | 'warm' | 'cold', score?: number): Promise<Client>;
   fetchClientInteractions(clientId: string): Promise<ClientInteraction[]>;
-  createClientInteraction(interaction: Omit<ClientInteraction, 'id' | 'created_at'>): Promise<ClientInteraction>;
-  
-  // Purchase history
+  createClientInteraction(interactionData: Omit<ClientInteraction, 'id' | 'created_at'>): Promise<ClientInteraction>;
   fetchClientPurchaseHistory(clientId: string): Promise<any[]>;
-  
-  // Appointment methods
-  fetchUpcomingAppointments(limit?: number): Promise<Appointment[]>;
-  fetchAppointmentsByClient(clientId: string): Promise<Appointment[]>;
   fetchClientAppointments(clientId: string): Promise<Appointment[]>;
-  createAppointment(appointment: Omit<Appointment, 'id' | 'created_at' | 'updated_at'>): Promise<Appointment>;
-  updateAppointment(id: string, updates: Partial<Appointment>): Promise<Appointment>;
+  fetchUpcomingAppointments(limit?: number): Promise<Appointment[]>;
+  createAppointment(appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at'>): Promise<Appointment>;
   updateAppointmentStatus(id: string, status: Appointment['status']): Promise<void>;
-  deleteAppointment(id: string): Promise<void>;
-  
-  // Kanban methods
   fetchKanbanStages(): Promise<KanbanStage[]>;
-  createKanbanStage(stage: Omit<KanbanStage, 'id' | 'created_at' | 'updated_at'>): Promise<KanbanStage>;
-  updateKanbanStage(id: string, updates: Partial<KanbanStage>): Promise<KanbanStage>;
+  createKanbanStage(stageData: Omit<KanbanStage, 'id' | 'created_at' | 'updated_at'>): Promise<KanbanStage>;
+  updateKanbanStage(id: string, stageData: Partial<KanbanStage>): Promise<KanbanStage>;
   deleteKanbanStage(id: string): Promise<void>;
+  fetchAppointmentsByClient(clientId: string): Promise<Appointment[]>;
+  updateAppointment(id: string, updates: Partial<Appointment>): Promise<Appointment>;
+  deleteAppointment(id: string): Promise<void>;
 }

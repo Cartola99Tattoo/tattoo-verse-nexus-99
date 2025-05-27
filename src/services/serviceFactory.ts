@@ -1,4 +1,3 @@
-
 import { appConfig } from "@/config/appConfig";
 import { isSupabaseConnected } from "@/integrations/supabase/client";
 
@@ -29,6 +28,7 @@ import { mockBedService } from './mock/mockBedService';
 // Supabase services
 import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
 import { supabaseArtistService } from './supabase/SupabaseArtistService';
+import { supabaseProductService } from './supabase/SupabaseProductService';
 import { handleSupabaseError } from "./supabaseService";
 
 // Blog service factory
@@ -53,15 +53,15 @@ export const getAuthService = (): IAuthService => {
   return mockAuthService;
 };
 
-// Product service factory
+// Product service factory - updated
 export const getProductService = (): IProductService => {
+  console.log(`Using ${appConfig.dataSource.useMockData ? 'mock' : 'supabase'} product service`);
+  
   if (appConfig.dataSource.useMockData) {
     return mockProductService;
   }
   
-  // This would be a real implementation that uses Supabase
-  // For now we'll return the mock service
-  return mockProductService;
+  return supabaseProductService;
 };
 
 // Dashboard service factory
