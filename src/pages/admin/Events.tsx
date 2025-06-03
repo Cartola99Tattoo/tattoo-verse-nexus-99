@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,10 +19,13 @@ const Events = () => {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const eventService = getEventService();
 
-  const { data: events = [], loading, refresh } = useDataQuery<IEvent[]>(
+  const { data: events, loading, refresh } = useDataQuery<IEvent[]>(
     () => eventService.fetchEvents(),
     []
   );
+
+  // Ensure events is always an array, even if data is null
+  const safeEvents = events || [];
 
   const handleCreateEvent = () => {
     setEditingEvent(null);
@@ -60,7 +62,8 @@ const Events = () => {
     refresh();
   };
 
-  const filteredEvents = events.filter(event => {
+  // Use safeEvents instead of events to avoid null filter error
+  const filteredEvents = safeEvents.filter(event => {
     const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || event.status === statusFilter;
