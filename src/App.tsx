@@ -37,6 +37,7 @@ const AdminBlog = lazy(() => import('./pages/admin/Blog'));
 const AdminAuth = lazy(() => import('./pages/AdminAuth'));
 const AdminUserSetup = lazy(() => import('./pages/AdminUserSetup'));
 const Projects = lazy(() => import('./pages/admin/Projects'));
+const AdminEvents = lazy(() => import('./pages/admin/Events'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 function App() {
@@ -170,6 +171,11 @@ function App() {
           <Route path="projects" element={
             <LazyLoader>
               <Projects />
+            </LazyLoader>
+          } />
+          <Route path="events" element={
+            <LazyLoader>
+              <AdminEvents />
             </LazyLoader>
           } />
           <Route path="financial" element={
