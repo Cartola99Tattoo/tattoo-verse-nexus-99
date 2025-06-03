@@ -22,6 +22,18 @@ interface Props {
   items: NavItem[]
 }
 
+function NavItemComponent({ href, icon: Icon, children }: { href: string; icon: any; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted"
+    >
+      <Icon className="h-4 w-4" />
+      {children}
+    </a>
+  )
+}
+
 export function AdminSidebar({ items }: Props) {
   return (
     <div className="w-64 border-r flex-col space-y-1">
@@ -31,9 +43,9 @@ export function AdminSidebar({ items }: Props) {
         </h2>
         <div className="space-y-1">
           {items.map((item) => (
-            <NavItem key={item.href} href={item.href} icon={item.icon}>
+            <NavItemComponent key={item.href} href={item.href} icon={item.icon}>
               {item.name}
-            </NavItem>
+            </NavItemComponent>
           ))}
         </div>
       </div>
