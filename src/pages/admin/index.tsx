@@ -13,3 +13,4 @@ export { default as Loyalty } from './Loyalty';
 export { default as Security } from './Security';
 export { default as AdminBlog } from './Blog';
 export { default as Projects } from './Projects';
+export { default as Events } from './Events';

@@ -12,6 +12,7 @@ import { IFinancialService } from './interfaces/IFinancialService';
 import { IClientService } from './interfaces/IClientService';
 import { IProjectService } from './interfaces/IProjectService';
 import { IBedService } from './interfaces/IBedService';
+import { IEventService } from './interfaces/IEventService';
 
 // Mock services
 import { mockBlogService } from "./mock/mockBlogService";
@@ -24,6 +25,7 @@ import { mockFinancialService } from './mock/mockFinancialService';
 import { mockClientService } from './mock/mockClientService';
 import mockProjectService from './mock/mockProjectService';
 import { mockBedService } from './mock/mockBedService';
+import mockEventService from './mock/mockEventService';
 
 // Supabase services
 import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
@@ -143,3 +145,11 @@ export function getProjectService(): IProjectService {
     throw new Error('Supabase Project Service not implemented yet');
   }
 }
+
+export const getEventService = (): IEventService => {
+  if (appConfig.dataSource.useMockData) {
+    return mockEventService;
+  }
+  // TODO: Return SupabaseEventService when implemented
+  return mockEventService;
+};
