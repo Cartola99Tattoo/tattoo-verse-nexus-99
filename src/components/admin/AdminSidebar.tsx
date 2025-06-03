@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   Users,
@@ -11,7 +12,11 @@ import {
   ListChecks
 } from "lucide-react"
 
-import { NavItem } from "@/types"
+interface NavItem {
+  name: string;
+  icon: any;
+  href: string;
+}
 
 interface Props {
   items: NavItem[]
