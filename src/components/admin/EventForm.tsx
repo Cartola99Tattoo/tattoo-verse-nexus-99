@@ -73,9 +73,10 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
   const loadSmartGoals = async (eventId: string) => {
     try {
       const goals = await eventService.fetchEventSmartGoals(eventId);
-      setSmartGoals(goals);
+      setSmartGoals(goals || []); // Add null safety
     } catch (error) {
       console.error('Error loading smart goals:', error);
+      setSmartGoals([]); // Ensure it's always an array
     }
   };
 
@@ -177,7 +178,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
         metricType: newGoal.metricType
       });
 
-      setSmartGoals(prev => [...prev, goal]);
+      setSmartGoals(prev => [...(prev || []), goal]); // Add null safety
       setNewGoal({ title: '', description: '', targetValue: 0, unit: '', deadline: '', metricType: 'count' });
 
       toast({
@@ -196,7 +197,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
   const handleDeleteSmartGoal = async (goalId: string) => {
     try {
       await eventService.deleteEventSmartGoal(goalId);
-      setSmartGoals(prev => prev.filter(g => g.id !== goalId));
+      setSmartGoals(prev => (prev || []).filter(g => g.id !== goalId)); // Add null safety
       toast({
         title: "Sucesso",
         description: "Meta SMART removida!",
@@ -670,7 +671,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
               </div>
 
               <div className="space-y-3">
-                {smartGoals.map((goal) => {
+                {(smartGoals || []).map((goal) => {
                   const progress = getProgressPercentage(goal.currentValue, goal.targetValue);
                   return (
                     <div key={goal.id} className="p-4 border rounded-lg bg-white shadow-sm border-red-100">
