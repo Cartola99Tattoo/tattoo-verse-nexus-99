@@ -39,11 +39,11 @@ const Events = () => {
   const eventService = getEventService();
 
   const { data: eventsData = [], loading } = useDataQuery<IEvent[]>(
-    () => eventService.fetchPublicEvents(),
+    () => eventService.fetchEvents(),
     []
   );
 
-  // Ensure events is always an array
+  // Ensure events is always an array and filter for active, future, public events
   const events = Array.isArray(eventsData) ? eventsData : [];
 
   const getEventTypeLabel = (type: string) => {
@@ -61,7 +61,7 @@ const Events = () => {
     const eventDate = new Date(event.startDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return eventDate >= today;
+    return eventDate >= today && event.status === 'active' && event.isPublic;
   };
 
   const filteredEvents = events
@@ -70,8 +70,8 @@ const Events = () => {
 
   const upcomingEvents = filteredEvents.slice(0, 6);
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
+  const scrollToContactForm = () => {
+    const element = document.getElementById('contact-form');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
@@ -99,7 +99,12 @@ const Events = () => {
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <Button
-                onClick={() => scrollToSection('upcoming-events')}
+                onClick={() => {
+                  const element = document.getElementById('upcoming-events');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-4 px-8 text-lg shadow-2xl hover:shadow-red-500/25 transition-all duration-300 transform hover:scale-105"
                 size="lg"
               >
@@ -108,7 +113,7 @@ const Events = () => {
               </Button>
               
               <Button
-                onClick={() => scrollToSection('b2b-section')}
+                onClick={scrollToContactForm}
                 variant="outline"
                 className="border-2 border-red-500 text-red-400 hover:bg-red-500 hover:text-white font-bold py-4 px-8 text-lg shadow-2xl backdrop-blur-sm bg-black/30 transition-all duration-300 transform hover:scale-105"
                 size="lg"
@@ -210,7 +215,7 @@ const Events = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10 animate-fade-in">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent">
-                Onde A Arte da 99Tattoo Irá Te Encontrar
+                Junte-se a Nós! Próximos Eventos 99Tattoo Perto de Você
               </h2>
               <p className="text-xl text-gray-300">
                 Participe dos nossos próximos eventos e vivencie uma experiência única com a arte da tatuagem.
@@ -263,7 +268,7 @@ const Events = () => {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="animate-pulse bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl overflow-hidden shadow-xl">
+                  <div key={i} className="animate-pulse bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl overflow-hidden shadow-xl border border-gray-700">
                     <div className="h-64 bg-gray-700"></div>
                     <div className="p-6">
                       <div className="h-5 bg-gray-700 rounded mb-3"></div>
@@ -300,10 +305,15 @@ const Events = () => {
                         <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-none shadow-lg">
                           {getEventTypeLabel(event.eventType)}
                         </Badge>
-                        {event.ticketProduct?.isEnabled && (
+                        {event.price && event.price > 0 && (
                           <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white border-none shadow-lg">
                             <ShoppingCart className="h-3 w-3 mr-1" />
-                            R$ {event.ticketProduct.productPrice.toFixed(2)}
+                            R$ {event.price.toFixed(2)}
+                          </Badge>
+                        )}
+                        {event.price === 0 && (
+                          <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none shadow-lg">
+                            Gratuito
                           </Badge>
                         )}
                       </div>
@@ -323,8 +333,9 @@ const Events = () => {
                           <span>
                             {new Date(event.startDate).toLocaleDateString('pt-BR', { 
                               day: '2-digit', 
-                              month: 'short',
-                              year: 'numeric'
+                              month: 'long',
+                              year: 'numeric',
+                              weekday: 'long'
                             })}
                           </span>
                         </div>
@@ -351,7 +362,7 @@ const Events = () => {
                         onClick={() => setSelectedEvent(event)}
                         className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                       >
-                        Ver Mais Detalhes / Comprar Ingresso
+                        Ver Mais Detalhes
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     </div>
@@ -362,16 +373,23 @@ const Events = () => {
               <div className="text-center py-16 animate-fade-in">
                 <Calendar className="h-24 w-24 mx-auto mb-6 text-red-500 opacity-60" />
                 <h3 className="text-2xl font-bold text-white mb-4">Novos eventos em breve!</h3>
-                <p className="text-gray-400 max-w-md mx-auto">
-                  Estamos preparando eventos incríveis para você. Acompanhe nossas redes sociais para novidades!
+                <p className="text-gray-400 max-w-md mx-auto mb-8">
+                  Estamos preparando eventos incríveis para você. Enquanto isso, que tal trazer a 99Tattoo para o seu evento?
                 </p>
+                <Button
+                  onClick={scrollToContactForm}
+                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-3 px-8 shadow-lg"
+                >
+                  <Target className="h-5 w-5 mr-2" />
+                  Quero a 99Tattoo no Meu Evento!
+                </Button>
               </div>
             )}
           </div>
         </section>
 
         {/* B2B Section */}
-        <section id="b2b-section" className="py-20 bg-gradient-to-b from-black to-red-900">
+        <section className="py-20 bg-gradient-to-b from-black to-red-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16 animate-fade-in">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent">
@@ -481,7 +499,7 @@ const Events = () => {
             {/* CTA Button */}
             <div className="text-center animate-fade-in">
               <Button
-                onClick={() => setShowB2BForm(true)}
+                onClick={scrollToContactForm}
                 className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-4 px-12 text-lg shadow-2xl hover:shadow-red-500/25 transition-all duration-300 transform hover:scale-105"
                 size="lg"
               >
@@ -492,7 +510,7 @@ const Events = () => {
           </div>
         </section>
 
-        {/* Depoimentos Section (Opcional/Mock) */}
+        {/* Depoimentos Section */}
         <section className="py-20 bg-gradient-to-b from-red-900 to-black">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16 animate-fade-in">
@@ -577,53 +595,30 @@ const Events = () => {
           </div>
         </section>
 
-        {/* Footer Enhancement */}
-        <section className="py-12 bg-black border-t border-red-900">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <h3 className="text-xl font-bold text-white mb-4">99Tattoo Eventos</h3>
-                <p className="text-gray-400">Transformando seu evento em uma experiência inesquecível com arte na pele.</p>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white mb-4">Contato</h3>
-                <div className="space-y-2 text-gray-400">
-                  <p className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-red-500" />
-                    <span>São Paulo, SP - Brasil</span>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-red-500" />
-                    <span>eventos@99tattoo.com</span>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-red-500" />
-                    <span>(11) 99999-9999</span>
-                  </p>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white mb-4">Siga-nos</h3>
-                <div className="flex space-x-4">
-                  <a href="#" className="text-red-500 hover:text-white transition-colors">
-                    <Instagram className="h-6 w-6" />
-                  </a>
-                  <a href="#" className="text-red-500 hover:text-white transition-colors">
-                    <Facebook className="h-6 w-6" />
-                  </a>
-                  <a href="#" className="text-red-500 hover:text-white transition-colors">
-                    <Twitter className="h-6 w-6" />
-                  </a>
-                </div>
-                <div className="mt-4 text-sm text-gray-500">
-                  <a href="#" className="hover:text-red-400 transition-colors">Política de Privacidade</a>
-                  <span className="mx-2">|</span>
-                  <a href="#" className="hover:text-red-400 transition-colors">Termos de Uso</a>
-                </div>
-              </div>
+        {/* Contact Form Section */}
+        <section id="contact-form" className="py-20 bg-black">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent">
+                Transforme Seu Evento. Fale Conosco!
+              </h2>
+              <p className="text-xl text-gray-300">
+                Conte-nos sobre sua ideia e receba uma proposta personalizada para levar a arte da 99Tattoo ao seu evento.
+              </p>
             </div>
-            <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
-              &copy; {new Date().getFullYear()} 99Tattoo. Todos os direitos reservados.
+
+            <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-red-500/30 shadow-2xl">
+              <Button
+                onClick={() => setShowB2BForm(true)}
+                className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-6 text-xl shadow-2xl hover:shadow-red-500/25 transition-all duration-300 transform hover:scale-105"
+                size="lg"
+              >
+                <Target className="h-8 w-8 mr-4" />
+                Receber Proposta Personalizada
+              </Button>
+              <p className="text-center text-gray-400 mt-4">
+                Clique no botão acima para abrir nosso formulário completo e detalhar seu projeto
+              </p>
             </div>
           </div>
         </section>
