@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,10 +60,11 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const eventService = getEventService();
-  const { data: projects = [] } = useProjects();
-  const { artists: artistsData = [] } = useArtists(); // Add default empty array and rename to avoid confusion
+  const { data: projectsData = [] } = useProjects();
+  const { artists: artistsData = [] } = useArtists();
 
-  // Ensure artists is always an array
+  // Ensure projects and artists are always arrays
+  const projects = Array.isArray(projectsData) ? projectsData : [];
   const artists = Array.isArray(artistsData) ? artistsData : [];
 
   useEffect(() => {

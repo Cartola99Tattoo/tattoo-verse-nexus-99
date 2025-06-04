@@ -14,10 +14,13 @@ const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState<IEvent | null>(null);
   const eventService = getEventService();
 
-  const { data: events = [], loading } = useDataQuery<IEvent[]>(
+  const { data: eventsData = [], loading } = useDataQuery<IEvent[]>(
     () => eventService.fetchPublicEvents(),
     []
   );
+
+  // Ensure events is always an array
+  const events = Array.isArray(eventsData) ? eventsData : [];
 
   const getEventTypeLabel = (type: string) => {
     switch (type) {
