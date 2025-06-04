@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,9 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Save, Plus, Trash2, Target } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { ArrowLeft, Save, Plus, Trash2, Target, ShoppingCart, DollarSign, Users, TrendingUp } from "lucide-react";
 import { IEvent, IEventSmartGoal } from "@/services/interfaces/IEventService";
 import { getEventService } from "@/services/serviceFactory";
+import { useProjects } from "@/hooks/useProjects";
+import { useArtists } from "@/hooks/useArtists";
 import { toast } from "@/hooks/use-toast";
 
 interface EventFormProps {
@@ -34,7 +36,16 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
     price: 0,
     ticketLink: '',
     participatingArtists: [],
-    status: 'pending'
+    status: 'pending',
+    projectId: undefined,
+    ticketProduct: {
+      isEnabled: false,
+      productName: '',
+      productPrice: 0,
+      ticketStock: 0,
+      productCategory: 'Ingressos',
+      productDescription: ''
+    }
   });
   
   const [smartGoals, setSmartGoals] = useState<IEventSmartGoal[]>([]);
@@ -43,10 +54,14 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
     description: '',
     targetValue: 0,
     unit: '',
-    deadline: ''
+    deadline: '',
+    metricType: 'count' as 'currency' | 'count' | 'percentage'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const eventService = getEventService();
+  const { data: projects = [] } = useProjects();
+  const { data: artists = [] } = useArtists();
 
   useEffect(() => {
     if (event) {
@@ -66,6 +81,42 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
 
   const handleInputChange = (field: keyof IEvent, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Auto-preenchimento quando um projeto é selecionado
+    if (field === 'projectId' && value) {
+      const selectedProject = projects.find(p => p.id === value);
+      if (selectedProject) {
+        setFormData(prev => ({
+          ...prev,
+          startDate: prev.startDate || selectedProject.startDate,
+          endDate: prev.endDate || selectedProject.endDate,
+          description: prev.description || selectedProject.description
+        }));
+      }
+    }
+    
+    // Auto-preenchimento do ingresso quando o preço é alterado
+    if (field === 'price' && value > 0 && formData.ticketProduct) {
+      setFormData(prev => ({
+        ...prev,
+        ticketProduct: {
+          ...prev.ticketProduct!,
+          productPrice: value,
+          productName: prev.ticketProduct!.productName || `Ingresso ${prev.name || 'Evento'}`,
+          productDescription: prev.ticketProduct!.productDescription || prev.description || ''
+        }
+      }));
+    }
+  };
+
+  const handleTicketProductChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      ticketProduct: {
+        ...prev.ticketProduct!,
+        [field]: value
+      }
+    }));
   };
 
   const handleArtistChange = (value: string) => {
@@ -122,11 +173,12 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
         targetValue: newGoal.targetValue,
         currentValue: 0,
         unit: newGoal.unit,
-        deadline: newGoal.deadline
+        deadline: newGoal.deadline,
+        metricType: newGoal.metricType
       });
 
       setSmartGoals(prev => [...prev, goal]);
-      setNewGoal({ title: '', description: '', targetValue: 0, unit: '', deadline: '' });
+      setNewGoal({ title: '', description: '', targetValue: 0, unit: '', deadline: '', metricType: 'count' });
 
       toast({
         title: "Sucesso",
@@ -155,6 +207,19 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
         description: "Erro ao remover meta SMART.",
         variant: "destructive",
       });
+    }
+  };
+
+  const getProgressPercentage = (current: number, target: number) => {
+    return target > 0 ? Math.min((current / target) * 100, 100) : 0;
+  };
+
+  const getMetricIcon = (metricType: string) => {
+    switch (metricType) {
+      case 'currency': return <DollarSign className="h-4 w-4" />;
+      case 'count': return <Users className="h-4 w-4" />;
+      case 'percentage': return <TrendingUp className="h-4 w-4" />;
+      default: return <Target className="h-4 w-4" />;
     }
   };
 
@@ -191,6 +256,45 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="projectId">Associar a Projeto</Label>
+                <Select
+                  value={formData.projectId || ''}
+                  onValueChange={(value) => handleInputChange('projectId', value || undefined)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um projeto (opcional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Nenhum projeto</SelectItem>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="eventType">Tipo de Evento</Label>
+                <Select
+                  value={formData.eventType || 'flash_day'}
+                  onValueChange={(value) => handleInputChange('eventType', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="flash_day">Flash Day</SelectItem>
+                    <SelectItem value="workshop">Workshop</SelectItem>
+                    <SelectItem value="collection_launch">Lançamento de Coleção</SelectItem>
+                    <SelectItem value="exhibition">Exposição</SelectItem>
+                    <SelectItem value="other">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="md:col-span-2 space-y-2">
                 <Label htmlFor="description">Descrição Curta</Label>
                 <Textarea
@@ -211,25 +315,6 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   placeholder="Descrição completa para exibição na página pública..."
                   rows={5}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="eventType">Tipo de Evento</Label>
-                <Select
-                  value={formData.eventType || 'flash_day'}
-                  onValueChange={(value) => handleInputChange('eventType', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="flash_day">Flash Day</SelectItem>
-                    <SelectItem value="workshop">Workshop</SelectItem>
-                    <SelectItem value="collection_launch">Lançamento de Coleção</SelectItem>
-                    <SelectItem value="exhibition">Exposição</SelectItem>
-                    <SelectItem value="other">Outro</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="space-y-2">
@@ -365,13 +450,27 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
 
             <div className="space-y-2">
               <Label htmlFor="participatingArtists">Tatuadores Participantes</Label>
+              <Select
+                value={formData.participatingArtists?.join(', ') || ''}
+                onValueChange={handleArtistChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione os tatuadores..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {artists.map((artist) => (
+                    <SelectItem key={artist.id} value={artist.name}>
+                      {artist.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-600">Ou digite manualmente separando por vírgulas</p>
               <Input
-                id="participatingArtists"
                 value={formData.participatingArtists?.join(', ') || ''}
                 onChange={(e) => handleArtistChange(e.target.value)}
                 placeholder="Nome 1, Nome 2, Nome 3..."
               />
-              <p className="text-sm text-gray-600">Separe os nomes com vírgulas</p>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -384,6 +483,93 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
             </div>
           </CardContent>
         </Card>
+
+        {(formData.price || 0) > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                Configuração de Venda de Ingressos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="ticketEnabled"
+                  checked={formData.ticketProduct?.isEnabled || false}
+                  onCheckedChange={(checked) => handleTicketProductChange('isEnabled', checked)}
+                />
+                <Label htmlFor="ticketEnabled">Vincular à Loja como Produto</Label>
+              </div>
+
+              {formData.ticketProduct?.isEnabled && (
+                <div className="space-y-4 border-l-4 border-purple-500 pl-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="productName">Nome do Produto (Ingresso)</Label>
+                      <Input
+                        id="productName"
+                        value={formData.ticketProduct.productName || ''}
+                        onChange={(e) => handleTicketProductChange('productName', e.target.value)}
+                        placeholder={`Ingresso ${formData.name || 'Evento'}`}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="productPrice">Preço do Ingresso</Label>
+                      <Input
+                        id="productPrice"
+                        type="number"
+                        step="0.01"
+                        value={formData.ticketProduct.productPrice || ''}
+                        onChange={(e) => handleTicketProductChange('productPrice', Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="ticketStock">Estoque de Ingressos</Label>
+                      <Input
+                        id="ticketStock"
+                        type="number"
+                        value={formData.ticketProduct.ticketStock || ''}
+                        onChange={(e) => handleTicketProductChange('ticketStock', Number(e.target.value))}
+                        placeholder="Ex: 50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="productCategory">Categoria do Produto</Label>
+                      <Select
+                        value={formData.ticketProduct.productCategory || 'Ingressos'}
+                        onValueChange={(value) => handleTicketProductChange('productCategory', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Ingressos">Ingressos</SelectItem>
+                          <SelectItem value="Eventos">Eventos</SelectItem>
+                          <SelectItem value="Workshops">Workshops</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="productDescription">Descrição do Produto</Label>
+                    <Textarea
+                      id="productDescription"
+                      value={formData.ticketProduct.productDescription || ''}
+                      onChange={(e) => handleTicketProductChange('productDescription', e.target.value)}
+                      placeholder={formData.description || 'Descrição do ingresso...'}
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {event && (
           <Card>
@@ -402,11 +588,19 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                     value={newGoal.title}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
                   />
-                  <Input
-                    placeholder="Unidade (ex: pessoas, R$)"
-                    value={newGoal.unit}
-                    onChange={(e) => setNewGoal(prev => ({ ...prev, unit: e.target.value }))}
-                  />
+                  <Select
+                    value={newGoal.metricType}
+                    onValueChange={(value) => setNewGoal(prev => ({ ...prev, metricType: value as any }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="currency">Monetário (R$)</SelectItem>
+                      <SelectItem value="count">Quantidade</SelectItem>
+                      <SelectItem value="percentage">Percentual (%)</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Input
                     type="number"
                     placeholder="Valor alvo"
@@ -414,7 +608,12 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                     onChange={(e) => setNewGoal(prev => ({ ...prev, targetValue: Number(e.target.value) }))}
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Input
+                    placeholder="Unidade (ex: pessoas, R$)"
+                    value={newGoal.unit}
+                    onChange={(e) => setNewGoal(prev => ({ ...prev, unit: e.target.value }))}
+                  />
                   <Textarea
                     placeholder="Descrição da meta"
                     value={newGoal.description}
@@ -439,26 +638,43 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
               </div>
 
               <div className="space-y-3">
-                {smartGoals.map((goal) => (
-                  <div key={goal.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
-                    <div className="flex-1">
-                      <h5 className="font-medium">{goal.title}</h5>
-                      <p className="text-sm text-gray-600">{goal.description}</p>
-                      <p className="text-sm text-gray-500">
-                        Meta: {goal.targetValue} {goal.unit} até {new Date(goal.deadline).toLocaleDateString('pt-BR')}
-                      </p>
+                {smartGoals.map((goal) => {
+                  const progress = getProgressPercentage(goal.currentValue, goal.targetValue);
+                  return (
+                    <div key={goal.id} className="p-4 border rounded-lg bg-white shadow-sm">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            {getMetricIcon(goal.metricType)}
+                            <h5 className="font-medium">{goal.title}</h5>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{goal.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span>Meta: {goal.targetValue} {goal.unit}</span>
+                            <span>Atual: {goal.currentValue} {goal.unit}</span>
+                            <span>Prazo: {new Date(goal.deadline).toLocaleDateString('pt-BR')}</span>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteSmartGoal(goal.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs text-gray-600">
+                          <span>Progresso</span>
+                          <span>{progress.toFixed(1)}%</span>
+                        </div>
+                        <Progress value={progress} className="h-2" />
+                      </div>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteSmartGoal(goal.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

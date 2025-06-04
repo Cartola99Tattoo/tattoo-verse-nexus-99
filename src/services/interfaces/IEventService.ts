@@ -20,6 +20,8 @@ export interface IEvent {
   participatingArtists?: string[];
   status: 'pending' | 'active' | 'completed' | 'cancelled';
   smartGoals?: IEventSmartGoal[];
+  projectId?: string; // Nova associação com projetos
+  ticketProduct?: IEventTicketProduct; // Nova configuração de ingresso
   createdAt: string;
   updatedAt: string;
 }
@@ -33,7 +35,18 @@ export interface IEventSmartGoal {
   currentValue: number;
   unit: string;
   deadline: string;
+  metricType: 'currency' | 'count' | 'percentage';
   createdAt: string;
+}
+
+export interface IEventTicketProduct {
+  isEnabled: boolean;
+  productName: string;
+  productPrice: number;
+  ticketStock: number;
+  productCategory: string;
+  productDescription: string;
+  productId?: string; // ID do produto criado na loja
 }
 
 export interface IEventLead {
@@ -57,7 +70,11 @@ export interface IEventService extends CRUDOperations<IEvent> {
   createEventSmartGoal(goal: Omit<IEventSmartGoal, 'id' | 'createdAt'>): Promise<IEventSmartGoal>;
   updateEventSmartGoal(id: string, goal: Partial<IEventSmartGoal>): Promise<IEventSmartGoal>;
   deleteEventSmartGoal(id: string): Promise<void>;
+  updateSmartGoalProgress(eventId: string, goalTitle: string, newValue: number): Promise<void>;
   
   fetchEventLeads(eventId: string): Promise<IEventLead[]>;
   createEventLead(lead: Omit<IEventLead, 'id' | 'createdAt'>): Promise<IEventLead>;
+  
+  createTicketProduct(event: IEvent): Promise<string>; // Retorna o ID do produto criado
+  updateTicketProduct(event: IEvent): Promise<void>;
 }

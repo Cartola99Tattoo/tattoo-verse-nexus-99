@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Calendar, MapPin, Search, Filter, Edit, Trash2, Users } from "lucide-react";
+import { Plus, Calendar, MapPin, Search, Filter, Edit, Trash2, Users, Target, ShoppingCart, TrendingUp } from "lucide-react";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getEventService } from "@/services/serviceFactory";
 import { IEvent } from "@/services/interfaces/IEventService";
@@ -100,6 +101,31 @@ const Events = () => {
       case 'exhibition': return 'Exposição';
       case 'other': return 'Outro';
       default: return type;
+    }
+  };
+
+  const getMainGoalProgress = async (eventId: string) => {
+    try {
+      const goals = await eventService.fetchEventSmartGoals(eventId);
+      if (goals.length === 0) return null;
+      
+      // Priorizar metas de faturamento, depois leads, depois outras
+      const priorityGoal = goals.find(g => g.title.toLowerCase().includes('faturamento')) ||
+                          goals.find(g => g.title.toLowerCase().includes('lead')) ||
+                          goals[0];
+      
+      const progress = priorityGoal.targetValue > 0 ? 
+        Math.min((priorityGoal.currentValue / priorityGoal.targetValue) * 100, 100) : 0;
+        
+      return {
+        title: priorityGoal.title,
+        progress,
+        current: priorityGoal.currentValue,
+        target: priorityGoal.targetValue,
+        unit: priorityGoal.unit
+      };
+    } catch (error) {
+      return null;
     }
   };
 
@@ -226,10 +252,16 @@ const Events = () => {
                     {getStatusLabel(event.status)}
                   </Badge>
                 </div>
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 flex gap-1">
                   {event.isPublic && (
                     <Badge variant="outline" className="bg-white/90 text-purple-700 border-purple-200">
                       Público
+                    </Badge>
+                  )}
+                  {event.ticketProduct?.isEnabled && (
+                    <Badge variant="outline" className="bg-white/90 text-green-700 border-green-200">
+                      <ShoppingCart className="h-3 w-3 mr-1" />
+                      Venda
                     </Badge>
                   )}
                 </div>
@@ -257,6 +289,47 @@ const Events = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Performance Indicators */}
+                {event.smartGoals && event.smartGoals.length > 0 && (
+                  <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm font-medium text-purple-800">Progresso Principal</span>
+                    </div>
+                    {event.smartGoals.slice(0, 1).map((goal) => {
+                      const progress = goal.targetValue > 0 ? Math.min((goal.currentValue / goal.targetValue) * 100, 100) : 0;
+                      return (
+                        <div key={goal.id} className="space-y-1">
+                          <div className="flex justify-between text-xs text-gray-600">
+                            <span>{goal.title}</span>
+                            <span>{progress.toFixed(0)}%</span>
+                          </div>
+                          <Progress value={progress} className="h-2" />
+                          <div className="text-xs text-gray-500">
+                            {goal.currentValue} / {goal.targetValue} {goal.unit}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Ticket Sales Indicator */}
+                {event.ticketProduct?.isEnabled && (
+                  <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
+                    <div className="flex items-center gap-2 mb-1">
+                      <ShoppingCart className="h-4 w-4 text-green-600" />
+                      <span className="text-sm font-medium text-green-800">Ingressos</span>
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {event.ticketProduct.ticketStock - (event.smartGoals?.find(g => g.title.toLowerCase().includes('ingresso'))?.currentValue || 0)} disponíveis de {event.ticketProduct.ticketStock}
+                    </div>
+                    <div className="text-xs text-green-600 font-medium">
+                      R$ {event.ticketProduct.productPrice.toFixed(2)}
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between mb-4">
                   <Badge variant="outline" className="text-indigo-700 border-indigo-200">
