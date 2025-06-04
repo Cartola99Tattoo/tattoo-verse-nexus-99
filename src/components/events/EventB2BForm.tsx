@@ -82,7 +82,7 @@ Preferências de Contato: ${Object.entries(formData.contactPreferences)
 
 Mensagem: ${formData.message || 'Nenhuma mensagem adicional'}`,
         source: 'event_b2b_landing',
-        status: 'lead',
+        status: 'interested',
         lead_score: 85, // High score for B2B leads
         tags: ['evento_b2b', formData.eventType?.toLowerCase().replace(/\s+/g, '_') || 'evento_personalizado'].filter(Boolean)
       });
