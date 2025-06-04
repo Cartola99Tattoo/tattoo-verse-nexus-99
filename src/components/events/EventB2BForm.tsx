@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -66,11 +65,9 @@ const EventB2BForm = ({ isOpen, onClose }: EventB2BFormProps) => {
     try {
       // Create a B2B event lead in the client service
       await clientService.create({
-        first_name: formData.name.split(' ')[0] || formData.name,
-        last_name: formData.name.split(' ').slice(1).join(' ') || '',
+        name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        company: formData.company,
         notes: `LEAD B2B EVENTO: ${formData.eventType || 'Não especificado'}
 Empresa/Evento: ${formData.company || 'Não informado'}
 Data Prevista: ${formData.eventDate || 'Não informado'}
