@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,7 +61,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
   
   const eventService = getEventService();
   const { data: projects = [] } = useProjects();
-  const { artists } = useArtists();
+  const { artists = [] } = useArtists(); // Add default empty array
 
   useEffect(() => {
     if (event) {
@@ -472,11 +470,15 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   <SelectValue placeholder="Selecione os tatuadores..." />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-red-200 shadow-lg">
-                  {artists.map((artist) => (
-                    <SelectItem key={artist.id} value={`${artist.first_name} ${artist.last_name}`}>
-                      {artist.first_name} {artist.last_name}
-                    </SelectItem>
-                  ))}
+                  {artists && artists.length > 0 ? (
+                    artists.map((artist) => (
+                      <SelectItem key={artist.id} value={`${artist.first_name} ${artist.last_name}`}>
+                        {artist.first_name} {artist.last_name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>Nenhum artista encontrado</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <p className="text-sm text-gray-600">Ou digite manualmente separando por vírgulas</p>
