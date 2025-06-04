@@ -61,7 +61,10 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
   
   const eventService = getEventService();
   const { data: projects = [] } = useProjects();
-  const { artists = [] } = useArtists(); // Add default empty array
+  const { artists: artistsData = [] } = useArtists(); // Add default empty array and rename to avoid confusion
+
+  // Ensure artists is always an array
+  const artists = Array.isArray(artistsData) ? artistsData : [];
 
   useEffect(() => {
     if (event) {
@@ -471,7 +474,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   <SelectValue placeholder="Selecione os tatuadores..." />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-red-200 shadow-lg">
-                  {artists && artists.length > 0 ? (
+                  {artists.length > 0 ? (
                     artists.map((artist) => (
                       <SelectItem key={artist.id} value={`${artist.first_name} ${artist.last_name}`}>
                         {artist.first_name} {artist.last_name}
