@@ -64,7 +64,7 @@ const EventB2BForm = ({ isOpen, onClose }: EventB2BFormProps) => {
     setIsSubmitting(true);
     try {
       // Create a B2B event lead in the client service
-      await clientService.create({
+      await clientService.createClient({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
