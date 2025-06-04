@@ -89,7 +89,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Auto-preenchimento quando um projeto é selecionado
-    if (field === 'projectId' && value) {
+    if (field === 'projectId' && value && value !== 'none') {
       const selectedProject = projects.find(p => p.id === value);
       if (selectedProject) {
         setFormData(prev => ({
@@ -143,14 +143,20 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
 
     setIsSubmitting(true);
     try {
+      // Handle projectId - convert 'none' back to undefined
+      const submitData = {
+        ...formData,
+        projectId: formData.projectId === 'none' ? undefined : formData.projectId
+      };
+
       if (event) {
-        await eventService.updateEvent(event.id, formData);
+        await eventService.updateEvent(event.id, submitData);
         toast({
           title: "Sucesso",
           description: "Evento atualizado com sucesso!",
         });
       } else {
-        await eventService.createEvent(formData as Omit<IEvent, 'id' | 'createdAt' | 'updatedAt'>);
+        await eventService.createEvent(submitData as Omit<IEvent, 'id' | 'createdAt' | 'updatedAt'>);
         toast({
           title: "Sucesso",
           description: "Evento criado com sucesso!",
@@ -268,14 +274,14 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
               <div className="space-y-2">
                 <Label htmlFor="projectId">Associar a Projeto</Label>
                 <Select
-                  value={formData.projectId || ''}
-                  onValueChange={(value) => handleInputChange('projectId', value || undefined)}
+                  value={formData.projectId || 'none'}
+                  onValueChange={(value) => handleInputChange('projectId', value === 'none' ? undefined : value)}
                 >
                   <SelectTrigger className="border-red-200 focus:border-red-500">
                     <SelectValue placeholder="Selecione um projeto (opcional)" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-red-200 shadow-lg">
-                    <SelectItem value="">Nenhum projeto</SelectItem>
+                    <SelectItem value="none">Nenhum projeto</SelectItem>
                     {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.name}
@@ -485,7 +491,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled>Nenhum artista encontrado</SelectItem>
+                    <SelectItem value="no-artists" disabled>Nenhum artista encontrado</SelectItem>
                   )}
                 </SelectContent>
               </Select>
