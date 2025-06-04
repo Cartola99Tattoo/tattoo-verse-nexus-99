@@ -61,7 +61,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
   
   const eventService = getEventService();
   const { data: projects = [] } = useProjects();
-  const { data: artists = [] } = useArtists();
+  const { artists } = useArtists();
 
   useEffect(() => {
     if (event) {
@@ -120,8 +120,8 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
   };
 
   const handleArtistChange = (value: string) => {
-    const artists = value.split(',').map(artist => artist.trim()).filter(Boolean);
-    handleInputChange('participatingArtists', artists);
+    const artistsArray = value.split(',').map(artist => artist.trim()).filter(Boolean);
+    handleInputChange('participatingArtists', artistsArray);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
