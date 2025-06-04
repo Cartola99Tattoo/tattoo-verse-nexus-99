@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -227,7 +228,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
   return (
     <div className="p-6">
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" onClick={onClose}>
+        <Button variant="outline" onClick={onClose} className="border-red-200 text-red-600 hover:bg-red-50">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
         </Button>
@@ -240,9 +241,9 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Informações Básicas</CardTitle>
+        <Card className="shadow-lg border-red-100">
+          <CardHeader className="bg-gradient-to-r from-red-50 to-gray-50">
+            <CardTitle className="text-red-800">Informações Básicas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -254,6 +255,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="Ex: Flash Day Verão 2024"
                   required
+                  className="border-red-200 focus:border-red-500 focus:ring-red-200"
                 />
               </div>
 
@@ -263,10 +265,10 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   value={formData.projectId || ''}
                   onValueChange={(value) => handleInputChange('projectId', value || undefined)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-red-200 focus:border-red-500">
                     <SelectValue placeholder="Selecione um projeto (opcional)" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border-red-200 shadow-lg">
                     <SelectItem value="">Nenhum projeto</SelectItem>
                     {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
@@ -283,10 +285,10 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   value={formData.eventType || 'flash_day'}
                   onValueChange={(value) => handleInputChange('eventType', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-red-200 focus:border-red-500">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border-red-200 shadow-lg">
                     <SelectItem value="flash_day">Flash Day</SelectItem>
                     <SelectItem value="workshop">Workshop</SelectItem>
                     <SelectItem value="collection_launch">Lançamento de Coleção</SelectItem>
@@ -304,6 +306,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   placeholder="Breve descrição do evento..."
                   rows={3}
+                  className="border-red-200 focus:border-red-500 focus:ring-red-200"
                 />
               </div>
 
@@ -315,6 +318,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   onChange={(e) => handleInputChange('detailedDescription', e.target.value)}
                   placeholder="Descrição completa para exibição na página pública..."
                   rows={5}
+                  className="border-red-200 focus:border-red-500 focus:ring-red-200"
                 />
               </div>
 
@@ -324,10 +328,10 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   value={formData.status || 'pending'}
                   onValueChange={(value) => handleInputChange('status', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-red-200 focus:border-red-500">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border-red-200 shadow-lg">
                     <SelectItem value="pending">Pendente</SelectItem>
                     <SelectItem value="active">Ativo</SelectItem>
                     <SelectItem value="completed">Concluído</SelectItem>
@@ -339,9 +343,9 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Data e Local</CardTitle>
+        <Card className="shadow-lg border-red-100">
+          <CardHeader className="bg-gradient-to-r from-red-50 to-gray-50">
+            <CardTitle className="text-red-800">Data e Local</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -352,6 +356,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   type="date"
                   value={formData.startDate || ''}
                   onChange={(e) => handleInputChange('startDate', e.target.value)}
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
 
@@ -362,6 +367,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   type="date"
                   value={formData.endDate || ''}
                   onChange={(e) => handleInputChange('endDate', e.target.value)}
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
 
@@ -372,6 +378,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   type="time"
                   value={formData.startTime || ''}
                   onChange={(e) => handleInputChange('startTime', e.target.value)}
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
 
@@ -382,6 +389,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   type="time"
                   value={formData.endTime || ''}
                   onChange={(e) => handleInputChange('endTime', e.target.value)}
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
             </div>
@@ -394,6 +402,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   value={formData.location || ''}
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   placeholder="Ex: Estúdio 99Tattoo"
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
 
@@ -404,15 +413,16 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   value={formData.fullAddress || ''}
                   onChange={(e) => handleInputChange('fullAddress', e.target.value)}
                   placeholder="Endereço completo para GPS..."
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Detalhes Adicionais</CardTitle>
+        <Card className="shadow-lg border-red-100">
+          <CardHeader className="bg-gradient-to-r from-red-50 to-gray-50">
+            <CardTitle className="text-red-800">Detalhes Adicionais</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -422,6 +432,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                 value={formData.featuredImage || ''}
                 onChange={(e) => handleInputChange('featuredImage', e.target.value)}
                 placeholder="https://exemplo.com/imagem.jpg"
+                className="border-red-200 focus:border-red-500"
               />
             </div>
 
@@ -435,6 +446,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   value={formData.price || ''}
                   onChange={(e) => handleInputChange('price', Number(e.target.value))}
                   placeholder="0.00"
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
 
@@ -445,6 +457,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   value={formData.ticketLink || ''}
                   onChange={(e) => handleInputChange('ticketLink', e.target.value)}
                   placeholder="https://exemplo.com/ingressos"
+                  className="border-red-200 focus:border-red-500"
                 />
               </div>
             </div>
@@ -455,10 +468,10 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                 value={formData.participatingArtists?.join(', ') || ''}
                 onValueChange={handleArtistChange}
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-red-200 focus:border-red-500">
                   <SelectValue placeholder="Selecione os tatuadores..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border-red-200 shadow-lg">
                   {artists.map((artist) => (
                     <SelectItem key={artist.id} value={`${artist.first_name} ${artist.last_name}`}>
                       {artist.first_name} {artist.last_name}
@@ -471,6 +484,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                 value={formData.participatingArtists?.join(', ') || ''}
                 onChange={(e) => handleArtistChange(e.target.value)}
                 placeholder="Nome 1, Nome 2, Nome 3..."
+                className="border-red-200 focus:border-red-500"
               />
             </div>
 
@@ -479,6 +493,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                 id="isPublic"
                 checked={formData.isPublic || false}
                 onCheckedChange={(checked) => handleInputChange('isPublic', checked)}
+                className="border-red-500 text-red-600"
               />
               <Label htmlFor="isPublic">Evento aberto ao público</Label>
             </div>
@@ -486,10 +501,10 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
         </Card>
 
         {(formData.price || 0) > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
+          <Card className="shadow-lg border-red-100">
+            <CardHeader className="bg-gradient-to-r from-red-50 to-gray-50">
+              <CardTitle className="flex items-center gap-2 text-red-800">
+                <ShoppingCart className="h-5 w-5 text-red-600" />
                 Configuração de Venda de Ingressos
               </CardTitle>
             </CardHeader>
@@ -499,43 +514,50 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   id="ticketEnabled"
                   checked={formData.ticketProduct?.isEnabled || false}
                   onCheckedChange={(checked) => handleTicketProductChange('isEnabled', checked)}
+                  className="border-red-500 text-red-600"
                 />
                 <Label htmlFor="ticketEnabled">Vincular à Loja como Produto</Label>
               </div>
 
               {formData.ticketProduct?.isEnabled && (
-                <div className="space-y-4 border-l-4 border-purple-500 pl-4">
+                <div className="space-y-4 border-l-4 border-red-500 pl-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="productName">Nome do Produto (Ingresso)</Label>
+                      <Label htmlFor="productName">Nome do Produto (Ingresso) *</Label>
                       <Input
                         id="productName"
                         value={formData.ticketProduct.productName || ''}
                         onChange={(e) => handleTicketProductChange('productName', e.target.value)}
                         placeholder={`Ingresso ${formData.name || 'Evento'}`}
+                        required
+                        className="border-red-200 focus:border-red-500"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="productPrice">Preço do Ingresso</Label>
+                      <Label htmlFor="productPrice">Preço do Ingresso *</Label>
                       <Input
                         id="productPrice"
                         type="number"
                         step="0.01"
                         value={formData.ticketProduct.productPrice || ''}
                         onChange={(e) => handleTicketProductChange('productPrice', Number(e.target.value))}
+                        required
+                        className="border-red-200 focus:border-red-500"
                       />
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="ticketStock">Estoque de Ingressos</Label>
+                      <Label htmlFor="ticketStock">Estoque de Ingressos *</Label>
                       <Input
                         id="ticketStock"
                         type="number"
                         value={formData.ticketProduct.ticketStock || ''}
                         onChange={(e) => handleTicketProductChange('ticketStock', Number(e.target.value))}
                         placeholder="Ex: 50"
+                        required
+                        className="border-red-200 focus:border-red-500"
                       />
                     </div>
                     <div className="space-y-2">
@@ -544,10 +566,10 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                         value={formData.ticketProduct.productCategory || 'Ingressos'}
                         onValueChange={(value) => handleTicketProductChange('productCategory', value)}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="border-red-200 focus:border-red-500">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white border-red-200 shadow-lg">
                           <SelectItem value="Ingressos">Ingressos</SelectItem>
                           <SelectItem value="Eventos">Eventos</SelectItem>
                           <SelectItem value="Workshops">Workshops</SelectItem>
@@ -564,6 +586,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                       onChange={(e) => handleTicketProductChange('productDescription', e.target.value)}
                       placeholder={formData.description || 'Descrição do ingresso...'}
                       rows={3}
+                      className="border-red-200 focus:border-red-500"
                     />
                   </div>
                 </div>
@@ -573,30 +596,31 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
         )}
 
         {event && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
+          <Card className="shadow-lg border-red-100">
+            <CardHeader className="bg-gradient-to-r from-red-50 to-gray-50">
+              <CardTitle className="flex items-center gap-2 text-red-800">
+                <Target className="h-5 w-5 text-red-600" />
                 Metas SMART do Evento
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50 space-y-4">
-                <h4 className="font-medium">Adicionar Nova Meta</h4>
+              <div className="p-4 border-2 border-dashed border-red-200 rounded-lg bg-red-50 space-y-4">
+                <h4 className="font-medium text-red-800">Adicionar Nova Meta</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Input
                     placeholder="Título da meta"
                     value={newGoal.title}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
+                    className="border-red-200 focus:border-red-500"
                   />
                   <Select
                     value={newGoal.metricType}
                     onValueChange={(value) => setNewGoal(prev => ({ ...prev, metricType: value as any }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-red-200 focus:border-red-500">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white border-red-200 shadow-lg">
                       <SelectItem value="currency">Monetário (R$)</SelectItem>
                       <SelectItem value="count">Quantidade</SelectItem>
                       <SelectItem value="percentage">Percentual (%)</SelectItem>
@@ -607,6 +631,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                     placeholder="Valor alvo"
                     value={newGoal.targetValue || ''}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, targetValue: Number(e.target.value) }))}
+                    className="border-red-200 focus:border-red-500"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -614,17 +639,20 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                     placeholder="Unidade (ex: pessoas, R$)"
                     value={newGoal.unit}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, unit: e.target.value }))}
+                    className="border-red-200 focus:border-red-500"
                   />
                   <Textarea
                     placeholder="Descrição da meta"
                     value={newGoal.description}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, description: e.target.value }))}
                     rows={2}
+                    className="border-red-200 focus:border-red-500"
                   />
                   <Input
                     type="date"
                     value={newGoal.deadline}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, deadline: e.target.value }))}
+                    className="border-red-200 focus:border-red-500"
                   />
                 </div>
                 <Button 
@@ -632,6 +660,7 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                   onClick={handleAddSmartGoal}
                   disabled={!newGoal.title.trim()}
                   size="sm"
+                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar Meta
@@ -642,12 +671,12 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                 {smartGoals.map((goal) => {
                   const progress = getProgressPercentage(goal.currentValue, goal.targetValue);
                   return (
-                    <div key={goal.id} className="p-4 border rounded-lg bg-white shadow-sm">
+                    <div key={goal.id} className="p-4 border rounded-lg bg-white shadow-sm border-red-100">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             {getMetricIcon(goal.metricType)}
-                            <h5 className="font-medium">{goal.title}</h5>
+                            <h5 className="font-medium text-red-800">{goal.title}</h5>
                           </div>
                           <p className="text-sm text-gray-600 mb-2">{goal.description}</p>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -671,7 +700,12 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                           <span>Progresso</span>
                           <span>{progress.toFixed(1)}%</span>
                         </div>
-                        <Progress value={progress} className="h-2" />
+                        <Progress value={progress} className="h-2 bg-gray-200">
+                          <div 
+                            className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all" 
+                            style={{ width: `${progress}%` }}
+                          />
+                        </Progress>
                       </div>
                     </div>
                   );
@@ -685,12 +719,12 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
           <Button 
             type="submit" 
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+            className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <Save className="h-4 w-4 mr-2" />
             {isSubmitting ? 'Salvando...' : (event ? 'Atualizar Evento' : 'Criar Evento')}
           </Button>
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onClose} className="border-gray-300 hover:bg-gray-50">
             Cancelar
           </Button>
         </div>

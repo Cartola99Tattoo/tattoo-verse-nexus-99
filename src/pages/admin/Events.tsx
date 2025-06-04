@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -104,29 +105,9 @@ const Events = () => {
     }
   };
 
-  const getMainGoalProgress = async (eventId: string) => {
-    try {
-      const goals = await eventService.fetchEventSmartGoals(eventId);
-      if (goals.length === 0) return null;
-      
-      // Priorizar metas de faturamento, depois leads, depois outras
-      const priorityGoal = goals.find(g => g.title.toLowerCase().includes('faturamento')) ||
-                          goals.find(g => g.title.toLowerCase().includes('lead')) ||
-                          goals[0];
-      
-      const progress = priorityGoal.targetValue > 0 ? 
-        Math.min((priorityGoal.currentValue / priorityGoal.targetValue) * 100, 100) : 0;
-        
-      return {
-        title: priorityGoal.title,
-        progress,
-        current: priorityGoal.currentValue,
-        target: priorityGoal.targetValue,
-        unit: priorityGoal.unit
-      };
-    } catch (error) {
-      return null;
-    }
+  const formatPrice = (price: number | undefined) => {
+    if (!price || price === 0) return 'Grátis';
+    return `R$ ${price.toFixed(2)}`;
   };
 
   if (showCreateForm) {
@@ -147,17 +128,17 @@ const Events = () => {
         </div>
         <Button 
           onClick={handleCreateEvent}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+          className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
         >
           <Plus className="h-4 w-4 mr-2" />
           Novo Evento
         </Button>
       </div>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
+      <Card className="mb-6 shadow-lg border-red-100">
+        <CardHeader className="bg-gradient-to-r from-red-50 to-gray-50">
+          <CardTitle className="flex items-center gap-2 text-red-800">
+            <Filter className="h-5 w-5 text-red-600" />
             Filtros e Busca
           </CardTitle>
         </CardHeader>
@@ -166,22 +147,22 @@ const Events = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium">Buscar</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-400" />
                 <Input
                   placeholder="Nome ou descrição..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 border-red-200 focus:border-red-500"
                 />
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Status</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="border-red-200 focus:border-red-500">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border-red-200 shadow-lg">
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="pending">Pendente</SelectItem>
                   <SelectItem value="active">Ativo</SelectItem>
@@ -193,10 +174,10 @@ const Events = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium">Tipo</label>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="border-red-200 focus:border-red-500">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border-red-200 shadow-lg">
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="flash_day">Flash Day</SelectItem>
                   <SelectItem value="workshop">Workshop</SelectItem>
@@ -234,7 +215,7 @@ const Events = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEvents.map((event) => (
-            <Card key={event.id} className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 border-2 hover:border-purple-200">
+            <Card key={event.id} className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-red-50 border-2 hover:border-red-200">
               <div className="relative h-48 overflow-hidden">
                 {event.featuredImage ? (
                   <img
@@ -243,7 +224,7 @@ const Events = () => {
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center">
                     <Calendar className="h-16 w-16 text-white opacity-50" />
                   </div>
                 )}
@@ -254,7 +235,7 @@ const Events = () => {
                 </div>
                 <div className="absolute top-2 right-2 flex gap-1">
                   {event.isPublic && (
-                    <Badge variant="outline" className="bg-white/90 text-purple-700 border-purple-200">
+                    <Badge variant="outline" className="bg-white/90 text-red-700 border-red-200">
                       Público
                     </Badge>
                   )}
@@ -273,29 +254,34 @@ const Events = () => {
                 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <Calendar className="h-4 w-4 text-purple-600" />
+                    <Calendar className="h-4 w-4 text-red-600" />
                     <span>
                       {new Date(event.startDate).toLocaleDateString('pt-BR')} • {event.startTime}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <MapPin className="h-4 w-4 text-purple-600" />
+                    <MapPin className="h-4 w-4 text-red-600" />
                     <span>{event.location}</span>
                   </div>
                   {event.participatingArtists && event.participatingArtists.length > 0 && (
                     <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Users className="h-4 w-4 text-purple-600" />
-                      <span>{event.participatingArtists.length} artista(s)</span>
+                      <Users className="h-4 w-4 text-red-600" />
+                      <span className="line-clamp-1">
+                        {event.participatingArtists.length <= 2 
+                          ? event.participatingArtists.join(', ')
+                          : `${event.participatingArtists.slice(0, 2).join(', ')} e mais ${event.participatingArtists.length - 2}`
+                        }
+                      </span>
                     </div>
                   )}
                 </div>
 
                 {/* Performance Indicators */}
                 {event.smartGoals && event.smartGoals.length > 0 && (
-                  <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-100">
+                  <div className="mb-4 p-3 bg-gradient-to-r from-red-50 to-gray-50 rounded-lg border border-red-100">
                     <div className="flex items-center gap-2 mb-2">
-                      <Target className="h-4 w-4 text-purple-600" />
-                      <span className="text-sm font-medium text-purple-800">Progresso Principal</span>
+                      <Target className="h-4 w-4 text-red-600" />
+                      <span className="text-sm font-medium text-red-800">Progresso Principal</span>
                     </div>
                     {event.smartGoals.slice(0, 1).map((goal) => {
                       const progress = goal.targetValue > 0 ? Math.min((goal.currentValue / goal.targetValue) * 100, 100) : 0;
@@ -305,7 +291,12 @@ const Events = () => {
                             <span>{goal.title}</span>
                             <span>{progress.toFixed(0)}%</span>
                           </div>
-                          <Progress value={progress} className="h-2" />
+                          <Progress value={progress} className="h-2 bg-gray-200">
+                            <div 
+                              className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all" 
+                              style={{ width: `${progress}%` }}
+                            />
+                          </Progress>
                           <div className="text-xs text-gray-500">
                             {goal.currentValue} / {goal.targetValue} {goal.unit}
                           </div>
@@ -332,14 +323,12 @@ const Events = () => {
                 )}
 
                 <div className="flex items-center justify-between mb-4">
-                  <Badge variant="outline" className="text-indigo-700 border-indigo-200">
+                  <Badge variant="outline" className="text-red-700 border-red-200">
                     {getTypeLabel(event.eventType)}
                   </Badge>
-                  {event.price && (
-                    <span className="font-semibold text-green-600">
-                      R$ {event.price.toFixed(2)}
-                    </span>
-                  )}
+                  <span className="font-semibold text-red-600">
+                    {formatPrice(event.price)}
+                  </span>
                 </div>
 
                 <div className="flex gap-2">
@@ -347,7 +336,7 @@ const Events = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleEditEvent(event)}
-                    className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50"
+                    className="flex-1 border-red-200 text-red-700 hover:bg-red-50"
                   >
                     <Edit className="h-4 w-4 mr-1" />
                     Editar
@@ -369,16 +358,19 @@ const Events = () => {
 
       {filteredEvents.length === 0 && !loading && (
         <div className="text-center py-12">
-          <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+          <Calendar className="h-16 w-16 mx-auto mb-4 text-red-300" />
           <h3 className="text-xl font-medium text-gray-900 mb-2">Nenhum evento encontrado</h3>
           <p className="text-gray-600 mb-6">
             {searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
               ? 'Tente ajustar os filtros de busca.'
-              : 'Comece criando seu primeiro evento.'
+              : 'Comece criando seu primeiro evento e aproveite todas as funcionalidades de gestão e análise.'
             }
           </p>
           {!searchTerm && statusFilter === 'all' && typeFilter === 'all' && (
-            <Button onClick={handleCreateEvent} className="bg-purple-600 hover:bg-purple-700">
+            <Button 
+              onClick={handleCreateEvent} 
+              className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Criar Primeiro Evento
             </Button>

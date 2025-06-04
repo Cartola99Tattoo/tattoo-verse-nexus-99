@@ -1,15 +1,15 @@
 
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Clock, Users, ShoppingCart, ExternalLink, CheckCircle, Star } from "lucide-react";
-import { IEvent } from "@/services/interfaces/IEventService";
-import { getEventService } from "@/services/serviceFactory";
-import { toast } from "@/hooks/use-toast";
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { IEvent } from '@/services/interfaces/IEventService';
+import { Calendar, MapPin, Clock, Users, ShoppingCart, X } from 'lucide-react';
+import { getEventService } from '@/services/serviceFactory';
+import { toast } from '@/hooks/use-toast';
 
 interface EventModalProps {
   event: IEvent | null;
@@ -18,24 +18,46 @@ interface EventModalProps {
 }
 
 const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
-  const [leadForm, setLeadForm] = useState({
+  const [leadData, setLeadData] = useState({
     name: '',
     email: '',
     phone: '',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [showLeadForm, setShowLeadForm] = useState(false);
   const eventService = getEventService();
 
   if (!event) return null;
 
+  const getEventTypeLabel = (type: string) => {
+    switch (type) {
+      case 'flash_day': return 'Flash Day';
+      case 'workshop': return 'Workshop';
+      case 'collection_launch': return 'Lançamento';
+      case 'exhibition': return 'Exposição';
+      case 'other': return 'Outro';
+      default: return type;
+    }
+  };
+
+  const handleBuyTicket = () => {
+    // Simular redirecionamento para checkout
+    toast({
+      title: "Redirecionando...",
+      description: "Você será redirecionado para o checkout em instantes!",
+    });
+    
+    // Aqui seria o redirecionamento real para a loja
+    console.log('Redirecionando para checkout com produto:', event.ticketProduct);
+  };
+
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!leadForm.name.trim() || !leadForm.email.trim()) {
+    if (!leadData.name.trim() || !leadData.email.trim()) {
       toast({
         title: "Erro",
-        description: "Nome e e-mail são obrigatórios",
+        description: "Nome e email são obrigatórios",
         variant: "destructive",
       });
       return;
@@ -45,23 +67,23 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
     try {
       await eventService.createEventLead({
         eventId: event.id,
-        name: leadForm.name,
-        email: leadForm.email,
-        phone: leadForm.phone,
-        message: leadForm.message
+        name: leadData.name,
+        email: leadData.email,
+        phone: leadData.phone,
+        message: leadData.message
       });
-      
-      setSubmitted(true);
+
       toast({
         title: "Sucesso!",
-        description: "Seu interesse foi registrado. Entraremos em contato em breve!",
+        description: "Sua inscrição foi realizada com sucesso! Entraremos em contato em breve.",
       });
-      
-      setLeadForm({ name: '', email: '', phone: '', message: '' });
+
+      setLeadData({ name: '', email: '', phone: '', message: '' });
+      setShowLeadForm(false);
     } catch (error) {
       toast({
         title: "Erro",
-        description: "Erro ao registrar interesse. Tente novamente.",
+        description: "Erro ao enviar inscrição. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -69,308 +91,250 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
     }
   };
 
-  const handleBuyTicket = () => {
-    if (event.ticketProduct?.productId) {
-      // Simular redirecionamento para checkout
-      toast({
-        title: "Redirecionando...",
-        description: "Você será direcionado para o checkout - Ambiente de Teste",
-      });
-      console.log('Redirecting to checkout with product:', event.ticketProduct.productId);
-    }
-  };
-
-  const getEventTypeLabel = (type: string) => {
-    switch (type) {
-      case 'flash_day': return 'Flash Day';
-      case 'workshop': return 'Workshop';
-      case 'collection_launch': return 'Lançamento de Coleção';
-      case 'exhibition': return 'Exposição';
-      case 'other': return 'Outro';
-      default: return type;
-    }
-  };
-
-  const getCtaText = (eventType: string) => {
-    switch (eventType) {
-      case 'workshop': return 'Quero me Inscrever!';
+  const getCTAText = () => {
+    switch (event.eventType) {
       case 'flash_day': return 'Quero Participar!';
-      case 'collection_launch': return 'Receber Lembrete!';
+      case 'workshop': return 'Inscrever-me!';
+      case 'exhibition': return 'Receber Lembrete!';
       default: return 'Tenho Interesse!';
     }
   };
 
-  const ticketsRemaining = event.ticketProduct?.isEnabled ? 
-    event.ticketProduct.ticketStock - (event.smartGoals?.find(g => g.title.toLowerCase().includes('ingresso'))?.currentValue || 0) : 0;
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
-          <DialogTitle className="sr-only">{event.name}</DialogTitle>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <DialogTitle className="text-2xl font-bold text-gray-900 mb-2">
+                {event.name}
+              </DialogTitle>
+              <div className="flex gap-2 mb-4">
+                <Badge className="bg-red-100 text-red-800 border-red-200">
+                  {getEventTypeLabel(event.eventType)}
+                </Badge>
+                {event.isPublic && (
+                  <Badge variant="outline" className="border-green-200 text-green-700">
+                    Aberto ao Público
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
-        
-        <div className="space-y-6">
-          {/* Banner Section */}
-          <div className="relative h-64 md:h-80 rounded-lg overflow-hidden">
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Imagem e informações principais */}
+          <div className="space-y-4">
             {event.featuredImage ? (
               <img
                 src={event.featuredImage}
                 alt={event.name}
-                className="w-full h-full object-cover"
+                className="w-full h-64 object-cover rounded-lg shadow-lg"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
-                <Calendar className="h-24 w-24 text-white opacity-50" />
+              <div className="w-full h-64 bg-gradient-to-br from-red-400 to-red-600 rounded-lg flex items-center justify-center">
+                <Calendar className="h-16 w-16 text-white opacity-60" />
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4">
-              <div className="flex flex-wrap gap-2 mb-3">
-                <Badge className="bg-white/90 text-purple-700 border-purple-200">
-                  {getEventTypeLabel(event.eventType)}
-                </Badge>
-                {event.ticketProduct?.isEnabled && (
-                  <Badge className="bg-green-100/90 text-green-800 border-green-200">
-                    <ShoppingCart className="h-3 w-3 mr-1" />
-                    Ingressos Disponíveis
-                  </Badge>
-                )}
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-gray-700">
+                <Calendar className="h-5 w-5 text-red-600" />
+                <span className="font-medium">
+                  {new Date(event.startDate).toLocaleDateString('pt-BR', { 
+                    day: '2-digit', 
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                  {event.endDate !== event.startDate && (
+                    <> até {new Date(event.endDate).toLocaleDateString('pt-BR', { 
+                      day: '2-digit', 
+                      month: 'long',
+                      year: 'numeric'
+                    })}</>
+                  )}
+                </span>
               </div>
-              <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{event.name}</h1>
-              <p className="text-lg text-white/90">{event.description}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Event Details */}
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-gray-900">Sobre o Evento</h2>
-                <div className="prose prose-sm max-w-none text-gray-700">
-                  <p>{event.detailedDescription || event.description}</p>
-                </div>
+              
+              <div className="flex items-center gap-3 text-gray-700">
+                <Clock className="h-5 w-5 text-red-600" />
+                <span>{event.startTime} às {event.endTime}</span>
               </div>
-
-              {/* Event Info Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Calendar className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium text-gray-900">Data e Horário</span>
-                  </div>
-                  <p className="text-gray-700">
-                    {new Date(event.startDate).toLocaleDateString('pt-BR', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
-                  </p>
-                  <p className="text-gray-600">
-                    das {event.startTime} às {event.endTime}
-                  </p>
-                </div>
-
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3 mb-2">
-                    <MapPin className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium text-gray-900">Local</span>
-                  </div>
-                  <p className="text-gray-700">{event.location}</p>
+              
+              <div className="flex items-center gap-3 text-gray-700">
+                <MapPin className="h-5 w-5 text-red-600" />
+                <div>
+                  <div className="font-medium">{event.location}</div>
                   {event.fullAddress && (
-                    <p className="text-gray-600 text-sm">{event.fullAddress}</p>
+                    <div className="text-sm text-gray-500">{event.fullAddress}</div>
                   )}
                 </div>
               </div>
 
-              {/* Participating Artists */}
               {event.participatingArtists && event.participatingArtists.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <Users className="h-5 w-5 text-purple-600" />
-                    Tatuadores Participantes
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {event.participatingArtists.map((artist, index) => (
-                      <div key={index} className="p-3 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg border border-purple-100 hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-medium text-sm">
-                              {artist.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-900 text-sm">{artist}</h4>
-                            <div className="flex items-center gap-1">
-                              <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                              <span className="text-xs text-gray-600">Artista</span>
-                            </div>
-                          </div>
+                <div className="flex items-start gap-3 text-gray-700">
+                  <Users className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <div className="font-medium mb-1">Tatuadores Participantes:</div>
+                    <div className="grid grid-cols-1 gap-1">
+                      {event.participatingArtists.map((artist, index) => (
+                        <div key={index} className="text-sm bg-red-50 text-red-800 px-2 py-1 rounded border border-red-200">
+                          {artist}
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Sidebar - Ticket Purchase / Lead Form */}
-            <div className="space-y-6">
-              {/* Ticket Purchase Section */}
-              {event.ticketProduct?.isEnabled && event.price && event.price > 0 && (
-                <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-200 shadow-lg">
-                  <div className="text-center space-y-4">
-                    <div className="flex items-center justify-center gap-2 text-green-800">
-                      <ShoppingCart className="h-6 w-6" />
-                      <span className="font-bold text-lg">Ingressos Disponíveis</span>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="text-3xl font-bold text-green-600">
-                        R$ {event.ticketProduct.productPrice.toFixed(2)}
+          {/* Descrição e ações */}
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Sobre o Evento</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                {event.detailedDescription || event.description}
+              </p>
+            </div>
+
+            {/* Preço e ingresso */}
+            {event.price && event.price > 0 && (
+              <div className="bg-gradient-to-r from-red-50 to-gray-50 p-4 rounded-lg border border-red-200">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-lg font-semibold text-gray-900">Investimento:</span>
+                  <span className="text-2xl font-bold text-red-600">
+                    R$ {event.price.toFixed(2)}
+                  </span>
+                </div>
+                
+                {event.ticketProduct?.isEnabled && (
+                  <div className="space-y-3">
+                    {event.ticketProduct.ticketStock > 0 && (
+                      <div className="text-sm text-gray-600">
+                        {event.ticketProduct.ticketStock} ingressos disponíveis
                       </div>
-                      {ticketsRemaining > 0 && (
-                        <p className="text-sm text-orange-600 font-medium">
-                          Apenas {ticketsRemaining} ingressos restantes!
-                        </p>
-                      )}
-                    </div>
-
+                    )}
                     <Button
                       onClick={handleBuyTicket}
-                      disabled={ticketsRemaining <= 0}
-                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-6 shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                     >
                       <ShoppingCart className="h-5 w-5 mr-2" />
-                      {ticketsRemaining > 0 ? 'Comprar Ingresso Agora' : 'Esgotado'}
+                      Comprar Ingresso Agora
                     </Button>
-
-                    <p className="text-xs text-gray-600">
-                      💳 Checkout via Stripe/Mercado Pago - Ambiente de Teste
+                    <p className="text-xs text-gray-500 text-center">
+                      Checkout via Stripe/Mercado Pago - Ambiente de Teste
                     </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Lead Capture Form */}
-              <div className="p-6 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg border-2 border-purple-200 shadow-lg">
-                {!submitted ? (
-                  <form onSubmit={handleLeadSubmit} className="space-y-4">
-                    <div className="text-center mb-4">
-                      <h3 className="text-lg font-bold text-purple-800 mb-2">
-                        {event.ticketProduct?.isEnabled ? 'Receber Novidades' : getCtaText(event.eventType)}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {event.ticketProduct?.isEnabled 
-                          ? 'Seja notificado sobre novidades e promoções'
-                          : 'Deixe seus dados e entraremos em contato!'
-                        }
-                      </p>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div>
-                        <Label htmlFor="name">Nome Completo *</Label>
-                        <Input
-                          id="name"
-                          value={leadForm.name}
-                          onChange={(e) => setLeadForm(prev => ({ ...prev, name: e.target.value }))}
-                          placeholder="Seu nome completo"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="email">E-mail *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={leadForm.email}
-                          onChange={(e) => setLeadForm(prev => ({ ...prev, email: e.target.value }))}
-                          placeholder="seu@email.com"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="phone">Telefone</Label>
-                        <Input
-                          id="phone"
-                          value={leadForm.phone}
-                          onChange={(e) => setLeadForm(prev => ({ ...prev, phone: e.target.value }))}
-                          placeholder="(11) 99999-9999"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="message">Mensagem</Label>
-                        <Textarea
-                          id="message"
-                          value={leadForm.message}
-                          onChange={(e) => setLeadForm(prev => ({ ...prev, message: e.target.value }))}
-                          placeholder="Deixe uma mensagem (opcional)"
-                          rows={3}
-                        />
-                      </div>
-                    </div>
-
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 px-6 shadow-lg hover:shadow-xl transition-all duration-300"
-                    >
-                      {isSubmitting ? 'Enviando...' : getCtaText(event.eventType)}
-                    </Button>
-                  </form>
-                ) : (
-                  <div className="text-center space-y-4">
-                    <CheckCircle className="h-16 w-16 text-green-600 mx-auto" />
-                    <div>
-                      <h3 className="text-lg font-bold text-green-800 mb-2">
-                        Interesse Registrado!
-                      </h3>
-                      <p className="text-gray-600 mb-4">
-                        Obrigado! Entraremos em contato em breve com mais informações sobre o evento.
-                      </p>
-                      <div className="space-y-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => setSubmitted(false)}
-                          className="w-full"
-                        >
-                          Registrar Outro Interesse
-                        </Button>
-                        <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
-                          <span>Siga-nos:</span>
-                          <Button variant="ghost" size="sm" className="text-purple-600">
-                            Instagram
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-purple-600">
-                            Facebook
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>
+            )}
 
-              {/* External Link */}
-              {event.ticketLink && (
-                <div className="text-center">
-                  <Button
-                    variant="outline"
-                    onClick={() => window.open(event.ticketLink, '_blank')}
-                    className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Link Externo do Evento
-                  </Button>
-                </div>
-              )}
-            </div>
+            {/* Formulário de lead ou botão de interesse */}
+            {!showLeadForm ? (
+              <div className="space-y-3">
+                <Button
+                  onClick={() => setShowLeadForm(true)}
+                  variant="outline"
+                  className="w-full border-red-200 text-red-700 hover:bg-red-50 py-3 font-semibold"
+                >
+                  {getCTAText()}
+                </Button>
+                {event.price === 0 && (
+                  <p className="text-sm text-center text-gray-600">
+                    Evento gratuito! Demonstre seu interesse para receber mais informações.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="bg-gray-50 p-4 rounded-lg border">
+                <h4 className="font-semibold text-gray-900 mb-4">Demonstrar Interesse</h4>
+                <form onSubmit={handleLeadSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="name">Nome *</Label>
+                      <Input
+                        id="name"
+                        value={leadData.name}
+                        onChange={(e) => setLeadData(prev => ({ ...prev, name: e.target.value }))}
+                        required
+                        className="border-red-200 focus:border-red-500"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={leadData.email}
+                        onChange={(e) => setLeadData(prev => ({ ...prev, email: e.target.value }))}
+                        required
+                        className="border-red-200 focus:border-red-500"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="phone">Telefone (WhatsApp)</Label>
+                    <Input
+                      id="phone"
+                      value={leadData.phone}
+                      onChange={(e) => setLeadData(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="(11) 99999-9999"
+                      className="border-red-200 focus:border-red-500"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="message">Mensagem (opcional)</Label>
+                    <Textarea
+                      id="message"
+                      value={leadData.message}
+                      onChange={(e) => setLeadData(prev => ({ ...prev, message: e.target.value }))}
+                      placeholder="Conte-nos mais sobre seu interesse..."
+                      rows={3}
+                      className="border-red-200 focus:border-red-500"
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="flex-1 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white"
+                    >
+                      {isSubmitting ? 'Enviando...' : 'Enviar Interesse'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowLeadForm(false)}
+                      className="border-gray-300"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* Links adicionais */}
+            {event.ticketLink && (
+              <div className="text-center">
+                <a
+                  href={event.ticketLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-red-600 hover:text-red-700 text-sm underline"
+                >
+                  Link alternativo para inscrição
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </DialogContent>
