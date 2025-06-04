@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,7 +77,8 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
   const loadSmartGoals = async (eventId: string) => {
     try {
       const goals = await eventService.fetchEventSmartGoals(eventId);
-      setSmartGoals(goals || []); // Add null safety
+      // Ensure goals is always an array
+      setSmartGoals(Array.isArray(goals) ? goals : []);
     } catch (error) {
       console.error('Error loading smart goals:', error);
       setSmartGoals([]); // Ensure it's always an array
@@ -181,7 +183,8 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
         metricType: newGoal.metricType
       });
 
-      setSmartGoals(prev => [...(prev || []), goal]); // Add null safety
+      // Ensure smartGoals is always an array before spreading
+      setSmartGoals(prev => [...(Array.isArray(prev) ? prev : []), goal]);
       setNewGoal({ title: '', description: '', targetValue: 0, unit: '', deadline: '', metricType: 'count' });
 
       toast({
@@ -200,7 +203,8 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
   const handleDeleteSmartGoal = async (goalId: string) => {
     try {
       await eventService.deleteEventSmartGoal(goalId);
-      setSmartGoals(prev => (prev || []).filter(g => g.id !== goalId)); // Add null safety
+      // Ensure smartGoals is always an array before filtering
+      setSmartGoals(prev => (Array.isArray(prev) ? prev : []).filter(g => g.id !== goalId));
       toast({
         title: "Sucesso",
         description: "Meta SMART removida!",
@@ -674,48 +678,55 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
               </div>
 
               <div className="space-y-3">
-                {(smartGoals || []).map((goal) => {
-                  const progress = getProgressPercentage(goal.currentValue, goal.targetValue);
-                  return (
-                    <div key={goal.id} className="p-4 border rounded-lg bg-white shadow-sm border-red-100">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            {getMetricIcon(goal.metricType)}
-                            <h5 className="font-medium text-red-800">{goal.title}</h5>
+                {Array.isArray(smartGoals) && smartGoals.length > 0 ? (
+                  smartGoals.map((goal) => {
+                    const progress = getProgressPercentage(goal.currentValue, goal.targetValue);
+                    return (
+                      <div key={goal.id} className="p-4 border rounded-lg bg-white shadow-sm border-red-100">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              {getMetricIcon(goal.metricType)}
+                              <h5 className="font-medium text-red-800">{goal.title}</h5>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">{goal.description}</p>
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <span>Meta: {goal.targetValue} {goal.unit}</span>
+                              <span>Atual: {goal.currentValue} {goal.unit}</span>
+                              <span>Prazo: {new Date(goal.deadline).toLocaleDateString('pt-BR')}</span>
+                            </div>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{goal.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <span>Meta: {goal.targetValue} {goal.unit}</span>
-                            <span>Atual: {goal.currentValue} {goal.unit}</span>
-                            <span>Prazo: {new Date(goal.deadline).toLocaleDateString('pt-BR')}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteSmartGoal(goal.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs text-gray-600">
+                            <span>Progresso</span>
+                            <span>{progress.toFixed(1)}%</span>
                           </div>
+                          <Progress value={progress} className="h-2 bg-gray-200">
+                            <div 
+                              className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all" 
+                              style={{ width: `${progress}%` }}
+                            />
+                          </Progress>
                         </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteSmartGoal(goal.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs text-gray-600">
-                          <span>Progresso</span>
-                          <span>{progress.toFixed(1)}%</span>
-                        </div>
-                        <Progress value={progress} className="h-2 bg-gray-200">
-                          <div 
-                            className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all" 
-                            style={{ width: `${progress}%` }}
-                          />
-                        </Progress>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    <Target className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                    <p>Nenhuma meta SMART criada ainda</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
