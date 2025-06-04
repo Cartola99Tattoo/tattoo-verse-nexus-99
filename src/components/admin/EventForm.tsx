@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -459,8 +460,8 @@ const EventForm = ({ event, onClose }: EventFormProps) => {
                 </SelectTrigger>
                 <SelectContent>
                   {artists.map((artist) => (
-                    <SelectItem key={artist.id} value={artist.name}>
-                      {artist.name}
+                    <SelectItem key={artist.id} value={`${artist.first_name} ${artist.last_name}`}>
+                      {artist.first_name} {artist.last_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
