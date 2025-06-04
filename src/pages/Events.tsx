@@ -1,10 +1,12 @@
-
 import React, { useState } from 'react';
 import { useDataQuery } from '@/hooks/useDataQuery';
 import { getEventService } from '@/services/serviceFactory';
 import { IEvent } from '@/services/interfaces/IEventService';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Calendar, 
   MapPin, 
@@ -25,21 +27,43 @@ import {
   Twitter,
   Mail,
   Phone,
-  Check
+  Check,
+  CreditCard,
+  ExternalLink
 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import EventModal from '@/components/events/EventModal';
 import EventB2BForm from '@/components/events/EventB2BForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from '@/hooks/use-toast';
 
 const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState<IEvent | null>(null);
   const [showB2BForm, setShowB2BForm] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [leadFormData, setLeadFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+  const [customEventFormData, setCustomEventFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    eventType: '',
+    estimatedDate: '',
+    description: ''
+  });
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [isSubmittingCustom, setIsSubmittingCustom] = useState(false);
+  const [leadFormSubmitted, setLeadFormSubmitted] = useState(false);
+  const [customFormSubmitted, setCustomFormSubmitted] = useState(false);
+  
   const eventService = getEventService();
 
   const { data: eventsData = [], loading } = useDataQuery<IEvent[]>(
-    () => eventService.fetchEvents(),
+    () => eventService.fetchPublicEvents(),
     []
   );
 
@@ -70,10 +94,129 @@ const Events = () => {
 
   const upcomingEvents = filteredEvents.slice(0, 6);
 
+  const scrollToEventDetails = (event: IEvent) => {
+    setSelectedEvent(event);
+    const element = document.getElementById('event-details');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const scrollToContactForm = () => {
     const element = document.getElementById('contact-form');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleBuyTicket = () => {
+    if (!selectedEvent) return;
+    
+    toast({
+      title: "Redirecionando para o checkout",
+      description: "Preparando seu ingresso para o evento. Aguarde um momento.",
+    });
+    
+    console.log('Redirecionando para checkout com produto:', selectedEvent.ticketProduct);
+    
+    setTimeout(() => {
+      toast({
+        title: "Checkout pronto!",
+        description: "Você será redirecionado para finalizar sua compra."
+      });
+    }, 1500);
+  };
+
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedEvent || !leadFormData.name.trim() || !leadFormData.email.trim()) {
+      toast({
+        title: "Erro",
+        description: "Nome e email são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingLead(true);
+    try {
+      await eventService.createEventLead({
+        eventId: selectedEvent.id,
+        name: leadFormData.name,
+        email: leadFormData.email,
+        phone: leadFormData.phone,
+        message: leadFormData.message
+      });
+
+      toast({
+        title: "Sucesso!",
+        description: "Sua inscrição foi realizada com sucesso! Entraremos em contato em breve.",
+      });
+
+      setLeadFormData({ name: '', email: '', phone: '', message: '' });
+      setLeadFormSubmitted(true);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao enviar inscrição. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingLead(false);
+    }
+  };
+
+  const handleCustomEventSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customEventFormData.name.trim() || !customEventFormData.email.trim()) {
+      toast({
+        title: "Erro",
+        description: "Nome e email são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingCustom(true);
+    try {
+      // Simular envio dos dados para o serviço de clientes
+      console.log('Enviando dados do formulário de evento customizado:', customEventFormData);
+      
+      // Simular delay de rede
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      toast({
+        title: "Proposta solicitada com sucesso!",
+        description: "Recebemos sua solicitação. Nossa equipe entrará em contato em até 24 horas.",
+      });
+
+      setCustomEventFormData({
+        name: '',
+        email: '',
+        phone: '',
+        eventType: '',
+        estimatedDate: '',
+        description: ''
+      });
+      setCustomFormSubmitted(true);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao enviar solicitação. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingCustom(false);
+    }
+  };
+
+  const getCTAText = () => {
+    if (!selectedEvent) return 'Tenho Interesse!';
+    switch (selectedEvent.eventType) {
+      case 'flash_day': return 'Quero Participar!';
+      case 'workshop': return 'Inscrever-me!';
+      case 'exhibition': return 'Receber Lembrete!';
+      default: return 'Tenho Interesse!';
     }
   };
 
@@ -139,7 +282,6 @@ const Events = () => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-12 items-center">
-              {/* O Comum */}
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 shadow-xl transform hover:-translate-y-1 transition-all duration-300">
                 <h3 className="text-2xl font-bold text-gray-300 mb-6 text-center">Eventos Comuns</h3>
                 <div className="space-y-5">
@@ -173,7 +315,6 @@ const Events = () => {
                 </p>
               </div>
 
-              {/* O Marcante com 99Tattoo */}
               <div className="bg-gradient-to-br from-red-900 via-red-800 to-black p-8 rounded-2xl border-2 border-red-500 shadow-2xl shadow-red-500/25 transform hover:-translate-y-2 transition-all duration-300">
                 <h3 className="text-2xl font-bold text-white mb-6 text-center">Eventos com a 99Tattoo</h3>
                 <div className="space-y-5">
@@ -359,7 +500,7 @@ const Events = () => {
                       </div>
 
                       <Button
-                        onClick={() => setSelectedEvent(event)}
+                        onClick={() => scrollToEventDetails(event)}
                         className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                       >
                         Ver Mais Detalhes
@@ -387,6 +528,274 @@ const Events = () => {
             )}
           </div>
         </section>
+
+        {/* Event Details Section */}
+        {selectedEvent && (
+          <section id="event-details" className="py-20 bg-gradient-to-b from-black to-gray-900">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-red-500/30 shadow-2xl overflow-hidden">
+                {/* Event Header */}
+                <div className="relative h-72 overflow-hidden">
+                  {selectedEvent.featuredImage ? (
+                    <img
+                      src={selectedEvent.featuredImage}
+                      alt={selectedEvent.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center">
+                      <Calendar className="h-20 w-20 text-white opacity-60" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  
+                  <div className="absolute bottom-0 left-0 w-full p-8 text-white">
+                    <div className="flex gap-2 mb-4">
+                      <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-none shadow-lg">
+                        {getEventTypeLabel(selectedEvent.eventType)}
+                      </Badge>
+                      {selectedEvent.isPublic && (
+                        <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white border-none shadow-lg">
+                          Aberto ao Público
+                        </Badge>
+                      )}
+                      {selectedEvent.ticketProduct?.isEnabled && (
+                        <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none shadow-lg">
+                          <ShoppingCart className="h-3 w-3 mr-1" />
+                          Venda de Ingressos
+                        </Badge>
+                      )}
+                    </div>
+                    <h2 className="text-4xl font-bold text-white shadow-text mb-3">
+                      {selectedEvent.name}
+                    </h2>
+                    <p className="text-lg text-gray-200">
+                      {selectedEvent.description}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Event Details - Left column */}
+                    <div className="lg:col-span-2 space-y-6">
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-4">Sobre o Evento</h3>
+                        <div className="text-gray-300 leading-relaxed space-y-3 text-base">
+                          <p>{selectedEvent.detailedDescription || selectedEvent.description}</p>
+                        </div>
+                      </div>
+                      
+                      {selectedEvent.participatingArtists && selectedEvent.participatingArtists.length > 0 && (
+                        <div className="bg-gradient-to-br from-gray-700 to-gray-800 p-6 rounded-xl border border-red-500/30">
+                          <h4 className="font-bold text-xl text-white mb-4">Tatuadores Participantes</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {selectedEvent.participatingArtists.map((artist, index) => (
+                              <div key={index} className="bg-gradient-to-r from-red-600/20 to-red-800/20 text-white px-4 py-3 rounded-lg border border-red-500/30 flex items-center hover:from-red-600/30 hover:to-red-800/30 transition-all">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-red-600 mr-3 flex items-center justify-center text-sm font-bold">
+                                  {artist.charAt(0)}
+                                </div>
+                                <span className="font-medium">{artist}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {selectedEvent.ticketLink && (
+                        <div className="bg-gradient-to-br from-gray-700 to-gray-800 p-6 rounded-xl border border-red-500/30">
+                          <h4 className="font-bold text-white mb-3">Links Adicionais</h4>
+                          <a 
+                            href={selectedEvent.ticketLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center text-red-400 hover:text-red-300 transition-colors"
+                          >
+                            <ExternalLink className="h-5 w-5 mr-2" />
+                            Link alternativo para inscrição
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Event metadata and actions - Right column */}
+                    <div className="space-y-6">
+                      <div className="bg-gradient-to-br from-gray-700 to-gray-800 p-6 rounded-xl border border-red-500/30 shadow-xl">
+                        <h4 className="font-bold text-white mb-4 pb-3 border-b border-red-500/30">
+                          Informações do Evento
+                        </h4>
+                        <div className="space-y-4">
+                          <div className="flex items-start gap-3 text-gray-300">
+                            <Calendar className="h-5 w-5 text-red-500 flex-shrink-0 mt-1" />
+                            <div>
+                              <div className="font-semibold text-white">Data</div>
+                              <div className="text-sm">
+                                {new Date(selectedEvent.startDate).toLocaleDateString('pt-BR', { 
+                                  day: '2-digit', 
+                                  month: 'long',
+                                  year: 'numeric',
+                                  weekday: 'long'
+                                })}
+                                {selectedEvent.endDate !== selectedEvent.startDate && (
+                                  <> até {new Date(selectedEvent.endDate).toLocaleDateString('pt-BR', { 
+                                    day: '2-digit', 
+                                    month: 'long',
+                                    year: 'numeric'
+                                  })}</>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-start gap-3 text-gray-300">
+                            <Clock className="h-5 w-5 text-red-500 flex-shrink-0 mt-1" />
+                            <div>
+                              <div className="font-semibold text-white">Horário</div>
+                              <div className="text-sm">{selectedEvent.startTime} às {selectedEvent.endTime}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-start gap-3 text-gray-300">
+                            <MapPin className="h-5 w-5 text-red-500 flex-shrink-0 mt-1" />
+                            <div>
+                              <div className="font-semibold text-white">Local</div>
+                              <div className="text-sm">{selectedEvent.location}</div>
+                              {selectedEvent.fullAddress && (
+                                <div className="text-xs text-gray-400 mt-1">{selectedEvent.fullAddress}</div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {selectedEvent.price !== undefined && (
+                            <div className="flex items-start gap-3 text-gray-300">
+                              <CreditCard className="h-5 w-5 text-red-500 flex-shrink-0 mt-1" />
+                              <div>
+                                <div className="font-semibold text-white">Investimento</div>
+                                <div className="text-sm font-bold text-red-400">
+                                  {selectedEvent.price > 0 
+                                    ? `R$ ${selectedEvent.price.toFixed(2)}` 
+                                    : 'Gratuito'}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Action Section */}
+                      {leadFormSubmitted ? (
+                        <div className="bg-gradient-to-br from-green-800/30 to-green-900/30 border border-green-500/50 rounded-xl p-6 text-center">
+                          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Check className="h-8 w-8 text-white" />
+                          </div>
+                          <h3 className="text-xl font-bold text-white mb-2">Interesse Registrado!</h3>
+                          <p className="text-gray-300 text-sm">
+                            Obrigado! Entraremos em contato com mais detalhes sobre o evento.
+                          </p>
+                        </div>
+                      ) : selectedEvent.price === 0 || !selectedEvent.ticketProduct?.isEnabled ? (
+                        <div className="bg-gradient-to-br from-gray-700 to-gray-800 p-6 rounded-xl border border-red-500/30">
+                          <h4 className="text-white font-bold mb-4 text-center">
+                            {selectedEvent.price === 0 ? 'Evento Gratuito!' : 'Demonstre seu interesse'}
+                          </h4>
+                          
+                          <form onSubmit={handleLeadSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="name" className="font-medium text-white">Nome Completo *</Label>
+                              <Input
+                                id="name"
+                                value={leadFormData.name}
+                                onChange={(e) => setLeadFormData(prev => ({ ...prev, name: e.target.value }))}
+                                required
+                                className="bg-gray-800 border-red-500/50 focus:border-red-500 text-white placeholder-gray-400"
+                                placeholder="Seu nome completo"
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="email" className="font-medium text-white">Email *</Label>
+                              <Input
+                                id="email"
+                                type="email"
+                                value={leadFormData.email}
+                                onChange={(e) => setLeadFormData(prev => ({ ...prev, email: e.target.value }))}
+                                required
+                                className="bg-gray-800 border-red-500/50 focus:border-red-500 text-white placeholder-gray-400"
+                                placeholder="seu@email.com"
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="phone" className="font-medium text-white">Telefone</Label>
+                              <Input
+                                id="phone"
+                                value={leadFormData.phone}
+                                onChange={(e) => setLeadFormData(prev => ({ ...prev, phone: e.target.value }))}
+                                placeholder="(11) 99999-9999"
+                                className="bg-gray-800 border-red-500/50 focus:border-red-500 text-white placeholder-gray-400"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="message" className="font-medium text-white">Mensagem</Label>
+                              <Textarea
+                                id="message"
+                                value={leadFormData.message}
+                                onChange={(e) => setLeadFormData(prev => ({ ...prev, message: e.target.value }))}
+                                placeholder="Perguntas ou comentários..."
+                                rows={3}
+                                className="bg-gray-800 border-red-500/50 focus:border-red-500 text-white placeholder-gray-400 resize-none"
+                              />
+                            </div>
+
+                            <Button
+                              type="submit"
+                              disabled={isSubmittingLead}
+                              className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg font-semibold py-3"
+                            >
+                              {isSubmittingLead ? 'Enviando...' : getCTAText()}
+                            </Button>
+                          </form>
+                        </div>
+                      ) : (
+                        <div className="bg-gradient-to-br from-gray-700 to-gray-800 p-6 rounded-xl border border-red-500/30 text-center">
+                          <h4 className="text-xl font-bold text-white mb-4">
+                            Evento com Inscrição Paga
+                          </h4>
+                          
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="text-lg font-semibold text-white">Investimento:</span>
+                            <span className="text-2xl font-bold text-red-400">
+                              R$ {selectedEvent.price.toFixed(2)}
+                            </span>
+                          </div>
+                          
+                          {selectedEvent.ticketProduct?.ticketStock > 0 && (
+                            <div className="text-sm text-gray-400 mb-6">
+                              {selectedEvent.ticketProduct.ticketStock} ingressos disponíveis
+                            </div>
+                          )}
+                          
+                          <Button
+                            onClick={handleBuyTicket}
+                            className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                          >
+                            <ShoppingCart className="h-5 w-5 mr-2" />
+                            Comprar Ingresso Agora
+                          </Button>
+                          <p className="text-xs text-gray-500 text-center mt-3">
+                            Checkout seguro via plataforma integrada
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* B2B Section */}
         <section className="py-20 bg-gradient-to-b from-black to-red-900">
@@ -495,18 +904,6 @@ const Events = () => {
                 <p className="text-white text-sm">Marketing e divulgação personalizada</p>
               </div>
             </div>
-
-            {/* CTA Button */}
-            <div className="text-center animate-fade-in">
-              <Button
-                onClick={scrollToContactForm}
-                className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-4 px-12 text-lg shadow-2xl hover:shadow-red-500/25 transition-all duration-300 transform hover:scale-105"
-                size="lg"
-              >
-                <Target className="h-6 w-6 mr-3" />
-                Transforme Seu Evento. Fale Conosco!
-              </Button>
-            </div>
           </div>
         </section>
 
@@ -523,7 +920,6 @@ const Events = () => {
             </div>
 
             <div className="grid gap-8 md:grid-cols-3">
-              {/* Depoimento 1 */}
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-red-500/30 shadow-xl">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-16 h-16 rounded-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center text-white text-xl font-bold">
@@ -546,7 +942,6 @@ const Events = () => {
                 </div>
               </div>
 
-              {/* Depoimento 2 */}
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-red-500/30 shadow-xl">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-16 h-16 rounded-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center text-white text-xl font-bold">
@@ -569,7 +964,6 @@ const Events = () => {
                 </div>
               </div>
 
-              {/* Depoimento 3 */}
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-red-500/30 shadow-xl">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-16 h-16 rounded-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center text-white text-xl font-bold">
@@ -608,17 +1002,115 @@ const Events = () => {
             </div>
 
             <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-red-500/30 shadow-2xl">
-              <Button
-                onClick={() => setShowB2BForm(true)}
-                className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-6 text-xl shadow-2xl hover:shadow-red-500/25 transition-all duration-300 transform hover:scale-105"
-                size="lg"
-              >
-                <Target className="h-8 w-8 mr-4" />
-                Receber Proposta Personalizada
-              </Button>
-              <p className="text-center text-gray-400 mt-4">
-                Clique no botão acima para abrir nosso formulário completo e detalhar seu projeto
-              </p>
+              {customFormSubmitted ? (
+                <div className="text-center py-8">
+                  <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Check className="h-10 w-10 text-white" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-white mb-4">Proposta Solicitada com Sucesso!</h3>
+                  <p className="text-gray-300 text-lg mb-8">
+                    Recebemos sua solicitação. Nossa equipe entrará em contato em até 24 horas com uma proposta personalizada para seu evento.
+                  </p>
+                  <div className="flex gap-4 justify-center">
+                    <Button
+                      onClick={() => setCustomFormSubmitted(false)}
+                      variant="outline"
+                      className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
+                    >
+                      Fazer Nova Solicitação
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleCustomEventSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="custom-name" className="font-medium text-white">Nome Completo *</Label>
+                      <Input
+                        id="custom-name"
+                        value={customEventFormData.name}
+                        onChange={(e) => setCustomEventFormData(prev => ({ ...prev, name: e.target.value }))}
+                        required
+                        className="bg-gray-800 border-red-500/50 focus:border-red-500 text-white placeholder-gray-400"
+                        placeholder="Seu nome completo"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="custom-email" className="font-medium text-white">Email *</Label>
+                      <Input
+                        id="custom-email"
+                        type="email"
+                        value={customEventFormData.email}
+                        onChange={(e) => setCustomEventFormData(prev => ({ ...prev, email: e.target.value }))}
+                        required
+                        className="bg-gray-800 border-red-500/50 focus:border-red-500 text-white placeholder-gray-400"
+                        placeholder="seu@email.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="custom-phone" className="font-medium text-white">Telefone</Label>
+                      <Input
+                        id="custom-phone"
+                        value={customEventFormData.phone}
+                        onChange={(e) => setCustomEventFormData(prev => ({ ...prev, phone: e.target.value }))}
+                        placeholder="(11) 99999-9999"
+                        className="bg-gray-800 border-red-500/50 focus:border-red-500 text-white placeholder-gray-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="custom-event-type" className="font-medium text-white">Tipo de Evento</Label>
+                      <select
+                        id="custom-event-type"
+                        value={customEventFormData.eventType}
+                        onChange={(e) => setCustomEventFormData(prev => ({ ...prev, eventType: e.target.value }))}
+                        className="w-full bg-gray-800 border border-red-500/50 focus:border-red-500 text-white rounded-md px-3 py-2"
+                      >
+                        <option value="">Selecione o tipo</option>
+                        <option value="corporativo">Corporativo</option>
+                        <option value="festa-casamento">Festa/Casamento</option>
+                        <option value="festival-convencao">Festival/Convenção</option>
+                        <option value="outro">Outro</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="custom-estimated-date" className="font-medium text-white">Data Estimada do Evento</Label>
+                    <Input
+                      id="custom-estimated-date"
+                      type="date"
+                      value={customEventFormData.estimatedDate}
+                      onChange={(e) => setCustomEventFormData(prev => ({ ...prev, estimatedDate: e.target.value }))}
+                      className="bg-gray-800 border-red-500/50 focus:border-red-500 text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="custom-description" className="font-medium text-white">Descrição do Evento / Ideia *</Label>
+                    <Textarea
+                      id="custom-description"
+                      value={customEventFormData.description}
+                      onChange={(e) => setCustomEventFormData(prev => ({ ...prev, description: e.target.value }))}
+                      required
+                      placeholder="Conte-nos sobre seu evento, número estimado de participantes, expectativas, localização, orçamento aproximado, e qualquer ideia específica que tenha em mente..."
+                      rows={5}
+                      className="bg-gray-800 border-red-500/50 focus:border-red-500 text-white placeholder-gray-400 resize-none"
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isSubmittingCustom}
+                    className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-4 text-lg shadow-2xl hover:shadow-red-500/25 transition-all duration-300 transform hover:scale-105"
+                  >
+                    {isSubmittingCustom ? 'Enviando...' : 'Receber Proposta Personalizada'}
+                    <Target className="h-5 w-5 ml-2" />
+                  </Button>
+                </form>
+              )}
             </div>
           </div>
         </section>
