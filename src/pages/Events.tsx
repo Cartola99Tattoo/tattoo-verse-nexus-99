@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, MapPin, Clock, Users, Star, ArrowRight, Check, Phone, Mail, User, Building, CalendarDays } from "lucide-react";
+import { Calendar, MapPin, Clock, Users, Star, ArrowRight, Check, Phone, Mail, User, Building, CalendarDays, Zap, Heart, Trophy, Sparkles, Camera, Music, Coffee } from "lucide-react";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getEventService } from "@/services/serviceFactory";
 import { IEvent } from "@/services/interfaces/IEventService";
@@ -158,6 +158,80 @@ const Events = () => {
               <Calendar className="h-5 w-5 text-blue-300" />
               <span>Datas Especiais</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Seção: A Essência da Tatuagem em Eventos */}
+      <div className="py-16 bg-gradient-to-br from-white to-red-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-red-600 to-black bg-clip-text text-transparent">
+              Transforme Seu Evento Com a Arte da Tatuagem: Uma Experiência Inesquecível!
+            </h2>
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+              Descubra como a 99Tattoo pode elevar seu evento comum para uma experiência extraordinária que seus convidados nunca esquecerão
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {/* Eventos Comuns */}
+            <Card className="p-8 bg-gradient-to-br from-gray-100 to-gray-200 border-gray-300 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gray-400 rounded-full flex items-center justify-center">
+                  <Coffee className="h-8 w-8 text-gray-600" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-gray-700">Eventos Comuns</h3>
+                <ul className="space-y-3 text-gray-600">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                    <span>Atrações genéricas e previsíveis</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                    <span>Pouco engajamento dos participantes</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                    <span>Memórias que se desvanecem rapidamente</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                    <span>Falta de diferencial competitivo</span>
+                  </li>
+                </ul>
+              </div>
+            </Card>
+
+            {/* Eventos com Tatuagens 99Tattoo */}
+            <Card className="p-8 bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center shadow-lg">
+                  <Sparkles className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+                  Eventos com Tatuagens 99Tattoo
+                </h3>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-red-600" />
+                    <span className="font-medium">Experiência imersiva e única</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Trophy className="h-4 w-4 text-red-600" />
+                    <span className="font-medium">Memórias duradouras na pele</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-red-600" />
+                    <span className="font-medium">Diferencial que gera buzz</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Camera className="h-4 w-4 text-red-600" />
+                    <span className="font-medium">Engajamento profundo e autêntico</span>
+                  </li>
+                </ul>
+              </div>
+            </Card>
           </div>
         </div>
       </div>
@@ -461,6 +535,110 @@ const Events = () => {
           </div>
         </div>
       )}
+
+      {/* Seção: Leve a 99Tattoo para o Seu Evento */}
+      <div className="py-16 bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-red-600 to-black bg-clip-text text-transparent">
+              Seu Evento, Sua Arte: A 99Tattoo Cria Experiências Exclusivas para Você
+            </h2>
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+              Oferecemos consultoria especializada para transformar seu evento em uma experiência única e inesquecível
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            {/* Corporativos */}
+            <Card className="p-8 bg-gradient-to-br from-white to-blue-50 border-blue-200 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center shadow-lg">
+                  <Building className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-blue-800">Eventos Corporativos</h3>
+                <p className="text-gray-600 mb-4">
+                  Team buildings, lançamentos de produto e convenções empresariais com experiências de tatuagem personalizadas.
+                </p>
+                <ul className="text-sm text-gray-600 space-y-2">
+                  <li>• Branding personalizado</li>
+                  <li>• Experiências exclusivas</li>
+                  <li>• Engajamento de equipe</li>
+                </ul>
+              </div>
+            </Card>
+
+            {/* Festas e Casamentos */}
+            <Card className="p-8 bg-gradient-to-br from-white to-pink-50 border-pink-200 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-pink-600 to-pink-800 rounded-full flex items-center justify-center shadow-lg">
+                  <Heart className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-pink-800">Festas e Casamentos</h3>
+                <p className="text-gray-600 mb-4">
+                  Celebrações especiais com tatuagens temáticas que eternizam momentos únicos na vida dos seus convidados.
+                </p>
+                <ul className="text-sm text-gray-600 space-y-2">
+                  <li>• Designs personalizados</li>
+                  <li>• Memórias duradouras</li>
+                  <li>• Experiência romântica</li>
+                </ul>
+              </div>
+            </Card>
+
+            {/* Festivais e Convenções */}
+            <Card className="p-8 bg-gradient-to-br from-white to-purple-50 border-purple-200 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full flex items-center justify-center shadow-lg">
+                  <Music className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-purple-800">Festivais e Convenções</h3>
+                <p className="text-gray-600 mb-4">
+                  Participação em grandes eventos culturais com estações de tatuagem que atraem multidões e geram buzz.
+                </p>
+                <ul className="text-sm text-gray-600 space-y-2">
+                  <li>• Alcance massivo</li>
+                  <li>• Experiência cultural</li>
+                  <li>• Marketing viral</li>
+                </ul>
+              </div>
+            </Card>
+          </div>
+
+          <div className="text-center mb-8">
+            <h3 className="text-3xl font-bold mb-6 text-gray-900">Nossos Benefícios Exclusivos</h3>
+            <div className="grid md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center">
+                  <Star className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Consultoria Especializada</h4>
+                <p className="text-sm text-gray-600">Planejamento completo do seu evento</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Artistas Selecionados</h4>
+                <p className="text-sm text-gray-600">Profissionais experientes e qualificados</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center">
+                  <Trophy className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Logística Completa</h4>
+                <p className="text-sm text-gray-600">Cuidamos de todos os detalhes</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center">
+                  <Zap className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Marketing Integrado</h4>
+                <p className="text-sm text-gray-600">Divulgação e promoção do evento</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Custom Events Form Section */}
       <div id="custom-events-form" className="py-16 bg-gradient-to-br from-black to-red-900 text-white">
