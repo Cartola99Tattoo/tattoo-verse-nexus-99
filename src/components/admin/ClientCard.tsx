@@ -16,15 +16,15 @@ interface ClientCardProps {
 
 const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
   const getStatusColor = (status: string) => {
-    const colors = {
-      new: "bg-blue-100 text-blue-800",
-      interested: "bg-yellow-100 text-yellow-800", 
-      pending: "bg-orange-100 text-orange-800",
-      completed: "bg-green-100 text-green-800",
-      returning: "bg-purple-100 text-purple-800",
-      vip: "bg-pink-100 text-pink-800"
+    const variants = {
+      new: "tattooInfo",
+      interested: "tattooWarning", 
+      pending: "tattooWarning",
+      completed: "tattooSuccess",
+      returning: "tattoo",
+      vip: "tattoo"
     };
-    return colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800";
+    return variants[status as keyof typeof variants] || "secondary";
   };
 
   const getStatusLabel = (status: string) => {
@@ -71,7 +71,7 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
       return {
         level: "hot",
         color: "text-red-500",
-        bgColor: "bg-red-50 border-red-200",
+        bgColor: "bg-gradient-to-br from-red-50 to-red-100 border-red-200",
         icon: Flame,
         label: "Muito Interessado"
       };
@@ -79,7 +79,7 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
       return {
         level: "warm",
         color: "text-orange-500",
-        bgColor: "bg-orange-50 border-orange-200",
+        bgColor: "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200",
         icon: Thermometer,
         label: "Moderadamente Interessado"
       };
@@ -87,7 +87,7 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
       return {
         level: "cold",
         color: "text-blue-500",
-        bgColor: "bg-blue-50 border-blue-200",
+        bgColor: "bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200",
         icon: Thermometer,
         label: "Pouco Interessado"
       };
@@ -99,18 +99,18 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
   const TemperatureIcon = temperatureConfig.icon;
 
   return (
-    <Card className={`cursor-pointer transition-all hover:shadow-md ${isDragging ? 'opacity-50 rotate-2' : ''} ${temperatureConfig.bgColor} w-full max-w-sm`}>
+    <Card className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-red-glow ${isDragging ? 'opacity-50 rotate-2' : ''} ${temperatureConfig.bgColor} w-full max-w-sm shadow-lg hover:scale-[1.02]`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3 min-w-0 flex-1">
-            <Avatar className="h-10 w-10 flex-shrink-0">
-              <AvatarFallback className="bg-blue-100 text-blue-800">
+            <Avatar className="h-10 w-10 flex-shrink-0 shadow-md">
+              <AvatarFallback className="bg-gradient-to-br from-red-100 to-red-200 text-red-800 font-medium">
                 {client.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
-              <h3 className="font-medium text-sm truncate">{client.name}</h3>
-              <p className="text-xs text-gray-500 truncate">{client.email}</p>
+              <h3 className="font-medium text-sm truncate text-gray-900">{client.name}</h3>
+              <p className="text-xs text-gray-600 truncate">{client.email}</p>
             </div>
           </div>
           <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -127,31 +127,31 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
           </div>
         </div>
 
-        <Badge className={`text-xs mb-2 ${getStatusColor(client.status)}`}>
+        <Badge variant={getStatusColor(client.status) as any} className="text-xs mb-2">
           {getStatusLabel(client.status)}
         </Badge>
 
         <div className="space-y-2 text-xs text-gray-600">
           <div className="flex items-center space-x-1">
-            <Calendar className="h-3 w-3 flex-shrink-0" />
+            <Calendar className="h-3 w-3 flex-shrink-0 text-gray-500" />
             <span className="truncate">Último contato: {formatDate(client.updated_at)}</span>
           </div>
           
           {client.phone && (
             <div className="flex items-center space-x-1">
-              <Phone className="h-3 w-3 flex-shrink-0" />
+              <Phone className="h-3 w-3 flex-shrink-0 text-gray-500" />
               <span className="truncate">{client.phone}</span>
             </div>
           )}
 
           <div className="flex items-center justify-between">
-            <span className="font-medium">Total gasto:</span>
-            <span className="text-green-600 font-medium">{formatCurrency(client.total_spent)}</span>
+            <span className="font-medium text-gray-700">Total gasto:</span>
+            <span className="text-red-600 font-medium">{formatCurrency(client.total_spent)}</span>
           </div>
 
           {client.preferred_style && (
             <div className="flex items-center space-x-1">
-              <Badge variant="outline" className="text-xs truncate">
+              <Badge variant="outline" className="text-xs truncate border-red-200 text-red-700">
                 {client.preferred_style}
               </Badge>
             </div>
@@ -159,13 +159,13 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
 
           {client.preferred_artist_id && (
             <div className="flex items-center space-x-1">
-              <User className="h-3 w-3 flex-shrink-0" />
+              <User className="h-3 w-3 flex-shrink-0 text-gray-500" />
               <span className="text-xs truncate">Artista preferencial</span>
             </div>
           )}
 
           {/* Informações de agendamento */}
-          <div className="border-t pt-2 mt-2">
+          <div className="border-t border-gray-200 pt-2 mt-2">
             <div className="text-xs text-gray-500">
               {client.next_appointment_date ? (
                 <div>
@@ -185,20 +185,20 @@ const ClientCard = ({ client, onViewClient, isDragging }: ClientCardProps) => {
         {/* Ações rápidas */}
         <div className="flex gap-1 mt-3">
           {client.phone && (
-            <Button variant="outline" size="sm" className="flex-1 text-xs p-1">
+            <Button variant="outline" size="sm" className="flex-1 text-xs p-1 border-red-200 hover:border-red-300">
               <Phone className="h-3 w-3" />
             </Button>
           )}
-          <Button variant="outline" size="sm" className="flex-1 text-xs p-1">
+          <Button variant="outline" size="sm" className="flex-1 text-xs p-1 border-red-200 hover:border-red-300">
             <Mail className="h-3 w-3" />
           </Button>
-          <Button variant="outline" size="sm" className="flex-1 text-xs p-1">
+          <Button variant="outline" size="sm" className="flex-1 text-xs p-1 border-red-200 hover:border-red-300">
             <Calendar className="h-3 w-3" />
           </Button>
         </div>
 
         <Button 
-          variant="outline" 
+          variant="tattoo" 
           size="sm" 
           className="w-full mt-2 text-xs"
           onClick={() => onViewClient(client.id)}

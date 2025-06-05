@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -15,6 +16,13 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        // 99Tattoo specific variants
+        tattoo: "border-transparent bg-gradient-to-r from-red-600 to-red-800 text-white shadow-md",
+        tattooSecondary: "border-transparent bg-gradient-to-r from-gray-600 to-gray-800 text-white shadow-md",
+        tattooOutline: "border-red-600 text-red-600 bg-white",
+        tattooSuccess: "border-transparent bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md",
+        tattooWarning: "border-transparent bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md",
+        tattooInfo: "border-transparent bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md",
       },
     },
     defaultVariants: {

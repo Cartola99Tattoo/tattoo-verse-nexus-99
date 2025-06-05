@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -109,14 +108,14 @@ const Clients = () => {
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      new: { class: "bg-blue-100 text-blue-800 border-blue-300", icon: Users },
-      active: { class: "bg-green-100 text-green-800 border-green-300", icon: UserCheck },
-      inactive: { class: "bg-gray-100 text-gray-800 border-gray-300", icon: UserX },
-      vip: { class: "bg-purple-100 text-purple-800 border-purple-300", icon: Crown },
-      interested: { class: "bg-yellow-100 text-yellow-800 border-yellow-300", icon: Eye },
-      pending: { class: "bg-orange-100 text-orange-800 border-orange-300", icon: Clock },
-      completed: { class: "bg-green-100 text-green-800 border-green-300", icon: UserCheck },
-      returning: { class: "bg-purple-100 text-purple-800 border-purple-300", icon: TrendingUp },
+      new: { variant: "tattooInfo", icon: Users },
+      active: { variant: "tattooSuccess", icon: UserCheck },
+      inactive: { variant: "secondary", icon: UserX },
+      vip: { variant: "tattoo", icon: Crown },
+      interested: { variant: "tattooWarning", icon: Eye },
+      pending: { variant: "tattooWarning", icon: Clock },
+      completed: { variant: "tattooSuccess", icon: UserCheck },
+      returning: { variant: "tattoo", icon: TrendingUp },
     };
     
     const labels = {
@@ -134,7 +133,7 @@ const Clients = () => {
     const IconComponent = variant?.icon || Users;
 
     return (
-      <Badge variant="outline" className={variant?.class}>
+      <Badge variant={variant?.variant as any}>
         <IconComponent className="h-3 w-3 mr-1" />
         {labels[status as keyof typeof labels] || status}
       </Badge>
@@ -145,16 +144,16 @@ const Clients = () => {
     if (!temperature) return null;
 
     const variants = {
-      hot: { class: "bg-red-100 text-red-800 border-red-300", label: "Quente" },
-      warm: { class: "bg-orange-100 text-orange-800 border-orange-300", label: "Morno" },
-      cold: { class: "bg-blue-100 text-blue-800 border-blue-300", label: "Frio" },
+      hot: { variant: "destructive", label: "Quente" },
+      warm: { variant: "tattooWarning", label: "Morno" },
+      cold: { variant: "tattooInfo", label: "Frio" },
     };
 
     const variant = variants[temperature as keyof typeof variants];
     if (!variant) return null;
 
     return (
-      <Badge variant="outline" className={variant.class}>
+      <Badge variant={variant.variant as any}>
         {variant.label}
       </Badge>
     );
@@ -166,83 +165,83 @@ const Clients = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Cards de Estatísticas Expandidas */}
+      {/* Cards de Estatísticas com novo design */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+          <Card variant="tattoo">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total_clients}</div>
-              <p className="text-xs text-muted-foreground">Clientes</p>
+              <div className="text-2xl font-bold text-gray-900">{stats.total_clients}</div>
+              <p className="text-xs text-gray-600">Clientes</p>
             </CardContent>
           </Card>
 
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+          <Card variant="tattoo">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Conversão</CardTitle>
               <TrendingUp className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">{stats.conversion_rate}%</div>
-              <p className="text-xs text-muted-foreground">Taxa</p>
+              <p className="text-xs text-gray-600">Taxa</p>
             </CardContent>
           </Card>
 
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+          <Card variant="tattoo">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Quentes</CardTitle>
-              <div className="h-4 w-4 bg-red-500 rounded-full" />
+              <div className="h-4 w-4 bg-gradient-to-r from-red-500 to-red-600 rounded-full" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">{stats.hot_clients || 0}</div>
-              <p className="text-xs text-muted-foreground">Interesse alto</p>
+              <p className="text-xs text-gray-600">Interesse alto</p>
             </CardContent>
           </Card>
 
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+          <Card variant="tattoo">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Mornos</CardTitle>
-              <div className="h-4 w-4 bg-orange-500 rounded-full" />
+              <div className="h-4 w-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-orange-600">{stats.warm_clients || 0}</div>
-              <p className="text-xs text-muted-foreground">Interesse médio</p>
+              <p className="text-xs text-gray-600">Interesse médio</p>
             </CardContent>
           </Card>
 
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+          <Card variant="tattoo">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Tempo Médio</CardTitle>
               <Clock className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">{stats.average_conversion_time}d</div>
-              <p className="text-xs text-muted-foreground">Conversão</p>
+              <p className="text-xs text-gray-600">Conversão</p>
             </CardContent>
           </Card>
 
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+          <Card variant="tattoo">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-4 w-4 text-gray-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(stats.average_order_value)}</div>
-              <p className="text-xs text-muted-foreground">Por cliente</p>
+              <div className="text-2xl font-bold text-gray-900">{formatCurrency(stats.average_order_value)}</div>
+              <p className="text-xs text-gray-600">Por cliente</p>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* Ações em Massa */}
+      {/* Ações em Massa com novo design */}
       {selectedClients.length > 0 && (
-        <Card className="border-blue-200 bg-blue-50">
+        <Card variant="tattooRed">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-blue-800">
+              <span className="text-sm font-medium text-red-800">
                 {selectedClients.length} cliente(s) selecionado(s)
               </span>
               <div className="flex gap-2">
@@ -287,12 +286,13 @@ const Clients = () => {
         </Card>
       )}
 
-      {/* Filtros e Controles */}
+      {/* Filtros e Controles com novo design */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="flex gap-2 flex-1">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
+              variant="tattoo"
               placeholder="Buscar por nome, email ou telefone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -300,7 +300,7 @@ const Clients = () => {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] border-red-200 focus:border-red-600">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -316,7 +316,7 @@ const Clients = () => {
           </Select>
 
           <Select value={temperatureFilter} onValueChange={setTemperatureFilter}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[140px] border-red-200 focus:border-red-600">
               <SelectValue placeholder="Temperatura" />
             </SelectTrigger>
             <SelectContent>
@@ -329,9 +329,9 @@ const Clients = () => {
         </div>
         
         <div className="flex gap-2">
-          <div className="flex border rounded-lg">
+          <div className="flex border border-red-200 rounded-lg">
             <Button
-              variant={viewMode === "kanban" ? "default" : "ghost"}
+              variant={viewMode === "kanban" ? "tattoo" : "ghost"}
               size="sm"
               onClick={() => setViewMode("kanban")}
               className="rounded-r-none"
@@ -340,7 +340,7 @@ const Clients = () => {
               Kanban
             </Button>
             <Button
-              variant={viewMode === "table" ? "default" : "ghost"}
+              variant={viewMode === "table" ? "tattoo" : "ghost"}
               size="sm"
               onClick={() => setViewMode("table")}
               className="rounded-l-none"
@@ -353,7 +353,7 @@ const Clients = () => {
           {viewMode === "kanban" && (
             <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="tattooOutline" size="sm">
                   <Settings className="h-4 w-4 mr-1" />
                   Configurar Estágios
                 </Button>
@@ -374,7 +374,7 @@ const Clients = () => {
 
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+              <Button variant="tattoo" size="default">
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Cliente
               </Button>
@@ -400,7 +400,7 @@ const Clients = () => {
 
       {/* Conteúdo Principal */}
       {viewMode === "kanban" ? (
-        <div className="bg-white rounded-lg">
+        <div className="bg-white rounded-lg shadow-lg">
           {clientsLoading ? (
             <div className="text-center py-8">Carregando clientes...</div>
           ) : (
@@ -411,8 +411,8 @@ const Clients = () => {
           )}
         </div>
       ) : (
-        <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+        <Card variant="tattoo">
+          <CardHeader variant="gradient">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-gray-800">Lista de Clientes</CardTitle>
@@ -467,7 +467,7 @@ const Clients = () => {
                     </TableRow>
                   ) : (
                     clients.map((client) => (
-                      <TableRow key={client.id}>
+                      <TableRow key={client.id} className="hover:bg-red-50">
                         <TableCell>
                           <Checkbox
                             checked={selectedClients.includes(client.id)}
@@ -493,7 +493,7 @@ const Clients = () => {
                           {formatCurrency(client.total_spent)}
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary">
+                          <Badge variant="tattooSecondary">
                             {client.total_orders} pedidos
                           </Badge>
                         </TableCell>
@@ -508,7 +508,7 @@ const Clients = () => {
                         <TableCell>
                           <div className="flex gap-1">
                             <Button 
-                              variant="outline" 
+                              variant="tattooOutline" 
                               size="sm"
                               onClick={() => handleViewClient(client.id)}
                             >
