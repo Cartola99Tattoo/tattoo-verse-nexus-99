@@ -128,6 +128,9 @@ export default {
 			},
 			boxShadow: {
 				'red-glow': '0 0 20px rgba(239, 68, 68, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15)',
+				'blue-glow': '0 0 20px rgba(59, 130, 246, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15)',
+				'green-glow': '0 0 20px rgba(34, 197, 94, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15)',
+				'enhanced': '0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1)',
 			}
 		}
 	},
