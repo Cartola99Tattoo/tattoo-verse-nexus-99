@@ -1,5 +1,8 @@
 
 import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 const testimonials = [
   {
@@ -36,74 +39,94 @@ const TestimonialsSection = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
   };
 
+  const currentTestimonial = testimonials[currentIndex];
+
   return (
-    <section className="py-16 bg-black text-white">
+    <section className="py-16 bg-gradient-to-b from-gray-900 to-black text-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">
-            O Que Nossos <span className="text-red-500">Clientes Dizem</span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            O Que Nossos{" "}
+            <span className="bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
+              Clientes Dizem
+            </span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg">
             Veja os depoimentos de clientes satisfeitos que confiaram em nosso trabalho
             para eternizar momentos e ideias em forma de arte.
           </p>
         </div>
 
         <div className="max-w-4xl mx-auto relative">
-          <div className="bg-gray-900 rounded-xl p-8 shadow-xl">
-            <div className="flex flex-col md:flex-row items-center">
-              <div className="md:w-1/3 mb-6 md:mb-0 flex justify-center">
-                <div className="relative">
-                  <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-red-500">
+          <Card variant="tattooDark" className="overflow-hidden">
+            <CardContent className="p-8">
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="md:w-1/3 flex flex-col items-center">
+                  <div className="w-32 h-32 rounded-full overflow-hidden mb-4 ring-4 ring-red-500">
                     <img
-                      src={testimonials[currentIndex].image}
-                      alt={testimonials[currentIndex].name}
+                      src={currentTestimonial.image}
+                      alt={currentTestimonial.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-3 py-1 rounded-full text-sm">
-                    {Array.from({ length: testimonials[currentIndex].rating }).map((_, i) => (
-                      <span key={i} className="inline-block">★</span>
+                  <h4 className="text-xl font-bold text-white mb-2">
+                    {currentTestimonial.name}
+                  </h4>
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-5 w-5 ${
+                          i < currentTestimonial.rating
+                            ? "text-yellow-500 fill-yellow-500"
+                            : "text-gray-400"
+                        }`}
+                      />
                     ))}
                   </div>
                 </div>
+                
+                <div className="md:w-2/3">
+                  <blockquote className="text-lg text-gray-300 leading-relaxed italic">
+                    "{currentTestimonial.text}"
+                  </blockquote>
+                </div>
               </div>
-              <div className="md:w-2/3 md:pl-8">
-                <div className="text-2xl text-gray-200 italic mb-4">"{testimonials[currentIndex].text}"</div>
-                <div className="text-lg font-bold">{testimonials[currentIndex].name}</div>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           <div className="flex justify-center mt-8 gap-4">
-            <button
+            <Button
+              variant="tattooOutline"
+              size="icon"
               onClick={prevTestimonial}
-              className="w-10 h-10 rounded-full bg-gray-800 hover:bg-red-500 flex items-center justify-center text-white transition-colors"
-              aria-label="Anterior"
+              className="bg-white/10 border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-3 h-3 rounded-full ${
-                  currentIndex === index ? "bg-red-500" : "bg-gray-500"
-                } transition-colors`}
-                aria-label={`Ir para o depoimento ${index + 1}`}
-              />
-            ))}
-            <button
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            
+            <div className="flex items-center gap-2">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentIndex
+                      ? "bg-red-500 scale-125"
+                      : "bg-gray-600 hover:bg-gray-500"
+                  }`}
+                />
+              ))}
+            </div>
+            
+            <Button
+              variant="tattooOutline"
+              size="icon"
               onClick={nextTestimonial}
-              className="w-10 h-10 rounded-full bg-gray-800 hover:bg-red-500 flex items-center justify-center text-white transition-colors"
-              aria-label="Próximo"
+              className="bg-white/10 border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+              <ChevronRight className="h-5 w-5" />
+            </Button>
           </div>
         </div>
       </div>

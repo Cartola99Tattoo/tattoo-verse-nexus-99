@@ -23,10 +23,15 @@ const Hero = () => {
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/90" />
+      <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 via-transparent to-red-900/20" />
+      
       <div className="container mx-auto px-4 h-full flex flex-col justify-center relative z-10">
         <div className={`max-w-2xl transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-            <span className="text-red-500">Sua Tatuagem Personalizada</span> Começa Aqui
+            <span className="bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
+              Sua Tatuagem Personalizada
+            </span>{" "}
+            <span className="text-white">Começa Aqui</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-200 mb-6 leading-relaxed">
             Você pode ter uma tatuagem personalizada que combine com seu corpo, criada em um estúdio seguro e higienizado!
@@ -37,16 +42,17 @@ const Hero = () => {
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               asChild
-              size="lg"
-              className="bg-red-500 hover:bg-red-600 text-white font-bold px-8 py-6 text-lg hover-scale"
+              size="xl"
+              variant="tattoo"
+              className="font-bold"
             >
               <Link to="/contact">Agende sua Tatuagem</Link>
             </Button>
             <Button
               asChild
-              size="lg"
-              variant="outline"
-              className="bg-transparent border-white text-white hover:bg-white/10 font-bold px-8 py-6 text-lg"
+              size="xl"
+              variant="tattooOutline"
+              className="bg-white/10 border-white text-white hover:bg-white hover:text-red-600 font-bold"
             >
               <Link to="/shop">Ver Catálogo</Link>
             </Button>

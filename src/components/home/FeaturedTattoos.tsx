@@ -1,7 +1,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { Star } from "lucide-react";
 
 const tattoosData = [
   {
@@ -51,26 +54,29 @@ const FeaturedTattoos = () => {
     : tattoosData.filter(tattoo => tattoo.category === activeCategory);
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-gradient-to-b from-white to-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-black mb-4">
-            Tatuagens <span className="text-red-500">em Destaque</span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Tatuagens{" "}
+            <span className="bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+              em Destaque
+            </span>
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+          <p className="text-gray-600 max-w-2xl mx-auto mb-8 text-lg">
             Explore nossa seleção de tatuagens mais populares, criadas por nossos talentosos artistas.
             Encontre inspiração para sua próxima arte corporal.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`px-4 py-2 rounded-full transition-colors ${
+                className={`px-6 py-3 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   activeCategory === category
-                    ? "bg-red-500 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    ? "bg-gradient-to-r from-red-600 to-red-800 text-white shadow-red-glow"
+                    : "bg-white text-gray-700 border border-gray-300 hover:bg-red-50 hover:border-red-300 hover:text-red-600"
                 }`}
               >
                 {category}
@@ -79,47 +85,58 @@ const FeaturedTattoos = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {filteredTattoos.map((tattoo) => (
-            <div
+            <Card
               key={tattoo.id}
-              className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+              variant="tattoo"
+              className="group overflow-hidden h-full"
             >
-              <div className="h-64 overflow-hidden">
-                <img
-                  src={tattoo.image}
-                  alt={tattoo.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
+              <div className="relative">
+                <Link to={`/shop/${tattoo.id}`}>
+                  <div className="h-64 overflow-hidden">
+                    <img
+                      src={tattoo.image}
+                      alt={tattoo.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
+                </Link>
+                <div className="absolute top-3 left-3">
+                  <Badge variant="tattoo" className="font-semibold">
+                    {tattoo.category}
+                  </Badge>
+                </div>
               </div>
-              <div className="p-4">
+              
+              <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-bold">{tattoo.name}</h3>
+                  <Link to={`/shop/${tattoo.id}`}>
+                    <h3 className="text-lg font-bold hover:text-red-600 transition-colors">
+                      {tattoo.name}
+                    </h3>
+                  </Link>
                   <div className="flex items-center">
-                    <svg className="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                    </svg>
+                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 mr-1" />
                     <span className="text-sm font-medium">{tattoo.rating}</span>
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-2">Por {tattoo.artist}</p>
-                <p className="text-sm text-gray-500 mb-3">Categoria: {tattoo.category}</p>
+                <p className="text-gray-600 mb-3">Por {tattoo.artist}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold">R$ {tattoo.price}</span>
-                  <Link 
-                    to={`/shop/${tattoo.id}`}
-                    className="text-red-500 hover:text-red-700 transition-colors"
-                  >
-                    Ver detalhes
-                  </Link>
+                  <span className="text-xl font-bold text-red-600">R$ {tattoo.price}</span>
+                  <Button asChild variant="tattooOutline" size="sm">
+                    <Link to={`/shop/${tattoo.id}`}>
+                      Ver detalhes
+                    </Link>
+                  </Button>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
         <div className="text-center mt-12">
-          <Button asChild className="bg-red-500 hover:bg-red-600 text-white">
+          <Button asChild variant="tattoo" size="lg" className="font-bold">
             <Link to="/shop">Ver Catálogo Completo</Link>
           </Button>
         </div>

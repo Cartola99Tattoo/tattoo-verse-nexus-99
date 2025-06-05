@@ -1,101 +1,83 @@
 
 import { Link } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
-import { toast } from "@/components/ui/use-toast";
+import { Star, Heart } from "lucide-react";
+import OptimizedCartButton from "./OptimizedCartButton";
 
 interface TattooCardProps {
   tattoo: {
     id: number;
     name: string;
     artist: string;
+    category: string;
     image: string;
     price: number;
-    category: string;
     rating: number;
   };
 }
 
 const TattooCard = ({ tattoo }: TattooCardProps) => {
-  const { addToCart } = useCart();
-  
-  const handleAddToCart = () => {
-    try {
-      addToCart({
-        id: tattoo.id,
-        name: tattoo.name,
-        price: tattoo.price,
-        image: tattoo.image,
-        artist: tattoo.artist,
-        category: tattoo.category,
-      });
-      
-      toast({
-        title: "Produto adicionado",
-        description: `${tattoo.name} foi adicionado ao carrinho.`,
-      });
-    } catch (error) {
-      console.error("Error adding item to cart:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível adicionar o item ao carrinho.",
-        variant: "destructive"
-      });
-    }
-  };
-
   return (
-    <div className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
-      <div className="relative h-64 overflow-hidden">
+    <Card variant="tattoo" className="group overflow-hidden h-full">
+      <div className="relative">
         <Link to={`/shop/${tattoo.id}`}>
-          <img
-            src={tattoo.image}
-            alt={tattoo.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            loading="lazy"
-          />
+          <div className="h-64 overflow-hidden">
+            <img
+              src={tattoo.image}
+              alt={tattoo.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          </div>
         </Link>
-        <button 
-          className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-white/80 rounded-full text-gray-500 hover:text-red-500 hover:bg-white transition-colors"
-          aria-label="Favoritar"
-        >
-          <Heart className="w-5 h-5" />
-        </button>
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Button size="icon" variant="tattooOutline" className="bg-white/90">
+            <Heart className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="absolute top-3 left-3">
+          <Badge variant="tattoo" className="font-semibold">
+            {tattoo.category}
+          </Badge>
+        </div>
       </div>
-      <div className="p-4">
+      
+      <CardContent className="p-6">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-bold">
-            <Link to={`/shop/${tattoo.id}`} className="hover:text-red-500 transition-colors">
+          <Link to={`/shop/${tattoo.id}`}>
+            <h3 className="text-lg font-bold hover:text-red-600 transition-colors">
               {tattoo.name}
-            </Link>
-          </h3>
+            </h3>
+          </Link>
           <div className="flex items-center">
-            <svg className="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-            </svg>
+            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 mr-1" />
             <span className="text-sm font-medium">{tattoo.rating}</span>
           </div>
         </div>
-        <p className="text-sm text-gray-600 mb-2">Por {tattoo.artist}</p>
-        <p className="text-sm text-gray-500 mb-3">Categoria: {tattoo.category}</p>
-        <div className="flex justify-between items-center">
-          <span className="text-lg font-bold">R$ {tattoo.price}</span>
-          <div className="space-x-2">
-            <Button asChild size="sm" variant="outline" className="text-black border-black hover:bg-black hover:text-white">
-              <Link to={`/shop/${tattoo.id}`}>Ver</Link>
-            </Button>
-            <Button 
-              size="sm" 
-              className="bg-red-500 hover:bg-red-600"
-              onClick={handleAddToCart}
-            >
-              Comprar
-            </Button>
-          </div>
+        
+        <p className="text-gray-600 mb-4">Por {tattoo.artist}</p>
+        
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-2xl font-bold text-red-600">R$ {tattoo.price}</span>
         </div>
-      </div>
-    </div>
+        
+        <div className="flex gap-2">
+          <OptimizedCartButton
+            productId={tattoo.id.toString()}
+            productName={tattoo.name}
+            price={tattoo.price}
+            variant="tattoo"
+            className="flex-1"
+          />
+          <Button asChild variant="tattooOutline" size="default">
+            <Link to={`/shop/${tattoo.id}`}>
+              Ver Detalhes
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

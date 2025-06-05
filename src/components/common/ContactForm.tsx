@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -44,16 +45,12 @@ const ContactForm = ({
     setIsSubmitting(true);
     
     try {
-      // Aqui enviaria os dados para o backend
       console.log("Dados do formulário:", values, "Origem:", sourcePage);
       
-      // Simular um atraso no envio
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Resetar o formulário
       form.reset();
       
-      // Mostrar uma mensagem de sucesso
       toast({
         title: "Solicitação enviada com sucesso!",
         description: "Em breve entraremos em contato para fazer seu orçamento.",
@@ -71,64 +68,82 @@ const ContactForm = ({
   };
 
   return (
-    <div className={`bg-white p-6 rounded-lg shadow-md ${className}`}>
-      <h3 className="text-2xl font-bold mb-4">{title}</h3>
-      <p className="text-gray-600 mb-6">{description}</p>
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome</FormLabel>
-                <FormControl>
-                  <Input placeholder="Seu nome" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="seu@email.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Telefone</FormLabel>
-                <FormControl>
-                  <Input placeholder="(00) 00000-0000" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <Button 
-            type="submit" 
-            className="w-full bg-red-500 hover:bg-red-600 text-white"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Enviando..." : buttonText}
-          </Button>
-        </form>
-      </Form>
-    </div>
+    <Card variant="tattoo" className={className}>
+      <CardHeader variant="red">
+        <CardTitle className="text-2xl font-bold text-gray-900">{title}</CardTitle>
+        <p className="text-gray-700">{description}</p>
+      </CardHeader>
+      <CardContent className="p-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 font-semibold">Nome</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Seu nome" 
+                      variant="tattoo"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 font-semibold">Email</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="email" 
+                      placeholder="seu@email.com" 
+                      variant="tattoo"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 font-semibold">Telefone</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="(00) 00000-0000" 
+                      variant="tattoo"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button 
+              type="submit" 
+              variant="tattoo"
+              size="lg"
+              className="w-full font-bold"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Enviando..." : buttonText}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 
