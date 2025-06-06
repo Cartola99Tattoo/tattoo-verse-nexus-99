@@ -42,7 +42,7 @@ function NavItemComponent({ href, icon: Icon, children }: { href: string; icon: 
 
 export function AdminSidebar({ items }: Props) {
   return (
-    <div className="w-64 bg-gradient-to-b from-gray-900 via-black to-gray-900 border-r border-gray-800 flex-col space-y-2 shadow-2xl">
+    <div className="w-64 bg-gradient-to-b from-black via-gray-900 to-black border-r border-gray-800 flex-col space-y-2 shadow-2xl">
       <div className="px-4 py-6">
         <div className="mb-8 px-2">
           <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">

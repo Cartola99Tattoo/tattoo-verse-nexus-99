@@ -3,6 +3,7 @@ import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
 import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/layout/Layout';
 
 // Lazy load páginas públicas
 const Home = lazy(() => import('./pages/Home'));
@@ -44,76 +45,104 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public routes */}
+        {/* Public routes wrapped with Layout */}
         <Route path="/" element={
-          <LazyLoader>
-            <Home />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <Home />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/blog" element={
-          <LazyLoader>
-            <Blog />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <Blog />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/blog/:slug" element={
-          <LazyLoader>
-            <BlogPost />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <BlogPost />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/artists" element={
-          <LazyLoader>
-            <Artists />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <Artists />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/artists/:id" element={
-          <LazyLoader>
-            <ArtistDetail />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <ArtistDetail />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/shop" element={
-          <LazyLoader>
-            <Shop />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <Shop />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/shop/:id" element={
-          <LazyLoader>
-            <ProductDetail />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <ProductDetail />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/events" element={
-          <LazyLoader>
-            <Events />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <Events />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/contact" element={
-          <LazyLoader>
-            <Contact />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <Contact />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/auth" element={
-          <LazyLoader>
-            <Auth />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <Auth />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/reset-password" element={
-          <LazyLoader>
-            <ResetPassword />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <ResetPassword />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/checkout" element={
-          <LazyLoader>
-            <Checkout />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <Checkout />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/profile" element={
-          <LazyLoader>
-            <Profile />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <Profile />
+            </LazyLoader>
+          </Layout>
         } />
         <Route path="/user-profile" element={
-          <LazyLoader>
-            <UserProfile />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <UserProfile />
+            </LazyLoader>
+          </Layout>
         } />
 
         {/* Admin routes - SINGLE AdminLayout instance with proper nesting */}
@@ -214,9 +243,11 @@ function App() {
 
         {/* 404 */}
         <Route path="*" element={
-          <LazyLoader>
-            <NotFound />
-          </LazyLoader>
+          <Layout>
+            <LazyLoader>
+              <NotFound />
+            </LazyLoader>
+          </Layout>
         } />
       </Routes>
     </Router>

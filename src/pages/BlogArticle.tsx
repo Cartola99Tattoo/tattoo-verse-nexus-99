@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -156,7 +157,7 @@ const BlogArticle = () => {
             </div>
 
             {/* Article Body */}
-            <Card variant="tattoo" className="shadow-xl">
+            <Card variant="tattoo" className="bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-xl">
               <CardContent className="p-8 md:p-12">
                 <div 
                   className="prose prose-lg max-w-none prose-headings:text-red-600 prose-h2:text-red-600 prose-h3:text-red-600 prose-links:text-red-600 prose-strong:text-gray-800"
@@ -188,7 +189,7 @@ const BlogArticle = () => {
                   <h3 className="text-lg font-bold text-red-600 mb-4">Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     {article.tags.map(tag => (
-                      <Badge key={tag} variant="tattooOutline" className="cursor-pointer hover:bg-red-50">
+                      <Badge key={tag} variant="tattooOutline" className="cursor-pointer hover:bg-red-50 border-red-200 text-red-600">
                         #{tag}
                       </Badge>
                     ))}
@@ -199,16 +200,16 @@ const BlogArticle = () => {
                 <div className="mt-8 pt-8 border-t border-red-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <Button variant="tattooOutline" size="sm">
+                      <Button variant="tattooOutline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50">
                         <Heart className="h-4 w-4 mr-2" />
                         Curtir
                       </Button>
-                      <Button variant="tattooOutline" size="sm">
+                      <Button variant="tattooOutline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50">
                         <MessageCircle className="h-4 w-4 mr-2" />
                         Comentar
                       </Button>
                     </div>
-                    <Button variant="tattoo" size="sm">
+                    <Button variant="tattoo" size="sm" className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 shadow-lg hover:shadow-xl">
                       <Share2 className="h-4 w-4 mr-2" />
                       Compartilhar
                     </Button>
@@ -221,7 +222,7 @@ const BlogArticle = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
             {/* Author Info */}
-            <Card variant="tattooRed" className="shadow-xl">
+            <Card variant="tattooRed" className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-xl">
               <CardContent className="p-6 text-center">
                 <div className="w-16 h-16 bg-gradient-to-r from-red-600 to-red-800 rounded-full mx-auto mb-4 flex items-center justify-center">
                   <User className="h-8 w-8 text-white" />
@@ -230,14 +231,14 @@ const BlogArticle = () => {
                 <p className="text-sm text-gray-600 mb-4">
                   Tatuadora especialista em realismo com mais de 8 anos de experiência.
                 </p>
-                <Button variant="tattooOutline" size="sm" className="w-full">
+                <Button variant="tattooOutline" size="sm" className="w-full border-red-200 text-red-600 hover:bg-red-50">
                   Ver Perfil
                 </Button>
               </CardContent>
             </Card>
 
             {/* Related Posts */}
-            <Card variant="tattoo" className="shadow-xl">
+            <Card variant="tattoo" className="bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-xl">
               <CardContent className="p-6">
                 <h3 className="font-bold text-red-600 mb-4">Artigos Relacionados</h3>
                 <div className="space-y-4">
@@ -267,13 +268,13 @@ const BlogArticle = () => {
             </Card>
 
             {/* CTA */}
-            <Card variant="tattoo" className="shadow-xl">
+            <Card variant="tattoo" className="bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-xl">
               <CardContent className="p-6 text-center">
                 <h3 className="font-bold text-red-600 mb-2">Pronto para fazer sua tatuagem?</h3>
                 <p className="text-sm text-gray-600 mb-4">
                   Agende uma consulta com nossos artistas especializados.
                 </p>
-                <Button variant="tattoo" className="w-full shadow-lg hover:shadow-xl">
+                <Button variant="tattoo" className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 shadow-lg hover:shadow-xl">
                   Agendar Consulta
                 </Button>
               </CardContent>

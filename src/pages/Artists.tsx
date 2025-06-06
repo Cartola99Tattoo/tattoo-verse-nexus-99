@@ -78,10 +78,10 @@ const Artists = () => {
       <section className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
               Nossos <span className="text-white">Tatuadores</span>
             </h1>
-            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto text-white">
               Conheça os artistas talentosos que transformarão suas ideias em arte permanente
             </p>
           </div>
@@ -98,7 +98,7 @@ const Artists = () => {
                 placeholder="Buscar por nome ou especialidade..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="shadow-lg"
+                className="shadow-lg border-red-200 focus:border-red-600 focus:ring-2 focus:ring-red-200"
               />
             </div>
             
@@ -129,7 +129,7 @@ const Artists = () => {
               <Card 
                 key={artist.id} 
                 variant="tattoo" 
-                className="group cursor-pointer overflow-hidden hover:shadow-red-glow transition-all duration-300 transform hover:scale-[1.02]"
+                className="group cursor-pointer overflow-hidden bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl hover:shadow-red-glow transition-all duration-300 transform hover:scale-[1.02]"
                 onClick={() => navigate(`/artists/${artist.id}`)}
               >
                 <div className="relative">
@@ -148,7 +148,7 @@ const Artists = () => {
                   </div>
                   
                   <div className="absolute top-3 left-3">
-                    <Badge variant="tattoo" className="font-semibold shadow-md">
+                    <Badge variant="tattoo" className="font-semibold shadow-md bg-gradient-to-r from-red-600 to-red-800">
                       {artist.specialty}
                     </Badge>
                   </div>
@@ -172,7 +172,7 @@ const Artists = () => {
                   
                   <div className="flex flex-wrap gap-1 mb-4">
                     {artist.styles.slice(0, 3).map(style => (
-                      <Badge key={style} variant="tattooOutline" className="text-xs">
+                      <Badge key={style} variant="tattooOutline" className="text-xs border-red-200 text-red-600">
                         {style}
                       </Badge>
                     ))}
@@ -186,7 +186,7 @@ const Artists = () => {
                   <div className="flex gap-2">
                     <Button
                       variant="tattoo"
-                      className="flex-1 shadow-lg hover:shadow-xl"
+                      className="flex-1 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/artists/${artist.id}`);
@@ -197,7 +197,7 @@ const Artists = () => {
                     <Button
                       variant="tattooOutline"
                       size="icon"
-                      className="shadow-md hover:shadow-lg"
+                      className="shadow-md hover:shadow-lg border-red-200 text-red-600 hover:bg-red-50"
                       onClick={(e) => {
                         e.stopPropagation();
                         window.open(`https://instagram.com/${artist.instagram.replace('@', '')}`, '_blank');

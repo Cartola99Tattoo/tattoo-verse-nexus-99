@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -101,10 +102,10 @@ const ProductDetail = () => {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`relative overflow-hidden rounded-lg transition-all duration-300 ${
+                  className={`relative overflow-hidden rounded-lg transition-all duration-300 shadow-md hover:shadow-lg ${
                     selectedImage === index 
-                      ? "ring-2 ring-red-600 shadow-lg transform scale-105" 
-                      : "hover:shadow-md hover:scale-105"
+                      ? "ring-2 ring-red-600 shadow-red-glow transform scale-105" 
+                      : "hover:transform hover:scale-105"
                   }`}
                 >
                   <img
@@ -120,7 +121,7 @@ const ProductDetail = () => {
           {/* Product Info */}
           <div>
             <div className="mb-4">
-              <Badge variant="tattoo" className="mb-2">
+              <Badge variant="tattoo" className="mb-2 bg-gradient-to-r from-red-600 to-red-800">
                 {productData.category}
               </Badge>
               
@@ -152,7 +153,7 @@ const ProductDetail = () => {
                     <span className="text-xl text-gray-400 line-through">
                       R$ {productData.originalPrice}
                     </span>
-                    <Badge variant="destructive">
+                    <Badge variant="destructive" className="bg-gradient-to-r from-red-500 to-red-700">
                       -{discount}%
                     </Badge>
                   </>
@@ -200,11 +201,11 @@ const ProductDetail = () => {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="tattooOutline" className="flex-1">
+                <Button variant="tattooOutline" className="flex-1 border-red-200 text-red-600 hover:bg-red-50">
                   <Heart className="h-4 w-4 mr-2" />
                   Favoritar
                 </Button>
-                <Button variant="tattooOutline" className="flex-1">
+                <Button variant="tattooOutline" className="flex-1 border-red-200 text-red-600 hover:bg-red-50">
                   <Share2 className="h-4 w-4 mr-2" />
                   Compartilhar
                 </Button>
@@ -213,15 +214,15 @@ const ProductDetail = () => {
 
             {/* Guarantees */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center p-3 bg-red-50 rounded-lg">
+              <div className="flex items-center p-3 bg-red-50 rounded-lg shadow-md">
                 <Truck className="h-5 w-5 text-red-600 mr-2" />
                 <span className="text-sm text-gray-700">Agendamento rápido</span>
               </div>
-              <div className="flex items-center p-3 bg-red-50 rounded-lg">
+              <div className="flex items-center p-3 bg-red-50 rounded-lg shadow-md">
                 <Shield className="h-5 w-5 text-red-600 mr-2" />
                 <span className="text-sm text-gray-700">Estúdio seguro</span>
               </div>
-              <div className="flex items-center p-3 bg-red-50 rounded-lg">
+              <div className="flex items-center p-3 bg-red-50 rounded-lg shadow-md">
                 <RotateCcw className="h-5 w-5 text-red-600 mr-2" />
                 <span className="text-sm text-gray-700">Retoque grátis</span>
               </div>
@@ -232,8 +233,8 @@ const ProductDetail = () => {
         {/* Additional Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           {/* Specifications */}
-          <Card variant="tattoo" className="shadow-xl">
-            <CardHeader variant="red">
+          <Card variant="tattoo" className="bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-xl">
+            <CardHeader variant="red" className="bg-gradient-to-r from-red-50 to-red-100">
               <CardTitle className="text-xl font-bold text-red-600">Especificações</CardTitle>
             </CardHeader>
             <CardContent>
@@ -251,8 +252,8 @@ const ProductDetail = () => {
           </Card>
 
           {/* What's Included */}
-          <Card variant="tattoo" className="shadow-xl">
-            <CardHeader variant="red">
+          <Card variant="tattoo" className="bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-xl">
+            <CardHeader variant="red" className="bg-gradient-to-r from-red-50 to-red-100">
               <CardTitle className="text-xl font-bold text-red-600">O que está incluído</CardTitle>
             </CardHeader>
             <CardContent>
@@ -276,7 +277,7 @@ const ProductDetail = () => {
               <Card 
                 key={product.id} 
                 variant="tattoo" 
-                className="group cursor-pointer overflow-hidden shadow-xl hover:shadow-red-glow transition-all duration-300 transform hover:scale-[1.02]"
+                className="group cursor-pointer overflow-hidden bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-xl hover:shadow-red-glow transition-all duration-300 transform hover:scale-[1.02]"
                 onClick={() => navigate(`/shop/${product.id}`)}
               >
                 <div className="h-48 overflow-hidden">
@@ -294,7 +295,7 @@ const ProductDetail = () => {
                   <p className="text-gray-600 text-sm mb-2">Por {product.artist}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-red-600">R$ {product.price}</span>
-                    <Button variant="tattooOutline" size="sm">
+                    <Button variant="tattooOutline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50">
                       Ver Detalhes
                     </Button>
                   </div>
