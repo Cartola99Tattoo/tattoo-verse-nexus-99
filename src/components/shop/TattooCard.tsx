@@ -67,8 +67,8 @@ const TattooCard = ({ tattoo }: TattooCardProps) => {
             productId={tattoo.id.toString()}
             productName={tattoo.name}
             price={tattoo.price}
-            variant="tattoo"
-            className="flex-1"
+            variant="default"
+            className="flex-1 bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg hover:from-red-700 hover:to-red-900 hover:shadow-xl transform hover:scale-105"
           />
           <Button asChild variant="tattooOutline" size="default">
             <Link to={`/shop/${tattoo.id}`}>
