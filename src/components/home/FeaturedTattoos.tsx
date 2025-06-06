@@ -1,67 +1,52 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Star } from "lucide-react";
-
-const tattoosData = [
-  {
-    id: 1,
-    name: "Dragão Oriental",
-    artist: "Mariana Silva",
-    category: "Colorido",
-    image: "https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=2070&auto=format&fit=crop",
-    price: 750,
-    rating: 4.9,
-  },
-  {
-    id: 2,
-    name: "Mandala Geométrica",
-    artist: "Rafael Costa",
-    category: "Blackwork",
-    image: "https://images.unsplash.com/photo-1562962230-16e4623d36e7?q=80&w=1974&auto=format&fit=crop",
-    price: 550,
-    rating: 4.8,
-  },
-  {
-    id: 3,
-    name: "Leão Aquarela",
-    artist: "Juliana Mendes",
-    category: "Aquarela",
-    image: "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?q=80&w=1974&auto=format&fit=crop",
-    price: 850,
-    rating: 5.0,
-  },
-  {
-    id: 4,
-    name: "Lobo Selvagem",
-    artist: "Mariana Silva",
-    category: "Realismo",
-    image: "https://images.unsplash.com/photo-1543767271-7c5f36dc5310?q=80&w=1974&auto=format&fit=crop",
-    price: 900,
-    rating: 4.9,
-  },
-];
-
+const tattoosData = [{
+  id: 1,
+  name: "Dragão Oriental",
+  artist: "Mariana Silva",
+  category: "Colorido",
+  image: "https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=2070&auto=format&fit=crop",
+  price: 750,
+  rating: 4.9
+}, {
+  id: 2,
+  name: "Mandala Geométrica",
+  artist: "Rafael Costa",
+  category: "Blackwork",
+  image: "https://images.unsplash.com/photo-1562962230-16e4623d36e7?q=80&w=1974&auto=format&fit=crop",
+  price: 550,
+  rating: 4.8
+}, {
+  id: 3,
+  name: "Leão Aquarela",
+  artist: "Juliana Mendes",
+  category: "Aquarela",
+  image: "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?q=80&w=1974&auto=format&fit=crop",
+  price: 850,
+  rating: 5.0
+}, {
+  id: 4,
+  name: "Lobo Selvagem",
+  artist: "Mariana Silva",
+  category: "Realismo",
+  image: "https://images.unsplash.com/photo-1543767271-7c5f36dc5310?q=80&w=1974&auto=format&fit=crop",
+  price: 900,
+  rating: 4.9
+}];
 const FeaturedTattoos = () => {
   const [activeCategory, setActiveCategory] = useState("Todos");
   const categories = ["Todos", "Realismo", "Blackwork", "Aquarela", "Colorido"];
-
-  const filteredTattoos = activeCategory === "Todos"
-    ? tattoosData
-    : tattoosData.filter(tattoo => tattoo.category === activeCategory);
-
-  return (
-    <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+  const filteredTattoos = activeCategory === "Todos" ? tattoosData : tattoosData.filter(tattoo => tattoo.category === activeCategory);
+  return <section className="py-16 bg-gradient-to-b from-white to-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Tatuagens{" "}
-            <span className="bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
-              em Destaque
-            </span>
+            <span className="bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">Tatuagem está Aqui</span>
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto mb-8 text-lg">
             Explore nossa seleção de tatuagens mais populares, criadas por nossos talentosos artistas.
@@ -69,37 +54,18 @@ const FeaturedTattoos = () => {
           </p>
           
           <div className="flex flex-wrap justify-center gap-3 mb-8">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                className={`px-6 py-3 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 ${
-                  activeCategory === category
-                    ? "bg-gradient-to-r from-red-600 to-red-800 text-white shadow-red-glow"
-                    : "bg-white text-gray-700 border border-gray-300 hover:bg-red-50 hover:border-red-300 hover:text-red-600"
-                }`}
-              >
+            {categories.map(category => <button key={category} onClick={() => setActiveCategory(category)} className={`px-6 py-3 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 ${activeCategory === category ? "bg-gradient-to-r from-red-600 to-red-800 text-white shadow-red-glow" : "bg-white text-gray-700 border border-gray-300 hover:bg-red-50 hover:border-red-300 hover:text-red-600"}`}>
                 {category}
-              </button>
-            ))}
+              </button>)}
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {filteredTattoos.map((tattoo) => (
-            <Card
-              key={tattoo.id}
-              variant="tattoo"
-              className="group overflow-hidden h-full"
-            >
+          {filteredTattoos.map(tattoo => <Card key={tattoo.id} variant="tattoo" className="group overflow-hidden h-full">
               <div className="relative">
                 <Link to={`/shop/${tattoo.id}`}>
                   <div className="h-64 overflow-hidden">
-                    <img
-                      src={tattoo.image}
-                      alt={tattoo.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
+                    <img src={tattoo.image} alt={tattoo.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   </div>
                 </Link>
                 <div className="absolute top-3 left-3">
@@ -131,8 +97,7 @@ const FeaturedTattoos = () => {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
         <div className="text-center mt-12">
@@ -141,8 +106,6 @@ const FeaturedTattoos = () => {
           </Button>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default FeaturedTattoos;
