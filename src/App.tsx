@@ -45,7 +45,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public routes with single Layout wrapper */}
+        {/* Public routes with SINGLE Layout wrapper - NO DUPLICATES */}
         <Route path="/" element={<Layout><LazyLoader><Home /></LazyLoader></Layout>} />
         <Route path="/blog" element={<Layout><LazyLoader><Blog /></LazyLoader></Layout>} />
         <Route path="/blog/:slug" element={<Layout><LazyLoader><BlogPost /></LazyLoader></Layout>} />
