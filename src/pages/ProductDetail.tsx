@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -195,7 +194,6 @@ const ProductDetail = () => {
                   productId={productData.id.toString()}
                   productName={productData.name}
                   price={productData.price}
-                  quantity={quantity}
                   variant="default"
                   className="flex-1 bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg hover:from-red-700 hover:to-red-900 hover:shadow-xl transform hover:scale-105"
                 />

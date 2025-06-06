@@ -162,10 +162,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       type: 'ADD_ITEM', 
       payload: { ...product, quantity } 
     });
-    toast({
-      title: 'Item adicionado',
-      description: `${product.name} foi adicionado ao seu carrinho.`,
-    });
   };
   
   const removeFromCart = (id: number) => {

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -160,32 +159,26 @@ const BlogArticle = () => {
             <Card variant="tattoo" className="shadow-xl">
               <CardContent className="p-8 md:p-12">
                 <div 
-                  className="prose prose-lg max-w-none"
-                  style={{
-                    '--tw-prose-headings': '#dc2626',
-                    '--tw-prose-links': '#dc2626',
-                    '--tw-prose-strong': '#374151',
-                    '--tw-prose-code': '#dc2626'
-                  }}
+                  className="prose prose-lg max-w-none prose-headings:text-red-600 prose-h2:text-red-600 prose-h3:text-red-600 prose-links:text-red-600 prose-strong:text-gray-800"
                   dangerouslySetInnerHTML={{ 
                     __html: article.content.replace(
                       /<h([1-6])/g, 
-                      '<h$1 style="color: #dc2626; font-weight: bold; margin-top: 2rem; margin-bottom: 1rem;"'
+                      '<h$1 class="text-red-600 font-bold mt-8 mb-4"'
                     ).replace(
                       /<h2/g,
-                      '<h2 style="color: #dc2626; font-weight: bold; font-size: 1.875rem; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 2px solid #fecaca; padding-bottom: 0.5rem;"'
+                      '<h2 class="text-red-600 font-bold text-3xl mt-10 mb-6 border-b-2 border-red-200 pb-2"'
                     ).replace(
                       /<h3/g,
-                      '<h3 style="color: #dc2626; font-weight: bold; font-size: 1.5rem; margin-top: 2rem; margin-bottom: 0.75rem;"'
+                      '<h3 class="text-red-600 font-bold text-2xl mt-8 mb-4"'
                     ).replace(
                       /<ul/g,
-                      '<ul style="list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem;"'
+                      '<ul class="list-disc ml-6 mb-4 space-y-2"'
                     ).replace(
                       /<li/g,
-                      '<li style="margin-bottom: 0.5rem; line-height: 1.6;"'
+                      '<li class="mb-2 leading-relaxed text-gray-700"'
                     ).replace(
                       /<p/g,
-                      '<p style="margin-bottom: 1.5rem; line-height: 1.7; color: #374151;"'
+                      '<p class="mb-6 leading-relaxed text-gray-700 text-lg"'
                     )
                   }}
                 />
