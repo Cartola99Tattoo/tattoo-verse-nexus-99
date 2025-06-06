@@ -45,105 +45,21 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public routes wrapped with Layout */}
-        <Route path="/" element={
-          <Layout>
-            <LazyLoader>
-              <Home />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/blog" element={
-          <Layout>
-            <LazyLoader>
-              <Blog />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/blog/:slug" element={
-          <Layout>
-            <LazyLoader>
-              <BlogPost />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/artists" element={
-          <Layout>
-            <LazyLoader>
-              <Artists />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/artists/:id" element={
-          <Layout>
-            <LazyLoader>
-              <ArtistDetail />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/shop" element={
-          <Layout>
-            <LazyLoader>
-              <Shop />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/shop/:id" element={
-          <Layout>
-            <LazyLoader>
-              <ProductDetail />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/events" element={
-          <Layout>
-            <LazyLoader>
-              <Events />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/contact" element={
-          <Layout>
-            <LazyLoader>
-              <Contact />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/auth" element={
-          <Layout>
-            <LazyLoader>
-              <Auth />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/reset-password" element={
-          <Layout>
-            <LazyLoader>
-              <ResetPassword />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/checkout" element={
-          <Layout>
-            <LazyLoader>
-              <Checkout />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/profile" element={
-          <Layout>
-            <LazyLoader>
-              <Profile />
-            </LazyLoader>
-          </Layout>
-        } />
-        <Route path="/user-profile" element={
-          <Layout>
-            <LazyLoader>
-              <UserProfile />
-            </LazyLoader>
-          </Layout>
-        } />
+        {/* Public routes with single Layout wrapper */}
+        <Route path="/" element={<Layout><LazyLoader><Home /></LazyLoader></Layout>} />
+        <Route path="/blog" element={<Layout><LazyLoader><Blog /></LazyLoader></Layout>} />
+        <Route path="/blog/:slug" element={<Layout><LazyLoader><BlogPost /></LazyLoader></Layout>} />
+        <Route path="/artists" element={<Layout><LazyLoader><Artists /></LazyLoader></Layout>} />
+        <Route path="/artists/:id" element={<Layout><LazyLoader><ArtistDetail /></LazyLoader></Layout>} />
+        <Route path="/shop" element={<Layout><LazyLoader><Shop /></LazyLoader></Layout>} />
+        <Route path="/shop/:id" element={<Layout><LazyLoader><ProductDetail /></LazyLoader></Layout>} />
+        <Route path="/events" element={<Layout><LazyLoader><Events /></LazyLoader></Layout>} />
+        <Route path="/contact" element={<Layout><LazyLoader><Contact /></LazyLoader></Layout>} />
+        <Route path="/auth" element={<Layout><LazyLoader><Auth /></LazyLoader></Layout>} />
+        <Route path="/reset-password" element={<Layout><LazyLoader><ResetPassword /></LazyLoader></Layout>} />
+        <Route path="/checkout" element={<Layout><LazyLoader><Checkout /></LazyLoader></Layout>} />
+        <Route path="/profile" element={<Layout><LazyLoader><Profile /></LazyLoader></Layout>} />
+        <Route path="/user-profile" element={<Layout><LazyLoader><UserProfile /></LazyLoader></Layout>} />
 
         {/* Admin routes - SINGLE AdminLayout instance with proper nesting */}
         <Route
@@ -157,98 +73,28 @@ function App() {
           }
         >
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={
-            <LazyLoader>
-              <Dashboard />
-            </LazyLoader>
-          } />
-          <Route path="artists" element={
-            <LazyLoader>
-              <AdminArtists />
-            </LazyLoader>
-          } />
-          <Route path="blog" element={
-            <LazyLoader>
-              <AdminBlog />
-            </LazyLoader>
-          } />
-          <Route path="appointments" element={
-            <LazyLoader>
-              <Appointments />
-            </LazyLoader>
-          } />
-          <Route path="clients" element={
-            <LazyLoader>
-              <Clients />
-            </LazyLoader>
-          } />
-          <Route path="clients/:id" element={
-            <LazyLoader>
-              <ClientDetail />
-            </LazyLoader>
-          } />
-          <Route path="products" element={
-            <LazyLoader>
-              <Products />
-            </LazyLoader>
-          } />
-          <Route path="stock" element={
-            <LazyLoader>
-              <Stock />
-            </LazyLoader>
-          } />
-          <Route path="projects" element={
-            <LazyLoader>
-              <Projects />
-            </LazyLoader>
-          } />
-          <Route path="events" element={
-            <LazyLoader>
-              <AdminEvents />
-            </LazyLoader>
-          } />
-          <Route path="financial" element={
-            <LazyLoader>
-              <Financial />
-            </LazyLoader>
-          } />
-          <Route path="analytics" element={
-            <LazyLoader>
-              <Analytics />
-            </LazyLoader>
-          } />
-          <Route path="loyalty" element={
-            <LazyLoader>
-              <Loyalty />
-            </LazyLoader>
-          } />
-          <Route path="security" element={
-            <LazyLoader>
-              <Security />
-            </LazyLoader>
-          } />
+          <Route path="dashboard" element={<LazyLoader><Dashboard /></LazyLoader>} />
+          <Route path="artists" element={<LazyLoader><AdminArtists /></LazyLoader>} />
+          <Route path="blog" element={<LazyLoader><AdminBlog /></LazyLoader>} />
+          <Route path="appointments" element={<LazyLoader><Appointments /></LazyLoader>} />
+          <Route path="clients" element={<LazyLoader><Clients /></LazyLoader>} />
+          <Route path="clients/:id" element={<LazyLoader><ClientDetail /></LazyLoader>} />
+          <Route path="products" element={<LazyLoader><Products /></LazyLoader>} />
+          <Route path="stock" element={<LazyLoader><Stock /></LazyLoader>} />
+          <Route path="projects" element={<LazyLoader><Projects /></LazyLoader>} />
+          <Route path="events" element={<LazyLoader><AdminEvents /></LazyLoader>} />
+          <Route path="financial" element={<LazyLoader><Financial /></LazyLoader>} />
+          <Route path="analytics" element={<LazyLoader><Analytics /></LazyLoader>} />
+          <Route path="loyalty" element={<LazyLoader><Loyalty /></LazyLoader>} />
+          <Route path="security" element={<LazyLoader><Security /></LazyLoader>} />
         </Route>
 
         {/* Standalone admin auth routes */}
-        <Route path="/admin/auth" element={
-          <LazyLoader>
-            <AdminAuth />
-          </LazyLoader>
-        } />
-        <Route path="/admin/setup" element={
-          <LazyLoader>
-            <AdminUserSetup />
-          </LazyLoader>
-        } />
+        <Route path="/admin/auth" element={<LazyLoader><AdminAuth /></LazyLoader>} />
+        <Route path="/admin/setup" element={<LazyLoader><AdminUserSetup /></LazyLoader>} />
 
         {/* 404 */}
-        <Route path="*" element={
-          <Layout>
-            <LazyLoader>
-              <NotFound />
-            </LazyLoader>
-          </Layout>
-        } />
+        <Route path="*" element={<Layout><LazyLoader><NotFound /></LazyLoader></Layout>} />
       </Routes>
     </Router>
   );

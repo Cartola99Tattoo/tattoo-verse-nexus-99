@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2, Map, Star } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getArtistsService } from "@/services/serviceFactory";
-import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -69,30 +67,28 @@ const ArtistDetail = () => {
   
   if (hasError) {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h2 className="text-2xl font-bold mb-4 text-red-500">Erro ao carregar informações</h2>
-          <p className="text-gray-600 mb-6">
-            Não foi possível carregar os detalhes deste tatuador.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Button onClick={() => {
-              refreshArtist();
-              refreshPortfolio();
-            }}>
-              Tentar novamente
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/artists">Voltar para lista</Link>
-            </Button>
-          </div>
+      <div className="container mx-auto px-4 py-12 text-center">
+        <h2 className="text-2xl font-bold mb-4 text-red-600">Erro ao carregar informações</h2>
+        <p className="text-gray-600 mb-6">
+          Não foi possível carregar os detalhes deste tatuador.
+        </p>
+        <div className="flex gap-4 justify-center">
+          <Button onClick={() => {
+            refreshArtist();
+            refreshPortfolio();
+          }}>
+            Tentar novamente
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/artists">Voltar para lista</Link>
+          </Button>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Helmet>
         <title>{isLoading ? 'Carregando...' : `${fullName} | 99Tattoo`}</title>
         <meta 
@@ -101,109 +97,111 @@ const ArtistDetail = () => {
         />
       </Helmet>
       
-      <div className="container mx-auto px-4 py-12">
-        {/* Back button */}
-        <div className="mb-6">
-          <Button variant="outline" asChild className="flex items-center gap-2">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white py-16">
+        <div className="container mx-auto px-4">
+          <Button
+            variant="ghost"
+            asChild
+            className="text-white hover:bg-white/10 mb-6"
+          >
             <Link to="/artists">
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar para todos os tatuadores
             </Link>
           </Button>
-        </div>
-        
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-12 w-12 animate-spin text-red-500 mb-4" />
-            <p className="text-lg text-gray-600">Carregando informações do tatuador...</p>
-          </div>
-        ) : artist ? (
-          <div className="animate-fade-in space-y-12">
-            {/* Artist header */}
+          
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="h-12 w-12 animate-spin text-white mb-4" />
+              <p className="text-lg text-red-100">Carregando informações do tatuador...</p>
+            </div>
+          ) : artist ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Avatar column */}
-              <div className="md:col-span-1">
-                <div className="flex flex-col items-center">
-                  <div className="relative mb-6 w-64 h-64">
-                    <div className="absolute inset-0 bg-gradient-to-br from-red-400 to-red-600 blur-2xl opacity-20 rounded-full"></div>
-                    <Avatar className="w-full h-full border-4 border-white shadow-lg">
-                      <AvatarImage 
-                        src={artist.avatar_url} 
-                        alt={fullName}
-                        className="w-full h-full object-cover" 
-                      />
-                      <AvatarFallback className="text-6xl bg-gray-200">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                  
-                  {/* Rating */}
-                  {artist.rating && (
-                    <div className="flex items-center mb-4 bg-white px-4 py-2 rounded-full shadow-sm">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star 
-                          key={i}
-                          className={`h-5 w-5 ${i < Math.floor(artist.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-                        />
-                      ))}
-                      <span className="ml-2 font-bold">{artist.rating}</span>
-                      {artist.total_reviews && (
-                        <span className="text-sm text-gray-500 ml-1">
-                          ({artist.total_reviews} avaliações)
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  
-                  {/* Specialties */}
-                  <div className="mb-6 text-center">
-                    <h3 className="font-bold mb-2 text-gray-700">Especialidades</h3>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {artist.specialties.map((specialty, idx) => (
-                        <Badge key={idx} className="bg-red-100 text-red-800 hover:bg-red-200">
-                          {specialty}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Location */}
-                  <div className="flex items-center mb-6 text-gray-600">
-                    <Map className="h-4 w-4 mr-2" />
-                    <span>São Paulo, SP</span>
-                  </div>
-                  
-                  {/* CTA Button */}
-                  <div className="w-full mt-4">
-                    <Button className="w-full bg-red-500 hover:bg-red-600" 
-                      onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}>
-                      Entrar em contato
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Info column */}
-              <div className="md:col-span-2">
-                <h1 className="text-3xl font-bold mb-4">{fullName}</h1>
-                <div className="flex items-center mb-4">
-                  <Badge variant="secondary" className="mr-2">{artist.style}</Badge>
+              <div className="md:col-span-1 flex flex-col items-center">
+                <div className="relative mb-6 w-64 h-64">
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-400 to-red-600 blur-2xl opacity-20 rounded-full"></div>
+                  <Avatar className="w-full h-full border-4 border-white shadow-2xl">
+                    <AvatarImage 
+                      src={artist.avatar_url} 
+                      alt={fullName}
+                      className="w-full h-full object-cover" 
+                    />
+                    <AvatarFallback className="text-6xl bg-gray-200">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
                 
+                {artist.rating && (
+                  <div className="flex items-center mb-4 bg-white px-4 py-2 rounded-full shadow-lg">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star 
+                        key={i}
+                        className={`h-5 w-5 ${i < Math.floor(artist.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                      />
+                    ))}
+                    <span className="ml-2 font-bold text-red-600">{artist.rating}</span>
+                    {artist.total_reviews && (
+                      <span className="text-sm text-gray-500 ml-1">
+                        ({artist.total_reviews} avaliações)
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              <div className="md:col-span-2">
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">{fullName}</h1>
+                <div className="flex items-center mb-6">
+                  <Badge className="mr-2 bg-white text-red-600 hover:bg-red-50">{artist.style}</Badge>
+                  <div className="flex items-center text-red-100">
+                    <Map className="h-4 w-4 mr-1" />
+                    <span>São Paulo, SP</span>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="font-bold mb-3 text-white text-lg">Especialidades</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {artist.specialties.map((specialty, idx) => (
+                      <Badge key={idx} variant="outline" className="border-white text-white hover:bg-white hover:text-red-600">
+                        {specialty}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                
+                <Button 
+                  className="bg-white text-red-600 hover:bg-red-50 shadow-lg hover:shadow-xl transition-all duration-300"
+                  onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  Entrar em contato
+                </Button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-12">
+        {artist && (
+          <div className="animate-fade-in space-y-12">
+            {/* Biography */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <h2 className="text-3xl font-bold mb-6 text-red-600">Sobre {artist.first_name}</h2>
                 <div className="prose prose-lg max-w-full">
-                  <h2 className="text-xl font-bold mb-4">Sobre {artist.first_name}</h2>
-                  
                   {artist.bio.split('\n').map((paragraph, idx) => (
                     <p key={idx} className="mb-4 text-gray-700 leading-relaxed">
                       {paragraph}
                     </p>
                   ))}
                   
-                  <h3 className="text-lg font-bold mt-8 mb-3">Estilo de trabalho</h3>
+                  <h3 className="text-xl font-bold mt-8 mb-3 text-red-600">Estilo de trabalho</h3>
                   <p className="text-gray-700 leading-relaxed">
-                    {artist.first_name} é especialista em <strong>{artist.style}</strong> e tem um 
-                    trabalho reconhecido pelas técnicas de {artist.specialties.join(", ")}.
+                    {artist.first_name} é especialista em <strong className="text-red-600">{artist.style}</strong> e tem um 
+                    trabalho reconhecido pelas técnicas de <strong className="text-red-600">{artist.specialties.join(", ")}</strong>.
                   </p>
                 </div>
               </div>
@@ -211,7 +209,7 @@ const ArtistDetail = () => {
             
             {/* Portfolio Section */}
             <div>
-              <h2 className="text-2xl font-bold mb-6 border-b pb-2">Portfólio de Trabalhos</h2>
+              <h2 className="text-3xl font-bold mb-6 border-b-2 border-red-200 pb-2 text-red-600">Portfólio de Trabalhos</h2>
               
               {isLoadingPortfolio ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -225,7 +223,7 @@ const ArtistDetail = () => {
                     {portfolio.slice(0, 9).map((item) => (
                       <div 
                         key={item.id}
-                        className="aspect-square rounded-md overflow-hidden cursor-pointer hover:opacity-90 transition-all hover:scale-[1.02] shadow-md"
+                        className="aspect-square rounded-md overflow-hidden cursor-pointer hover:opacity-90 transition-all hover:scale-[1.02] shadow-lg hover:shadow-xl"
                         onClick={() => setSelectedImage(item)}
                       >
                         <img 
@@ -244,21 +242,21 @@ const ArtistDetail = () => {
                         <img 
                           src={selectedImage.image_url} 
                           alt={selectedImage.description || `Trabalho de ${fullName}`}
-                          className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                          className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
                         />
                         <div className="absolute top-2 right-2">
                           <Button 
                             variant="outline" 
                             size="icon"
-                            className="bg-white text-gray-900 rounded-full"
+                            className="bg-white text-gray-900 rounded-full shadow-lg"
                             onClick={() => setSelectedImage(null)}
                           >
                             <span className="sr-only">Fechar</span>
                             ✕
                           </Button>
                         </div>
-                        <div className="bg-white p-4 rounded-b-lg">
-                          <h3 className="font-bold">{selectedImage.category || 'Trabalho'} por {fullName}</h3>
+                        <div className="bg-white p-4 rounded-b-lg shadow-lg">
+                          <h3 className="font-bold text-red-600">{selectedImage.category || 'Trabalho'} por {fullName}</h3>
                           {selectedImage.description && <p className="text-gray-600">{selectedImage.description}</p>}
                         </div>
                       </div>
@@ -277,19 +275,9 @@ const ArtistDetail = () => {
               <ArtistContactForm artistName={artist.first_name} artistId={artist.id} />
             </div>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Tatuador não encontrado</h2>
-            <p className="text-gray-600 mb-6">
-              Não foi possível encontrar o tatuador solicitado.
-            </p>
-            <Button asChild>
-              <Link to="/artists">Ver todos os tatuadores</Link>
-            </Button>
-          </div>
         )}
       </div>
-    </Layout>
+    </>
   );
 };
 

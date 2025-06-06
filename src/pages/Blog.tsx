@@ -138,11 +138,11 @@ const Blog = () => {
                   <img
                     src={featuredPost.image}
                     alt={featuredPost.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 shadow-lg"
                   />
                 </div>
                 <CardContent className="p-8 flex flex-col justify-center">
-                  <Badge variant="tattoo" className="mb-4 w-fit bg-gradient-to-r from-red-600 to-red-800">
+                  <Badge className="mb-4 w-fit bg-gradient-to-r from-red-600 to-red-800 text-white">
                     {featuredPost.category}
                   </Badge>
                   <h3 className="text-2xl md:text-3xl font-bold text-red-600 mb-4 group-hover:text-red-700 transition-colors">
@@ -165,7 +165,7 @@ const Blog = () => {
                       <span>{featuredPost.readTime} de leitura</span>
                     </div>
                   </div>
-                  <Button variant="tattoo" className="w-fit bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Button className="w-fit bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg hover:shadow-xl transition-all duration-300">
                     Ler Artigo
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -184,19 +184,19 @@ const Blog = () => {
             {regularPosts.map(post => (
               <Card 
                 key={post.id}
-                className="group cursor-pointer overflow-hidden bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-lg hover:shadow-xl hover:border-red-300 transition-all duration-300 transform hover:scale-[1.02]"
+                className="group cursor-pointer overflow-hidden bg-gradient-to-br from-white to-gray-50 border-red-200 shadow-lg hover:shadow-xl hover:border-red-400 transition-all duration-300 transform hover:scale-[1.02]"
                 onClick={() => navigate(`/blog/${post.slug}`)}
               >
                 <div className="h-48 overflow-hidden">
                   <img
                     src={post.image}
                     alt={post.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 shadow-md"
                   />
                 </div>
                 
                 <CardContent className="p-6">
-                  <Badge variant="tattooOutline" className="mb-3 border-red-200 text-red-600">
+                  <Badge variant="outline" className="mb-3 border-red-200 text-red-600 hover:bg-red-50">
                     {post.category}
                   </Badge>
                   
@@ -223,7 +223,7 @@ const Blog = () => {
                     <span className="text-sm text-gray-500">
                       {new Date(post.date).toLocaleDateString('pt-BR')}
                     </span>
-                    <Button variant="tattooOutline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50">
+                    <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400">
                       Ler mais
                       <ArrowRight className="h-3 w-3 ml-1" />
                     </Button>
