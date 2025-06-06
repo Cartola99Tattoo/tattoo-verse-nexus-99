@@ -1,452 +1,272 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import Layout from "@/components/layout/Layout";
-import BlogCard from "@/components/blog/BlogCard";
-import BlogSidebar from "@/components/blog/BlogSidebar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Loader2, Search } from "lucide-react";
-import { getBlogService } from "@/services/serviceFactory";
-import { useDataQuery } from "@/hooks/useDataQuery";
-import { BlogQueryParams } from "@/services/interfaces/IBlogService";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Card, CardContent } from "@/components/ui/card";
-import { Helmet } from "react-helmet-async";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Filter } from "lucide-react";
 
-const ITEMS_PER_PAGE = 9;
-const sortOptions = [
-  { value: 'latest', label: 'Mais recentes' },
-  { value: 'oldest', label: 'Mais antigos' },
-  { value: 'popular', label: 'Mais populares' }
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Search, Calendar, User, ArrowRight, Clock } from "lucide-react";
+
+const blogPosts = [
+  {
+    id: 1,
+    title: "Guia Completo: Como Cuidar da Sua Tatuagem Recém Feita",
+    slug: "como-cuidar-tatuagem-recem-feita",
+    excerpt: "Aprenda os cuidados essenciais para garantir que sua nova tatuagem cicatrize perfeitamente e mantenha suas cores vibrantes por muito tempo.",
+    author: "Mariana Silva",
+    date: "2024-01-15",
+    category: "Cuidados",
+    image: "https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=2070&auto=format&fit=crop",
+    readTime: "8 min"
+  },
+  {
+    id: 2,
+    title: "Tendências de Tatuagem 2024: O Que Está em Alta",
+    slug: "tendencias-tatuagem-2024",
+    excerpt: "Descubra os estilos e técnicas que estão dominando o mundo da tatuagem neste ano, desde minimalismo até realismo hiper-detalhado.",
+    author: "Rafael Costa",
+    date: "2024-01-10",
+    category: "Tendências",
+    image: "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?q=80&w=1974&auto=format&fit=crop",
+    readTime: "6 min"
+  },
+  {
+    id: 3,
+    title: "A História e Significado das Tatuagens Tribais",
+    slug: "historia-significado-tatuagens-tribais",
+    excerpt: "Explore as origens culturais e os simbolismos por trás das tatuagens tribais, uma das formas mais antigas de arte corporal.",
+    author: "Juliana Mendes",
+    date: "2024-01-08",
+    category: "História",
+    image: "https://images.unsplash.com/photo-1543767271-7c5f36dc5310?q=80&w=1974&auto=format&fit=crop",
+    readTime: "10 min"
+  },
+  {
+    id: 4,
+    title: "Escolhendo o Local Perfeito para Sua Primeira Tatuagem",
+    slug: "escolhendo-local-primeira-tatuagem",
+    excerpt: "Dicas importantes para escolher a melhor localização no corpo para sua primeira tatuagem, considerando dor, cicatrização e visibilidade.",
+    author: "Carlos Fernandes",
+    date: "2024-01-05",
+    category: "Iniciantes",
+    image: "https://images.unsplash.com/photo-1562962230-16e4623d36e7?q=80&w=1974&auto=format&fit=crop",
+    readTime: "7 min"
+  },
+  {
+    id: 5,
+    title: "Tatuagens Coloridas vs Preto e Cinza: Qual Escolher?",
+    slug: "tatuagens-coloridas-vs-preto-cinza",
+    excerpt: "Entenda as diferenças, vantagens e desvantagens entre tatuagens coloridas e em preto e cinza para tomar a melhor decisão.",
+    author: "Mariana Silva",
+    date: "2024-01-03",
+    category: "Dicas",
+    image: "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?q=80&w=1974&auto=format&fit=crop",
+    readTime: "9 min"
+  },
+  {
+    id: 6,
+    title: "O Processo Criativo: Da Ideia ao Desenho Final",
+    slug: "processo-criativo-ideia-desenho-final",
+    excerpt: "Acompanhe o processo completo de criação de uma tatuagem, desde a primeira consulta até o resultado final na pele.",
+    author: "Rafael Costa",
+    date: "2024-01-01",
+    category: "Processo",
+    image: "https://images.unsplash.com/photo-1590736969955-71cc94901144?q=80&w=1974&auto=format&fit=crop",
+    readTime: "12 min"
+  }
 ];
 
-const Blog = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  
-  // Get initial values from URL parameters
-  const initialCategory = searchParams.get('category') || "Todos";
-  const initialPage = parseInt(searchParams.get('page') || '1');
-  const initialTag = searchParams.get('tag') || "";
-  const initialSort = searchParams.get('sort') as "latest" | "oldest" | "popular" || "latest";
-  const initialSearch = searchParams.get('search') || "";
-  
-  // State for filters and search
-  const [activeCategory, setActiveCategory] = useState(initialCategory);
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [activeTag, setActiveTag] = useState(initialTag);
-  const [searchQuery, setSearchQuery] = useState(initialSearch);
-  const [searchInput, setSearchInput] = useState(initialSearch);
-  const [sortMethod, setSortMethod] = useState<'latest' | 'oldest' | 'popular'>(initialSort);
-  
-  // Get blog service
-  const blogService = getBlogService();
-  
-  // Build query parameters for fetching blog posts
-  const buildQueryParams = (): BlogQueryParams => {
-    return {
-      page: currentPage,
-      limit: ITEMS_PER_PAGE,
-      category: activeCategory !== "Todos" ? activeCategory : undefined,
-      tag: activeTag || undefined,
-      search: searchQuery || undefined,
-      sort: sortMethod
-    };
-  };
-  
-  // Fetch blog posts with filters
-  const { 
-    data: blogData, 
-    loading: isLoadingPosts, 
-    error: postsError,
-    refresh: refreshPosts
-  } = useDataQuery(
-    () => blogService.fetchBlogPosts(buildQueryParams()),
-    [activeCategory, currentPage, activeTag, searchQuery, sortMethod]
-  );
-  
-  // Fetch categories
-  const { 
-    data: categoriesData = [], 
-    loading: isLoadingCategories 
-  } = useDataQuery(
-    () => blogService.fetchBlogCategories(),
-    []
-  );
-  
-  // Fetch tags for filters
-  const {
-    data: tagsData = [],
-    loading: isLoadingTags
-  } = useDataQuery(
-    () => blogService.fetchTagsList(),
-    []
-  );
-  
-  // Transform categories data
-  const categories = ["Todos", ...(categoriesData?.map(cat => cat.name || "") || [])].filter(Boolean);
-  
-  // Update URL when filters change
-  useEffect(() => {
-    const params = new URLSearchParams();
-    
-    if (activeCategory !== "Todos") {
-      params.set('category', activeCategory);
-    }
-    
-    if (currentPage > 1) {
-      params.set('page', currentPage.toString());
-    }
-    
-    if (activeTag) {
-      params.set('tag', activeTag);
-    }
-    
-    if (searchQuery) {
-      params.set('search', searchQuery);
-    }
-    
-    if (sortMethod !== 'latest') {
-      params.set('sort', sortMethod);
-    }
-    
-    setSearchParams(params);
-  }, [activeCategory, currentPage, activeTag, searchQuery, sortMethod, setSearchParams]);
-  
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeCategory, activeTag, searchQuery, sortMethod]);
-  
-  // Handle filter changes
-  const handleCategoryChange = (category: string) => {
-    setActiveCategory(category);
-  };
-  
-  const handleTagChange = (tag: string) => {
-    if (activeTag === tag) {
-      setActiveTag(''); // Toggle off if already selected
-    } else {
-      setActiveTag(tag);
-    }
-  };
-  
-  const handleSortChange = (sort: 'latest' | 'oldest' | 'popular') => {
-    setSortMethod(sort);
-  };
-  
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchQuery(searchInput);
-  };
-  
-  // Reset all filters
-  const handleResetFilters = () => {
-    setActiveCategory("Todos");
-    setActiveTag("");
-    setSearchQuery("");
-    setSearchInput("");
-    setSortMethod("latest");
-    setCurrentPage(1);
-  };
-  
-  // Calculate pagination
-  const totalPosts = blogData?.totalPosts || 0;
-  const totalPages = blogData?.totalPages || 1;
-  const posts = blogData?.posts || [];
-  
-  // Generate pagination items
-  const generatePaginationItems = () => {
-    let items = [];
-    const maxVisiblePages = 5;
-    
-    // Start and end page calculation
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-    // Adjust if we're near the end
-    if (endPage - startPage + 1 < maxVisiblePages && startPage > 1) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-    
-    // Add first page
-    if (startPage > 1) {
-      items.push(
-        <PaginationItem key="first">
-          <PaginationLink
-            onClick={() => setCurrentPage(1)}
-            isActive={currentPage === 1}
-          >
-            1
-          </PaginationLink>
-        </PaginationItem>
-      );
-      
-      // Add ellipsis if needed
-      if (startPage > 2) {
-        items.push(
-          <PaginationItem key="ellipsis-start">
-            <span className="px-4">...</span>
-          </PaginationItem>
-        );
-      }
-    }
-    
-    // Add pages
-    for (let i = startPage; i <= endPage; i++) {
-      items.push(
-        <PaginationItem key={i}>
-          <PaginationLink
-            onClick={() => setCurrentPage(i)}
-            isActive={currentPage === i}
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-    
-    // Add ellipsis and last page if needed
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        items.push(
-          <PaginationItem key="ellipsis-end">
-            <span className="px-4">...</span>
-          </PaginationItem>
-        );
-      }
-      
-      items.push(
-        <PaginationItem key="last">
-          <PaginationLink
-            onClick={() => setCurrentPage(totalPages)}
-            isActive={currentPage === totalPages}
-          >
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-    
-    return items;
-  };
-  
-  return (
-    <Layout>
-      <Helmet>
-        <title>Blog | 99Tattoo</title>
-        <meta name="description" content="Artigos, dicas e novidades sobre tatuagem no blog oficial da 99Tattoo." />
-      </Helmet>
-      
-      {/* Blog header */}
-      <div className="bg-gray-900 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold mb-4">Blog da <span className="text-red-500">99Tattoo</span></h1>
-          <p className="text-xl max-w-2xl mx-auto">
-            Dicas, novidades e conteúdo sobre o mundo das tatuagens.
-          </p>
-        </div>
-      </div>
+const categories = ["Todas", "Cuidados", "Tendências", "História", "Iniciantes", "Dicas", "Processo"];
 
-      {/* Search and filter section */}
-      <div className="bg-white py-8 shadow-md sticky top-0 z-10">
+const Blog = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Todas");
+  const navigate = useNavigate();
+
+  const filteredPosts = blogPosts.filter(post => {
+    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "Todas" || post.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const featuredPost = blogPosts[0];
+  const regularPosts = filteredPosts.slice(1);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white py-16">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="md:w-1/3">
-              <form onSubmit={handleSearch} className="flex">
-                <Input
-                  type="search"
-                  placeholder="Buscar no blog..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full"
-                  aria-label="Buscar artigos"
-                />
-                <Button type="submit" variant="outline" className="ml-2">
-                  <Search className="h-4 w-4" />
-                  <span className="sr-only">Buscar</span>
-                </Button>
-              </form>
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Blog <span className="text-white">99Tattoo</span>
+            </h1>
+            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+              Dicas, tendências e tudo sobre o mundo das tatuagens
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Search and Filters */}
+      <section className="py-8 bg-white shadow-lg">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="w-full md:w-96 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                variant="tattoo"
+                placeholder="Buscar artigos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 shadow-lg"
+              />
             </div>
             
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Sort dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
-                    <Filter className="h-4 w-4" />
-                    Ordenar: {sortOptions.find(opt => opt.value === sortMethod)?.label}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  {sortOptions.map(option => (
-                    <DropdownMenuItem 
-                      key={option.value}
-                      onClick={() => handleSortChange(option.value as 'latest' | 'oldest' | 'popular')}
-                      className="cursor-pointer"
-                    >
-                      {option.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              {/* Reset filters button */}
-              {(activeCategory !== "Todos" || activeTag || searchQuery || sortMethod !== "latest") && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleResetFilters}
+            <div className="flex flex-wrap gap-2">
+              {categories.map(category => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                    selectedCategory === category
+                      ? "bg-gradient-to-r from-red-600 to-red-800 text-white shadow-red-glow"
+                      : "bg-white text-gray-700 border border-gray-300 hover:bg-red-50 hover:border-red-300 hover:text-red-600"
+                  }`}
                 >
-                  Limpar filtros
-                </Button>
-              )}
+                  {category}
+                </button>
+              ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Featured Post */}
+      {featuredPost && (
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-red-600 mb-8 text-center">Artigo em Destaque</h2>
+            <Card 
+              variant="tattoo" 
+              className="group cursor-pointer overflow-hidden max-w-4xl mx-auto shadow-2xl hover:shadow-red-glow transition-all duration-300 transform hover:scale-[1.02]"
+              onClick={() => navigate(`/blog/${featuredPost.slug}`)}
+            >
+              <div className="md:flex">
+                <div className="md:w-1/2">
+                  <div className="h-64 md:h-full overflow-hidden">
+                    <img
+                      src={featuredPost.image}
+                      alt={featuredPost.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
+                </div>
+                <div className="md:w-1/2 p-8">
+                  <Badge variant="tattoo" className="mb-4">
+                    {featuredPost.category}
+                  </Badge>
+                  <h3 className="text-2xl md:text-3xl font-bold text-red-600 mb-4 group-hover:text-red-700 transition-colors">
+                    {featuredPost.title}
+                  </h3>
+                  <p className="text-gray-700 mb-6 leading-relaxed">
+                    {featuredPost.excerpt}
+                  </p>
+                  <div className="flex items-center justify-between text-sm text-gray-600 mb-6">
+                    <div className="flex items-center">
+                      <User className="h-4 w-4 mr-2 text-red-500" />
+                      <span>{featuredPost.author}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-2 text-red-500" />
+                      <span>{new Date(featuredPost.date).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-2 text-red-500" />
+                      <span>{featuredPost.readTime}</span>
+                    </div>
+                  </div>
+                  <Button variant="tattoo" className="shadow-lg hover:shadow-xl">
+                    Ler Artigo
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </section>
+      )}
+
+      {/* Regular Posts Grid */}
+      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-red-600 mb-8 text-center">Últimos Artigos</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {regularPosts.map(post => (
+              <Card 
+                key={post.id} 
+                variant="tattoo" 
+                className="group cursor-pointer overflow-hidden h-full shadow-xl hover:shadow-red-glow transition-all duration-300 transform hover:scale-[1.02]"
+                onClick={() => navigate(`/blog/${post.slug}`)}
+              >
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
+                
+                <CardContent className="p-6 flex flex-col flex-1">
+                  <Badge variant="tattooOutline" className="mb-3 w-fit">
+                    {post.category}
+                  </Badge>
+                  
+                  <h3 className="text-xl font-bold text-red-600 mb-3 group-hover:text-red-700 transition-colors line-clamp-2">
+                    {post.title}
+                  </h3>
+                  
+                  <p className="text-gray-700 mb-4 flex-1 line-clamp-3">
+                    {post.excerpt}
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <User className="h-4 w-4 mr-1 text-red-500" />
+                        <span>{post.author}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1 text-red-500" />
+                        <span>{post.readTime}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Calendar className="h-4 w-4 mr-2 text-red-500" />
+                      <span>{new Date(post.date).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    
+                    <Button variant="tattooOutline" size="sm" className="w-full">
+                      Ler Mais
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
           
-          {/* Filter status summary */}
-          {(activeCategory !== "Todos" || activeTag || searchQuery) && (
-            <div className="mt-4 text-sm text-gray-600">
-              <p>
-                Mostrando resultados para
-                {activeCategory !== "Todos" && <span> categoria <strong>{activeCategory}</strong></span>}
-                {activeTag && <span> tag <strong>{activeTag}</strong></span>}
-                {searchQuery && <span> busca <strong>"{searchQuery}"</strong></span>}
-              </p>
+          {filteredPosts.length === 0 && (
+            <div className="text-center py-12">
+              <h3 className="text-xl font-semibold text-red-600 mb-2">Nenhum artigo encontrado</h3>
+              <p className="text-gray-600">Tente ajustar os filtros de busca</p>
             </div>
           )}
         </div>
-      </div>
-
-      {/* Blog content with sidebar layout */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar with filters - moved to the left side */}
-          <div className="lg:w-1/4 order-2 lg:order-1">
-            <div className="lg:sticky lg:top-24">
-              <BlogSidebar 
-                categories={categories}
-                activeCategory={activeCategory}
-                onCategoryChange={handleCategoryChange}
-                tags={tagsData}
-                activeTag={activeTag}
-                onTagChange={handleTagChange}
-                isLoadingCategories={isLoadingCategories}
-                isLoadingTags={isLoadingTags}
-              />
-            </div>
-          </div>
-          
-          {/* Main content */}
-          <div className="lg:w-3/4 order-1 lg:order-2">
-            {isLoadingPosts ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-12 w-12 animate-spin text-red-500 mb-4" />
-                <p className="text-lg text-gray-600">Carregando artigos...</p>
-              </div>
-            ) : postsError ? (
-              <div className="text-center py-12">
-                <h3 className="text-xl font-bold mb-2 text-red-500">Erro ao carregar artigos</h3>
-                <p className="text-gray-600 mb-4">Ocorreu um erro ao carregar os artigos. Por favor, tente novamente.</p>
-                <Button onClick={() => refreshPosts()}>Tentar novamente</Button>
-              </div>
-            ) : posts.length > 0 ? (
-              <>
-                {/* Featured post only on first page with no filters */}
-                {currentPage === 1 && activeCategory === "Todos" && !activeTag && !searchQuery && posts.length > 0 && (
-                  <div className="mb-12">
-                    <BlogCard post={posts[0]} variant="featured" />
-                  </div>
-                )}
-
-                {/* Blog grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                  {posts
-                    .slice(
-                      currentPage === 1 && activeCategory === "Todos" && !activeTag && !searchQuery ? 1 : 0
-                    )
-                    .map((post) => (
-                      <BlogCard key={post.id} post={post} />
-                    ))}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 0 && (
-                  <div className="mt-12">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-                            className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
-                          />
-                        </PaginationItem>
-                        
-                        {/* Dynamic pagination items */}
-                        {generatePaginationItems()}
-                        
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-                            className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-12">
-                <Card className="max-w-lg mx-auto p-6">
-                  <CardContent className="pt-6">
-                    <h3 className="text-xl font-bold mb-2">Nenhum artigo encontrado</h3>
-                    <p className="text-gray-600 mb-4">
-                      Não encontramos artigos que correspondam aos filtros aplicados.
-                    </p>
-                    <Button onClick={handleResetFilters}>
-                      Ver todos os artigos
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      {/* Newsletter signup section */}
-      <div className="bg-red-50 py-16">
-        <div className="container mx-auto px-4 max-w-3xl text-center">
-          <h2 className="text-3xl font-bold mb-4">Fique por dentro das novidades</h2>
-          <p className="text-gray-600 mb-6">
-            Inscreva-se na nossa newsletter e receba artigos e novidades diretamente no seu email.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-            <Input
-              type="email"
-              placeholder="Seu melhor email"
-              className="flex-grow"
-              required
-            />
-            <Button type="submit">Inscrever</Button>
-          </form>
-        </div>
-      </div>
-    </Layout>
+      </section>
+    </div>
   );
 };
 

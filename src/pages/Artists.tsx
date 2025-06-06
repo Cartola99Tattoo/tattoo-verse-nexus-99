@@ -1,361 +1,225 @@
-import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
-import Layout from "@/components/layout/Layout";
-import ArtistCard from "@/components/artists/ArtistCard";
-import ArtistsSidebar from "@/components/artists/ArtistsSidebar";
-import useArtists from "@/hooks/useArtists";
-import { Button } from "@/components/ui/button";
-import { Helmet } from "react-helmet-async";
-import { Loader2, Users } from "lucide-react";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { useToast } from "@/hooks/use-toast";
-import ContactForm from "@/components/common/ContactForm";
 
-const ITEMS_PER_PAGE = 9;
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Star, Instagram, Heart } from "lucide-react";
+
+const artistsData = [
+  {
+    id: 1,
+    name: "Mariana Silva",
+    specialty: "Realismo",
+    location: "São Paulo, SP",
+    rating: 4.9,
+    reviews: 127,
+    image: "https://images.unsplash.com/photo-1594736797933-d0589ba2fe65?q=80&w=1974&auto=format&fit=crop",
+    styles: ["Realismo", "Retrato", "Preto e Cinza"],
+    experience: "8 anos",
+    instagram: "@mariana_tattoo"
+  },
+  {
+    id: 2,
+    name: "Rafael Costa",
+    specialty: "Blackwork",
+    location: "Rio de Janeiro, RJ",
+    rating: 4.8,
+    reviews: 98,
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop",
+    styles: ["Blackwork", "Geométrico", "Mandala"],
+    experience: "6 anos",
+    instagram: "@rafael_blackwork"
+  },
+  {
+    id: 3,
+    name: "Juliana Mendes",
+    specialty: "Aquarela",
+    location: "Belo Horizonte, MG",
+    rating: 5.0,
+    reviews: 156,
+    image: "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?q=80&w=1974&auto=format&fit=crop",
+    styles: ["Aquarela", "Colorido", "Floral"],
+    experience: "10 anos",
+    instagram: "@juli_watercolor"
+  },
+  {
+    id: 4,
+    name: "Carlos Fernandes",
+    specialty: "Traditional",
+    location: "Porto Alegre, RS",
+    rating: 4.7,
+    reviews: 89,
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=1974&auto=format&fit=crop",
+    styles: ["Traditional", "Old School", "Neo Traditional"],
+    experience: "12 anos",
+    instagram: "@carlos_traditional"
+  }
+];
 
 const Artists = () => {
-  const { toast } = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
-  
-  // Get initial values from URL parameters
-  const initialPage = parseInt(searchParams.get('page') || '1');
-  const initialSearch = searchParams.get('search') || undefined;
-  const initialStyle = searchParams.get('style') || undefined;
-  const initialSpecialties = searchParams.get('specialties')?.split(',').filter(Boolean) || [];
-  
-  // Initialize the query params for artists
-  const initialQueryParams = {
-    limit: ITEMS_PER_PAGE,
-    offset: (initialPage - 1) * ITEMS_PER_PAGE,
-    search: initialSearch,
-    style: initialStyle,
-    specialties: initialSpecialties
-  };
-  
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  
-  // Use our custom hook to fetch artists
-  const { 
-    artists, 
-    totalArtists, 
-    totalPages, 
-    isLoading, 
-    error, 
-    queryParams, 
-    updateQueryParams,
-    refresh
-  } = useArtists(initialQueryParams);
-  
-  // Update URL when filters change - with debounce to prevent unnecessary URL updates
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const params = new URLSearchParams();
-      
-      if (currentPage > 1) {
-        params.set('page', currentPage.toString());
-      }
-      
-      if (queryParams.search) {
-        params.set('search', queryParams.search);
-      }
-      
-      if (queryParams.style) {
-        params.set('style', queryParams.style);
-      }
-      
-      if (queryParams.specialties && queryParams.specialties.length > 0) {
-        params.set('specialties', queryParams.specialties.join(','));
-      }
-      
-      setSearchParams(params);
-    }, 300); // Debounce de 300ms
-    
-    return () => clearTimeout(timeoutId);
-  }, [currentPage, queryParams, setSearchParams]);
-  
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    }
-  }, [queryParams.search, queryParams.style, queryParams.specialties]);
-  
-  // Update offset when page changes
-  useEffect(() => {
-    updateQueryParams({ 
-      offset: (currentPage - 1) * ITEMS_PER_PAGE 
-    });
-  }, [currentPage, updateQueryParams]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStyle, setSelectedStyle] = useState("Todos");
+  const navigate = useNavigate();
 
-  // Handle errors
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Erro ao carregar tatuadores",
-        description: "Ocorreu um problema ao buscar os tatuadores. Tente novamente mais tarde.",
-        variant: "destructive",
-      });
-    }
-  }, [error, toast]);
-  
-  // Generate pagination items - memoized to avoid recalculations
-  const paginationItems = useMemo(() => {
-    let items = [];
-    const maxVisiblePages = 5;
-    
-    // Start and end page calculation
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-    // Adjust if we're near the end
-    if (endPage - startPage + 1 < maxVisiblePages && startPage > 1) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-    
-    // Add first page
-    if (startPage > 1) {
-      items.push(
-        <PaginationItem key="first">
-          <PaginationLink
-            onClick={() => setCurrentPage(1)}
-            isActive={currentPage === 1}
-          >
-            1
-          </PaginationLink>
-        </PaginationItem>
-      );
-      
-      // Add ellipsis if needed
-      if (startPage > 2) {
-        items.push(
-          <PaginationItem key="ellipsis-start">
-            <span className="px-4">...</span>
-          </PaginationItem>
-        );
-      }
-    }
-    
-    // Add pages
-    for (let i = startPage; i <= endPage; i++) {
-      items.push(
-        <PaginationItem key={i}>
-          <PaginationLink
-            onClick={() => setCurrentPage(i)}
-            isActive={currentPage === i}
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-    
-    // Add ellipsis and last page if needed
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        items.push(
-          <PaginationItem key="ellipsis-end">
-            <span className="px-4">...</span>
-          </PaginationItem>
-        );
-      }
-      
-      items.push(
-        <PaginationItem key="last">
-          <PaginationLink
-            onClick={() => setCurrentPage(totalPages)}
-            isActive={currentPage === totalPages}
-          >
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-    
-    return items;
-  }, [currentPage, totalPages]);
+  const styles = ["Todos", "Realismo", "Blackwork", "Aquarela", "Traditional", "Geométrico"];
+
+  const filteredArtists = artistsData.filter(artist => {
+    const matchesSearch = artist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         artist.specialty.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStyle = selectedStyle === "Todos" || artist.styles.includes(selectedStyle);
+    return matchesSearch && matchesStyle;
+  });
 
   return (
-    <Layout>
-      <Helmet>
-        <title>Tatuadores | 99Tattoo</title>
-        <meta name="description" content="Conheça os tatuadores da 99Tattoo. Encontre o artista perfeito para sua próxima tatuagem." />
-      </Helmet>
-      
-      {/* Hero section */}
-      <div className="bg-gradient-to-r from-gray-900 to-black text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Conheça nossos <span className="text-red-500">Tatuadores</span>
-          </h1>
-          <p className="text-xl max-w-2xl mx-auto">
-            Artistas talentosos e experientes para criar a tatuagem dos seus sonhos.
-          </p>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar with filters */}
-          <div className="lg:w-1/4">
-            <div className="lg:sticky lg:top-24">
-              <ArtistsSidebar 
-                queryParams={queryParams} 
-                onUpdateParams={updateQueryParams}
-                totalResults={totalArtists}
-                isLoading={isLoading}
-              />
-            </div>
-          </div>
-          
-          {/* Main content */}
-          <div className="lg:w-3/4">
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-12 w-12 animate-spin text-red-500 mb-4" />
-                <p className="text-lg text-gray-600">Carregando tatuadores...</p>
-              </div>
-            ) : error ? (
-              <div className="text-center py-12">
-                <h3 className="text-xl font-bold mb-2 text-red-500">Erro ao carregar tatuadores</h3>
-                <p className="text-gray-600 mb-4">Ocorreu um erro ao carregar a lista de tatuadores.</p>
-                <Button onClick={() => refresh()}>Tentar novamente</Button>
-              </div>
-            ) : artists.length > 0 ? (
-              <>
-                {/* Lista de resultados com indicação de quantidade */}
-                <div className="mb-6 flex items-center">
-                  <Users className="text-red-500 mr-2" />
-                  <h2 className="text-lg font-medium">
-                    {totalArtists} {totalArtists === 1 ? 'Tatuador encontrado' : 'Tatuadores encontrados'}
-                  </h2>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {artists.map((artist) => (
-                    <ArtistCard key={artist.id} artist={artist} />
-                  ))}
-                </div>
-                
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="mt-12">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-                            className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
-                          />
-                        </PaginationItem>
-                        
-                        {paginationItems}
-                        
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-                            className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-lg border">
-                <h3 className="text-xl font-bold mb-2">Nenhum tatuador encontrado</h3>
-                <p className="text-gray-600 mb-4">
-                  Não encontramos tatuadores que correspondam aos filtros aplicados.
-                </p>
-                <Button onClick={() => updateQueryParams({
-                  search: undefined,
-                  specialties: [],
-                  style: undefined
-                })}>
-                  Limpar filtros
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      {/* Seção de CTA com formulário */}
-      <section className="py-16 bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            <div>
-              <h2 className="text-3xl font-bold mb-6">Pronto para fazer sua tatuagem?</h2>
-              <p className="text-lg text-gray-600 mb-6">
-                Preencha o formulário ao lado e um de nossos tatuadores entrará em contato para realizar seu orçamento personalizado.
-              </p>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="bg-red-500 p-2 rounded-full mt-1 text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg">Profissionais Qualificados</h4>
-                    <p className="text-gray-600">Equipe com anos de experiência e diversos prêmios em convenções.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="bg-red-500 p-2 rounded-full mt-1 text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg">Estúdio Certificado</h4>
-                    <p className="text-gray-600">Ambiente seguro, higienizado e com os melhores equipamentos.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="bg-red-500 p-2 rounded-full mt-1 text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg">Projetos Personalizados</h4>
-                    <p className="text-gray-600">Criamos designs exclusivos baseados nas suas ideias e preferências.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <ContactForm sourcePage="artists-page" />
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Nossos <span className="text-white">Tatuadores</span>
+            </h1>
+            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+              Conheça os artistas talentosos que transformarão suas ideias em arte permanente
+            </p>
           </div>
         </div>
       </section>
-      
-      {/* CTA section */}
-      <div className="bg-gradient-to-r from-red-50 to-red-100 py-16">
-        <div className="container mx-auto px-4 max-w-3xl text-center">
-          <h2 className="text-3xl font-bold mb-4">Pronto para fazer sua tatuagem?</h2>
-          <p className="text-gray-600 mb-6">
-            Entre em contato conosco e agende uma consulta com um de nossos tatuadores.
-          </p>
-          <div className="flex justify-center">
-            <Button size="lg" className="bg-red-500 hover:bg-red-600 transition-all">
-              Agendar consulta
-            </Button>
+
+      {/* Filters Section */}
+      <section className="py-8 bg-white shadow-lg">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="w-full md:w-96">
+              <Input
+                variant="tattoo"
+                placeholder="Buscar por nome ou especialidade..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="shadow-lg"
+              />
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {styles.map(style => (
+                <button
+                  key={style}
+                  onClick={() => setSelectedStyle(style)}
+                  className={`px-4 py-2 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                    selectedStyle === style
+                      ? "bg-gradient-to-r from-red-600 to-red-800 text-white shadow-red-glow"
+                      : "bg-white text-gray-700 border border-gray-300 hover:bg-red-50 hover:border-red-300 hover:text-red-600"
+                  }`}
+                >
+                  {style}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </Layout>
+      </section>
+
+      {/* Artists Grid */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {filteredArtists.map(artist => (
+              <Card 
+                key={artist.id} 
+                variant="tattoo" 
+                className="group cursor-pointer overflow-hidden hover:shadow-red-glow transition-all duration-300 transform hover:scale-[1.02]"
+                onClick={() => navigate(`/artists/${artist.id}`)}
+              >
+                <div className="relative">
+                  <div className="h-64 overflow-hidden">
+                    <img
+                      src={artist.image}
+                      alt={artist.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
+                  
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Button size="icon" variant="tattooOutline" className="bg-white/90 shadow-lg">
+                      <Heart className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="absolute top-3 left-3">
+                    <Badge variant="tattoo" className="font-semibold shadow-md">
+                      {artist.specialty}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-xl font-bold text-red-600 hover:text-red-700 transition-colors">
+                      {artist.name}
+                    </h3>
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 mr-1" />
+                      <span className="text-sm font-medium text-gray-700">{artist.rating}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center text-gray-600 mb-3">
+                    <MapPin className="h-4 w-4 mr-1 text-red-500" />
+                    <span className="text-sm">{artist.location}</span>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {artist.styles.slice(0, 3).map(style => (
+                      <Badge key={style} variant="tattooOutline" className="text-xs">
+                        {style}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
+                    <span>Experiência: <span className="font-medium text-red-600">{artist.experience}</span></span>
+                    <span>{artist.reviews} avaliações</span>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      variant="tattoo"
+                      className="flex-1 shadow-lg hover:shadow-xl"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/artists/${artist.id}`);
+                      }}
+                    >
+                      Ver Perfil
+                    </Button>
+                    <Button
+                      variant="tattooOutline"
+                      size="icon"
+                      className="shadow-md hover:shadow-lg"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(`https://instagram.com/${artist.instagram.replace('@', '')}`, '_blank');
+                      }}
+                    >
+                      <Instagram className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          {filteredArtists.length === 0 && (
+            <div className="text-center py-12">
+              <h3 className="text-xl font-semibold text-red-600 mb-2">Nenhum artista encontrado</h3>
+              <p className="text-gray-600">Tente ajustar os filtros de busca</p>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
   );
 };
 
