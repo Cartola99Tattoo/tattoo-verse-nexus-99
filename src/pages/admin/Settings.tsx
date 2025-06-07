@@ -58,14 +58,20 @@ const Settings = () => {
     console.log("Studio settings saved:", studioSettings);
   };
 
-  const updateField = (section: string, field: string, value: any) => {
-    setStudioSettings(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section as keyof typeof prev],
-        [field]: value
+  const updateField = (section: keyof typeof studioSettings, field: string, value: any) => {
+    setStudioSettings(prev => {
+      const sectionData = prev[section];
+      if (typeof sectionData === 'object' && sectionData !== null) {
+        return {
+          ...prev,
+          [section]: {
+            ...sectionData,
+            [field]: value
+          }
+        };
       }
-    }));
+      return prev;
+    });
   };
 
   const updateHours = (day: string, field: string, value: any) => {
