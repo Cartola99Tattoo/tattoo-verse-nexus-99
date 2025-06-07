@@ -36,6 +36,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           return { title: "Analytics", description: "Análise de dados e performance do estúdio" };
         case "/admin/loyalty":
           return { title: "Programa de Fidelidade", description: "Gerencie o programa de fidelidade do estúdio" };
+        case "/admin/settings":
+          return { title: "Configurações do Estúdio", description: "Configure informações gerais do estúdio" };
         case "/admin/security":
           return { title: "Segurança", description: "Configurações de segurança e acesso" };
         default:
@@ -60,7 +62,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           </div>
 
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-red-600 mb-2 bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
               {pageInfo.title}
             </h1>
             <p className="text-gray-600">{pageInfo.description}</p>

@@ -18,7 +18,6 @@ const Contact = lazy(() => import('./pages/Contact'));
 const Auth = lazy(() => import('./pages/Auth'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Checkout = lazy(() => import('./pages/Checkout'));
-const Profile = lazy(() => import('./pages/Profile'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
 
 // Lazy load páginas administrativas
@@ -39,6 +38,7 @@ const AdminAuth = lazy(() => import('./pages/AdminAuth'));
 const AdminUserSetup = lazy(() => import('./pages/AdminUserSetup'));
 const Projects = lazy(() => import('./pages/admin/Projects'));
 const AdminEvents = lazy(() => import('./pages/admin/Events'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 function App() {
@@ -58,7 +58,6 @@ function App() {
         <Route path="/auth" element={<Layout><LazyLoader><Auth /></LazyLoader></Layout>} />
         <Route path="/reset-password" element={<Layout><LazyLoader><ResetPassword /></LazyLoader></Layout>} />
         <Route path="/checkout" element={<Layout><LazyLoader><Checkout /></LazyLoader></Layout>} />
-        <Route path="/profile" element={<Layout><LazyLoader><Profile /></LazyLoader></Layout>} />
         <Route path="/user-profile" element={<Layout><LazyLoader><UserProfile /></LazyLoader></Layout>} />
 
         {/* Admin routes - SINGLE AdminLayout instance with proper nesting */}
@@ -86,6 +85,7 @@ function App() {
           <Route path="financial" element={<LazyLoader><Financial /></LazyLoader>} />
           <Route path="analytics" element={<LazyLoader><Analytics /></LazyLoader>} />
           <Route path="loyalty" element={<LazyLoader><Loyalty /></LazyLoader>} />
+          <Route path="settings" element={<LazyLoader><Settings /></LazyLoader>} />
           <Route path="security" element={<LazyLoader><Security /></LazyLoader>} />
         </Route>
 

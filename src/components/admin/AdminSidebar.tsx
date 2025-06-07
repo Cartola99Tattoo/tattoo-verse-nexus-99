@@ -9,7 +9,11 @@ import {
   Lock,
   FolderKanban,
   Brush,
-  ListChecks
+  ListChecks,
+  Settings,
+  Heart,
+  DollarSign,
+  TrendingUp
 } from "lucide-react"
 
 interface NavItem {
@@ -69,7 +73,7 @@ export function AdminSidebar({ items }: Props) {
               GESTÃO
             </h3>
             <NavItemComponent href="/admin/artists" icon={Brush}>
-              Artistas
+              Tatuadores
             </NavItemComponent>
             <NavItemComponent href="/admin/clients" icon={Users}>
               Clientes
@@ -80,11 +84,14 @@ export function AdminSidebar({ items }: Props) {
             <NavItemComponent href="/admin/projects" icon={FolderKanban}>
               Projetos
             </NavItemComponent>
+            <NavItemComponent href="/admin/loyalty" icon={Heart}>
+              Fidelidade
+            </NavItemComponent>
           </div>
           
           <div className="mb-6">
             <h3 className="text-xs font-semibold text-red-400 uppercase tracking-wider px-2 mb-3">
-              VENDAS
+              VENDAS & FINANCEIRO
             </h3>
             <NavItemComponent href="/admin/products" icon={ShoppingCart}>
               Produtos
@@ -92,8 +99,11 @@ export function AdminSidebar({ items }: Props) {
             <NavItemComponent href="/admin/stock" icon={ListChecks}>
               Estoque
             </NavItemComponent>
-            <NavItemComponent href="/admin/financial" icon={FileText}>
+            <NavItemComponent href="/admin/financial" icon={DollarSign}>
               Financeiro
+            </NavItemComponent>
+            <NavItemComponent href="/admin/reports" icon={TrendingUp}>
+              Relatórios
             </NavItemComponent>
           </div>
           
@@ -103,6 +113,12 @@ export function AdminSidebar({ items }: Props) {
             </h3>
             <NavItemComponent href="/admin/events" icon={Calendar}>
               Eventos
+            </NavItemComponent>
+            <NavItemComponent href="/admin/blog" icon={FileText}>
+              Blog
+            </NavItemComponent>
+            <NavItemComponent href="/admin/settings" icon={Settings}>
+              Estúdio
             </NavItemComponent>
             <NavItemComponent href="/admin/security" icon={Lock}>
               Segurança
@@ -121,9 +137,19 @@ const sidebarItems = [
     href: "/admin/dashboard",
   },
   {
-    name: "Artistas",
+    name: "Analytics",
+    icon: BarChart,
+    href: "/admin/analytics",
+  },
+  {
+    name: "Tatuadores",
     icon: Brush,
     href: "/admin/artists",
+  },
+  {
+    name: "Clientes",
+    icon: Users,
+    href: "/admin/clients",
   },
   {
     name: "Agendamentos",
@@ -131,9 +157,14 @@ const sidebarItems = [
     href: "/admin/appointments",
   },
   {
-    name: "Clientes",
-    icon: Users,
-    href: "/admin/clients",
+    name: "Projetos",
+    icon: FolderKanban,
+    href: "/admin/projects",
+  },
+  {
+    name: "Fidelidade",
+    icon: Heart,
+    href: "/admin/loyalty",
   },
   {
     name: "Produtos",
@@ -147,23 +178,28 @@ const sidebarItems = [
   },
   {
     name: "Financeiro",
-    icon: FileText,
+    icon: DollarSign,
     href: "/admin/financial",
   },
   {
-    name: "Analytics",
-    icon: BarChart,
-    href: "/admin/analytics",
-  },
-  {
-    name: "Projetos",
-    icon: FolderKanban,
-    href: "/admin/projects",
+    name: "Relatórios",
+    icon: TrendingUp,
+    href: "/admin/reports",
   },
   {
     name: "Eventos",
     icon: Calendar,
     href: "/admin/events",
+  },
+  {
+    name: "Blog",
+    icon: FileText,
+    href: "/admin/blog",
+  },
+  {
+    name: "Estúdio",
+    icon: Settings,
+    href: "/admin/settings",
   },
   {
     name: "Segurança",
