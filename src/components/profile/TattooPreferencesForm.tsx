@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -32,12 +31,13 @@ const TattooPreferencesForm: React.FC<TattooPreferencesFormProps> = ({
   const tattooStyles = [
     "Realismo", "Fineline", "Old School", "Neo-Tradicional", "Oriental", 
     "Aquarela", "Pontilhismo", "Geométrico", "Minimalista", "Blackwork",
-    "Tradicional Americano", "New School", "Chicano", "Tribal", "Biomecânico"
+    "Tradicional Americano", "New School", "Chicano", "Tribal", "Biomecânico",
+    "Trash Polka", "Lettering", "Dotwork"
   ];
 
   const bodyParts = [
-    "Braço", "Perna", "Costas", "Pescoço", "Mão", "Pé", 
-    "Tórax", "Glúteos", "Região Íntima", "Rosto", "Outro"
+    "Braço", "Antebraço", "Perna", "Coxa", "Costas", "Pescoço", "Mão", "Pé", 
+    "Tórax", "Abdômen", "Glúteos", "Região Íntima", "Rosto", "Outro"
   ];
 
   const budgetRanges = [
@@ -53,13 +53,14 @@ const TattooPreferencesForm: React.FC<TattooPreferencesFormProps> = ({
     "Uma vez por ano",
     "A cada 6 meses",
     "A cada 3 meses",
-    "Sempre que possível"
+    "Sempre que possível",
+    "Para cobrir tatuagem antiga"
   ];
 
   const themes = [
-    "Animais", "Natureza", "Mitologia", "Cultura Pop", "Geometria Sagrada",
+    "Animais", "Flores", "Natureza", "Mitologia", "Cultura Pop", "Geometria Sagrada",
     "Religioso/Espiritual", "Familiar", "Abstrato", "Retratos", "Lettering",
-    "Símbolos", "Flores", "Crânios", "Dragões", "Mandalas"
+    "Símbolos", "Crânios", "Dragões", "Mandalas", "Espaço", "Tribal", "Cíclico"
   ];
 
   const toggleArrayItem = (array: string[], item: string, setter: (newArray: string[]) => void) => {
@@ -77,6 +78,9 @@ const TattooPreferencesForm: React.FC<TattooPreferencesFormProps> = ({
           <Brush className="h-5 w-5" />
           Preferências de Tatuagem
         </CardTitle>
+        <p className="text-gray-600 text-sm">
+          Compartilhe suas preferências para que possamos personalizar recomendações e encontrar o artista perfeito para você
+        </p>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -204,7 +208,7 @@ const TattooPreferencesForm: React.FC<TattooPreferencesFormProps> = ({
             <Textarea
               value={formData.current_inspirations}
               onChange={(e) => setFormData(prev => ({ ...prev, current_inspirations: e.target.value }))}
-              placeholder="Descreva ideias ou conceitos que o inspiram no momento..."
+              placeholder="Descreva ideias ou conceitos que o inspiram no momento... Ex: elementos da natureza, animais selvagens, geometria sagrada..."
               rows={3}
               className="border-red-200 focus:border-red-600"
             />

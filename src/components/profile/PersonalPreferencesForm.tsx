@@ -37,7 +37,7 @@ const PersonalPreferencesForm: React.FC<PersonalPreferencesFormProps> = ({
   const movieSeriesGenres = [
     "Ficção Científica", "Fantasia", "Drama", "Ação", "Terror", 
     "Comédia", "Documentário", "Anime", "Romance", "Suspense",
-    "Aventura", "Crime", "Musical", "Guerra", "Biografia"
+    "Thriller", "Histórico", "Aventura", "Crime", "Musical", "Guerra", "Biografia"
   ];
 
   const personalityTypes = [
@@ -163,7 +163,7 @@ const PersonalPreferencesForm: React.FC<PersonalPreferencesFormProps> = ({
             <Textarea
               value={formData.hobbies_interests}
               onChange={(e) => setFormData(prev => ({ ...prev, hobbies_interests: e.target.value }))}
-              placeholder="Ex: Viagens, jogos, culinária, esportes, natureza, fotografia..."
+              placeholder="Ex: Viagens, jogos, culinária, esportes, natureza, fotografia, artesanato, música, tecnologia, filosofia..."
               rows={2}
               className="border-red-200 focus:border-red-600"
             />

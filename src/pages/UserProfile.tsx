@@ -20,7 +20,9 @@ import {
   Heart,
   Brush,
   Settings,
-  CheckCircle
+  CheckCircle,
+  Star,
+  Target
 } from "lucide-react";
 import { useUserProfile, useUpdateTattooPreferences, useUpdatePersonalPreferences, useUpdateBasicInfo } from "@/hooks/useUserProfile";
 import TattooPreferencesForm from "@/components/profile/TattooPreferencesForm";
@@ -139,122 +141,101 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50">
-      {/* Header Section com Status de Fidelidade */}
-      <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white py-12">
+      {/* Seção Unificada de Perfil e Fidelidade */}
+      <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white py-16">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center gap-8">
-            {/* Informações do Usuário */}
-            <div className="flex flex-col md:flex-row items-center gap-6 flex-1">
-              <div className="relative">
-                <Avatar className="w-32 h-32 border-4 border-white shadow-2xl">
-                  <AvatarImage src={userProfile.avatar_url} />
-                  <AvatarFallback className="text-2xl font-bold text-red-600">
-                    {userProfile.first_name[0]}{userProfile.last_name[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <Button
-                  size="icon"
-                  className="absolute bottom-0 right-0 rounded-full bg-white text-red-600 hover:bg-red-50 shadow-lg"
-                >
-                  <Upload className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="text-center md:text-left">
-                <h1 className="text-4xl font-bold text-white mb-2">
-                  {userProfile.first_name} {userProfile.last_name}
-                </h1>
-                <p className="text-red-100 mb-4 max-w-md">
-                  {userProfile.bio}
-                </p>
-                
-                {/* Progresso do Perfil */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-white font-medium">Perfil Completo</span>
-                    <span className="text-white font-bold">{userProfile.profile_completion}%</span>
+          <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl hover:shadow-red-glow transition-all duration-300">
+            <CardContent className="p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                {/* Informações Básicas do Usuário */}
+                <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+                  <div className="relative mb-4">
+                    <Avatar className="w-32 h-32 border-4 border-red-600 shadow-xl">
+                      <AvatarImage src={userProfile.avatar_url} />
+                      <AvatarFallback className="text-2xl font-bold text-red-600 bg-red-50">
+                        {userProfile.first_name[0]}{userProfile.last_name[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <Button
+                      size="icon"
+                      className="absolute bottom-0 right-0 rounded-full bg-red-600 text-white hover:bg-red-700 shadow-lg"
+                    >
+                      <Upload className="h-4 w-4" />
+                    </Button>
                   </div>
+                  
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    {userProfile.first_name} {userProfile.last_name}
+                  </h1>
+                  <p className="text-gray-600 mb-4 max-w-md">
+                    {userProfile.bio || "Adicione uma descrição ao seu perfil para que os artistas conheçam melhor você!"}
+                  </p>
+                  
+                  {!isEditingBasic && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditingBasic(true)}
+                      className="border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      <Settings className="h-4 w-4 mr-2" />
+                      Editar Perfil
+                    </Button>
+                  )}
+                </div>
+
+                {/* Progresso do Perfil */}
+                <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border border-red-200">
+                  <div className="text-center mb-4">
+                    <Target className="h-8 w-8 text-red-600 mx-auto mb-2" />
+                    <h3 className="text-xl font-bold text-red-700">Perfil Completo</h3>
+                    <p className="text-red-600 text-2xl font-bold">{userProfile.profile_completion}%</p>
+                  </div>
+                  
                   <Progress 
                     value={userProfile.profile_completion} 
-                    className="h-2 bg-white/20" 
+                    className="h-3 mb-4" 
                   />
+                  
+                  <div className="bg-white rounded-lg p-4 border border-red-200">
+                    <p className="text-red-700 text-sm font-medium text-center">
+                      💡 <strong>Quanto mais informações você compartilhar</strong> sobre suas preferências de tatuagens, gostos pessoais e interações com conteúdo, <strong>mais conseguiremos personalizar uma tatuagem única para você!</strong>
+                    </p>
+                  </div>
+                  
                   {userProfile.profile_completion < 100 && (
-                    <p className="text-red-100 text-sm mt-2">
-                      Complete seu perfil para ganhar +50 pontos de fidelidade!
+                    <p className="text-red-600 text-sm mt-3 text-center">
+                      Complete seu perfil para ganhar <strong>+50 pontos de fidelidade!</strong>
                     </p>
                   )}
                 </div>
+
+                {/* Status de Fidelidade */}
+                <div>
+                  <LoyaltyStatusCard loyaltyStatus={userProfile.loyalty_status} />
+                </div>
               </div>
-            </div>
 
-            {/* Status de Fidelidade Integrado */}
-            <div className="w-full lg:w-auto">
-              <LoyaltyStatusCard loyaltyStatus={userProfile.loyalty_status} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="basic-info" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-white border-red-200">
-            <TabsTrigger value="basic-info" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
-              <User className="h-4 w-4 mr-2" />
-              Info Básica
-            </TabsTrigger>
-            <TabsTrigger value="tattoo-preferences" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
-              <Brush className="h-4 w-4 mr-2" />
-              Tatuagens
-            </TabsTrigger>
-            <TabsTrigger value="personal-preferences" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
-              <Heart className="h-4 w-4 mr-2" />
-              Gostos Pessoais
-            </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
-              <Clock className="h-4 w-4 mr-2" />
-              Histórico
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Informações Básicas */}
-          <TabsContent value="basic-info">
-            <Card className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-red-600 flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Informações Pessoais
-                </CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditingBasic(!isEditingBasic)}
-                  className="border-red-200 text-red-600 hover:bg-red-50"
-                >
-                  {isEditingBasic ? "Cancelar" : "Editar"}
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isEditingBasic ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-red-600 font-medium">Nome</Label>
-                        <Input
-                          value={basicFormData.first_name}
-                          onChange={(e) => setBasicFormData(prev => ({ ...prev, first_name: e.target.value }))}
-                          className="border-red-200 focus:border-red-600"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-red-600 font-medium">Sobrenome</Label>
-                        <Input
-                          value={basicFormData.last_name}
-                          onChange={(e) => setBasicFormData(prev => ({ ...prev, last_name: e.target.value }))}
-                          className="border-red-200 focus:border-red-600"
-                        />
-                      </div>
+              {/* Edição de Informações Básicas */}
+              {isEditingBasic && (
+                <div className="mt-8 pt-8 border-t border-red-200">
+                  <h3 className="text-xl font-bold text-red-600 mb-4">Editar Informações Básicas</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-red-600 font-medium">Nome</Label>
+                      <Input
+                        value={basicFormData.first_name}
+                        onChange={(e) => setBasicFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                        className="border-red-200 focus:border-red-600"
+                      />
                     </div>
-                    
+                    <div>
+                      <Label className="text-red-600 font-medium">Sobrenome</Label>
+                      <Input
+                        value={basicFormData.last_name}
+                        onChange={(e) => setBasicFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                        className="border-red-200 focus:border-red-600"
+                      />
+                    </div>
                     <div>
                       <Label className="text-red-600 font-medium">E-mail</Label>
                       <Input
@@ -264,27 +245,23 @@ const UserProfile = () => {
                         className="border-red-200 focus:border-red-600"
                       />
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-red-600 font-medium">Telefone</Label>
-                        <Input
-                          value={basicFormData.phone}
-                          onChange={(e) => setBasicFormData(prev => ({ ...prev, phone: e.target.value }))}
-                          className="border-red-200 focus:border-red-600"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-red-600 font-medium">Data de Nascimento</Label>
-                        <Input
-                          type="date"
-                          value={basicFormData.date_of_birth}
-                          onChange={(e) => setBasicFormData(prev => ({ ...prev, date_of_birth: e.target.value }))}
-                          className="border-red-200 focus:border-red-600"
-                        />
-                      </div>
+                    <div>
+                      <Label className="text-red-600 font-medium">Telefone</Label>
+                      <Input
+                        value={basicFormData.phone}
+                        onChange={(e) => setBasicFormData(prev => ({ ...prev, phone: e.target.value }))}
+                        className="border-red-200 focus:border-red-600"
+                      />
                     </div>
-                    
+                    <div>
+                      <Label className="text-red-600 font-medium">Data de Nascimento</Label>
+                      <Input
+                        type="date"
+                        value={basicFormData.date_of_birth}
+                        onChange={(e) => setBasicFormData(prev => ({ ...prev, date_of_birth: e.target.value }))}
+                        className="border-red-200 focus:border-red-600"
+                      />
+                    </div>
                     <div>
                       <Label className="text-red-600 font-medium">Endereço</Label>
                       <Input
@@ -293,17 +270,19 @@ const UserProfile = () => {
                         className="border-red-200 focus:border-red-600"
                       />
                     </div>
-                    
-                    <div>
+                    <div className="md:col-span-2">
                       <Label className="text-red-600 font-medium">Bio</Label>
                       <Textarea
                         value={basicFormData.bio}
                         onChange={(e) => setBasicFormData(prev => ({ ...prev, bio: e.target.value }))}
                         rows={3}
                         className="border-red-200 focus:border-red-600"
+                        placeholder="Conte um pouco sobre você, seus interesses e o que te inspira..."
                       />
                     </div>
-                    
+                  </div>
+                  
+                  <div className="flex gap-4 mt-6">
                     <Button
                       onClick={handleBasicInfoUpdate}
                       disabled={updateBasicInfo.isPending}
@@ -311,44 +290,37 @@ const UserProfile = () => {
                     >
                       {updateBasicInfo.isPending ? "Salvando..." : "Salvar Alterações"}
                     </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditingBasic(false)}
+                      className="border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      Cancelar
+                    </Button>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex items-center gap-3">
-                      <Mail className="h-5 w-5 text-red-500" />
-                      <div>
-                        <p className="text-sm text-gray-600">E-mail</p>
-                        <p className="font-medium">{userProfile.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Phone className="h-5 w-5 text-red-500" />
-                      <div>
-                        <p className="text-sm text-gray-600">Telefone</p>
-                        <p className="font-medium">{userProfile.phone || "Não informado"}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Calendar className="h-5 w-5 text-red-500" />
-                      <div>
-                        <p className="text-sm text-gray-600">Data de Nascimento</p>
-                        <p className="font-medium">
-                          {userProfile.date_of_birth ? new Date(userProfile.date_of_birth).toLocaleDateString('pt-BR') : "Não informado"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <MapPin className="h-5 w-5 text-red-500" />
-                      <div>
-                        <p className="text-sm text-gray-600">Endereço</p>
-                        <p className="font-medium">{userProfile.address || "Não informado"}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="tattoo-preferences" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 bg-white border-red-200 shadow-lg">
+            <TabsTrigger value="tattoo-preferences" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
+              <Brush className="h-4 w-4 mr-2" />
+              Preferências de Tatuagem
+            </TabsTrigger>
+            <TabsTrigger value="personal-preferences" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
+              <Heart className="h-4 w-4 mr-2" />
+              Gostos Pessoais
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
+              <Clock className="h-4 w-4 mr-2" />
+              Meu Histórico
+            </TabsTrigger>
+          </TabsList>
 
           {/* Preferências de Tatuagem */}
           <TabsContent value="tattoo-preferences">
