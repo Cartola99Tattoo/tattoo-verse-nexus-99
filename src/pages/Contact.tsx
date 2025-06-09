@@ -36,7 +36,6 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      // Simulando envio do formulário
       console.log("Form values:", values);
       await new Promise(resolve => setTimeout(resolve, 1000));
       

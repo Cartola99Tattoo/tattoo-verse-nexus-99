@@ -13,7 +13,6 @@ const BlogPost = () => {
   const { post, isLoading, error } = useBlogPost(slug || "");
 
   useEffect(() => {
-    // Set page title when post is loaded
     if (post?.title) {
       document.title = `${post.title} | 99Tattoo Blog`;
     }
@@ -22,7 +21,6 @@ const BlogPost = () => {
     };
   }, [post]);
 
-  // Safety check - if no slug is provided, redirect to blog listing
   if (!slug) {
     return <Navigate to="/blog" replace />;
   }
@@ -83,7 +81,6 @@ const BlogPost = () => {
     }
   };
 
-  // Helper function to safely get avatar URL
   const getAvatarUrl = () => {
     if (!post?.profiles) return null;
     
@@ -96,7 +93,6 @@ const BlogPost = () => {
 
   return (
     <>
-      {/* SEO optimization */}
       {post && (
         <Helmet>
           <title>{post.title} | 99Tattoo Blog</title>
@@ -136,7 +132,6 @@ const BlogPost = () => {
         </div>
       ) : (
         <>
-          {/* Cover Image */}
           <div className="w-full h-[40vh] relative">
             <img
               src={post.cover_image || "https://images.unsplash.com/photo-1562864758-143c0cc8b5a4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"}
@@ -148,7 +143,6 @@ const BlogPost = () => {
 
           <article className="container mx-auto px-4 py-12">
             <div className="max-w-3xl mx-auto">
-              {/* Header */}
               <header className="mb-8">
                 <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-4">
                   <span className="bg-red-100 text-red-600 px-2 py-1 rounded">
@@ -201,13 +195,11 @@ const BlogPost = () => {
                 </div>
               </header>
 
-              {/* Content */}
               <div 
                 className="prose max-w-none prose-headings:text-red-600 prose-links:text-red-600 prose-strong:text-red-600"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
 
-              {/* Tags */}
               {post.tags && post.tags.length > 0 && (
                 <div className="mt-12">
                   <h3 className="text-lg font-bold mb-2 flex items-center text-red-600">
@@ -228,7 +220,6 @@ const BlogPost = () => {
                 </div>
               )}
 
-              {/* Related Posts */}
               <div className="mt-12 border-t border-red-200 pt-8">
                 <h3 className="text-2xl font-bold mb-6 text-red-600">Artigos Relacionados</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -256,7 +247,6 @@ const BlogPost = () => {
                 </div>
               </div>
 
-              {/* Back link */}
               <div className="mt-12 pt-6 border-t border-red-200">
                 <Button asChild variant="outline" className="border-red-200 text-red-600 hover:bg-red-50">
                   <a href="/blog">
@@ -281,7 +271,6 @@ const BlogPost = () => {
             </div>
           </article>
 
-          {/* Seção de CTA com formulário */}
           <section className="py-12 bg-gradient-to-r from-red-50 to-red-100">
             <div className="container mx-auto px-4 max-w-4xl">
               <div className="text-center mb-8">

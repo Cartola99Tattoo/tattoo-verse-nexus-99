@@ -19,6 +19,7 @@ const Auth = lazy(() => import('./pages/Auth'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
+const TattooConsultancy = lazy(() => import('./pages/TattooConsultancy'));
 
 // Lazy load páginas administrativas
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
@@ -45,7 +46,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public routes with SINGLE Layout wrapper - NO DUPLICATES */}
+        {/* Public routes with Layout wrapper */}
         <Route path="/" element={<Layout><LazyLoader><Home /></LazyLoader></Layout>} />
         <Route path="/blog" element={<Layout><LazyLoader><Blog /></LazyLoader></Layout>} />
         <Route path="/blog/:slug" element={<Layout><LazyLoader><BlogPost /></LazyLoader></Layout>} />
@@ -55,12 +56,13 @@ function App() {
         <Route path="/shop/:id" element={<Layout><LazyLoader><ProductDetail /></LazyLoader></Layout>} />
         <Route path="/events" element={<Layout><LazyLoader><Events /></LazyLoader></Layout>} />
         <Route path="/contact" element={<Layout><LazyLoader><Contact /></LazyLoader></Layout>} />
+        <Route path="/consultoria" element={<Layout><LazyLoader><TattooConsultancy /></LazyLoader></Layout>} />
         <Route path="/auth" element={<Layout><LazyLoader><Auth /></LazyLoader></Layout>} />
         <Route path="/reset-password" element={<Layout><LazyLoader><ResetPassword /></LazyLoader></Layout>} />
         <Route path="/checkout" element={<Layout><LazyLoader><Checkout /></LazyLoader></Layout>} />
         <Route path="/user-profile" element={<Layout><LazyLoader><UserProfile /></LazyLoader></Layout>} />
 
-        {/* Admin routes - SINGLE AdminLayout instance with proper nesting */}
+        {/* Admin routes with AdminLayout */}
         <Route
           path="/admin/*"
           element={
