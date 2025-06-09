@@ -26,6 +26,7 @@ import { mockClientService } from './mock/mockClientService';
 import mockProjectService from './mock/mockProjectService';
 import { mockBedService } from './mock/mockBedService';
 import mockEventService from './mock/mockEventService';
+import { mockUserProfileService } from "./mock/mockUserProfileService";
 
 // Supabase services
 import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
@@ -152,4 +153,8 @@ export const getEventService = (): IEventService => {
   }
   // TODO: Return SupabaseEventService when implemented
   return mockEventService;
+};
+
+export const getUserProfileService = () => {
+  return mockUserProfileService;
 };
