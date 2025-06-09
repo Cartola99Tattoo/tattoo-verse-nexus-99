@@ -16,11 +16,11 @@ import CartButton from "@/components/shop/CartButton";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
+    signOut();
     navigate("/");
   };
 
@@ -71,9 +71,9 @@ const Header = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar_url} alt={user.name} />
+                      <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.first_name || 'User'} />
                       <AvatarFallback className="bg-red-600 text-white">
-                        {user.name?.charAt(0).toUpperCase()}
+                        {profile?.first_name?.charAt(0).toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -81,9 +81,9 @@ const Header = () => {
                 <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg" align="end" forceMount>
                   <div className="flex items-center justify-start gap-2 p-2">
                     <div className="flex flex-col space-y-1 leading-none">
-                      <p className="font-medium text-gray-900">{user.name}</p>
+                      <p className="font-medium text-gray-900">{profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : 'Usuário'}</p>
                       <p className="w-[200px] truncate text-sm text-gray-600">
-                        {user.email}
+                        {profile?.email || user.email}
                       </p>
                     </div>
                   </div>
