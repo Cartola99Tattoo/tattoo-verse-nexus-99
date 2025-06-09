@@ -97,21 +97,24 @@ const TattooConsultancy = () => {
         
         <div className="relative z-10 container mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-red-100 to-white bg-clip-text text-transparent leading-tight">
-            Sua próxima tatuagem começa com uma história bem contada.
+            Sua próxima tatuagem não precisa ser um risco. Descubra a arte que realmente te representa.
           </h1>
-          <p className="text-xl md:text-2xl text-red-100 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Uma consultoria criativa para te ajudar a escolher a arte perfeita para o seu corpo, seu estilo e sua fase de vida.
+          <p className="text-xl md:text-2xl text-red-100 mb-8 max-w-4xl mx-auto leading-relaxed">
+            Chega de dúvidas! Nossa consultoria criativa te guia para escolher a tatuagem perfeita, que celebra seu corpo, sua história e sua essência, sem arrependimentos.
           </p>
           <Button 
             onClick={scrollToForm}
             className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white text-lg px-8 py-4 rounded-lg shadow-2xl hover:shadow-red-500/25 transform hover:scale-105 transition-all duration-300"
             size="lg"
           >
-            Agende sua Consultoria
+            Agende sua Consultoria Personalizada
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
       </section>
+
+      {/* Separador Vermelho */}
+      <div className="h-8 bg-gradient-to-r from-red-600 to-red-800 shadow-xl"></div>
 
       {/* O que é a Consultoria */}
       <section className="py-16 bg-gradient-to-b from-white to-red-50">
@@ -129,7 +132,7 @@ const TattooConsultancy = () => {
               { icon: Camera, text: "Ajuda na cobertura de tatuagens antigas" },
               { icon: Star, text: "Transformação de cicatrizes em arte" }
             ].map((benefit, index) => (
-              <Card key={index} className="group hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-red-200">
+              <Card key={index} className="group hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-red-200 bg-gradient-to-br from-white to-red-50">
                 <CardContent className="p-6 text-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-red-500/25">
                     <benefit.icon className="h-8 w-8 text-white" />
@@ -144,13 +147,13 @@ const TattooConsultancy = () => {
           </div>
 
           {/* Depoimento */}
-          <Card className="max-w-2xl mx-auto bg-gradient-to-br from-red-50 to-white border-red-200 shadow-xl">
+          <Card className="max-w-3xl mx-auto bg-gradient-to-br from-red-50 to-white border-red-200 shadow-xl">
             <CardContent className="p-8 text-center">
               <MessageCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
               <blockquote className="text-lg italic text-gray-700 mb-4">
-                "A consultoria me deu confiança para finalmente fazer minha tattoo dos sonhos. O artista entendeu perfeitamente o que eu queria e sugeriu melhorias que eu nunca tinha pensado."
+                "Eu estava prestes a fazer uma tatuagem que provavelmente me arrependeria. A consultoria da 99Tattoo abriu meus olhos para estilos que eu nem imaginava que combinariam comigo. Minha tatuagem agora é parte de mim, e sou grato por ter tido essa orientação."
               </blockquote>
-              <p className="font-semibold text-red-600">- Marina S., primeira tatuagem</p>
+              <p className="font-semibold text-red-600">- Cliente Satisfeito</p>
             </CardContent>
           </Card>
 
@@ -167,32 +170,35 @@ const TattooConsultancy = () => {
         </div>
       </section>
 
+      {/* Separador Vermelho */}
+      <div className="h-4 bg-gradient-to-r from-red-800 to-red-600"></div>
+
       {/* Para quem é */}
       <section className="py-16 bg-gradient-to-b from-red-50 to-white">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-red-600 text-center mb-12">Para quem é essa consultoria?</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {[
               {
                 icon: "💔",
-                title: "Tenho uma cicatriz e quero transformá-la em algo bonito",
-                description: "Transformamos marcas do passado em arte significativa"
+                title: "Minha cicatriz me incomoda, quero transformá-la em algo que amo.",
+                description: "Transformamos marcas do passado em arte significativa que celebra sua superação"
               },
               {
-                icon: "🎨",
-                title: "Tenho uma tatuagem antiga que não combina mais comigo",
-                description: "Criamos covers incríveis que respeitam sua nova fase"
+                icon: "😔",
+                title: "Tenho uma tatuagem antiga e me arrependo. Preciso de uma cobertura ou ressignificação.",
+                description: "Criamos covers incríveis que respeitam sua nova fase e apagam arrependimentos"
               },
               {
-                icon: "✨",
-                title: "Quero minha primeira tattoo mas não sei por onde começar",
-                description: "Te guiamos em cada etapa da sua primeira experiência"
+                icon: "😰",
+                title: "Quero minha primeira tattoo mas tenho medo de escolher algo que não combine comigo.",
+                description: "Te guiamos com segurança na sua primeira experiência, eliminando o medo do arrependimento"
               },
               {
-                icon: "❤️",
-                title: "Quero que minha próxima arte tenha um significado real",
-                description: "Desenvolvemos conceitos únicos baseados na sua história"
+                icon: "💭",
+                title: "Minha próxima arte precisa ter um significado profundo e eu não sei como expressá-lo.",
+                description: "Desenvolvemos conceitos únicos que traduzem sua essência em arte permanente"
               }
             ].map((persona, index) => (
               <Card key={index} className="group hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-white to-red-50 border-red-200">
@@ -204,15 +210,28 @@ const TattooConsultancy = () => {
               </Card>
             ))}
           </div>
+
+          <div className="text-center mt-12">
+            <Button 
+              onClick={scrollToForm}
+              className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-8 py-3 shadow-lg"
+            >
+              Quero uma tatuagem com propósito
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </section>
+
+      {/* Separador Vermelho */}
+      <div className="h-6 bg-gradient-to-r from-red-600 via-red-700 to-red-800 shadow-lg"></div>
 
       {/* Galeria */}
       <section className="py-16 bg-gradient-to-b from-white to-red-50">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-red-600 text-center mb-6">Transformações Reais</h2>
-          <p className="text-xl text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-            Cada pele tem uma história. Cada tatuagem é uma escolha consciente.
+          <p className="text-xl text-gray-600 text-center mb-12 max-w-4xl mx-auto">
+            Escolher uma tatuagem é escolher uma parte de você para sempre. Não deixe o receio de uma má decisão te impedir de ter a arte que sempre sonhou. Com a 99Tattoo, cada pele tem uma história bem escrita. Cada tatuagem é uma escolha consciente e planejada para você.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -233,7 +252,7 @@ const TattooConsultancy = () => {
                 description: "Arte criada especialmente para o cliente"
               }
             ].map((example, index) => (
-              <Card key={index} className="group overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <Card key={index} className="group overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-red-200">
                 <div className="aspect-square overflow-hidden">
                   <img 
                     src={example.image} 
@@ -241,7 +260,7 @@ const TattooConsultancy = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
-                <CardContent className="p-6">
+                <CardContent className="p-6 bg-gradient-to-br from-white to-red-50">
                   <h3 className="font-bold text-red-600 mb-2">{example.title}</h3>
                   <p className="text-gray-600">{example.description}</p>
                 </CardContent>
@@ -251,13 +270,15 @@ const TattooConsultancy = () => {
         </div>
       </section>
 
+      {/* Separador Vermelho */}
+      <div className="h-4 bg-gradient-to-r from-red-800 to-red-600"></div>
+
       {/* Como funciona */}
       <section className="py-16 bg-gradient-to-b from-red-50 to-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-red-600 text-center mb-12">Como funciona a consultoria</h2>
-          <p className="text-xl text-gray-600 text-center mb-12 max-w-2xl mx-auto">Etapas da sua experiência:</p>
+          <h2 className="text-4xl font-bold text-red-600 text-center mb-12">Etapas da sua experiência:</h2>
           
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
               {[
                 { number: "1", title: "Formulário", description: "Preenchimento com suas ideias e gostos", icon: MessageCircle },
@@ -271,7 +292,7 @@ const TattooConsultancy = () => {
                     <div className="w-16 h-16 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center mx-auto shadow-lg group-hover:shadow-red-500/25 transition-all duration-300">
                       <step.icon className="h-8 w-8 text-white" />
                     </div>
-                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-white border-2 border-red-600 rounded-full flex items-center justify-center text-red-600 font-bold text-sm">
+                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-white border-2 border-red-600 rounded-full flex items-center justify-center text-red-600 font-bold text-sm shadow-lg">
                       {step.number}
                     </div>
                   </div>
@@ -283,6 +304,9 @@ const TattooConsultancy = () => {
           </div>
         </div>
       </section>
+
+      {/* Separador Vermelho */}
+      <div className="h-6 bg-gradient-to-r from-red-600 via-red-700 to-red-800 shadow-lg"></div>
 
       {/* Depoimentos */}
       <section className="py-16 bg-gradient-to-b from-white to-red-50">
@@ -323,14 +347,17 @@ const TattooConsultancy = () => {
         </div>
       </section>
 
+      {/* Separador Vermelho */}
+      <div className="h-4 bg-gradient-to-r from-red-800 to-red-600"></div>
+
       {/* FAQ */}
       <section className="py-16 bg-gradient-to-b from-red-50 to-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-red-600 text-center mb-12">Perguntas Frequentes</h2>
+          <h2 className="text-4xl font-bold text-red-600 text-center mb-12">Sua confiança é nossa prioridade. Tire suas dúvidas:</h2>
           
           <div className="max-w-3xl mx-auto">
             <Accordion type="single" collapsible className="space-y-4">
-              <AccordionItem value="item-1" className="border border-red-200 rounded-lg px-6">
+              <AccordionItem value="item-1" className="border border-red-200 rounded-lg px-6 bg-gradient-to-r from-white to-red-50">
                 <AccordionTrigger className="text-red-600 hover:text-red-700">
                   A consultoria é online ou presencial?
                 </AccordionTrigger>
@@ -339,30 +366,39 @@ const TattooConsultancy = () => {
                 </AccordionContent>
               </AccordionItem>
               
-              <AccordionItem value="item-2" className="border border-red-200 rounded-lg px-6">
+              <AccordionItem value="item-2" className="border border-red-200 rounded-lg px-6 bg-gradient-to-r from-white to-red-50">
                 <AccordionTrigger className="text-red-600 hover:text-red-700">
-                  Quanto tempo dura a consultoria?
+                  Qual o tempo de duração da consultoria?
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-700">
                   Normalmente entre 45 minutos a 1 hora, dependendo da complexidade do seu projeto e suas necessidades específicas.
                 </AccordionContent>
               </AccordionItem>
               
-              <AccordionItem value="item-3" className="border border-red-200 rounded-lg px-6">
+              <AccordionItem value="item-3" className="border border-red-200 rounded-lg px-6 bg-gradient-to-r from-white to-red-50">
                 <AccordionTrigger className="text-red-600 hover:text-red-700">
-                  A consultoria tem algum custo?
+                  A consultoria inclui o valor da tatuagem?
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-700">
                   A primeira consultoria é gratuita! Se você decidir fazer a tatuagem conosco, o valor é descontado do orçamento final.
                 </AccordionContent>
               </AccordionItem>
               
-              <AccordionItem value="item-4" className="border border-red-200 rounded-lg px-6">
+              <AccordionItem value="item-4" className="border border-red-200 rounded-lg px-6 bg-gradient-to-r from-white to-red-50">
                 <AccordionTrigger className="text-red-600 hover:text-red-700">
-                  Preciso ter uma ideia definida?
+                  Se eu não gostar da proposta, o que acontece?
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-700">
-                  Não! Na verdade, muitos clientes chegam apenas com uma vontade de tatuar. Nosso trabalho é justamente te ajudar a descobrir o que combina com você.
+                  Nosso compromisso é com sua satisfação. Trabalhamos juntos até encontrar a proposta ideal para você, sem compromisso de execução.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-5" className="border border-red-200 rounded-lg px-6 bg-gradient-to-r from-white to-red-50">
+                <AccordionTrigger className="text-red-600 hover:text-red-700">
+                  Qual o valor da consultoria?
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-700">
+                  A primeira consultoria é completamente gratuita! É nossa forma de conhecer você e apresentar nosso trabalho.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -370,12 +406,15 @@ const TattooConsultancy = () => {
         </div>
       </section>
 
+      {/* Separador Vermelho Final */}
+      <div className="h-8 bg-gradient-to-r from-red-600 to-red-800 shadow-xl"></div>
+
       {/* Formulário Final */}
       <section id="consultancy-form" className="py-16 bg-gradient-to-b from-white to-red-50">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center mb-12">
             <h2 className="text-4xl font-bold text-red-600 mb-6">
-              Pronto para descobrir a tatuagem que mais combina com você?
+              Chega de dúvidas! Agende sua consultoria e descubra a tatuagem que nasceu para você.
             </h2>
             <p className="text-xl text-gray-600">
               Preencha o formulário abaixo e nossa equipe entrará em contato pelo WhatsApp para agendar sua consultoria personalizada.
@@ -502,7 +541,7 @@ const TattooConsultancy = () => {
                     disabled={isSubmitting}
                     size="lg"
                   >
-                    {isSubmitting ? "Enviando..." : "Agendar minha consultoria personalizada"}
+                    {isSubmitting ? "Enviando..." : "Agendar Minha Consultoria Agora!"}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </form>

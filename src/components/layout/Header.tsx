@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import CartButton from "@/components/shop/CartButton";
+import MobileMenu from "./MobileMenu";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,15 +36,18 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl">T</span>
+              <span className="text-white font-bold text-xl">99</span>
             </div>
-            <span className="text-xl font-bold text-white">TattooStudio</span>
+            <span className="text-xl font-bold text-white">Tattoo</span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-white hover:text-red-500 transition-colors">
               Início
+            </Link>
+            <Link to="/consultoria" className="text-white hover:text-red-500 transition-colors">
+              Consultoria
             </Link>
             <Link to="/artists" className="text-white hover:text-red-500 transition-colors">
               Artistas
@@ -118,63 +122,7 @@ const Header = () => {
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-700">
-            <nav className="flex flex-col space-y-4">
-              <Link 
-                to="/" 
-                className="text-white hover:text-red-500 transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Início
-              </Link>
-              <Link 
-                to="/artists" 
-                className="text-white hover:text-red-500 transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Artistas
-              </Link>
-              <Link 
-                to="/shop" 
-                className="text-white hover:text-red-500 transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Loja
-              </Link>
-              <Link 
-                to="/blog" 
-                className="text-white hover:text-red-500 transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Blog
-              </Link>
-              <Link 
-                to="/events" 
-                className="text-white hover:text-red-500 transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Eventos
-              </Link>
-              <Link 
-                to="/contact" 
-                className="text-white hover:text-red-500 transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contato
-              </Link>
-              {!user && (
-                <Link 
-                  to="/auth" 
-                  className="text-red-500 font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Entrar
-                </Link>
-              )}
-            </nav>
-          </div>
-        )}
+        <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
       </div>
     </header>
   );
