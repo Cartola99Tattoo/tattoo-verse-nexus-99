@@ -1,6 +1,6 @@
+
 import { useParams, Navigate } from "react-router-dom";
 import { useBlogPost } from "@/hooks/useBlogPost";
-import Layout from "@/components/layout/Layout";
 import { Loader2, Share2, Clock, Calendar, User, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
@@ -95,7 +95,7 @@ const BlogPost = () => {
   };
 
   return (
-    <Layout>
+    <>
       {/* SEO optimization */}
       {post && (
         <Helmet>
@@ -118,19 +118,19 @@ const BlogPost = () => {
         </div>
       ) : error ? (
         <div className="container mx-auto px-4 py-20 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Erro ao carregar o artigo</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Erro ao carregar o artigo</h2>
           <p className="text-gray-600 mb-6">{error.message}</p>
-          <Button asChild>
+          <Button asChild className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg hover:shadow-xl">
             <a href="/blog">Voltar para o Blog</a>
           </Button>
         </div>
       ) : !post ? (
         <div className="container mx-auto px-4 py-20 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Artigo não encontrado</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Artigo não encontrado</h2>
           <p className="text-gray-600 mb-6">
             O artigo que você está procurando não existe ou foi removido.
           </p>
-          <Button asChild>
+          <Button asChild className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg hover:shadow-xl">
             <a href="/blog">Voltar para o Blog</a>
           </Button>
         </div>
@@ -151,7 +151,7 @@ const BlogPost = () => {
               {/* Header */}
               <header className="mb-8">
                 <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-4">
-                  <span className="bg-red-100 text-red-500 px-2 py-1 rounded">
+                  <span className="bg-red-100 text-red-600 px-2 py-1 rounded">
                     {getCategoryName(post)}
                   </span>
                   <span>•</span>
@@ -171,7 +171,7 @@ const BlogPost = () => {
                     </>
                   )}
                 </div>
-                <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
+                <h1 className="text-4xl font-bold mb-4 text-red-600">{post.title}</h1>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-gray-300 rounded-full mr-3 flex items-center justify-center overflow-hidden">
@@ -193,7 +193,7 @@ const BlogPost = () => {
                     onClick={handleShare} 
                     variant="outline" 
                     size="sm"
-                    className="gap-1"
+                    className="gap-1 border-red-200 text-red-600 hover:bg-red-50"
                   >
                     <Share2 className="h-4 w-4" />
                     <span className="hidden sm:inline">Compartilhar</span>
@@ -203,14 +203,14 @@ const BlogPost = () => {
 
               {/* Content */}
               <div 
-                className="prose max-w-none"
+                className="prose max-w-none prose-headings:text-red-600 prose-links:text-red-600 prose-strong:text-red-600"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
 
               {/* Tags */}
               {post.tags && post.tags.length > 0 && (
                 <div className="mt-12">
-                  <h3 className="text-lg font-bold mb-2 flex items-center">
+                  <h3 className="text-lg font-bold mb-2 flex items-center text-red-600">
                     <Tag className="h-4 w-4 mr-2" />
                     Tags
                   </h3>
@@ -219,7 +219,7 @@ const BlogPost = () => {
                       <a
                         key={tag}
                         href={`/blog?tag=${tag}`}
-                        className="bg-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors"
+                        className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm hover:bg-red-200 transition-colors"
                       >
                         {tag}
                       </a>
@@ -228,12 +228,12 @@ const BlogPost = () => {
                 </div>
               )}
 
-              {/* Related Posts - We would fetch these from the API in a real implementation */}
-              <div className="mt-12 border-t pt-8">
-                <h3 className="text-2xl font-bold mb-6">Artigos Relacionados</h3>
+              {/* Related Posts */}
+              <div className="mt-12 border-t border-red-200 pt-8">
+                <h3 className="text-2xl font-bold mb-6 text-red-600">Artigos Relacionados</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[1, 2].map((i) => (
-                    <Card key={i} className="hover:shadow-md transition-shadow">
+                    <Card key={i} className="hover:shadow-lg transition-shadow border-red-200">
                       <div className="h-40 w-full overflow-hidden">
                         <img 
                           src={`https://images.unsplash.com/photo-${i === 1 ? '1590246815107-56d48602592f' : '1565058398932-9a36a1a3c2b9'}?w=600&auto=format&fit=crop&q=60`} 
@@ -243,7 +243,7 @@ const BlogPost = () => {
                       </div>
                       <CardContent className="p-4">
                         <h4 className="font-bold truncate">
-                          <a href="/blog/article-slug" className="hover:text-red-500">
+                          <a href="/blog/article-slug" className="hover:text-red-600 text-red-600">
                             {i === 1 ? 'Tendências de tatuagem para 2024' : 'Como cuidar da sua tatuagem recém-feita'}
                           </a>
                         </h4>
@@ -257,8 +257,8 @@ const BlogPost = () => {
               </div>
 
               {/* Back link */}
-              <div className="mt-12 pt-6 border-t">
-                <Button asChild variant="outline">
+              <div className="mt-12 pt-6 border-t border-red-200">
+                <Button asChild variant="outline" className="border-red-200 text-red-600 hover:bg-red-50">
                   <a href="/blog">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -282,10 +282,10 @@ const BlogPost = () => {
           </article>
 
           {/* Seção de CTA com formulário */}
-          <section className="py-12 bg-gray-100">
+          <section className="py-12 bg-gradient-to-r from-red-50 to-red-100">
             <div className="container mx-auto px-4 max-w-4xl">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold">Gostou do conteúdo?</h3>
+                <h3 className="text-2xl font-bold text-red-600">Gostou do conteúdo?</h3>
                 <p className="text-gray-600">Fale com um de nossos tatuadores para realizar seu projeto!</p>
               </div>
               
@@ -299,7 +299,7 @@ const BlogPost = () => {
           </section>
         </>
       )}
-    </Layout>
+    </>
   );
 };
 

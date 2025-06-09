@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,7 +59,7 @@ const Contact = () => {
   };
 
   return (
-    <Layout>
+    <>
       <div className="bg-gradient-to-b from-black to-gray-900 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12 animate-fade-in">
@@ -76,7 +75,7 @@ const Contact = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div className="animate-slide-in">
-              <h2 className="text-2xl font-bold mb-6">Entre em contato conosco</h2>
+              <h2 className="text-2xl font-bold mb-6 text-red-600">Entre em contato conosco</h2>
               <p className="text-gray-600 mb-8">
                 Preencha o formulário abaixo e nossa equipe entrará em contato com você o mais breve possível.
               </p>
@@ -88,9 +87,9 @@ const Contact = () => {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nome</FormLabel>
+                        <FormLabel className="text-red-600">Nome</FormLabel>
                         <FormControl>
-                          <Input placeholder="Seu nome completo" {...field} />
+                          <Input placeholder="Seu nome completo" {...field} className="border-red-200 focus:border-red-600" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -102,9 +101,9 @@ const Contact = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel className="text-red-600">Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="seu.email@exemplo.com" {...field} />
+                          <Input placeholder="seu.email@exemplo.com" {...field} className="border-red-200 focus:border-red-600" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -116,9 +115,9 @@ const Contact = () => {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Telefone</FormLabel>
+                        <FormLabel className="text-red-600">Telefone</FormLabel>
                         <FormControl>
-                          <Input placeholder="(00) 00000-0000" {...field} />
+                          <Input placeholder="(00) 00000-0000" {...field} className="border-red-200 focus:border-red-600" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -130,11 +129,11 @@ const Contact = () => {
                     name="message"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Mensagem</FormLabel>
+                        <FormLabel className="text-red-600">Mensagem</FormLabel>
                         <FormControl>
                           <Textarea 
                             placeholder="Como podemos ajudar? Descreva o que você procura..."
-                            className="min-h-32"
+                            className="min-h-32 border-red-200 focus:border-red-600"
                             {...field} 
                           />
                         </FormControl>
@@ -145,7 +144,7 @@ const Contact = () => {
                   
                   <Button 
                     type="submit" 
-                    className="w-full bg-red-500 hover:bg-red-600" 
+                    className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg hover:shadow-xl" 
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
@@ -155,14 +154,14 @@ const Contact = () => {
             </div>
             
             <div>
-              <div className="bg-gray-50 p-8 rounded-lg shadow-lg h-full">
-                <h2 className="text-2xl font-bold mb-6">Informações de Contato</h2>
+              <div className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl p-8 rounded-lg h-full">
+                <h2 className="text-2xl font-bold mb-6 text-red-600">Informações de Contato</h2>
                 
                 <div className="space-y-6">
                   <div className="flex items-start">
                     <MapPin className="h-6 w-6 text-red-500 mr-4 mt-1" />
                     <div>
-                      <h3 className="font-medium">Endereço</h3>
+                      <h3 className="font-medium text-red-600">Endereço</h3>
                       <p className="text-gray-600">Rua das Tattoos, 99</p>
                       <p className="text-gray-600">São Paulo, SP</p>
                     </div>
@@ -171,7 +170,7 @@ const Contact = () => {
                   <div className="flex items-start">
                     <Phone className="h-6 w-6 text-red-500 mr-4 mt-1" />
                     <div>
-                      <h3 className="font-medium">Telefone</h3>
+                      <h3 className="font-medium text-red-600">Telefone</h3>
                       <p className="text-gray-600">(11) 9999-9999</p>
                     </div>
                   </div>
@@ -179,14 +178,14 @@ const Contact = () => {
                   <div className="flex items-start">
                     <Mail className="h-6 w-6 text-red-500 mr-4 mt-1" />
                     <div>
-                      <h3 className="font-medium">Email</h3>
+                      <h3 className="font-medium text-red-600">Email</h3>
                       <p className="text-gray-600">contato@99tattoo.com</p>
                     </div>
                   </div>
                 </div>
                 
                 <div className="mt-8">
-                  <h3 className="font-medium mb-4">Horário de Funcionamento</h3>
+                  <h3 className="font-medium mb-4 text-red-600">Horário de Funcionamento</h3>
                   <div className="space-y-2 text-gray-600">
                     <p>Segunda a Sexta: 10h às 19h</p>
                     <p>Sábado: 10h às 16h</p>
@@ -195,7 +194,7 @@ const Contact = () => {
                 </div>
                 
                 <div className="mt-8">
-                  <h3 className="font-medium mb-4">Nossa Localização</h3>
+                  <h3 className="font-medium mb-4 text-red-600">Nossa Localização</h3>
                   <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
                     <iframe 
                       src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29268.755976432707!2d-46.65789148434596!3d-23.564228499999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce59c8da0aa315%3A0xd59f9431f2c9776a!2sAv.%20Paulista%2C%20S%C3%A3o%20Paulo%20-%20SP!5e0!3m2!1spt-BR!2sbr!4v1709984029731!5m2!1spt-BR!2sbr" 
@@ -213,7 +212,7 @@ const Contact = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </>
   );
 };
 

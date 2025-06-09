@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, User, ShoppingCart, LogOut, Settings } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -29,35 +29,35 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white shadow-lg sticky top-0 z-50">
+    <header className="bg-black shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-xl">T</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">TattooStudio</span>
+            <span className="text-xl font-bold text-white">TattooStudio</span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-red-600 transition-colors">
+            <Link to="/" className="text-white hover:text-red-500 transition-colors">
               Início
             </Link>
-            <Link to="/artists" className="text-gray-700 hover:text-red-600 transition-colors">
+            <Link to="/artists" className="text-white hover:text-red-500 transition-colors">
               Artistas
             </Link>
-            <Link to="/shop" className="text-gray-700 hover:text-red-600 transition-colors">
+            <Link to="/shop" className="text-white hover:text-red-500 transition-colors">
               Loja
             </Link>
-            <Link to="/blog" className="text-gray-700 hover:text-red-600 transition-colors">
+            <Link to="/blog" className="text-white hover:text-red-500 transition-colors">
               Blog
             </Link>
-            <Link to="/events" className="text-gray-700 hover:text-red-600 transition-colors">
+            <Link to="/events" className="text-white hover:text-red-500 transition-colors">
               Eventos
             </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-red-600 transition-colors">
+            <Link to="/contact" className="text-white hover:text-red-500 transition-colors">
               Contato
             </Link>
           </nav>
@@ -69,7 +69,7 @@ const Header = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-red-600">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.first_name || 'User'} />
                       <AvatarFallback className="bg-red-600 text-white">
@@ -100,7 +100,7 @@ const Header = () => {
               </DropdownMenu>
             ) : (
               <Link to="/auth">
-                <Button className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white">
+                <Button className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg hover:shadow-xl">
                   Entrar
                 </Button>
               </Link>
@@ -109,7 +109,7 @@ const Header = () => {
             {/* Mobile menu button */}
             <Button
               variant="ghost"
-              className="md:hidden"
+              className="md:hidden text-white hover:bg-red-600"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -119,46 +119,46 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
+          <div className="md:hidden py-4 border-t border-gray-700">
             <nav className="flex flex-col space-y-4">
               <Link 
                 to="/" 
-                className="text-gray-700 hover:text-red-600 transition-colors"
+                className="text-white hover:text-red-500 transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Início
               </Link>
               <Link 
                 to="/artists" 
-                className="text-gray-700 hover:text-red-600 transition-colors"
+                className="text-white hover:text-red-500 transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Artistas
               </Link>
               <Link 
                 to="/shop" 
-                className="text-gray-700 hover:text-red-600 transition-colors"
+                className="text-white hover:text-red-500 transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Loja
               </Link>
               <Link 
                 to="/blog" 
-                className="text-gray-700 hover:text-red-600 transition-colors"
+                className="text-white hover:text-red-500 transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Blog
               </Link>
               <Link 
                 to="/events" 
-                className="text-gray-700 hover:text-red-600 transition-colors"
+                className="text-white hover:text-red-500 transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Eventos
               </Link>
               <Link 
                 to="/contact" 
-                className="text-gray-700 hover:text-red-600 transition-colors"
+                className="text-white hover:text-red-500 transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contato
@@ -166,7 +166,7 @@ const Header = () => {
               {!user && (
                 <Link 
                   to="/auth" 
-                  className="text-red-600 font-medium"
+                  className="text-red-500 font-medium py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Entrar
