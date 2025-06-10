@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -44,7 +43,7 @@ const ProjectDashboard = ({ project, tasks }: ProjectDashboardProps) => {
 
   const projectStatus = getProjectStatus();
 
-  const urgentTasks = tasks.filter(task => task.priority === 'urgent' && task.status !== 'completed').length;
+  const criticalTasks = tasks.filter(task => task.priority === 'critical' && task.status !== 'completed').length;
   const overdueTasks = tasks.filter(task => {
     if (!task.dueDate || task.status === 'completed') return false;
     return new Date(task.dueDate) < today;
@@ -105,9 +104,9 @@ const ProjectDashboard = ({ project, tasks }: ProjectDashboardProps) => {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{urgentTasks + overdueTasks}</div>
+            <div className="text-2xl font-bold text-red-600">{criticalTasks + overdueTasks}</div>
             <div className="text-xs text-muted-foreground mt-1">
-              <div>{urgentTasks} urgentes</div>
+              <div>{criticalTasks} críticas</div>
               <div>{overdueTasks} atrasadas</div>
             </div>
           </CardContent>

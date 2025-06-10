@@ -114,7 +114,7 @@ class MockProjectService implements IProjectService {
     ];
 
     this.mockSmartGoals = [
-      { id: '1', projectId: '1', title: 'Aumentar faturamento em 30%', metric: 'R$ 15.000 vs R$ 12.000', deadline: '2024-02-15', responsible: 'Gerente', progress: 85, createdAt: '2024-01-01T10:00:00Z' }
+      { id: '1', projectId: '1', title: 'Aumentar faturamento em 30%', specific: 'Aumentar vendas mensais', measurable: 'Meta de R$ 15.000 vs atual R$ 12.000', achievable: 'Com base na capacidade atual', relevant: 'Crescimento sustentável', timeBound: 'Até 15 de fevereiro', deadline: '2024-02-15', responsible: 'Gerente', progress: 85, createdAt: '2024-01-01T10:00:00Z' }
     ];
 
     this.mockLearningCycles = [

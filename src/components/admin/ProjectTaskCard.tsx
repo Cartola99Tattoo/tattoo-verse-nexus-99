@@ -76,7 +76,7 @@ const ProjectTaskCard = ({ task, onTaskRefresh }: ProjectTaskCardProps) => {
     return (
       <EditTaskForm
         task={task}
-        onClose={() => setShowEditForm(false)}
+        onCancel={() => setShowEditForm(false)}
         onTaskUpdated={onTaskRefresh}
       />
     );
