@@ -28,6 +28,7 @@ const AdminArtists = lazy(() => import('./pages/admin/AdminArtists'));
 const Appointments = lazy(() => import('./pages/admin/Appointments'));
 const Clients = lazy(() => import('./pages/admin/Clients'));
 const ClientDetail = lazy(() => import('./pages/admin/ClientDetail'));
+const CRM = lazy(() => import('./pages/admin/CRM'));
 const Products = lazy(() => import('./pages/admin/Products'));
 const Stock = lazy(() => import('./pages/admin/Stock'));
 const Financial = lazy(() => import('./pages/admin/Financial'));
@@ -80,6 +81,7 @@ function App() {
           <Route path="appointments" element={<LazyLoader><Appointments /></LazyLoader>} />
           <Route path="clients" element={<LazyLoader><Clients /></LazyLoader>} />
           <Route path="clients/:id" element={<LazyLoader><ClientDetail /></LazyLoader>} />
+          <Route path="crm" element={<LazyLoader><CRM /></LazyLoader>} />
           <Route path="products" element={<LazyLoader><Products /></LazyLoader>} />
           <Route path="stock" element={<LazyLoader><Stock /></LazyLoader>} />
           <Route path="projects" element={<LazyLoader><Projects /></LazyLoader>} />

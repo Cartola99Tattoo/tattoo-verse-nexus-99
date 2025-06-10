@@ -24,6 +24,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           return { title: "Agendamentos", description: "Gerencie agendamentos e calendário" };
         case "/admin/clients":
           return { title: "Clientes", description: "Gerencie clientes e relacionamentos" };
+        case "/admin/crm":
+          return { title: "CRM - Gestão de Clientes", description: "Gestão completa de leads e clientes do estúdio" };
         case "/admin/products":
           return { title: "Produtos", description: "Gerencie produtos e catálogo" };
         case "/admin/stock":

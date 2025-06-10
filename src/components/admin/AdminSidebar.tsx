@@ -13,7 +13,8 @@ import {
   Settings,
   Heart,
   DollarSign,
-  TrendingUp
+  TrendingUp,
+  UserCheck
 } from "lucide-react"
 
 interface NavItem {
@@ -77,6 +78,9 @@ export function AdminSidebar({ items }: Props) {
             </NavItemComponent>
             <NavItemComponent href="/admin/clients" icon={Users}>
               Clientes
+            </NavItemComponent>
+            <NavItemComponent href="/admin/crm" icon={UserCheck}>
+              CRM
             </NavItemComponent>
             <NavItemComponent href="/admin/appointments" icon={Calendar}>
               Agendamentos
@@ -150,6 +154,11 @@ const sidebarItems = [
     name: "Clientes",
     icon: Users,
     href: "/admin/clients",
+  },
+  {
+    name: "CRM",
+    icon: UserCheck,
+    href: "/admin/crm",
   },
   {
     name: "Agendamentos",
