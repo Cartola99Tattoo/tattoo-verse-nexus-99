@@ -36,10 +36,13 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel, initialStage
 
   const projectService = getProjectService();
 
-  const { data: smartGoals = [] } = useDataQuery<IProjectSmartGoal[]>(
+  const { data: smartGoals, loading: smartGoalsLoading } = useDataQuery<IProjectSmartGoal[]>(
     () => projectService.fetchProjectSmartGoals(project.id),
     [project.id]
   );
+
+  // Ensure safe access to smartGoals array
+  const safeSmartGoals = Array.isArray(smartGoals) ? smartGoals : [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,7 +224,11 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel, initialStage
                   Associação à Meta SMART
                 </Label>
                 <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                  {smartGoals.length === 0 ? (
+                  {smartGoalsLoading ? (
+                    <p className="text-sm text-gray-600 italic">
+                      Carregando metas SMART...
+                    </p>
+                  ) : safeSmartGoals.length === 0 ? (
                     <p className="text-sm text-gray-600 italic">
                       Nenhuma Meta SMART definida para este projeto. 
                       Considere criar metas SMART para orientar estrategicamente suas tarefas.
@@ -232,7 +239,7 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel, initialStage
                         Selecione as metas SMART que esta tarefa ajudará a alcançar:
                       </p>
                       <div className="space-y-2">
-                        {smartGoals.map((goal) => (
+                        {safeSmartGoals.map((goal) => (
                           <div key={goal.id} className="flex items-start space-x-2">
                             <Checkbox
                               id={`goal-${goal.id}`}
