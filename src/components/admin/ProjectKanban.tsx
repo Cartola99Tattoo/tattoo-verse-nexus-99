@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,10 +11,8 @@ import { IProject, IProjectTask, IKanbanStage, IProjectSmartGoal } from "@/servi
 import ProjectKanbanColumn from "@/components/admin/ProjectKanbanColumn";
 import CreateTaskForm from "@/components/admin/CreateTaskForm";
 import ProjectKanbanSettings from "@/components/admin/ProjectKanbanSettings";
-import ProjectPlanningTabs from "@/components/admin/ProjectPlanningTabs";
-import SmartGoalsDashboard from "@/components/admin/SmartGoalsDashboard";
-import EnhancedSmartGoalsManager from "@/components/admin/EnhancedSmartGoalsManager";
 import EnhancedSmartGoalsDashboard from "@/components/admin/EnhancedSmartGoalsDashboard";
+import IntegratedProjectOverview from "@/components/admin/IntegratedProjectOverview";
 
 interface ProjectKanbanProps {
   project: IProject;
@@ -47,7 +46,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
   const safeSmartGoals = Array.isArray(smartGoals) ? smartGoals : [];
   const safeStages = Array.isArray(stages) ? stages : [];
 
-  // Ensure default stages exist
+  // Ensure default stages exist with 99Tattoo theme colors
   const getDefaultStages = (): IKanbanStage[] => [
     { 
       id: 'ideas', 
@@ -62,7 +61,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
       projectId: project.id,
       name: 'A Fazer', 
       order: 2,
-      color: '#3B82F6',
+      color: '#dc2626',
       createdAt: new Date().toISOString()
     },
     { 
@@ -70,7 +69,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
       projectId: project.id,
       name: 'Em Andamento', 
       order: 3,
-      color: '#F59E0B',
+      color: '#ea384c',
       createdAt: new Date().toISOString()
     },
     { 
@@ -78,7 +77,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
       projectId: project.id,
       name: 'Revisão', 
       order: 4,
-      color: '#F97316',
+      color: '#f97316',
       createdAt: new Date().toISOString()
     },
     { 
@@ -86,7 +85,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
       projectId: project.id,
       name: 'Concluído', 
       order: 5,
-      color: '#10B981',
+      color: '#10b981',
       createdAt: new Date().toISOString()
     }
   ];
@@ -128,11 +127,11 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'planning': return 'bg-purple-100 text-purple-800';
-      case 'active': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'on_hold': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'planning': return 'bg-purple-100 text-purple-800 border-purple-300';
+      case 'active': return 'bg-red-100 text-red-800 border-red-300';
+      case 'completed': return 'bg-green-100 text-green-800 border-green-300';
+      case 'on_hold': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      default: return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
@@ -171,15 +170,15 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gradient-to-br from-gray-50 to-white min-h-screen">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={onBack}>
+          <Button variant="outline" onClick={onBack} className="border-red-300 text-red-600 hover:bg-red-50">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{project.name}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 font-heading">{project.name}</h1>
             <div className="flex items-center gap-2 mt-1">
               <Badge className={getStatusColor(project.status)}>
                 {getStatusLabel(project.status)}
@@ -190,11 +189,11 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowSettings(true)}>
+          <Button variant="outline" onClick={() => setShowSettings(true)} className="border-gray-300 hover:bg-gray-50">
             <Settings className="h-4 w-4 mr-2" />
             Configurar
           </Button>
-          <Button onClick={() => setShowCreateTask(true)}>
+          <Button onClick={() => setShowCreateTask(true)} className="bg-red-600 hover:bg-red-700 text-white shadow-red-glow">
             <Plus className="h-4 w-4 mr-2" />
             Nova Tarefa
           </Button>
@@ -202,7 +201,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
       </div>
 
       {project.description && (
-        <Card className="mb-6">
+        <Card className="mb-6 border-l-4 border-l-red-600 shadow-card">
           <CardContent className="pt-6">
             <p className="text-gray-700">{project.description}</p>
           </CardContent>
@@ -210,63 +209,26 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-2 bg-white border border-gray-200 shadow-sm">
+          <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
             <Target className="h-4 w-4" />
-            Visão Geral
+            Visão Geral Unificada
           </TabsTrigger>
-          <TabsTrigger value="smart-goals" className="flex items-center gap-2">
-            <Target className="h-4 w-4" />
-            Gerenciar Metas
-          </TabsTrigger>
-          <TabsTrigger value="planning" className="flex items-center gap-2">
-            <LayoutDashboard className="h-4 w-4" />
-            Planejamento Estratégico
-          </TabsTrigger>
-          <TabsTrigger value="kanban" className="flex items-center gap-2">
+          <TabsTrigger value="kanban" className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
             <Kanban className="h-4 w-4" />
             Quadro de Tarefas
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
-          <div className="space-y-6">
-            <EnhancedSmartGoalsDashboard
-              goals={safeSmartGoals}
-              tasks={safeTasks}
-              onUpdateGoal={handleSmartGoalUpdate}
-              onAddGoal={handleAddSmartGoal}
-            />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="smart-goals" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-red-600" />
-                Gerenciar Metas SMART
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <EnhancedSmartGoalsManager
-                projectId={project.id}
-                goals={safeSmartGoals}
-                onAddGoal={async (goal) => {
-                  await projectService.createSmartGoal(goal);
-                  refreshSmartGoals();
-                }}
-                onUpdateGoal={async (id, goal) => {
-                  await projectService.updateSmartGoal(id, goal);
-                  refreshSmartGoals();
-                }}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="planning" className="mt-6">
-          <ProjectPlanningTabs project={project} tasks={safeTasks} />
+          <IntegratedProjectOverview
+            project={project}
+            goals={safeSmartGoals}
+            tasks={safeTasks}
+            onUpdateGoal={handleSmartGoalUpdate}
+            onAddGoal={handleAddSmartGoal}
+            onRefreshGoals={refreshSmartGoals}
+          />
         </TabsContent>
 
         <TabsContent value="kanban" className="mt-6">
@@ -275,6 +237,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
               variant={filter === 'all' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setFilter('all')}
+              className={filter === 'all' ? 'bg-red-600 hover:bg-red-700' : 'border-red-300 text-red-600 hover:bg-red-50'}
             >
               Todas
             </Button>
@@ -282,6 +245,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
               variant={filter === 'high' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setFilter('high')}
+              className={filter === 'high' ? 'bg-red-600 hover:bg-red-700' : 'border-red-300 text-red-600 hover:bg-red-50'}
             >
               Alta Prioridade
             </Button>
@@ -289,6 +253,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
               variant={filter === 'critical' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setFilter('critical')}
+              className={filter === 'critical' ? 'bg-red-600 hover:bg-red-700' : 'border-red-300 text-red-600 hover:bg-red-50'}
             >
               Crítica
             </Button>
@@ -312,7 +277,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
               ))}
             </div>
           ) : (
-            <div className="flex gap-6 overflow-x-auto pb-4 bg-gradient-to-r from-gray-50 to-white p-4 rounded-lg">
+            <div className="flex gap-6 overflow-x-auto pb-4 bg-gradient-to-r from-red-50 via-white to-red-50 p-6 rounded-lg shadow-enhanced border border-red-100">
               {currentStages.map((stage) => (
                 <ProjectKanbanColumn
                   key={stage.id}

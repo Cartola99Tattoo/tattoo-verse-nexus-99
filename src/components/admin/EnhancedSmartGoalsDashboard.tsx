@@ -9,8 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Target, Edit, Calendar, User, TrendingUp, Clock, CheckCircle2, AlertTriangle, Plus } from "lucide-react";
+import { Target, Edit, Calendar, User, TrendingUp, Clock, CheckCircle2, Plus } from "lucide-react";
 import { IProjectSmartGoal, IProjectTask } from "@/services/interfaces/IProjectService";
 import { mockTeamMembers, getTeamMemberById } from "@/data/mockTeamMembers";
 import { toast } from "@/hooks/use-toast";
@@ -83,18 +82,18 @@ const EnhancedSmartGoalsDashboard = ({ goals, tasks, onUpdateGoal, onAddGoal }: 
 
   if (goals.length === 0) {
     return (
-      <Card className="border-2 border-red-200 bg-gradient-to-br from-red-50 to-white">
+      <Card className="border-2 border-red-200 bg-gradient-to-br from-red-50 to-white shadow-tattoo">
         <CardContent className="flex flex-col items-center justify-center py-12">
           <div className="text-center space-y-4">
-            <Target className="h-16 w-16 text-red-600 mx-auto" />
-            <h3 className="text-xl font-bold text-gray-900">
+            <Target className="h-16 w-16 text-red-600 mx-auto animate-pulse" />
+            <h3 className="text-xl font-bold text-gray-900 font-heading">
               Configure as Metas SMART do Projeto
             </h3>
             <p className="text-gray-600 max-w-md">
               As Metas SMART são fundamentais para o sucesso do projeto. Elas orientam estrategicamente 
               todas as ações e garantem resultados mensuráveis.
             </p>
-            <Button onClick={onAddGoal} className="bg-red-600 hover:bg-red-700">
+            <Button onClick={onAddGoal} className="bg-red-600 hover:bg-red-700 text-white shadow-red-glow transform hover:scale-105 transition-all">
               <Plus className="h-4 w-4 mr-2" />
               Criar Primeira Meta SMART
             </Button>
@@ -112,32 +111,32 @@ const EnhancedSmartGoalsDashboard = ({ goals, tasks, onUpdateGoal, onAddGoal }: 
   return (
     <div className="space-y-6">
       {/* Resumo Executivo */}
-      <Card className="border-l-4 border-l-red-600 bg-gradient-to-r from-red-50 to-white">
+      <Card className="border-l-4 border-l-red-600 bg-gradient-to-r from-red-50 via-white to-red-50 shadow-tattoo">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-800">
+          <CardTitle className="flex items-center gap-2 text-red-800 font-heading">
             <Target className="h-6 w-6" />
             Dashboard de Metas SMART - Direcionamento Estratégico
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">{goals.length}</div>
+            <div className="text-center p-4 bg-white rounded-lg shadow-card border border-red-100 hover:shadow-red-glow transition-all">
+              <div className="text-3xl font-bold text-red-600 font-heading">{goals.length}</div>
               <div className="text-sm text-gray-600">Metas Definidas</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">{overallProgress.toFixed(0)}%</div>
+            <div className="text-center p-4 bg-white rounded-lg shadow-card border border-blue-100 hover:shadow-blue-glow transition-all">
+              <div className="text-3xl font-bold text-blue-600 font-heading">{overallProgress.toFixed(0)}%</div>
               <div className="text-sm text-gray-600">Progresso Geral</div>
               <Progress value={overallProgress} className="h-2 mt-2" />
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">
+            <div className="text-center p-4 bg-white rounded-lg shadow-card border border-green-100 hover:shadow-green-glow transition-all">
+              <div className="text-3xl font-bold text-green-600 font-heading">
                 {goals.filter(g => g.progress >= 100).length}
               </div>
               <div className="text-sm text-gray-600">Metas Concluídas</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-orange-600">{urgentGoals}</div>
+            <div className="text-center p-4 bg-white rounded-lg shadow-card border border-orange-100 hover:shadow-card-hover transition-all">
+              <div className="text-3xl font-bold text-orange-600 font-heading">{urgentGoals}</div>
               <div className="text-sm text-gray-600">Prazos Urgentes</div>
             </div>
           </div>
@@ -154,19 +153,19 @@ const EnhancedSmartGoalsDashboard = ({ goals, tasks, onUpdateGoal, onAddGoal }: 
           const deadline = goal.deadline ? formatDeadline(goal.deadline) : null;
           
           return (
-            <Card key={goal.id} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-red-600">
-              <CardHeader className="bg-gradient-to-r from-gray-50 to-white">
+            <Card key={goal.id} className="hover:shadow-tattoo-lg transition-all duration-300 border-l-4 border-l-red-600 bg-gradient-to-br from-white to-red-50 transform hover:scale-102">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-red-50 border-b border-red-100">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     {isEditing ? (
                       <Input
                         value={editValues.title || ''}
                         onChange={(e) => setEditValues({...editValues, title: e.target.value})}
-                        className="font-bold text-lg"
+                        className="font-bold text-lg border-red-200 focus:border-red-400"
                         placeholder="Título da Meta"
                       />
                     ) : (
-                      <CardTitle className="text-lg">{goal.title}</CardTitle>
+                      <CardTitle className="text-lg font-heading">{goal.title}</CardTitle>
                     )}
                     
                     <div className="flex items-center gap-2 mt-2">
@@ -186,6 +185,7 @@ const EnhancedSmartGoalsDashboard = ({ goals, tasks, onUpdateGoal, onAddGoal }: 
                       size="sm"
                       variant="outline"
                       onClick={() => isEditing ? handleSave(goal.id) : handleEdit(goal)}
+                      className="border-red-300 text-red-600 hover:bg-red-50"
                     >
                       {isEditing ? <CheckCircle2 className="h-3 w-3" /> : <Edit className="h-3 w-3" />}
                     </Button>
@@ -203,9 +203,10 @@ const EnhancedSmartGoalsDashboard = ({ goals, tasks, onUpdateGoal, onAddGoal }: 
                         value={editValues.specific || ''}
                         onChange={(e) => setEditValues({...editValues, specific: e.target.value})}
                         placeholder="Descreva especificamente o que será alcançado..."
+                        className="border-red-200 focus:border-red-400"
                       />
                     ) : (
-                      <p className="text-sm text-gray-700 bg-red-50 p-2 rounded border border-red-200">
+                      <p className="text-sm text-gray-700 bg-red-50 p-3 rounded border border-red-200">
                         {goal.specific}
                       </p>
                     )}
@@ -218,9 +219,10 @@ const EnhancedSmartGoalsDashboard = ({ goals, tasks, onUpdateGoal, onAddGoal }: 
                         value={editValues.measurable || ''}
                         onChange={(e) => setEditValues({...editValues, measurable: e.target.value})}
                         placeholder="Como será medido o sucesso..."
+                        className="border-blue-200 focus:border-blue-400"
                       />
                     ) : (
-                      <p className="text-sm text-gray-700 bg-blue-50 p-2 rounded border border-blue-200">
+                      <p className="text-sm text-gray-700 bg-blue-50 p-3 rounded border border-blue-200">
                         {goal.measurable}
                       </p>
                     )}
@@ -234,9 +236,10 @@ const EnhancedSmartGoalsDashboard = ({ goals, tasks, onUpdateGoal, onAddGoal }: 
                           value={editValues.achievable || ''}
                           onChange={(e) => setEditValues({...editValues, achievable: e.target.value})}
                           placeholder="Como é atingível..."
+                          className="border-green-200 focus:border-green-400"
                         />
                       ) : (
-                        <p className="text-sm text-gray-700 bg-green-50 p-2 rounded border border-green-200">
+                        <p className="text-sm text-gray-700 bg-green-50 p-3 rounded border border-green-200">
                           {goal.achievable}
                         </p>
                       )}
@@ -249,9 +252,10 @@ const EnhancedSmartGoalsDashboard = ({ goals, tasks, onUpdateGoal, onAddGoal }: 
                           value={editValues.relevant || ''}
                           onChange={(e) => setEditValues({...editValues, relevant: e.target.value})}
                           placeholder="Por que é relevante..."
+                          className="border-purple-200 focus:border-purple-400"
                         />
                       ) : (
-                        <p className="text-sm text-gray-700 bg-purple-50 p-2 rounded border border-purple-200">
+                        <p className="text-sm text-gray-700 bg-purple-50 p-3 rounded border border-purple-200">
                           {goal.relevant}
                         </p>
                       )}
@@ -265,9 +269,10 @@ const EnhancedSmartGoalsDashboard = ({ goals, tasks, onUpdateGoal, onAddGoal }: 
                         value={editValues.timeBound || ''}
                         onChange={(e) => setEditValues({...editValues, timeBound: e.target.value})}
                         placeholder="Qual o prazo e cronograma..."
+                        className="border-orange-200 focus:border-orange-400"
                       />
                     ) : (
-                      <p className="text-sm text-gray-700 bg-orange-50 p-2 rounded border border-orange-200">
+                      <p className="text-sm text-gray-700 bg-orange-50 p-3 rounded border border-orange-200">
                         {goal.timeBound}
                       </p>
                     )}
@@ -376,9 +381,9 @@ const EnhancedSmartGoalsDashboard = ({ goals, tasks, onUpdateGoal, onAddGoal }: 
       </div>
 
       {/* Botão para Adicionar Nova Meta */}
-      <Card className="border-2 border-dashed border-red-300 hover:border-red-400 transition-colors">
+      <Card className="border-2 border-dashed border-red-300 hover:border-red-400 transition-colors bg-gradient-to-r from-red-50 to-white">
         <CardContent className="flex items-center justify-center py-8">
-          <Button onClick={onAddGoal} variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+          <Button onClick={onAddGoal} variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 shadow-red-glow">
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Nova Meta SMART
           </Button>
