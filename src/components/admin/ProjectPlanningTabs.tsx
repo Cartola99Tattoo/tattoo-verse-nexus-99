@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProjectDashboard from "./ProjectDashboard";
 import ProjectRiskManagement from "./ProjectRiskManagement";
-import SmartGoalsManager from "./SmartGoalsManager";
+import EnhancedSmartGoalsManager from "./EnhancedSmartGoalsManager";
 import BudgetItemForm from "./BudgetItemForm";
 import ImprovementActionForm from "./ImprovementActionForm";
 import ExpansionResourceForm from "./ExpansionResourceForm";
@@ -10,7 +10,7 @@ import SustainabilityActionForm from "./SustainabilityActionForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2, Edit, Target, AlertTriangle } from "lucide-react";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getProjectService } from "@/services/serviceFactory";
 import { 
@@ -19,7 +19,8 @@ import {
   IProjectBudgetItem,
   IProjectImprovementAction,
   IProjectExpansionResource,
-  IProjectSustainabilityAction
+  IProjectSustainabilityAction,
+  IProjectSmartGoal
 } from "@/services/interfaces/IProjectService";
 import { toast } from "@/hooks/use-toast";
 
@@ -29,7 +30,7 @@ interface ProjectPlanningTabsProps {
 }
 
 const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("goals");
   const [showBudgetForm, setShowBudgetForm] = useState(false);
   const [showImprovementForm, setShowImprovementForm] = useState(false);
   const [showExpansionForm, setShowExpansionForm] = useState(false);
@@ -59,11 +60,52 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
     [project.id]
   );
 
+  const { data: smartGoalsData = [], refresh: refreshSmartGoals } = useDataQuery<IProjectSmartGoal[]>(
+    () => projectService.fetchProjectSmartGoals(project.id),
+    [project.id]
+  );
+
   // Ensure arrays are never null
   const budgetItems = Array.isArray(budgetData) ? budgetData : [];
   const improvementActions = Array.isArray(improvementData) ? improvementData : [];
   const expansionResources = Array.isArray(expansionData) ? expansionData : [];
   const sustainabilityActions = Array.isArray(sustainabilityData) ? sustainabilityData : [];
+  const smartGoals = Array.isArray(smartGoalsData) ? smartGoalsData : [];
+
+  // Handlers para Metas SMART
+  const handleAddSmartGoal = async (goal: Omit<IProjectSmartGoal, 'id' | 'createdAt'>) => {
+    try {
+      await projectService.createSmartGoal(goal);
+      refreshSmartGoals();
+      toast({
+        title: "Meta criada",
+        description: "Meta SMART criada com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao criar meta SMART.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateSmartGoal = async (id: string, goal: Partial<IProjectSmartGoal>) => {
+    try {
+      await projectService.updateSmartGoal(id, goal);
+      refreshSmartGoals();
+      toast({
+        title: "Meta atualizada",
+        description: "Meta SMART atualizada com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar meta SMART.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Handlers para adicionar itens
   const handleAddBudgetItem = async (item: Omit<IProjectBudgetItem, 'id' | 'createdAt'>) => {
@@ -163,32 +205,61 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
     return labels[status] || status;
   };
 
-  // Mock goals for SmartGoalsManager
-  const mockSmartGoals = [
-    {
-      id: '1',
-      specific: 'Aumentar a participação no Flash Day em 50%',
-      measurable: { metric: 'Número de participantes', current: 30, target: 45, unit: 'pessoas' },
-      achievable: 'Com melhor divulgação nas redes sociais e parcerias estratégicas',
-      relevant: 'Aumentar o faturamento e expandir a base de clientes',
-      timeBound: { startDate: '2024-01-15', endDate: '2024-02-15' },
-      status: 'in_progress' as const,
-      progress: 65
-    }
-  ];
+  // Verificar se há tarefas sem associação SMART
+  const tasksWithoutSmartGoal = (tasks || []).filter(task => !task.smartGoalAssociation);
 
   return (
     <div className="space-y-6">
+      {smartGoals.length === 0 && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-amber-700">
+              <AlertTriangle className="h-5 w-5" />
+              <p className="font-medium">
+                Defina as Metas SMART primeiro para orientar estrategicamente todas as tarefas do projeto.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="goals" className="flex items-center gap-1">
+            <Target className="h-4 w-4" />
+            Metas SMART
+          </TabsTrigger>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="budget">Orçamento</TabsTrigger>
           <TabsTrigger value="risks">Riscos</TabsTrigger>
           <TabsTrigger value="improvements">Melhorias</TabsTrigger>
           <TabsTrigger value="expansion">Expansão</TabsTrigger>
           <TabsTrigger value="sustainability">Sustentabilidade</TabsTrigger>
-          <TabsTrigger value="goals">Metas SMART</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="goals" className="space-y-4">
+          <EnhancedSmartGoalsManager
+            projectId={project.id}
+            goals={smartGoals}
+            onAddGoal={handleAddSmartGoal}
+            onUpdateGoal={handleUpdateSmartGoal}
+          />
+          
+          {tasksWithoutSmartGoal.length > 0 && smartGoals.length > 0 && (
+            <Card className="border-amber-200 bg-amber-50">
+              <CardHeader>
+                <CardTitle className="text-amber-800 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Tarefas sem Associação SMART
+                </CardTitle>
+                <CardDescription className="text-amber-700">
+                  {tasksWithoutSmartGoal.length} tarefa(s) não estão associadas a nenhuma Meta SMART.
+                  Considere associá-las para melhor direcionamento estratégico.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          )}
+        </TabsContent>
 
         <TabsContent value="dashboard" className="space-y-4">
           <ProjectDashboard project={project} tasks={tasks || []} />
@@ -406,15 +477,6 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="goals" className="space-y-4">
-          <SmartGoalsManager
-            projectId={project.id}
-            goals={mockSmartGoals}
-            onAddGoal={() => {}}
-            onUpdateGoal={() => {}}
-          />
         </TabsContent>
       </Tabs>
 

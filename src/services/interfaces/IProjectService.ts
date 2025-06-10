@@ -1,4 +1,3 @@
-
 import { CRUDOperations } from '../base/BaseService';
 
 export interface IProject {
@@ -79,13 +78,15 @@ export interface IProjectTask {
   title: string;
   description?: string;
   status: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  priority: 'low' | 'medium' | 'high' | 'critical';
   assignedTo?: string;
   dueDate?: string;
   createdAt: string;
   updatedAt: string;
   order: number;
   storyPoints?: number;
+  estimatedHours?: number;
+  smartGoalAssociation?: 'specific' | 'measurable' | 'achievable' | 'relevant' | 'timeBound';
 }
 
 export interface IKanbanStage {
@@ -156,7 +157,11 @@ export interface IProjectSmartGoal {
   id: string;
   projectId: string;
   title: string;
-  metric: string;
+  specific: string;
+  measurable: string;
+  achievable: string;
+  relevant: string;
+  timeBound: string;
   deadline?: string;
   responsible?: string;
   progress: number;

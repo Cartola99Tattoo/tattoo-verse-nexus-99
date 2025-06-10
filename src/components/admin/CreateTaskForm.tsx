@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Target } from "lucide-react";
 import { getProjectService } from "@/services/serviceFactory";
-import { IProject, IKanbanStage } from "@/services/interfaces/IProjectService";
+import { IProject, IKanbanStage, IProjectSmartGoal } from "@/services/interfaces/IProjectService";
 import { toast } from "@/hooks/use-toast";
+import { useDataQuery } from "@/hooks/useDataQuery";
 
 interface CreateTaskFormProps {
   project: IProject;
@@ -26,10 +27,28 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
     priority: 'medium' as const,
     assignedTo: '',
     dueDate: '',
-    order: 0
+    order: 0,
+    estimatedHours: 0,
+    smartGoalAssociation: '' as any
   });
   const [loading, setLoading] = useState(false);
   const projectService = getProjectService();
+
+  // Buscar metas SMART do projeto
+  const { data: smartGoals = [] } = useDataQuery<IProjectSmartGoal[]>(
+    () => projectService.fetchProjectSmartGoals(project.id),
+    [project.id]
+  );
+
+  // Mock data para responsáveis (tatuadores)
+  const mockResponsaveis = [
+    'Marcus Silva - Tatuador Sênior',
+    'Ana Costa - Tatuadora Especialista',
+    'João Santos - Tatuador Júnior',
+    'Maria Oliveira - Tatuadora Realismo',
+    'Pedro Lima - Tatuador Tradicional',
+    'Carla Souza - Tatuadora Fine Line'
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,11 +61,19 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
       return;
     }
 
+    if (smartGoals.length > 0 && !formData.smartGoalAssociation) {
+      toast({
+        title: "Atenção",
+        description: "Recomendamos associar esta tarefa a uma Meta SMART para melhor direcionamento estratégico.",
+      });
+    }
+
     setLoading(true);
     try {
       await projectService.createTask({
         ...formData,
-        projectId: project.id
+        projectId: project.id,
+        smartGoalAssociation: formData.smartGoalAssociation || undefined
       });
       toast({
         title: "Sucesso",
@@ -68,6 +95,27 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'text-red-600';
+      case 'high': return 'text-orange-600';
+      case 'medium': return 'text-yellow-600';
+      case 'low': return 'text-green-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const getSmartGoalTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      'specific': 'Específica (Specific)',
+      'measurable': 'Mensurável (Measurable)', 
+      'achievable': 'Atingível (Achievable)',
+      'relevant': 'Relevante (Relevant)',
+      'timeBound': 'Temporal (Time-bound)'
+    };
+    return labels[type] || type;
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center gap-4 mb-6">
@@ -81,11 +129,11 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
         </div>
       </div>
 
-      <Card className="max-w-2xl">
+      <Card className="max-w-4xl">
         <CardHeader>
           <CardTitle>Detalhes da Tarefa</CardTitle>
           <CardDescription>
-            Preencha as informações da nova tarefa
+            Preencha as informações detalhadas da nova tarefa. Associe-a a uma Meta SMART para direcionamento estratégico.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -94,7 +142,7 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
               <Label htmlFor="title">Título da Tarefa *</Label>
               <Input
                 id="title"
-                placeholder="Ex: Criar designs flash"
+                placeholder="Ex: Criar 10 designs flash para evento"
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 required
@@ -102,17 +150,45 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
+              <Label htmlFor="description">Descrição Detalhada</Label>
               <Textarea
                 id="description"
-                placeholder="Descreva os detalhes da tarefa..."
+                placeholder="Descreva os detalhes da tarefa, objetivos específicos, materiais necessários, etc..."
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 rows={4}
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {smartGoals.length > 0 && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Target className="h-4 w-4 text-red-600" />
+                  Associação à Meta SMART *
+                </Label>
+                <Select
+                  value={formData.smartGoalAssociation}
+                  onValueChange={(value) => handleInputChange('smartGoalAssociation', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione qual meta esta tarefa ajuda a atingir" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Nenhuma associação</SelectItem>
+                    <SelectItem value="specific">Específica (Specific)</SelectItem>
+                    <SelectItem value="measurable">Mensurável (Measurable)</SelectItem>
+                    <SelectItem value="achievable">Atingível (Achievable)</SelectItem>
+                    <SelectItem value="relevant">Relevante (Relevant)</SelectItem>
+                    <SelectItem value="timeBound">Temporal (Time-bound)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500">
+                  Escolha qual critério SMART esta tarefa contribui mais diretamente para alcançar.
+                </p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label>Etapa Inicial</Label>
                 <Select
@@ -133,7 +209,7 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
               </div>
 
               <div className="space-y-2">
-                <Label>Prioridade</Label>
+                <Label>Prioridade *</Label>
                 <Select
                   value={formData.priority}
                   onValueChange={(value) => handleInputChange('priority', value)}
@@ -142,35 +218,70 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Baixa</SelectItem>
-                    <SelectItem value="medium">Média</SelectItem>
-                    <SelectItem value="high">Alta</SelectItem>
-                    <SelectItem value="urgent">Urgente</SelectItem>
+                    <SelectItem value="low">
+                      <span className={getPriorityColor('low')}>Baixa</span>
+                    </SelectItem>
+                    <SelectItem value="medium">
+                      <span className={getPriorityColor('medium')}>Média</span>
+                    </SelectItem>
+                    <SelectItem value="high">
+                      <span className={getPriorityColor('high')}>Alta</span>
+                    </SelectItem>
+                    <SelectItem value="critical">
+                      <span className={getPriorityColor('critical')}>Crítica</span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="assignedTo">Responsável</Label>
-                <Input
-                  id="assignedTo"
-                  placeholder="Nome do responsável"
+                <Label htmlFor="assignedTo">Responsável *</Label>
+                <Select
                   value={formData.assignedTo}
-                  onChange={(e) => handleInputChange('assignedTo', e.target.value)}
-                />
+                  onValueChange={(value) => handleInputChange('assignedTo', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um responsável" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockResponsaveis.map((responsavel) => (
+                      <SelectItem key={responsavel} value={responsavel}>
+                        {responsavel}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dueDate">Data de Vencimento</Label>
+                <Label htmlFor="dueDate">Data de Vencimento *</Label>
                 <Input
                   id="dueDate"
                   type="date"
                   value={formData.dueDate}
                   onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                  required
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="estimatedHours">Tempo Estimado (horas) *</Label>
+              <Input
+                id="estimatedHours"
+                type="number"
+                min="0.5"
+                step="0.5"
+                placeholder="Ex: 8"
+                value={formData.estimatedHours}
+                onChange={(e) => handleInputChange('estimatedHours', parseFloat(e.target.value) || 0)}
+                required
+              />
+              <p className="text-xs text-gray-500">
+                Tempo médio estimado para completar esta tarefa (em horas).
+              </p>
             </div>
 
             <div className="flex gap-3 pt-6">
