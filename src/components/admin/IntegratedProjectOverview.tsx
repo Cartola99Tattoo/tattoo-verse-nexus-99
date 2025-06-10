@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,7 @@ import {
   Calendar,
   BarChart3
 } from "lucide-react";
-import { IProject, IProjectTask, IProjectSmartGoal } from "@/services/interfaces/IProjectService";
+import { IProject, IProjectTask, IProjectSmartGoal, IEnhancedSmartGoal } from "@/services/interfaces/IProjectService";
 import EnhancedSmartGoalsDashboard from "@/components/admin/EnhancedSmartGoalsDashboard";
 import EnhancedSmartGoalsManager from "@/components/admin/EnhancedSmartGoalsManager";
 import BudgetItemForm from "@/components/admin/BudgetItemForm";
@@ -60,6 +59,15 @@ const IntegratedProjectOverview = ({
   const urgentGoals = goals.filter(goal => 
     goal.deadline && new Date(goal.deadline) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   ).length;
+
+  // Convert IProjectSmartGoal to IEnhancedSmartGoal for compatibility
+  const enhancedGoals: IEnhancedSmartGoal[] = goals.map(goal => ({
+    ...goal,
+    currentMetric: 0, // Default value - can be enhanced later
+    targetMetric: 100, // Default value - can be enhanced later
+    projectId: project.id,
+    createdAt: new Date().toISOString()
+  }));
 
   const getProjectMetrics = () => {
     const totalTasks = tasks.length;
@@ -235,10 +243,15 @@ const IntegratedProjectOverview = ({
         {activeSection === 'smart-goals' && (
           <div className="space-y-6">
             <EnhancedSmartGoalsDashboard
-              goals={goals}
+              project={project}
+              goals={enhancedGoals}
               tasks={tasks}
-              onUpdateGoal={onUpdateGoal}
-              onAddGoal={onAddGoal}
+              onUpdateGoal={(goalId, updates) => {
+                // Convert back to IProjectSmartGoal format
+                const { currentMetric, targetMetric, projectId, createdAt, ...smartGoalUpdates } = updates;
+                onUpdateGoal(goalId, smartGoalUpdates);
+              }}
+              onRefreshGoals={onRefreshGoals}
             />
             
             <Card className="border-dashed border-2 border-red-300 bg-gradient-to-r from-red-50 to-white">
