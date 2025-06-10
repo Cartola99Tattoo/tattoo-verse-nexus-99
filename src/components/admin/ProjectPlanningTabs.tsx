@@ -1,23 +1,28 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProjectDashboard from "./ProjectDashboard";
 import ProjectRiskManagement from "./ProjectRiskManagement";
+import SmartGoalsManager from "./SmartGoalsManager";
+import BudgetItemForm from "./BudgetItemForm";
+import ImprovementActionForm from "./ImprovementActionForm";
+import ExpansionResourceForm from "./ExpansionResourceForm";
+import SustainabilityActionForm from "./SustainabilityActionForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Plus, Trash2, Edit } from "lucide-react";
+import { useDataQuery } from "@/hooks/useDataQuery";
+import { getProjectService } from "@/services/serviceFactory";
 import { 
-  DollarSign, 
-  TrendingUp, 
-  Target, 
-  Users, 
-  Calendar,
-  Plus,
-  CheckCircle2,
-  Clock,
-  AlertCircle
-} from "lucide-react";
-import { IProject, IProjectTask } from "@/services/interfaces/IProjectService";
+  IProject, 
+  IProjectTask, 
+  IProjectBudgetItem,
+  IProjectImprovementAction,
+  IProjectExpansionResource,
+  IProjectSustainabilityAction
+} from "@/services/interfaces/IProjectService";
+import { toast } from "@/hooks/use-toast";
 
 interface ProjectPlanningTabsProps {
   project: IProject;
@@ -26,58 +31,103 @@ interface ProjectPlanningTabsProps {
 
 const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [showBudgetForm, setShowBudgetForm] = useState(false);
+  const [showImprovementForm, setShowImprovementForm] = useState(false);
+  const [showExpansionForm, setShowExpansionForm] = useState(false);
+  const [showSustainabilityForm, setShowSustainabilityForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  
+  const projectService = getProjectService();
 
-  const completedTasks = tasks.filter(task => task.status === 'completed').length;
-  const progressPercentage = tasks.length > 0 ? (completedTasks / tasks.length) * 100 : 0;
+  // Queries para as diferentes seções
+  const { data: budgetItems = [], refresh: refreshBudget } = useDataQuery<IProjectBudgetItem[]>(
+    () => projectService.fetchProjectBudgetItems(project.id),
+    [project.id]
+  );
 
-  const mockBudgetItems = [
-    { id: '1', description: 'Material de divulgação', estimated: 500, real: 450, status: 'paid' },
-    { id: '2', description: 'Equipamentos extras', estimated: 1200, real: 0, status: 'pending' },
-    { id: '3', description: 'Coffee break para equipe', estimated: 300, real: 280, status: 'paid' }
-  ];
+  const { data: improvementActions = [], refresh: refreshImprovements } = useDataQuery<IProjectImprovementAction[]>(
+    () => projectService.fetchProjectImprovementActions(project.id),
+    [project.id]
+  );
 
-  const mockImprovementActions = [
-    { id: '1', title: 'Otimizar processo de agendamento', responsible: 'João Silva', priority: 'high', status: 'in_progress' },
-    { id: '2', title: 'Criar checklist de materiais', responsible: 'Maria Santos', priority: 'medium', status: 'completed' },
-    { id: '3', title: 'Implementar sistema de feedback', responsible: 'Pedro Costa', priority: 'low', status: 'pending' }
-  ];
+  const { data: expansionResources = [], refresh: refreshExpansion } = useDataQuery<IProjectExpansionResource[]>(
+    () => projectService.fetchProjectExpansionResources(project.id),
+    [project.id]
+  );
 
-  const mockExpansionResources = [
-    { id: '1', resource: 'Mais 2 tatuadores', justification: 'Aumentar capacidade de atendimento', cost: 8000, status: 'planning' },
-    { id: '2', resource: 'Sistema de som profissional', justification: 'Melhorar ambiente', cost: 1500, status: 'approved' },
-    { id: '3', resource: 'Espaço adicional', justification: 'Comportar mais clientes', cost: 5000, status: 'researching' }
-  ];
+  const { data: sustainabilityActions = [], refresh: refreshSustainability } = useDataQuery<IProjectSustainabilityAction[]>(
+    () => projectService.fetchProjectSustainabilityActions(project.id),
+    [project.id]
+  );
 
-  const mockSustainabilityActions = [
-    { id: '1', title: 'Cronograma de posts pós-evento', responsible: 'Social Media', deadline: '2024-02-20', status: 'pending' },
-    { id: '2', title: 'E-mail de agradecimento', responsible: 'Marketing', deadline: '2024-02-16', status: 'completed' },
-    { id: '3', title: 'Coleta de feedback dos clientes', responsible: 'Atendimento', deadline: '2024-02-18', status: 'in_progress' }
-  ];
-
-  const mockCategoryGoals = [
-    { id: '1', category: 'Marketing', title: 'Alcançar 1000 seguidores', responsible: 'Maria', deadline: '2024-03-01', status: 'in_progress' },
-    { id: '2', category: 'Vendas', title: 'Realizar 50 tatuagens flash', responsible: 'Equipe', deadline: '2024-02-15', status: 'achieved' },
-    { id: '3', category: 'Operacional', title: 'Zero reclamações de qualidade', responsible: 'Todos', deadline: '2024-02-15', status: 'achieved' }
-  ];
-
-  const mockSmartGoals = [
-    { 
-      id: '1', 
-      title: 'Aumentar faturamento do Flash Day em 30%', 
-      metric: 'R$ 15.000 vs R$ 12.000 anterior', 
-      deadline: '2024-02-15', 
-      responsible: 'Gerente', 
-      progress: 85 
-    },
-    { 
-      id: '2', 
-      title: 'Reduzir tempo de espera para 15min máximo', 
-      metric: 'Tempo médio de espera', 
-      deadline: '2024-02-15', 
-      responsible: 'Atendimento', 
-      progress: 60 
+  // Handlers para adicionar itens
+  const handleAddBudgetItem = async (item: Omit<IProjectBudgetItem, 'id' | 'createdAt'>) => {
+    try {
+      await projectService.createBudgetItem(item);
+      refreshBudget();
+      toast({
+        title: "Item adicionado",
+        description: "Item de orçamento adicionado com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar item de orçamento.",
+        variant: "destructive"
+      });
     }
-  ];
+  };
+
+  const handleAddImprovementAction = async (action: Omit<IProjectImprovementAction, 'id' | 'createdAt'>) => {
+    try {
+      await projectService.createImprovementAction(action);
+      refreshImprovements();
+      toast({
+        title: "Ação adicionada",
+        description: "Ação de melhoria adicionada com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar ação de melhoria.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAddExpansionResource = async (resource: Omit<IProjectExpansionResource, 'id' | 'createdAt'>) => {
+    try {
+      await projectService.createExpansionResource(resource);
+      refreshExpansion();
+      toast({
+        title: "Recurso adicionado",
+        description: "Recurso de expansão adicionado com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar recurso de expansão.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAddSustainabilityAction = async (action: Omit<IProjectSustainabilityAction, 'id' | 'createdAt'>) => {
+    try {
+      await projectService.createSustainabilityAction(action);
+      refreshSustainability();
+      toast({
+        title: "Ação adicionada",
+        description: "Ação de sustentabilidade adicionada com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar ação de sustentabilidade.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -92,6 +142,35 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      'completed': 'Concluída',
+      'paid': 'Pago',
+      'pending': 'Pendente',
+      'in_progress': 'Em Andamento',
+      'planning': 'Planejamento',
+      'approved': 'Aprovado',
+      'researching': 'Pesquisando',
+      'acquired': 'Adquirido',
+      'estimated': 'Estimado'
+    };
+    return labels[status] || status;
+  };
+
+  // Mock goals for SmartGoalsManager
+  const mockSmartGoals = [
+    {
+      id: '1',
+      specific: 'Aumentar a participação no Flash Day em 50%',
+      measurable: { metric: 'Número de participantes', current: 30, target: 45, unit: 'pessoas' },
+      achievable: 'Com melhor divulgação nas redes sociais e parcerias estratégicas',
+      relevant: 'Aumentar o faturamento e expandir a base de clientes',
+      timeBound: { startDate: '2024-01-15', endDate: '2024-02-15' },
+      status: 'in_progress' as const,
+      progress: 65
+    }
+  ];
 
   return (
     <div className="space-y-6">
@@ -121,42 +200,54 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
                 <CardTitle>Orçamento do Projeto</CardTitle>
                 <CardDescription>Controle de custos estimados e reais por categoria</CardDescription>
               </div>
-              <Button>
+              <Button onClick={() => setShowBudgetForm(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar Item
               </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockBudgetItems.map((item) => (
+                {budgetItems.map((item) => (
                   <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
                       <h4 className="font-medium">{item.description}</h4>
                       <div className="flex gap-4 text-sm text-gray-600 mt-1">
-                        <span>Categoria: Marketing</span>
-                        <span>Estimado: R$ {item.estimated}</span>
-                        <span>Real: R$ {item.real}</span>
+                        <span>Estimado: R$ {item.estimatedCost}</span>
+                        <span>Real: R$ {item.realCost}</span>
                       </div>
                     </div>
-                    <Badge className={getStatusColor(item.status)}>
-                      {item.status === 'paid' ? 'Pago' : 'Pendente'}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getStatusColor(item.status)}>
+                        {getStatusLabel(item.status)}
+                      </Badge>
+                      <Button size="sm" variant="outline" onClick={() => {
+                        setEditingItem(item);
+                        setShowBudgetForm(true);
+                      }}>
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
-                <div className="border-t pt-4 space-y-2">
-                  <div className="flex justify-between font-medium">
-                    <span>Total Estimado:</span>
-                    <span>R$ {mockBudgetItems.reduce((sum, item) => sum + item.estimated, 0)}</span>
+                
+                {budgetItems.length > 0 && (
+                  <div className="border-t pt-4 space-y-2">
+                    <div className="flex justify-between font-medium">
+                      <span>Total Estimado:</span>
+                      <span>R$ {budgetItems.reduce((sum, item) => sum + item.estimatedCost, 0)}</span>
+                    </div>
+                    <div className="flex justify-between font-medium text-green-600">
+                      <span>Total Real:</span>
+                      <span>R$ {budgetItems.reduce((sum, item) => sum + item.realCost, 0)}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between font-medium text-green-600">
-                    <span>Total Real:</span>
-                    <span>R$ {mockBudgetItems.reduce((sum, item) => sum + item.real, 0)}</span>
+                )}
+                
+                {budgetItems.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    Nenhum item de orçamento adicionado ainda.
                   </div>
-                  <div className="flex justify-between font-medium text-blue-600">
-                    <span>Disponível:</span>
-                    <span>R$ {mockBudgetItems.reduce((sum, item) => sum + item.estimated, 0) - mockBudgetItems.reduce((sum, item) => sum + item.real, 0)}</span>
-                  </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -167,34 +258,47 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Ações de Otimização</CardTitle>
-                <CardDescription>Melhorias nos processos e execução com alocação de recursos</CardDescription>
+                <CardDescription>Melhorias nos processos e execução</CardDescription>
               </div>
-              <Button>
+              <Button onClick={() => setShowImprovementForm(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Ação
               </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockImprovementActions.map((action) => (
+                {improvementActions.map((action) => (
                   <div key={action.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
                       <h4 className="font-medium">{action.title}</h4>
-                      <div className="flex gap-4 text-sm text-gray-600 mt-1">
-                        <span>Responsável: {action.responsible}</span>
+                      {action.description && (
+                        <p className="text-sm text-gray-600 mt-1">{action.description}</p>
+                      )}
+                      <div className="flex gap-4 text-sm text-gray-600 mt-2">
+                        {action.responsible && <span>Responsável: {action.responsible}</span>}
                         <span>Prioridade: {action.priority === 'high' ? 'Alta' : action.priority === 'medium' ? 'Média' : 'Baixa'}</span>
-                        <span>Recursos: Equipamento XYZ</span>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Critério de Qualidade: Reduzir tempo de espera em 50%
+                        {action.dueDate && <span>Prazo: {new Date(action.dueDate).toLocaleDateString('pt-BR')}</span>}
                       </div>
                     </div>
-                    <Badge className={getStatusColor(action.status)}>
-                      {action.status === 'completed' ? 'Concluída' : 
-                       action.status === 'in_progress' ? 'Em Andamento' : 'Pendente'}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getStatusColor(action.status)}>
+                        {getStatusLabel(action.status)}
+                      </Badge>
+                      <Button size="sm" variant="outline" onClick={() => {
+                        setEditingItem(action);
+                        setShowImprovementForm(true);
+                      }}>
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
+                
+                {improvementActions.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    Nenhuma ação de melhoria adicionada ainda.
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -205,34 +309,45 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Recursos para Expansão</CardTitle>
-                <CardDescription>Planejamento de crescimento com verificação de disponibilidade</CardDescription>
+                <CardDescription>Planejamento de crescimento</CardDescription>
               </div>
-              <Button>
+              <Button onClick={() => setShowExpansionForm(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Recurso
               </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockExpansionResources.map((resource) => (
+                {expansionResources.map((resource) => (
                   <div key={resource.id} className="p-4 border rounded-lg">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h4 className="font-medium">{resource.resource}</h4>
                         <p className="text-sm text-gray-600 mt-1">{resource.justification}</p>
-                        <div className="text-sm text-gray-600 mt-2 space-y-1">
-                          <div>Custo Estimado: R$ {resource.cost}</div>
-                          <div>Disponibilidade: {resource.resource.includes('tatuador') ? 'Verificar agenda' : 'Em estoque'}</div>
-                          <div>Impacto: Aumento de 30% na capacidade</div>
+                        <div className="text-sm text-gray-600 mt-2">
+                          <div>Custo Estimado: R$ {resource.estimatedCost}</div>
                         </div>
                       </div>
-                      <Badge className={getStatusColor(resource.status)}>
-                        {resource.status === 'approved' ? 'Aprovado' : 
-                         resource.status === 'planning' ? 'Planejamento' : 'Pesquisando'}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getStatusColor(resource.status)}>
+                          {getStatusLabel(resource.status)}
+                        </Badge>
+                        <Button size="sm" variant="outline" onClick={() => {
+                          setEditingItem(resource);
+                          setShowExpansionForm(true);
+                        }}>
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
+                
+                {expansionResources.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    Nenhum recurso de expansão adicionado ainda.
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -243,111 +358,105 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Sustentabilidade e Relacionamento</CardTitle>
-                <CardDescription>Ações para manutenção a longo prazo e integração com CRM</CardDescription>
+                <CardDescription>Ações para manutenção a longo prazo</CardDescription>
               </div>
-              <Button>
+              <Button onClick={() => setShowSustainabilityForm(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Ação
               </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockSustainabilityActions.map((action) => (
+                {sustainabilityActions.map((action) => (
                   <div key={action.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
                       <h4 className="font-medium">{action.title}</h4>
-                      <div className="flex gap-4 text-sm text-gray-600 mt-1">
-                        <span>Responsável: {action.responsible}</span>
-                        <span>Prazo: {new Date(action.deadline).toLocaleDateString('pt-BR')}</span>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Integração: {action.title.includes('post') ? 'Redes Sociais' : 
-                                    action.title.includes('email') ? 'CRM/Email Marketing' : 'Sistema de Feedback'}
+                      {action.description && (
+                        <p className="text-sm text-gray-600 mt-1">{action.description}</p>
+                      )}
+                      <div className="flex gap-4 text-sm text-gray-600 mt-2">
+                        {action.responsible && <span>Responsável: {action.responsible}</span>}
+                        {action.deadline && <span>Prazo: {new Date(action.deadline).toLocaleDateString('pt-BR')}</span>}
                       </div>
                     </div>
-                    <Badge className={getStatusColor(action.status)}>
-                      {action.status === 'completed' ? 'Concluída' : 
-                       action.status === 'in_progress' ? 'Em Andamento' : 'Pendente'}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getStatusColor(action.status)}>
+                        {getStatusLabel(action.status)}
+                      </Badge>
+                      <Button size="sm" variant="outline" onClick={() => {
+                        setEditingItem(action);
+                        setShowSustainabilityForm(true);
+                      }}>
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
+                
+                {sustainabilityActions.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    Nenhuma ação de sustentabilidade adicionada ainda.
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="goals" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Metas por Categoria</CardTitle>
-                <CardDescription>Objetivos específicos por área com marcos</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mockCategoryGoals.map((goal) => (
-                    <div key={goal.id} className="p-3 border rounded-lg">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="text-xs">
-                              {goal.category}
-                            </Badge>
-                            <Badge className={getStatusColor(goal.status)}>
-                              {goal.status === 'achieved' ? 'Alcançada' : 'Em Andamento'}
-                            </Badge>
-                          </div>
-                          <h5 className="font-medium text-sm">{goal.title}</h5>
-                          <div className="text-xs text-gray-600 mt-1">
-                            <span>Responsável: {goal.responsible}</span>
-                            <span className="ml-3">Prazo: {new Date(goal.deadline).toLocaleDateString('pt-BR')}</span>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            Marco: {goal.category === 'Marketing' ? '500 seguidores alcançados' : 
-                                    goal.category === 'Vendas' ? '25 tatuagens concluídas' : 'Zero incidentes registrados'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Metas SMART Interativas</CardTitle>
-                <CardDescription>Objetivos específicos e mensuráveis com KPIs</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mockSmartGoals.map((goal) => (
-                    <div key={goal.id} className="p-3 border rounded-lg">
-                      <h5 className="font-medium text-sm mb-2">{goal.title}</h5>
-                      <div className="text-xs text-gray-600 mb-2">
-                        <div>Métrica: {goal.metric}</div>
-                        <div>Responsável: {goal.responsible}</div>
-                        <div>Prazo: {new Date(goal.deadline).toLocaleDateString('pt-BR')}</div>
-                        <div>Status: {goal.progress >= 100 ? 'Concluída' : goal.progress >= 80 ? 'Quase lá' : 'Em andamento'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span>Progresso</span>
-                          <span>{goal.progress}%</span>
-                        </div>
-                        <Progress value={goal.progress} className="h-2" />
-                        <div className="text-xs text-gray-500">
-                          KPI Atual: {goal.progress >= 85 ? 'R$ 12.750' : 'R$ 10.200'} de faturamento
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <SmartGoalsManager
+            projectId={project.id}
+            goals={mockSmartGoals}
+            onAddGoal={() => {}}
+            onUpdateGoal={() => {}}
+          />
         </TabsContent>
       </Tabs>
+
+      {/* Formulários */}
+      <BudgetItemForm
+        open={showBudgetForm}
+        onOpenChange={(open) => {
+          setShowBudgetForm(open);
+          if (!open) setEditingItem(null);
+        }}
+        onSubmit={handleAddBudgetItem}
+        projectId={project.id}
+        editItem={editingItem}
+      />
+
+      <ImprovementActionForm
+        open={showImprovementForm}
+        onOpenChange={(open) => {
+          setShowImprovementForm(open);
+          if (!open) setEditingItem(null);
+        }}
+        onSubmit={handleAddImprovementAction}
+        projectId={project.id}
+        editAction={editingItem}
+      />
+
+      <ExpansionResourceForm
+        open={showExpansionForm}
+        onOpenChange={(open) => {
+          setShowExpansionForm(open);
+          if (!open) setEditingItem(null);
+        }}
+        onSubmit={handleAddExpansionResource}
+        projectId={project.id}
+        editResource={editingItem}
+      />
+
+      <SustainabilityActionForm
+        open={showSustainabilityForm}
+        onOpenChange={(open) => {
+          setShowSustainabilityForm(open);
+          if (!open) setEditingItem(null);
+        }}
+        onSubmit={handleAddSustainabilityAction}
+        projectId={project.id}
+        editAction={editingItem}
+      />
     </div>
   );
 };
