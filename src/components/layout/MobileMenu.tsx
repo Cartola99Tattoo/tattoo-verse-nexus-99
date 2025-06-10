@@ -59,6 +59,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
           Eventos
         </Link>
         <Link 
+          to="/tatuagem-em-eventos" 
+          className="text-white hover:text-red-300 hover:bg-red-600/20 transition-all duration-300 py-2 px-3 rounded-md"
+          onClick={onClose}
+        >
+          Eventos Customizados
+        </Link>
+        <Link 
           to="/contact" 
           className="text-white hover:text-red-300 hover:bg-red-600/20 transition-all duration-300 py-2 px-3 rounded-md"
           onClick={onClose}

@@ -127,6 +127,19 @@ const Header = () => {
               )}
             </Link>
             <Link 
+              to="/tatuagem-em-eventos" 
+              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
+                isActiveRoute('/tatuagem-em-eventos') 
+                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
+                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
+              }`}
+            >
+              Eventos Customizados
+              {isActiveRoute('/tatuagem-em-eventos') && (
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
+              )}
+            </Link>
+            <Link 
               to="/contact" 
               className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
                 isActiveRoute('/contact') 

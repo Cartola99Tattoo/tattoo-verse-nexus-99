@@ -14,6 +14,7 @@ const ArtistDetail = lazy(() => import('./pages/ArtistDetail'));
 const Shop = lazy(() => import('./pages/Shop'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Events = lazy(() => import('./pages/Events'));
+const TattooEvents = lazy(() => import('./pages/TattooEvents'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Auth = lazy(() => import('./pages/Auth'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
@@ -55,6 +56,7 @@ function App() {
         <Route path="/shop" element={<Layout><LazyLoader><Shop /></LazyLoader></Layout>} />
         <Route path="/shop/:id" element={<Layout><LazyLoader><ProductDetail /></LazyLoader></Layout>} />
         <Route path="/events" element={<Layout><LazyLoader><Events /></LazyLoader></Layout>} />
+        <Route path="/tatuagem-em-eventos" element={<Layout><LazyLoader><TattooEvents /></LazyLoader></Layout>} />
         <Route path="/contact" element={<Layout><LazyLoader><Contact /></LazyLoader></Layout>} />
         <Route path="/consultoria" element={<Layout><LazyLoader><TattooConsultancy /></LazyLoader></Layout>} />
         <Route path="/auth" element={<Layout><LazyLoader><Auth /></LazyLoader></Layout>} />
