@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { IClientService, Client, ClientInteraction, ClientStats, KanbanStage, Appointment } from '../interfaces/IClientService';
+import { IClientService, Client, ClientInteraction, ClientStats, KanbanStage, Appointment, PageVisit } from '../interfaces/IClientService';
 import { generateMockId, delay } from './mockUtils';
 
 class MockClientService implements IClientService {
@@ -60,6 +60,11 @@ class MockClientService implements IClientService {
         appointment_status: faker.helpers.arrayElement(['scheduled', 'confirmed', 'cancelled']),
         created_at: faker.date.recent({ days: 365 }).toISOString(),
         updated_at: faker.date.recent({ days: 30 }).toISOString(),
+        // Novos campos para qualificação de leads
+        lead_score: faker.number.int({ min: 0, max: 100 }),
+        last_activity: faker.date.recent({ days: 7 }).toISOString(),
+        qualified_interests: faker.helpers.arrayElements(['Tatuagem Floral', 'Eventos Corporativos', 'Realismo', 'Minimalista'], { min: 0, max: 3 }),
+        origin: faker.helpers.arrayElement(['landing_events', 'contact_form', 'consultation', 'shop', 'referral', 'social_media', 'manual']),
       };
       this.mockClients.push(client);
     }
@@ -166,6 +171,10 @@ class MockClientService implements IClientService {
       total_orders: 0,
       temperature: 'cold',
       temperature_score: 0,
+      lead_score: clientData.lead_score || 0,
+      last_activity: new Date().toISOString(),
+      qualified_interests: clientData.qualified_interests || [],
+      origin: clientData.origin || 'manual',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -397,6 +406,71 @@ class MockClientService implements IClientService {
     }
     
     this.mockAppointments.splice(index, 1);
+  }
+
+  // Novos métodos para qualificação de leads
+  async fetchClientPageVisits(clientId: string): Promise<PageVisit[]> {
+    await delay(600);
+    console.log('MockClientService: Fetching client page visits', clientId);
+    
+    // Mock data para demonstração
+    return [
+      {
+        id: generateMockId(),
+        client_id: clientId,
+        session_id: 'session-123',
+        url: '/artists',
+        page_title: 'Tatuadores',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 horas atrás
+        duration_seconds: 180,
+      },
+      {
+        id: generateMockId(),
+        client_id: clientId,
+        session_id: 'session-123',
+        url: '/events',
+        page_title: 'Eventos de Tatuagem',
+        timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hora atrás
+        duration_seconds: 240,
+      },
+      {
+        id: generateMockId(),
+        client_id: clientId,
+        session_id: 'session-123',
+        url: '/artists/1',
+        page_title: 'Portfólio do Tatuador',
+        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 min atrás
+        duration_seconds: 320,
+      }
+    ];
+  }
+
+  async updateLeadScore(clientId: string, score: number): Promise<void> {
+    await delay(500);
+    console.log('MockClientService: Updating lead score', clientId, score);
+    
+    const index = this.mockClients.findIndex(client => client.id === clientId);
+    if (index !== -1) {
+      this.mockClients[index] = {
+        ...this.mockClients[index],
+        lead_score: score,
+        updated_at: new Date().toISOString(),
+      };
+    }
+  }
+
+  async updateQualifiedInterests(clientId: string, interests: string[]): Promise<void> {
+    await delay(500);
+    console.log('MockClientService: Updating qualified interests', clientId, interests);
+    
+    const index = this.mockClients.findIndex(client => client.id === clientId);
+    if (index !== -1) {
+      this.mockClients[index] = {
+        ...this.mockClients[index],
+        qualified_interests: interests,
+        updated_at: new Date().toISOString(),
+      };
+    }
   }
 }
 
