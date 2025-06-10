@@ -1,4 +1,3 @@
-
 import React, { ReactNode, useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
@@ -23,9 +22,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         case "/admin/appointments":
           return { title: "Agendamentos", description: "Gerencie agendamentos e calendário" };
         case "/admin/clients":
-          return { title: "Clientes", description: "Gerencie clientes e relacionamentos" };
-        case "/admin/crm":
-          return { title: "CRM - Gestão de Clientes", description: "Gestão completa de leads e clientes do estúdio" };
+          return { title: "Gestão de Clientes", description: "CRM completo - gerencie leads, clientes e relacionamentos" };
         case "/admin/products":
           return { title: "Produtos", description: "Gerencie produtos e catálogo" };
         case "/admin/stock":

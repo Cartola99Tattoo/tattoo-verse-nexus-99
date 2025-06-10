@@ -1,4 +1,3 @@
-
 import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
@@ -81,7 +80,6 @@ function App() {
           <Route path="appointments" element={<LazyLoader><Appointments /></LazyLoader>} />
           <Route path="clients" element={<LazyLoader><Clients /></LazyLoader>} />
           <Route path="clients/:id" element={<LazyLoader><ClientDetail /></LazyLoader>} />
-          <Route path="crm" element={<LazyLoader><CRM /></LazyLoader>} />
           <Route path="products" element={<LazyLoader><Products /></LazyLoader>} />
           <Route path="stock" element={<LazyLoader><Stock /></LazyLoader>} />
           <Route path="projects" element={<LazyLoader><Projects /></LazyLoader>} />

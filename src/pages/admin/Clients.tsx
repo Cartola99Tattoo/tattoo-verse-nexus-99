@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -11,36 +12,41 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getClientService } from "@/services/serviceFactory";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Users, Search, Filter, Plus, Eye, UserCheck, Crown, UserX, LayoutGrid, List, TrendingUp, Clock, Settings, Mail, Phone, Tag, Move } from "lucide-react";
+import { 
+  Users, Search, Filter, Plus, Eye, UserCheck, Crown, UserX, LayoutGrid, List, 
+  TrendingUp, Clock, Settings, Mail, Phone, Tag, Move, Target, MessageSquare 
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import CreateClientForm from "@/components/admin/CreateClientForm";
+import CRMLeadForm from "@/components/admin/CRMLeadForm";
 import ClientsKanban from "@/components/admin/ClientsKanban";
 import KanbanSettings from "@/components/admin/KanbanSettings";
+import CRMClientDetail from "@/components/admin/CRMClientDetail";
 import { Client } from "@/services/interfaces/IClientService";
 
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [temperatureFilter, setTemperatureFilter] = useState<string>("all");
+  const [originFilter, setOriginFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
-  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
-  // Buscar estatísticas
+  // Buscar estatísticas unificadas
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['client-stats'],
     queryFn: () => clientService.fetchClientStats(),
   });
 
-  // Buscar clientes
+  // Buscar clientes com filtros expandidos
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
-    queryKey: ['clients', searchTerm, statusFilter, temperatureFilter],
+    queryKey: ['clients', searchTerm, statusFilter, temperatureFilter, originFilter],
     queryFn: () => clientService.fetchClients({
       search: searchTerm || undefined,
       status: statusFilter === 'all' ? undefined : statusFilter,
@@ -70,7 +76,6 @@ const Clients = () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       queryClient.invalidateQueries({ queryKey: ['client-stats'] });
       setSelectedClients([]);
-      setShowBulkActions(false);
       toast({
         title: "Ação executada",
         description: "A ação em massa foi executada com sucesso.",
@@ -104,6 +109,10 @@ const Clients = () => {
     } else {
       setSelectedClients([]);
     }
+  };
+
+  const handleViewClient = (clientId: string) => {
+    setSelectedClientId(clientId);
   };
 
   const getStatusBadge = (status: string) => {
@@ -144,9 +153,9 @@ const Clients = () => {
     if (!temperature) return null;
 
     const variants = {
-      hot: { variant: "destructive", label: "Quente" },
-      warm: { variant: "tattooWarning", label: "Morno" },
-      cold: { variant: "tattooInfo", label: "Frio" },
+      hot: { variant: "destructive", label: "🔥 Quente" },
+      warm: { variant: "tattooWarning", label: "🔶 Morno" },
+      cold: { variant: "tattooInfo", label: "❄️ Frio" },
     };
 
     const variant = variants[temperature as keyof typeof variants];
@@ -159,13 +168,31 @@ const Clients = () => {
     );
   };
 
-  const handleViewClient = (clientId: string) => {
-    navigate(`/admin/clients/${clientId}`);
+  const getOriginBadge = (origin?: string) => {
+    if (!origin) return <Badge variant="secondary">Manual</Badge>;
+
+    const origins = {
+      'landing_events': { label: 'Landing Eventos', variant: 'tattoo' },
+      'contact_form': { label: 'Formulário Contato', variant: 'tattooInfo' },
+      'consultation': { label: 'Consultoria', variant: 'tattooWarning' },
+      'shop': { label: 'Loja', variant: 'tattooSuccess' },
+      'referral': { label: 'Indicação', variant: 'tattooSecondary' },
+      'social_media': { label: 'Redes Sociais', variant: 'tattooOutline' },
+      'manual': { label: 'Manual', variant: 'secondary' },
+    };
+
+    const originData = origins[origin as keyof typeof origins] || { label: origin, variant: 'secondary' };
+    
+    return (
+      <Badge variant={originData.variant as any}>
+        {originData.label}
+      </Badge>
+    );
   };
 
   return (
     <div className="p-6 space-y-6">
-      {/* Cards de Estatísticas com novo design */}
+      {/* Cards de Estatísticas CRM/Clientes Unificados */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           <Card variant="tattoo">
@@ -181,11 +208,22 @@ const Clients = () => {
 
           <Card variant="tattoo">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Novos Leads</CardTitle>
+              <Target className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{stats.new_clients_this_month || 0}</div>
+              <p className="text-xs text-gray-600">Este mês</p>
+            </CardContent>
+          </Card>
+
+          <Card variant="tattoo">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Conversão</CardTitle>
               <TrendingUp className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.conversion_rate}%</div>
+              <div className="text-2xl font-bold text-green-600">{stats.conversion_rate || 0}%</div>
               <p className="text-xs text-gray-600">Taxa</p>
             </CardContent>
           </Card>
@@ -197,18 +235,7 @@ const Clients = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">{stats.hot_clients || 0}</div>
-              <p className="text-xs text-gray-600">Interesse alto</p>
-            </CardContent>
-          </Card>
-
-          <Card variant="tattoo">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Mornos</CardTitle>
-              <div className="h-4 w-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats.warm_clients || 0}</div>
-              <p className="text-xs text-gray-600">Interesse médio</p>
+              <p className="text-xs text-gray-600">Alta prioridade</p>
             </CardContent>
           </Card>
 
@@ -218,7 +245,7 @@ const Clients = () => {
               <Clock className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{stats.average_conversion_time}d</div>
+              <div className="text-2xl font-bold text-blue-600">{stats.average_conversion_time || 0}d</div>
               <p className="text-xs text-gray-600">Conversão</p>
             </CardContent>
           </Card>
@@ -229,14 +256,14 @@ const Clients = () => {
               <Users className="h-4 w-4 text-gray-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{formatCurrency(stats.average_order_value)}</div>
+              <div className="text-2xl font-bold text-gray-900">{formatCurrency(stats.average_order_value || 0)}</div>
               <p className="text-xs text-gray-600">Por cliente</p>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* Ações em Massa com novo design */}
+      {/* Ações em Massa */}
       {selectedClients.length > 0 && (
         <Card variant="tattooRed">
           <CardContent className="p-4">
@@ -265,18 +292,16 @@ const Clients = () => {
                     <SelectValue placeholder="Temperatura" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="hot">Quente</SelectItem>
-                    <SelectItem value="warm">Morno</SelectItem>
-                    <SelectItem value="cold">Frio</SelectItem>
+                    <SelectItem value="hot">🔥 Quente</SelectItem>
+                    <SelectItem value="warm">🔶 Morno</SelectItem>
+                    <SelectItem value="cold">❄️ Frio</SelectItem>
                   </SelectContent>
                 </Select>
                 
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => {
-                    setSelectedClients([]);
-                  }}
+                  onClick={() => setSelectedClients([])}
                 >
                   Limpar
                 </Button>
@@ -286,19 +311,19 @@ const Clients = () => {
         </Card>
       )}
 
-      {/* Filtros e Controles com novo design */}
+      {/* Filtros e Controles Expandidos */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="flex gap-2 flex-1">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
-              variant="tattoo"
               placeholder="Buscar por nome, email ou telefone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 border-red-200 focus:border-red-600"
             />
           </div>
+          
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px] border-red-200 focus:border-red-600">
               <Filter className="h-4 w-4 mr-2" />
@@ -321,9 +346,25 @@ const Clients = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas</SelectItem>
-              <SelectItem value="hot">Quente</SelectItem>
-              <SelectItem value="warm">Morno</SelectItem>
-              <SelectItem value="cold">Frio</SelectItem>
+              <SelectItem value="hot">🔥 Quente</SelectItem>
+              <SelectItem value="warm">🔶 Morno</SelectItem>
+              <SelectItem value="cold">❄️ Frio</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={originFilter} onValueChange={setOriginFilter}>
+            <SelectTrigger className="w-[160px] border-red-200 focus:border-red-600">
+              <SelectValue placeholder="Origem" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as Origens</SelectItem>
+              <SelectItem value="landing_events">Landing Eventos</SelectItem>
+              <SelectItem value="contact_form">Formulário Contato</SelectItem>
+              <SelectItem value="consultation">Consultoria</SelectItem>
+              <SelectItem value="shop">Loja</SelectItem>
+              <SelectItem value="referral">Indicação</SelectItem>
+              <SelectItem value="social_media">Redes Sociais</SelectItem>
+              <SelectItem value="manual">Manual</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -376,17 +417,17 @@ const Clients = () => {
             <DialogTrigger asChild>
               <Button variant="tattoo" size="default">
                 <Plus className="h-4 w-4 mr-2" />
-                Novo Cliente
+                Novo Lead/Cliente
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Cadastrar Novo Cliente</DialogTitle>
+                <DialogTitle>Cadastrar Novo Lead/Cliente</DialogTitle>
                 <DialogDescription>
-                  Adicione um novo cliente ao sistema CRM
+                  Adicione um novo lead ou cliente ao sistema
                 </DialogDescription>
               </DialogHeader>
-              <CreateClientForm 
+              <CRMLeadForm 
                 onSuccess={() => {
                   setIsCreateDialogOpen(false);
                   queryClient.invalidateQueries({ queryKey: ['clients'] });
@@ -415,20 +456,18 @@ const Clients = () => {
           <CardHeader variant="gradient">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-gray-800">Lista de Clientes</CardTitle>
+                <CardTitle className="text-gray-800">Gestão Centralizada de Clientes</CardTitle>
                 <CardDescription>
-                  Visualize e gerencie todos os clientes cadastrados
+                  Visualize e gerencie todos os leads e clientes do estúdio
                 </CardDescription>
               </div>
-              {viewMode === "table" && (
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={selectedClients.length === clients.length && clients.length > 0}
-                    onCheckedChange={handleSelectAll}
-                  />
-                  <span className="text-sm text-gray-600">Selecionar todos</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={selectedClients.length === clients.length && clients.length > 0}
+                  onCheckedChange={handleSelectAll}
+                />
+                <span className="text-sm text-gray-600">Selecionar todos</span>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -442,13 +481,13 @@ const Clients = () => {
                         onCheckedChange={handleSelectAll}
                       />
                     </TableHead>
-                    <TableHead>Cliente</TableHead>
+                    <TableHead>Cliente/Lead</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Temperatura</TableHead>
+                    <TableHead>Origem</TableHead>
                     <TableHead>Total Gasto</TableHead>
-                    <TableHead>Pedidos</TableHead>
-                    <TableHead>Estilo Preferido</TableHead>
-                    <TableHead>Cadastrado em</TableHead>
+                    <TableHead>Interesse</TableHead>
+                    <TableHead>Último Contato</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -489,21 +528,21 @@ const Clients = () => {
                         <TableCell>
                           {getTemperatureBadge(client.temperature)}
                         </TableCell>
+                        <TableCell>
+                          {getOriginBadge('landing_events')}
+                        </TableCell>
                         <TableCell className="font-medium">
                           {formatCurrency(client.total_spent)}
                         </TableCell>
                         <TableCell>
-                          <Badge variant="tattooSecondary">
-                            {client.total_orders} pedidos
-                          </Badge>
+                          <div className="text-sm">
+                            {client.preferred_style || 'Eventos customizados'}
+                          </div>
                         </TableCell>
                         <TableCell>
-                          {client.preferred_style || (
-                            <span className="text-gray-400">Não definido</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {formatDate(client.created_at)}
+                          <div className="text-sm">
+                            {formatDate(client.updated_at)}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
@@ -519,9 +558,9 @@ const Clients = () => {
                               <Button 
                                 variant="ghost" 
                                 size="sm"
-                                onClick={() => window.open(`tel:${client.phone}`)}
+                                onClick={() => window.open(`https://wa.me/${client.phone?.replace(/\D/g, '')}`)}
                               >
-                                <Phone className="h-4 w-4" />
+                                <MessageSquare className="h-4 w-4" />
                               </Button>
                             )}
                             {client.email && (
@@ -543,6 +582,14 @@ const Clients = () => {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Modal de Detalhes do Cliente 360° */}
+      {selectedClientId && (
+        <CRMClientDetail 
+          clientId={selectedClientId}
+          onClose={() => setSelectedClientId(null)}
+        />
       )}
     </div>
   );

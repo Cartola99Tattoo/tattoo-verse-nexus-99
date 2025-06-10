@@ -1,4 +1,3 @@
-
 import {
   LayoutDashboard,
   Users,
@@ -77,10 +76,7 @@ export function AdminSidebar({ items }: Props) {
               Tatuadores
             </NavItemComponent>
             <NavItemComponent href="/admin/clients" icon={Users}>
-              Clientes
-            </NavItemComponent>
-            <NavItemComponent href="/admin/crm" icon={UserCheck}>
-              CRM
+              Gestão de Clientes
             </NavItemComponent>
             <NavItemComponent href="/admin/appointments" icon={Calendar}>
               Agendamentos
@@ -151,14 +147,9 @@ const sidebarItems = [
     href: "/admin/artists",
   },
   {
-    name: "Clientes",
+    name: "Gestão de Clientes",
     icon: Users,
     href: "/admin/clients",
-  },
-  {
-    name: "CRM",
-    icon: UserCheck,
-    href: "/admin/crm",
   },
   {
     name: "Agendamentos",

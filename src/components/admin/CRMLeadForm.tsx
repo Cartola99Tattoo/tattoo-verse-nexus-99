@@ -21,6 +21,7 @@ const formSchema = z.object({
   preferred_style: z.string().optional(),
   notes: z.string().optional(),
   tags: z.string().optional(),
+  origin: z.string().optional(),
 });
 
 interface CRMLeadFormProps {
@@ -41,6 +42,7 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
       preferred_style: "",
       notes: "",
       tags: "",
+      origin: "manual",
     },
   });
 
@@ -57,7 +59,7 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
     onSuccess: () => {
       toast({
         title: "Lead criado com sucesso!",
-        description: "O novo lead foi adicionado ao CRM.",
+        description: "O novo lead foi adicionado ao sistema.",
       });
       onSuccess();
     },
@@ -87,7 +89,6 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
                 <FormControl>
                   <Input 
                     placeholder="Nome do cliente/lead" 
-                    variant="tattoo"
                     {...field} 
                   />
                 </FormControl>
@@ -106,7 +107,6 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
                   <Input 
                     type="email" 
                     placeholder="email@exemplo.com" 
-                    variant="tattoo"
                     {...field} 
                   />
                 </FormControl>
@@ -126,7 +126,6 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
                 <FormControl>
                   <Input 
                     placeholder="(00) 00000-0000" 
-                    variant="tattoo"
                     {...field} 
                   />
                 </FormControl>
@@ -143,7 +142,7 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
                 <FormLabel>Status Inicial</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger variant="tattoo">
+                    <SelectTrigger>
                       <SelectValue placeholder="Selecione o status" />
                     </SelectTrigger>
                   </FormControl>
@@ -169,7 +168,7 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
                 <FormLabel>Temperatura do Lead</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger variant="tattoo">
+                    <SelectTrigger>
                       <SelectValue placeholder="Selecione a temperatura" />
                     </SelectTrigger>
                   </FormControl>
@@ -186,22 +185,48 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
           
           <FormField
             control={form.control}
-            name="preferred_style"
+            name="origin"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Interesse/Estilo Preferido</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Ex: Eventos corporativos, Realismo, etc." 
-                    variant="tattoo"
-                    {...field} 
-                  />
-                </FormControl>
+                <FormLabel>Origem do Lead</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a origem" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="landing_events">Landing Page - Eventos</SelectItem>
+                    <SelectItem value="contact_form">Formulário de Contato</SelectItem>
+                    <SelectItem value="consultation">Consultoria</SelectItem>
+                    <SelectItem value="shop">Loja</SelectItem>
+                    <SelectItem value="referral">Indicação</SelectItem>
+                    <SelectItem value="social_media">Redes Sociais</SelectItem>
+                    <SelectItem value="manual">Cadastro Manual</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="preferred_style"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Interesse/Estilo Preferido</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Ex: Eventos corporativos, Realismo, etc." 
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -212,7 +237,6 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
               <FormControl>
                 <Input 
                   placeholder="Ex: evento corporativo, urgente, referência"
-                  variant="tattoo"
                   {...field} 
                 />
               </FormControl>
@@ -230,7 +254,6 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
               <FormControl>
                 <Textarea 
                   placeholder="Descreva o contexto do lead, necessidades específicas, etc."
-                  variant="tattoo"
                   {...field} 
                 />
               </FormControl>
