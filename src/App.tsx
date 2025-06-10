@@ -1,3 +1,4 @@
+
 import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
@@ -27,7 +28,6 @@ const AdminArtists = lazy(() => import('./pages/admin/AdminArtists'));
 const Appointments = lazy(() => import('./pages/admin/Appointments'));
 const Clients = lazy(() => import('./pages/admin/Clients'));
 const ClientDetail = lazy(() => import('./pages/admin/ClientDetail'));
-const CRM = lazy(() => import('./pages/admin/CRM'));
 const Products = lazy(() => import('./pages/admin/Products'));
 const Stock = lazy(() => import('./pages/admin/Stock'));
 const Financial = lazy(() => import('./pages/admin/Financial'));
