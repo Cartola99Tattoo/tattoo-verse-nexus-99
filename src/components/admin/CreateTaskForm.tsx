@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft } from "lucide-react";
 import { getProjectService } from "@/services/serviceFactory";
-import { IProject, IKanbanStage, IProjectSmartGoal } from "@/services/interfaces/IProjectService";
+import { IProject, IKanbanStage, IProjectSmartGoal, SmartCriteria, ISmartGoalAssociation } from "@/services/interfaces/IProjectService";
 import { mockTeamMembers } from "@/data/mockTeamMembers";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { toast } from "@/hooks/use-toast";
+import SmartCriteriaSelector from "@/components/admin/SmartCriteriaSelector";
 
 interface CreateTaskFormProps {
   project: IProject;
@@ -31,7 +31,8 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel, initialStage
     assignedTo: '',
     dueDate: '',
     estimatedHours: '',
-    smartGoalAssociation: [] as string[]
+    smartGoalId: 'none',
+    smartCriteria: [] as SmartCriteria[]
   });
 
   const projectService = getProjectService();
@@ -48,6 +49,11 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel, initialStage
     e.preventDefault();
     
     try {
+      const smartGoalAssociation: ISmartGoalAssociation[] = 
+        formData.smartGoalId !== 'none' && formData.smartCriteria.length > 0
+          ? [{ goalId: formData.smartGoalId, criteria: formData.smartCriteria }]
+          : [];
+
       const taskData = {
         projectId: project.id,
         title: formData.title,
@@ -57,7 +63,7 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel, initialStage
         assignedTo: formData.assignedTo || undefined,
         dueDate: formData.dueDate || undefined,
         estimatedHours: formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined,
-        smartGoalAssociation: formData.smartGoalAssociation.length > 0 ? formData.smartGoalAssociation : undefined,
+        smartGoalAssociation: smartGoalAssociation.length > 0 ? smartGoalAssociation : undefined,
         order: 0
       };
 
@@ -79,12 +85,18 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel, initialStage
     }
   };
 
-  const handleSmartGoalToggle = (goalId: string) => {
+  const handleSmartGoalChange = (goalId: string) => {
     setFormData(prev => ({
       ...prev,
-      smartGoalAssociation: prev.smartGoalAssociation.includes(goalId)
-        ? prev.smartGoalAssociation.filter(id => id !== goalId)
-        : [...prev.smartGoalAssociation, goalId]
+      smartGoalId: goalId,
+      smartCriteria: goalId === 'none' ? [] : prev.smartCriteria
+    }));
+  };
+
+  const handleSmartCriteriaChange = (criteria: SmartCriteria[]) => {
+    setFormData(prev => ({
+      ...prev,
+      smartCriteria: criteria
     }));
   };
 
@@ -219,54 +231,15 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel, initialStage
               </div>
 
               {/* Associação à Meta SMART */}
-              <div className="space-y-3">
-                <Label className="text-sm font-semibold text-red-600">
-                  Associação à Meta SMART
-                </Label>
-                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                  {smartGoalsLoading ? (
-                    <p className="text-sm text-gray-600 italic">
-                      Carregando metas SMART...
-                    </p>
-                  ) : safeSmartGoals.length === 0 ? (
-                    <p className="text-sm text-gray-600 italic">
-                      Nenhuma Meta SMART definida para este projeto. 
-                      Considere criar metas SMART para orientar estrategicamente suas tarefas.
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      <p className="text-sm text-red-700 font-medium">
-                        Selecione as metas SMART que esta tarefa ajudará a alcançar:
-                      </p>
-                      <div className="space-y-2">
-                        {safeSmartGoals.map((goal) => (
-                          <div key={goal.id} className="flex items-start space-x-2">
-                            <Checkbox
-                              id={`goal-${goal.id}`}
-                              checked={formData.smartGoalAssociation.includes(goal.id)}
-                              onCheckedChange={() => handleSmartGoalToggle(goal.id)}
-                              className="mt-1"
-                            />
-                            <div className="flex-1">
-                              <Label 
-                                htmlFor={`goal-${goal.id}`} 
-                                className="text-sm font-medium cursor-pointer"
-                              >
-                                {goal.title}
-                              </Label>
-                              {goal.specific && (
-                                <p className="text-xs text-gray-600 mt-1">
-                                  {goal.specific}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              {!smartGoalsLoading && (
+                <SmartCriteriaSelector
+                  smartGoals={safeSmartGoals}
+                  selectedGoalId={formData.smartGoalId}
+                  selectedCriteria={formData.smartCriteria}
+                  onGoalChange={handleSmartGoalChange}
+                  onCriteriaChange={handleSmartCriteriaChange}
+                />
+              )}
 
               {/* Botões */}
               <div className="flex gap-3 pt-6 border-t border-red-100">

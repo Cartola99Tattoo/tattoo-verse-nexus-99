@@ -46,7 +46,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
   const safeSmartGoals = Array.isArray(smartGoals) ? smartGoals : [];
   const safeStages = Array.isArray(stages) ? stages : [];
 
-  // Ensure default stages exist with 99Tattoo theme colors
+  // Ensure default stages exist with 99Tattoo theme colors and proper ordering
   const getDefaultStages = (): IKanbanStage[] => [
     { 
       id: 'ideas', 
@@ -90,7 +90,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
     }
   ];
 
-  const currentStages = safeStages.length > 0 ? safeStages : getDefaultStages();
+  const currentStages = safeStages.length > 0 ? safeStages.sort((a, b) => a.order - b.order) : getDefaultStages();
 
   const handleTaskCreated = () => {
     setShowCreateTask(false);
@@ -277,16 +277,19 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
               ))}
             </div>
           ) : (
-            <div className="flex gap-6 overflow-x-auto pb-4 bg-gradient-to-r from-red-50 via-white to-red-50 p-6 rounded-lg shadow-enhanced border border-red-100">
-              {currentStages.map((stage) => (
-                <ProjectKanbanColumn
-                  key={stage.id}
-                  stage={stage}
-                  tasks={filteredTasks.filter(task => task.status === stage.id)}
-                  onTaskUpdate={handleTaskUpdate}
-                  onTaskRefresh={refreshTasks}
-                />
-              ))}
+            <div className="bg-gradient-to-br from-red-50 via-white to-red-50 p-6 rounded-xl shadow-enhanced border border-red-100 overflow-hidden">
+              <div className="flex gap-6 overflow-x-auto pb-4 min-h-[600px]">
+                {currentStages.map((stage) => (
+                  <div key={stage.id} className="flex-shrink-0 transition-all duration-300 hover:scale-105">
+                    <ProjectKanbanColumn
+                      stage={stage}
+                      tasks={filteredTasks.filter(task => task.status === stage.id)}
+                      onTaskUpdate={handleTaskUpdate}
+                      onTaskRefresh={refreshTasks}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </TabsContent>

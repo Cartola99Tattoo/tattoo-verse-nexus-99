@@ -72,6 +72,13 @@ export interface IEnhancedSmartGoal {
   createdAt: string;
 }
 
+export type SmartCriteria = 'specific' | 'measurable' | 'achievable' | 'relevant' | 'time_bound';
+
+export interface ISmartGoalAssociation {
+  goalId: string;
+  criteria: SmartCriteria[];
+}
+
 export interface IProjectTask {
   id: string;
   projectId: string;
@@ -87,7 +94,7 @@ export interface IProjectTask {
   order: number;
   storyPoints?: number;
   estimatedHours?: number;
-  smartGoalAssociation?: string[];
+  smartGoalAssociation?: ISmartGoalAssociation[];
 }
 
 export interface IKanbanStage {
@@ -107,6 +114,7 @@ export interface IProjectBudgetItem {
   realCost: number;
   status: 'estimated' | 'paid' | 'pending';
   smartGoalId?: string;
+  smartCriteria?: SmartCriteria;
   createdAt: string;
 }
 
@@ -120,6 +128,7 @@ export interface IProjectImprovementAction {
   status: 'pending' | 'in_progress' | 'completed';
   dueDate?: string;
   smartGoalId?: string;
+  smartCriteria?: SmartCriteria;
   createdAt: string;
 }
 
@@ -131,6 +140,7 @@ export interface IProjectExpansionResource {
   estimatedCost: number;
   status: 'planning' | 'researching' | 'approved' | 'acquired';
   smartGoalId?: string;
+  smartCriteria?: SmartCriteria;
   createdAt: string;
 }
 
@@ -143,6 +153,20 @@ export interface IProjectSustainabilityAction {
   deadline?: string;
   status: 'pending' | 'in_progress' | 'completed';
   smartGoalId?: string;
+  smartCriteria?: SmartCriteria;
+  createdAt: string;
+}
+
+export interface IProjectRisk {
+  id: string;
+  projectId: string;
+  description: string;
+  probability: 'low' | 'medium' | 'high';
+  impact: 'low' | 'medium' | 'high';
+  mitigation: string;
+  status: 'open' | 'mitigated' | 'occurred';
+  smartGoalId?: string;
+  smartCriteria?: SmartCriteria;
   createdAt: string;
 }
 
@@ -235,4 +259,10 @@ export interface IProjectService extends CRUDOperations<IProject> {
   createEnhancedSmartGoal(goal: Omit<IEnhancedSmartGoal, 'id' | 'createdAt'>): Promise<IEnhancedSmartGoal>;
   updateEnhancedSmartGoal(id: string, goal: Partial<IEnhancedSmartGoal>): Promise<IEnhancedSmartGoal>;
   deleteEnhancedSmartGoal(id: string): Promise<void>;
+
+  // Risk management methods
+  fetchProjectRisks(projectId: string): Promise<IProjectRisk[]>;
+  createRisk(risk: Omit<IProjectRisk, 'id' | 'createdAt'>): Promise<IProjectRisk>;
+  updateRisk(id: string, risk: Partial<IProjectRisk>): Promise<IProjectRisk>;
+  deleteRisk(id: string): Promise<void>;
 }
