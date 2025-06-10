@@ -36,7 +36,9 @@ const ProjectTaskCard = ({ task, onTaskRefresh }: ProjectTaskCardProps) => {
     return labels[priority] || priority;
   };
 
-  const getSmartGoalColor = (association: string) => {
+  const getSmartGoalColor = (associationArray: string[]) => {
+    // For now, use the first association for color
+    const association = associationArray[0];
     switch (association) {
       case 'specific': return 'bg-red-100 text-red-800';
       case 'measurable': return 'bg-blue-100 text-blue-800';
@@ -47,7 +49,7 @@ const ProjectTaskCard = ({ task, onTaskRefresh }: ProjectTaskCardProps) => {
     }
   };
 
-  const getSmartGoalLabel = (association: string) => {
+  const getSmartGoalLabel = (associationArray: string[]) => {
     const labels: Record<string, string> = {
       'specific': 'Específica',
       'measurable': 'Mensurável',
@@ -55,7 +57,8 @@ const ProjectTaskCard = ({ task, onTaskRefresh }: ProjectTaskCardProps) => {
       'relevant': 'Relevante',
       'timeBound': 'Temporal'
     };
-    return labels[association] || association;
+    // For now, show the first association
+    return labels[associationArray[0]] || associationArray[0];
   };
 
   const getInitials = (name: string) => {
@@ -109,7 +112,7 @@ const ProjectTaskCard = ({ task, onTaskRefresh }: ProjectTaskCardProps) => {
             {getPriorityLabel(task.priority)}
           </Badge>
           
-          {task.smartGoalAssociation && (
+          {task.smartGoalAssociation && task.smartGoalAssociation.length > 0 && (
             <Badge className={`text-xs ${getSmartGoalColor(task.smartGoalAssociation)}`}>
               <Target className="h-3 w-3 mr-1" />
               {getSmartGoalLabel(task.smartGoalAssociation)}
@@ -149,7 +152,7 @@ const ProjectTaskCard = ({ task, onTaskRefresh }: ProjectTaskCardProps) => {
           )}
         </div>
 
-        {!task.smartGoalAssociation && (
+        {(!task.smartGoalAssociation || task.smartGoalAssociation.length === 0) && (
           <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
             <Target className="h-3 w-3 inline mr-1" />
             Tarefa não associada a nenhuma Meta SMART
