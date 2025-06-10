@@ -1,4 +1,5 @@
 
+
 import { appConfig } from "@/config/appConfig";
 import { isSupabaseConnected } from "@/integrations/supabase/client";
 
@@ -26,7 +27,7 @@ import { mockFinancialService } from './mock/mockFinancialService';
 import { mockClientService } from './mock/mockClientService';
 import { mockProjectService } from './mock/mockProjectService';
 import { mockBedService } from './mock/mockBedService';
-import { mockEventService } from './mock/mockEventService';
+import mockEventService from './mock/mockEventService';
 import { mockUserProfileService } from "./mock/mockUserProfileService";
 
 // Supabase services
