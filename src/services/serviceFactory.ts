@@ -1,5 +1,3 @@
-
-
 import { appConfig } from "@/config/appConfig";
 import { isSupabaseConnected } from "@/integrations/supabase/client";
 

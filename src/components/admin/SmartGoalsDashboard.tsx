@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,11 +6,14 @@ import { Target, Calendar, Users, BarChart3, CheckCircle2 } from "lucide-react";
 import { IProjectSmartGoal, IProjectTask } from "@/services/interfaces/IProjectService";
 
 interface SmartGoalsDashboardProps {
+  project: any;
   goals: IProjectSmartGoal[];
   tasks: IProjectTask[];
+  onUpdateGoal: any;
+  onRefreshGoals: any;
 }
 
-const SmartGoalsDashboard = ({ goals, tasks }: SmartGoalsDashboardProps) => {
+const SmartGoalsDashboard = ({ project, goals, tasks, onUpdateGoal, onRefreshGoals }: SmartGoalsDashboardProps) => {
   const getGoalTypeColor = (goalId: string) => {
     const colors = {
       'specific': 'bg-red-100 text-red-800 border-red-200',
@@ -28,7 +30,9 @@ const SmartGoalsDashboard = ({ goals, tasks }: SmartGoalsDashboardProps) => {
   };
 
   const getTasksForGoal = (goalId: string) => {
-    return tasks.filter(task => task.smartGoalAssociation && task.smartGoalAssociation.includes(goalId));
+    return tasks.filter(task => 
+      task.smartGoalAssociation?.some(assoc => assoc.goalId === goalId)
+    );
   };
 
   const getGoalProgress = (goalId: string) => {

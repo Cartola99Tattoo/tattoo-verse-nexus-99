@@ -465,8 +465,7 @@ class MockProjectService implements IProjectService {
 
   // Base CRUD operations
   async getAll(): Promise<IProject[]> {
-    await delay();
-    return this.mockProjects;
+    return this.fetchProjects();
   }
 
   async getById(id: string): Promise<IProject> {
@@ -1026,4 +1025,5 @@ class MockProjectService implements IProjectService {
   }
 }
 
+export const mockProjectService = new MockProjectService();
 export default MockProjectService;

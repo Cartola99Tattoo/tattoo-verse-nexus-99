@@ -1,163 +1,109 @@
-
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Clock, User, Target, Edit, Trash2 } from "lucide-react";
-import { IProjectTask } from "@/services/interfaces/IProjectService";
-import EditTaskForm from "./EditTaskForm";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MoreVertical, Edit, Trash, Target } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { IProjectTask, SmartCriteria } from "@/services/interfaces/IProjectService";
 
 interface ProjectTaskCardProps {
   task: IProjectTask;
+  onTaskUpdate: (taskId: string, newStatus: string) => Promise<void>;
   onTaskRefresh: () => void;
 }
 
-const ProjectTaskCard = ({ task, onTaskRefresh }: ProjectTaskCardProps) => {
-  const [showEditForm, setShowEditForm] = useState(false);
+const priorityColors: { [key: string]: string } = {
+  low: 'border-l-green-500',
+  medium: 'border-l-yellow-500',
+  high: 'border-l-orange-500',
+  critical: 'border-l-red-500',
+};
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical': return 'bg-red-100 text-red-800 border-red-200';
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+const ProjectTaskCard = ({ task, onTaskUpdate, onTaskRefresh }: ProjectTaskCardProps) => {
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    e.dataTransfer.setData('taskId', task.id);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleUpdateStatus = async (newStatus: string) => {
+    await onTaskUpdate(task.id, newStatus);
+    onTaskRefresh();
+  };
+
+  const getSmartGoalInfo = () => {
+    if (!task.smartGoalAssociation || task.smartGoalAssociation.length === 0) {
+      return null;
     }
+
+    return task.smartGoalAssociation.map(assoc => ({
+      goalId: assoc.goalId,
+      criteria: assoc.criteria
+    }));
   };
 
-  const getPriorityLabel = (priority: string) => {
-    const labels: Record<string, string> = {
-      'critical': 'Crítica',
-      'high': 'Alta',
-      'medium': 'Média',
-      'low': 'Baixa'
-    };
-    return labels[priority] || priority;
-  };
-
-  const getSmartGoalColor = (associationArray: string[]) => {
-    // For now, use the first association for color
-    const association = associationArray[0];
-    switch (association) {
-      case 'specific': return 'bg-red-100 text-red-800';
-      case 'measurable': return 'bg-blue-100 text-blue-800';
-      case 'achievable': return 'bg-green-100 text-green-800';
-      case 'relevant': return 'bg-purple-100 text-purple-800';
-      case 'timeBound': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getSmartGoalLabel = (associationArray: string[]) => {
-    const labels: Record<string, string> = {
-      'specific': 'Específica',
-      'measurable': 'Mensurável',
-      'achievable': 'Atingível',
-      'relevant': 'Relevante',
-      'timeBound': 'Temporal'
-    };
-    // For now, show the first association
-    return labels[associationArray[0]] || associationArray[0];
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const isOverdue = (dueDate: string) => {
-    if (!dueDate) return false;
-    return new Date(dueDate) < new Date();
-  };
-
-  if (showEditForm) {
-    return (
-      <EditTaskForm
-        task={task}
-        onCancel={() => setShowEditForm(false)}
-        onTaskUpdated={onTaskRefresh}
-      />
-    );
-  }
+  const smartGoalInfo = getSmartGoalInfo();
 
   return (
-    <Card className="hover:shadow-md transition-shadow bg-white">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <h4 className="font-medium text-sm leading-tight line-clamp-2">{task.title}</h4>
-          <div className="flex gap-1 ml-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-6 w-6 p-0"
-              onClick={() => setShowEditForm(true)}
-            >
-              <Edit className="h-3 w-3" />
+    <Card 
+      className={`mb-3 cursor-move transition-all duration-200 hover:shadow-lg border-l-4 ${priorityColors[task.priority]} ${
+        isDragging ? 'opacity-50 rotate-2 scale-105' : ''
+      }`}
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+        <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-4 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreVertical className="h-4 w-4"/>
             </Button>
-          </div>
-        </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => console.log('Edit task')}>
+              <Edit className="h-4 w-4 mr-2" />
+              <span>Edit</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => console.log('Delete task')}>
+              <Trash className="h-4 w-4 mr-2" />
+              <span>Delete</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="pt-2">
         {task.description && (
-          <p className="text-xs text-gray-600 line-clamp-2">{task.description}</p>
+          <p className="text-xs text-gray-500 line-clamp-2 mb-2">
+            {task.description}
+          </p>
         )}
         
-        <div className="flex gap-1 flex-wrap">
-          <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
-            {getPriorityLabel(task.priority)}
-          </Badge>
-          
-          {task.smartGoalAssociation && task.smartGoalAssociation.length > 0 && (
-            <Badge className={`text-xs ${getSmartGoalColor(task.smartGoalAssociation)}`}>
-              <Target className="h-3 w-3 mr-1" />
-              {getSmartGoalLabel(task.smartGoalAssociation)}
-            </Badge>
-          )}
-        </div>
-
-        {task.assignedTo && (
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarFallback className="text-xs">
-                {getInitials(task.assignedTo)}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs text-gray-600 truncate">{task.assignedTo}</span>
-          </div>
-        )}
-
-        <div className="space-y-1">
-          {task.dueDate && (
-            <div className="flex items-center gap-1 text-xs">
-              <Calendar className="h-3 w-3" />
-              <span className={isOverdue(task.dueDate) ? 'text-red-600 font-medium' : 'text-gray-600'}>
-                {new Date(task.dueDate).toLocaleDateString('pt-BR')}
-                {isOverdue(task.dueDate) && ' (Atrasada)'}
-              </span>
-            </div>
-          )}
-          
-          {task.estimatedHours && task.estimatedHours > 0 && (
-            <div className="flex items-center gap-1 text-xs text-gray-600">
-              <Clock className="h-3 w-3" />
-              <span>
-                {task.estimatedHours}h estimada{task.estimatedHours !== 1 ? 's' : ''}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {(!task.smartGoalAssociation || task.smartGoalAssociation.length === 0) && (
-          <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
+        {smartGoalInfo && smartGoalInfo.length > 0 && (
+          <div className="text-xs bg-red-50 text-red-700 px-2 py-1 rounded mt-2">
             <Target className="h-3 w-3 inline mr-1" />
-            Tarefa não associada a nenhuma Meta SMART
+            Meta SMART: {smartGoalInfo.map(info => `${info.goalId} (${info.criteria.join(', ')})`).join('; ')}
           </div>
         )}
+
+        <div className="flex items-center space-x-2">
+          {task.assignedTo && (
+            <Avatar className="h-5 w-5">
+              <AvatarImage src={`https://github.com/${task.assignedTo}.png`} alt={task.assignedTo} />
+              <AvatarFallback>{task.assignedTo.substring(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+          )}
+          <span className="text-xs text-gray-500">
+            {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'Sem data'}
+          </span>
+        </div>
       </CardContent>
     </Card>
   );
