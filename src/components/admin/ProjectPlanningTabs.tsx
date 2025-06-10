@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProjectDashboard from "./ProjectDashboard";
@@ -39,26 +38,32 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
   
   const projectService = getProjectService();
 
-  // Queries para as diferentes seções
-  const { data: budgetItems = [], refresh: refreshBudget } = useDataQuery<IProjectBudgetItem[]>(
+  // Queries para as diferentes seções com null safety
+  const { data: budgetData = [], refresh: refreshBudget } = useDataQuery<IProjectBudgetItem[]>(
     () => projectService.fetchProjectBudgetItems(project.id),
     [project.id]
   );
 
-  const { data: improvementActions = [], refresh: refreshImprovements } = useDataQuery<IProjectImprovementAction[]>(
+  const { data: improvementData = [], refresh: refreshImprovements } = useDataQuery<IProjectImprovementAction[]>(
     () => projectService.fetchProjectImprovementActions(project.id),
     [project.id]
   );
 
-  const { data: expansionResources = [], refresh: refreshExpansion } = useDataQuery<IProjectExpansionResource[]>(
+  const { data: expansionData = [], refresh: refreshExpansion } = useDataQuery<IProjectExpansionResource[]>(
     () => projectService.fetchProjectExpansionResources(project.id),
     [project.id]
   );
 
-  const { data: sustainabilityActions = [], refresh: refreshSustainability } = useDataQuery<IProjectSustainabilityAction[]>(
+  const { data: sustainabilityData = [], refresh: refreshSustainability } = useDataQuery<IProjectSustainabilityAction[]>(
     () => projectService.fetchProjectSustainabilityActions(project.id),
     [project.id]
   );
+
+  // Ensure arrays are never null
+  const budgetItems = Array.isArray(budgetData) ? budgetData : [];
+  const improvementActions = Array.isArray(improvementData) ? improvementData : [];
+  const expansionResources = Array.isArray(expansionData) ? expansionData : [];
+  const sustainabilityActions = Array.isArray(sustainabilityData) ? sustainabilityData : [];
 
   // Handlers para adicionar itens
   const handleAddBudgetItem = async (item: Omit<IProjectBudgetItem, 'id' | 'createdAt'>) => {
@@ -186,7 +191,7 @@ const ProjectPlanningTabs = ({ project, tasks }: ProjectPlanningTabsProps) => {
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-4">
-          <ProjectDashboard project={project} tasks={tasks} />
+          <ProjectDashboard project={project} tasks={tasks || []} />
         </TabsContent>
 
         <TabsContent value="risks" className="space-y-4">
