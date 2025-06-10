@@ -1,4 +1,3 @@
-
 import { CRUDOperations } from '../base/BaseService';
 
 export interface IProject {
@@ -66,7 +65,7 @@ export interface IEnhancedSmartGoal {
   timeBound: string;
   currentMetric: number;
   targetMetric: number;
-  deadline: string;
+  deadline?: string;
   responsible?: string;
   progress: number;
   createdAt: string;

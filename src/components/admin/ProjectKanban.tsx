@@ -282,10 +282,12 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
                 {currentStages.map((stage) => (
                   <div key={stage.id} className="flex-shrink-0 transition-all duration-300 hover:scale-105">
                     <ProjectKanbanColumn
-                      stage={stage}
+                      title={stage.name}
+                      status={stage.id}
                       tasks={filteredTasks.filter(task => task.status === stage.id)}
                       onTaskUpdate={handleTaskUpdate}
                       onTaskRefresh={refreshTasks}
+                      count={filteredTasks.filter(task => task.status === stage.id).length}
                     />
                   </div>
                 ))}

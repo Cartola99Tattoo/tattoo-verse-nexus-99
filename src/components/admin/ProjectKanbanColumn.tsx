@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { IProjectTask } from "@/services/interfaces/IProjectService";
+import { IProjectTask, IKanbanStage } from "@/services/interfaces/IProjectService";
 import ProjectTaskCard from "./ProjectTaskCard";
 
 interface ProjectKanbanColumnProps {

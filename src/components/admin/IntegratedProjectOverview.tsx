@@ -66,7 +66,8 @@ const IntegratedProjectOverview = ({
     currentMetric: 0, // Default value - can be enhanced later
     targetMetric: 100, // Default value - can be enhanced later
     projectId: project.id,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    deadline: goal.deadline || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // Default deadline if not set
   }));
 
   const getProjectMetrics = () => {
