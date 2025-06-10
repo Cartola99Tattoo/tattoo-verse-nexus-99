@@ -4,14 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Settings, Filter, LayoutDashboard, Kanban } from "lucide-react";
+import { ArrowLeft, Plus, Settings, Filter, LayoutDashboard, Kanban, Target } from "lucide-react";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getProjectService } from "@/services/serviceFactory";
-import { IProject, IProjectTask, IKanbanStage } from "@/services/interfaces/IProjectService";
+import { IProject, IProjectTask, IKanbanStage, IProjectSmartGoal } from "@/services/interfaces/IProjectService";
 import ProjectKanbanColumn from "@/components/admin/ProjectKanbanColumn";
 import CreateTaskForm from "@/components/admin/CreateTaskForm";
 import ProjectKanbanSettings from "@/components/admin/ProjectKanbanSettings";
 import ProjectPlanningTabs from "@/components/admin/ProjectPlanningTabs";
+import SmartGoalsDashboard from "@/components/admin/SmartGoalsDashboard";
+import EnhancedSmartGoalsManager from "@/components/admin/EnhancedSmartGoalsManager";
 
 interface ProjectKanbanProps {
   project: IProject;
@@ -22,7 +24,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [filter, setFilter] = useState<string>('all');
-  const [activeTab, setActiveTab] = useState<string>('planning');
+  const [activeTab, setActiveTab] = useState<string>('overview');
   const projectService = getProjectService();
 
   const { data: tasks = [], loading: tasksLoading, refresh: refreshTasks } = useDataQuery<IProjectTask[]>(
@@ -34,6 +36,22 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
     () => projectService.fetchKanbanStages(project.id),
     [project.id]
   );
+
+  const { data: smartGoals = [], refresh: refreshSmartGoals } = useDataQuery<IProjectSmartGoal[]>(
+    () => projectService.fetchProjectSmartGoals(project.id),
+    [project.id]
+  );
+
+  // Ensure default stages exist
+  const defaultStages = [
+    { id: 'ideas', name: 'Quadro de Ideias', order: 1 },
+    { id: 'todo', name: 'A Fazer', order: 2 },
+    { id: 'in_progress', name: 'Em Andamento', order: 3 },
+    { id: 'review', name: 'Revisão', order: 4 },
+    { id: 'completed', name: 'Concluído', order: 5 }
+  ];
+
+  const currentStages = stages.length > 0 ? stages : defaultStages;
 
   const handleTaskCreated = () => {
     setShowCreateTask(false);
@@ -74,7 +92,6 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
     }
   };
 
-  // Ensure tasks is an array before filtering
   const safeTasks = Array.isArray(tasks) ? tasks : [];
   const filteredTasks = filter === 'all' 
     ? safeTasks 
@@ -84,7 +101,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
     return (
       <CreateTaskForm
         project={project}
-        stages={stages || []}
+        stages={currentStages || []}
         onTaskCreated={handleTaskCreated}
         onCancel={() => setShowCreateTask(false)}
       />
@@ -139,8 +156,17 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
         </Card>
       )}
 
+      {/* Painel de Metas SMART Integrado */}
+      <div className="mb-6">
+        <SmartGoalsDashboard goals={smartGoals} tasks={safeTasks} />
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Visão Geral
+          </TabsTrigger>
           <TabsTrigger value="planning" className="flex items-center gap-2">
             <LayoutDashboard className="h-4 w-4" />
             Planejamento Estratégico
@@ -150,6 +176,33 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
             Quadro de Tarefas
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview" className="mt-6">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-red-600" />
+                  Gerenciar Metas SMART
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EnhancedSmartGoalsManager
+                  projectId={project.id}
+                  goals={smartGoals}
+                  onAddGoal={async (goal) => {
+                    await projectService.createSmartGoal(goal);
+                    refreshSmartGoals();
+                  }}
+                  onUpdateGoal={async (id, goal) => {
+                    await projectService.updateSmartGoal(id, goal);
+                    refreshSmartGoals();
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         <TabsContent value="planning" className="mt-6">
           <ProjectPlanningTabs project={project} tasks={safeTasks} />
@@ -172,17 +225,17 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
               Alta Prioridade
             </Button>
             <Button
-              variant={filter === 'urgent' ? 'default' : 'outline'}
+              variant={filter === 'critical' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setFilter('urgent')}
+              onClick={() => setFilter('critical')}
             >
-              Urgente
+              Crítica
             </Button>
           </div>
 
           {stagesLoading || tasksLoading ? (
             <div className="flex gap-6 overflow-x-auto pb-4">
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 2, 3, 4, 5].map((i) => (
                 <Card key={i} className="flex-shrink-0 w-80 animate-pulse">
                   <CardHeader>
                     <div className="h-4 bg-gray-200 rounded w-24"></div>
@@ -197,25 +250,9 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
                 </Card>
               ))}
             </div>
-          ) : (stages || []).length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Settings className="h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Configure as etapas do projeto
-                </h3>
-                <p className="text-gray-500 text-center mb-6">
-                  Defina as etapas do seu Kanban para começar a organizar as tarefas.
-                </p>
-                <Button onClick={() => setShowSettings(true)}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Configurar Etapas
-                </Button>
-              </CardContent>
-            </Card>
           ) : (
-            <div className="flex gap-6 overflow-x-auto pb-4">
-              {(stages || []).map((stage) => (
+            <div className="flex gap-6 overflow-x-auto pb-4 bg-gradient-to-r from-gray-50 to-white p-4 rounded-lg">
+              {currentStages.map((stage) => (
                 <ProjectKanbanColumn
                   key={stage.id}
                   stage={stage}
