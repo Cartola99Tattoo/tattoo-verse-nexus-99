@@ -6,27 +6,27 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const services = [
   {
-    title: "Tatuagens Personalizadas",
-    description: "Criamos desenhos exclusivos com base nas suas ideias e preferências",
-    icon: "✏️",
-    link: "/shop",
+    title: "Consultoria Especializada",
+    description: "Com uma Consultoria Especializada, você terá o suporte individual de um artista experiente para transformar suas ideias em uma arte que realmente ressoa com sua alma, garantindo uma tatuagem que conta sua história e evita arrependimentos futuros.",
+    icon: "💬",
+    link: "/consultoria",
   },
   {
-    title: "Cover-ups",
-    description: "Transformamos tatuagens antigas em novas obras de arte",
+    title: "Artistas Selecionados",
+    description: "Nossa curadoria rigorosa reúne apenas os melhores tatuadores, cada um especializado em estilos únicos. Você não apenas escolhe um profissional, mas encontra o artista perfeito que dominará a técnica ideal para dar vida à sua visão com maestria incomparável.",
+    icon: "🎨",
+    link: "/artists",
+  },
+  {
+    title: "Logística Completa",
+    description: "Desde o primeiro contato até a cicatrização final, cuidamos de cada detalhe da sua jornada. Agendamento flexível, ambiente esterilizado, materiais premium e acompanhamento pós-tattoo - tudo pensado para que você se concentre apenas em viver essa experiência transformadora.",
     icon: "🔄",
-    link: "/shop",
-  },
-  {
-    title: "Tatuagens em Eventos",
-    description: "Serviço exclusivo para festas e eventos corporativos",
-    icon: "🎉",
     link: "/contact",
   },
   {
-    title: "Consultoria",
-    description: "Ajudamos você a escolher o estilo, tamanho e localização ideal",
-    icon: "💬",
+    title: "Marketing Integrado",
+    description: "Sua tatuagem merece ser celebrada! Oferecemos sessões fotográficas profissionais, compartilhamento em nossas redes e campanhas que destacam sua nova arte. Transformamos seu momento especial em uma história inspiradora que conecta e emociona outras pessoas.",
+    icon: "📱",
     link: "/contact",
   },
 ];
@@ -66,11 +66,11 @@ const ServicesSection = () => {
     >
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-red-600">
-            Nossos <span className="text-red-600">Serviços</span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 tattoo-title-red">
+            Nossos <span className="tattoo-title-gradient">Benefícios Exclusivos</span>
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Oferecemos serviços exclusivos e personalizados para transformar suas ideias em arte na pele
+            Oferecemos uma experiência completa e personalizada para transformar suas ideias em arte na pele, com acompanhamento especializado em cada etapa
           </p>
         </div>
 
@@ -78,7 +78,7 @@ const ServicesSection = () => {
           {services.map((service, index) => (
             <Card
               key={service.title}
-              className={`group overflow-hidden bg-gradient-to-br from-white via-red-50/30 to-white border-2 border-red-200/50 shadow-xl hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-700 transform hover:scale-105 hover:border-red-400/70 cursor-pointer ${
+              className={`group overflow-hidden tattoo-card-enhanced tattoo-hover-lift cursor-pointer ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-10"
@@ -92,15 +92,15 @@ const ServicesSection = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg"></div>
                 
                 <div className="relative z-10">
-                  <div className="text-4xl mb-4 p-3 bg-gradient-to-br from-red-100 to-red-200 rounded-full w-fit shadow-lg group-hover:shadow-xl group-hover:bg-gradient-to-br group-hover:from-red-200 group-hover:to-red-300 transition-all duration-300">
+                  <div className="text-4xl mb-4 p-3 bg-gradient-to-br from-red-100 to-red-200 rounded-full w-fit shadow-lg group-hover:shadow-xl group-hover:bg-gradient-to-br group-hover:from-red-200 group-hover:to-red-300 transition-all duration-300 tattoo-hover-glow">
                     {service.icon}
                   </div>
                   
-                  <h3 className="text-xl font-bold mb-3 text-red-600 group-hover:text-red-700 transition-colors duration-300">
+                  <h3 className="text-xl font-bold mb-3 tattoo-title-red group-hover:text-red-700 transition-colors duration-300">
                     {service.title}
                   </h3>
                   
-                  <p className="text-gray-700 mb-6 flex-grow leading-relaxed group-hover:text-gray-800 transition-colors duration-300">
+                  <p className="text-gray-700 mb-6 flex-grow leading-relaxed group-hover:text-gray-800 transition-colors duration-300 text-sm">
                     {service.description}
                   </p>
                   

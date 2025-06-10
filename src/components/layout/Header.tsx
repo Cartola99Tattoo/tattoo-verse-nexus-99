@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,6 +19,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     signOut();
@@ -27,6 +28,10 @@ const Header = () => {
 
   const handleProfileClick = () => {
     navigate("/user-profile");
+  };
+
+  const isActiveRoute = (path: string) => {
+    return location.pathname === path;
   };
 
   return (
@@ -42,27 +47,97 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="tattoo-nav-link">
+          <nav className="hidden md:flex items-center space-x-1">
+            <Link 
+              to="/" 
+              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
+                isActiveRoute('/') 
+                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
+                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
+              }`}
+            >
               Início
+              {isActiveRoute('/') && (
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
+              )}
             </Link>
-            <Link to="/consultoria" className="tattoo-nav-link">
+            <Link 
+              to="/consultoria" 
+              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
+                isActiveRoute('/consultoria') 
+                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
+                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
+              }`}
+            >
               Consultoria
+              {isActiveRoute('/consultoria') && (
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
+              )}
             </Link>
-            <Link to="/artists" className="tattoo-nav-link">
+            <Link 
+              to="/artists" 
+              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
+                isActiveRoute('/artists') 
+                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
+                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
+              }`}
+            >
               Artistas
+              {isActiveRoute('/artists') && (
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
+              )}
             </Link>
-            <Link to="/shop" className="tattoo-nav-link">
+            <Link 
+              to="/shop" 
+              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
+                isActiveRoute('/shop') 
+                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
+                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
+              }`}
+            >
               Loja
+              {isActiveRoute('/shop') && (
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
+              )}
             </Link>
-            <Link to="/blog" className="tattoo-nav-link">
+            <Link 
+              to="/blog" 
+              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
+                isActiveRoute('/blog') 
+                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
+                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
+              }`}
+            >
               Blog
+              {isActiveRoute('/blog') && (
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
+              )}
             </Link>
-            <Link to="/events" className="tattoo-nav-link">
+            <Link 
+              to="/events" 
+              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
+                isActiveRoute('/events') 
+                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
+                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
+              }`}
+            >
               Eventos
+              {isActiveRoute('/events') && (
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
+              )}
             </Link>
-            <Link to="/contact" className="tattoo-nav-link">
+            <Link 
+              to="/contact" 
+              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
+                isActiveRoute('/contact') 
+                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
+                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
+              }`}
+            >
               Contato
+              {isActiveRoute('/contact') && (
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
+              )}
             </Link>
           </nav>
 

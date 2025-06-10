@@ -20,14 +20,14 @@ const Home = () => {
         <Hero />
       </div>
       
+      {/* Services Section - Moved to be more prominent after Hero */}
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 shadow-inner">
+        <ServicesSection />
+      </div>
+      
       {/* About Section with Subtle Shadow */}
       <div className="shadow-lg bg-white relative z-10">
         <AboutSection />
-      </div>
-      
-      {/* Services with Gradient Background */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 shadow-inner">
-        <ServicesSection />
       </div>
       
       {/* Featured Tattoos with Enhanced Cards */}
