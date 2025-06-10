@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,20 +27,25 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
   const [activeTab, setActiveTab] = useState<string>('overview');
   const projectService = getProjectService();
 
-  const { data: tasks = [], loading: tasksLoading, refresh: refreshTasks } = useDataQuery<IProjectTask[]>(
+  const { data: tasks, loading: tasksLoading, refresh: refreshTasks } = useDataQuery<IProjectTask[]>(
     () => projectService.fetchProjectTasks(project.id),
     [project.id]
   );
 
-  const { data: stages = [], loading: stagesLoading, refresh: refreshStages } = useDataQuery<IKanbanStage[]>(
+  const { data: stages, loading: stagesLoading, refresh: refreshStages } = useDataQuery<IKanbanStage[]>(
     () => projectService.fetchKanbanStages(project.id),
     [project.id]
   );
 
-  const { data: smartGoals = [], refresh: refreshSmartGoals } = useDataQuery<IProjectSmartGoal[]>(
+  const { data: smartGoals, refresh: refreshSmartGoals } = useDataQuery<IProjectSmartGoal[]>(
     () => projectService.fetchProjectSmartGoals(project.id),
     [project.id]
   );
+
+  // Ensure safe access to tasks and smartGoals arrays
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
+  const safeSmartGoals = Array.isArray(smartGoals) ? smartGoals : [];
+  const safeStages = Array.isArray(stages) ? stages : [];
 
   // Ensure default stages exist
   const getDefaultStages = (): IKanbanStage[] => [
@@ -85,7 +91,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
     }
   ];
 
-  const currentStages = stages.length > 0 ? stages : getDefaultStages();
+  const currentStages = safeStages.length > 0 ? safeStages : getDefaultStages();
 
   const handleTaskCreated = () => {
     setShowCreateTask(false);
@@ -126,7 +132,6 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
     }
   };
 
-  const safeTasks = Array.isArray(tasks) ? tasks : [];
   const filteredTasks = filter === 'all' 
     ? safeTasks 
     : safeTasks.filter(task => task.priority === filter);
@@ -192,7 +197,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
 
       {/* Painel de Metas SMART Integrado */}
       <div className="mb-6">
-        <SmartGoalsDashboard goals={smartGoals} tasks={safeTasks} />
+        <SmartGoalsDashboard goals={safeSmartGoals} tasks={safeTasks} />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -223,7 +228,7 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
               <CardContent>
                 <EnhancedSmartGoalsManager
                   projectId={project.id}
-                  goals={smartGoals}
+                  goals={safeSmartGoals}
                   onAddGoal={async (goal) => {
                     await projectService.createSmartGoal(goal);
                     refreshSmartGoals();
