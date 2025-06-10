@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,7 +60,7 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
       return;
     }
 
-    if (smartGoals.length > 0 && !formData.smartGoalAssociation) {
+    if (smartGoals && smartGoals.length > 0 && !formData.smartGoalAssociation) {
       toast({
         title: "Atenção",
         description: "Recomendamos associar esta tarefa a uma Meta SMART para melhor direcionamento estratégico.",
@@ -160,7 +159,7 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
               />
             </div>
 
-            {smartGoals.length > 0 && (
+            {smartGoals && smartGoals.length > 0 && (
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Target className="h-4 w-4 text-red-600" />
