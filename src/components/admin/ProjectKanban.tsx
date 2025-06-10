@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,15 +42,50 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
   );
 
   // Ensure default stages exist
-  const defaultStages = [
-    { id: 'ideas', name: 'Quadro de Ideias', order: 1 },
-    { id: 'todo', name: 'A Fazer', order: 2 },
-    { id: 'in_progress', name: 'Em Andamento', order: 3 },
-    { id: 'review', name: 'Revisão', order: 4 },
-    { id: 'completed', name: 'Concluído', order: 5 }
+  const getDefaultStages = (): IKanbanStage[] => [
+    { 
+      id: 'ideas', 
+      projectId: project.id,
+      name: 'Quadro de Ideias', 
+      order: 1,
+      color: '#8B5CF6',
+      createdAt: new Date().toISOString()
+    },
+    { 
+      id: 'todo', 
+      projectId: project.id,
+      name: 'A Fazer', 
+      order: 2,
+      color: '#3B82F6',
+      createdAt: new Date().toISOString()
+    },
+    { 
+      id: 'in_progress', 
+      projectId: project.id,
+      name: 'Em Andamento', 
+      order: 3,
+      color: '#F59E0B',
+      createdAt: new Date().toISOString()
+    },
+    { 
+      id: 'review', 
+      projectId: project.id,
+      name: 'Revisão', 
+      order: 4,
+      color: '#F97316',
+      createdAt: new Date().toISOString()
+    },
+    { 
+      id: 'completed', 
+      projectId: project.id,
+      name: 'Concluído', 
+      order: 5,
+      color: '#10B981',
+      createdAt: new Date().toISOString()
+    }
   ];
 
-  const currentStages = stages.length > 0 ? stages : defaultStages;
+  const currentStages = stages.length > 0 ? stages : getDefaultStages();
 
   const handleTaskCreated = () => {
     setShowCreateTask(false);

@@ -12,7 +12,7 @@ interface SmartGoalsDashboardProps {
 }
 
 const SmartGoalsDashboard = ({ goals, tasks }: SmartGoalsDashboardProps) => {
-  const getGoalTypeColor = (type: string) => {
+  const getGoalTypeColor = (goalId: string) => {
     const colors = {
       'specific': 'bg-red-100 text-red-800 border-red-200',
       'measurable': 'bg-blue-100 text-blue-800 border-blue-200',
@@ -20,26 +20,19 @@ const SmartGoalsDashboard = ({ goals, tasks }: SmartGoalsDashboardProps) => {
       'relevant': 'bg-purple-100 text-purple-800 border-purple-200',
       'timeBound': 'bg-orange-100 text-orange-800 border-orange-200'
     };
-    return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-200';
+    return colors['specific'] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
-  const getGoalTypeLabel = (type: string) => {
-    const labels = {
-      'specific': 'Específica',
-      'measurable': 'Mensurável',
-      'achievable': 'Atingível',
-      'relevant': 'Relevante',
-      'timeBound': 'Temporal'
-    };
-    return labels[type as keyof typeof labels] || type;
+  const getGoalTypeLabel = (goalId: string) => {
+    return 'Meta SMART';
   };
 
-  const getTasksForGoal = (goalType: string) => {
-    return tasks.filter(task => task.smartGoalAssociation === goalType);
+  const getTasksForGoal = (goalId: string) => {
+    return tasks.filter(task => task.smartGoalAssociation && task.smartGoalAssociation.includes(goalId));
   };
 
-  const getGoalProgress = (goalType: string) => {
-    const goalTasks = getTasksForGoal(goalType);
+  const getGoalProgress = (goalId: string) => {
+    const goalTasks = getTasksForGoal(goalId);
     if (goalTasks.length === 0) return 0;
     const completedTasks = goalTasks.filter(task => task.status === 'completed').length;
     return Math.round((completedTasks / goalTasks.length) * 100);
@@ -81,16 +74,16 @@ const SmartGoalsDashboard = ({ goals, tasks }: SmartGoalsDashboardProps) => {
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {goals.map((goal) => {
-          const goalTasks = getTasksForGoal(goal.type);
-          const progress = getGoalProgress(goal.type);
+          const goalTasks = getTasksForGoal(goal.id);
+          const progress = getGoalProgress(goal.id);
           const completedTasks = goalTasks.filter(task => task.status === 'completed').length;
           
           return (
             <Card key={goal.id} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-red-600 bg-gradient-to-br from-white to-gray-50">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <Badge className={`${getGoalTypeColor(goal.type)} font-medium`}>
-                    {getGoalTypeLabel(goal.type)}
+                  <Badge className={`${getGoalTypeColor(goal.id)} font-medium`}>
+                    {getGoalTypeLabel(goal.id)}
                   </Badge>
                   <div className="flex items-center gap-1 text-sm text-gray-600">
                     <CheckCircle2 className="h-4 w-4" />
@@ -101,8 +94,8 @@ const SmartGoalsDashboard = ({ goals, tasks }: SmartGoalsDashboardProps) => {
               </CardHeader>
               
               <CardContent className="space-y-4">
-                {goal.description && (
-                  <p className="text-sm text-gray-600 line-clamp-2">{goal.description}</p>
+                {goal.specific && (
+                  <p className="text-sm text-gray-600 line-clamp-2">{goal.specific}</p>
                 )}
                 
                 <div className="space-y-3">
@@ -127,15 +120,15 @@ const SmartGoalsDashboard = ({ goals, tasks }: SmartGoalsDashboardProps) => {
                   )}
                 </div>
 
-                {goal.targetValue && (
+                {goal.measurable && (
                   <div className="bg-blue-50 p-2 rounded border border-blue-200">
                     <div className="flex items-center gap-1 text-xs">
                       <Target className="h-3 w-3 text-blue-600" />
-                      <span className="font-medium text-blue-800">Meta: {goal.targetValue}</span>
+                      <span className="font-medium text-blue-800">Meta: {goal.measurable}</span>
                     </div>
-                    {goal.currentValue && (
+                    {goal.achievable && (
                       <div className="text-xs text-blue-700 mt-1">
-                        Atual: {goal.currentValue}
+                        Atingível: {goal.achievable}
                       </div>
                     )}
                   </div>
