@@ -288,5 +288,3 @@ const ProjectCalendar = ({ projects, onCreateProject, onProjectClick }: ProjectC
 };
 
 export default ProjectCalendar;
-
-</edits_to_apply>
