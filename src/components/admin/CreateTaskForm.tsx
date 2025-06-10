@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
     dueDate: '',
     order: 0,
     estimatedHours: 0,
-    smartGoalAssociation: '' as any
+    smartGoalAssociation: 'none' as any
   });
   const [loading, setLoading] = useState(false);
   const projectService = getProjectService();
@@ -60,7 +61,7 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
       return;
     }
 
-    if (smartGoals && smartGoals.length > 0 && !formData.smartGoalAssociation) {
+    if (smartGoals && smartGoals.length > 0 && formData.smartGoalAssociation === 'none') {
       toast({
         title: "Atenção",
         description: "Recomendamos associar esta tarefa a uma Meta SMART para melhor direcionamento estratégico.",
@@ -72,7 +73,7 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
       await projectService.createTask({
         ...formData,
         projectId: project.id,
-        smartGoalAssociation: formData.smartGoalAssociation || undefined
+        smartGoalAssociation: formData.smartGoalAssociation === 'none' ? undefined : formData.smartGoalAssociation
       });
       toast({
         title: "Sucesso",
@@ -173,7 +174,7 @@ const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTask
                     <SelectValue placeholder="Selecione qual meta esta tarefa ajuda a atingir" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhuma associação</SelectItem>
+                    <SelectItem value="none">Nenhuma associação</SelectItem>
                     <SelectItem value="specific">Específica (Specific)</SelectItem>
                     <SelectItem value="measurable">Mensurável (Measurable)</SelectItem>
                     <SelectItem value="achievable">Atingível (Achievable)</SelectItem>
