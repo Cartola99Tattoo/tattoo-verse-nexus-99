@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,7 @@ const ProjectCalendar = ({ projects, onCreateProject, onProjectClick }: ProjectC
   const projectService = getProjectService();
 
   // Buscar todas as tarefas de todos os projetos
-  const { data: allTasks = [] } = useDataQuery<IProjectTask[]>(
+  const { data: allTasks } = useDataQuery<IProjectTask[]>(
     async () => {
       const taskPromises = projects.map(project => 
         projectService.fetchProjectTasks(project.id)
@@ -30,6 +29,9 @@ const ProjectCalendar = ({ projects, onCreateProject, onProjectClick }: ProjectC
     },
     [projects]
   );
+
+  // Ensure safe access to allTasks array
+  const safeTasks = Array.isArray(allTasks) ? allTasks : [];
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -61,7 +63,7 @@ const ProjectCalendar = ({ projects, onCreateProject, onProjectClick }: ProjectC
   };
 
   const getTasksForDate = (date: Date) => {
-    return allTasks.filter(task => {
+    return safeTasks.filter(task => {
       if (!task.dueDate) return false;
       const taskDate = new Date(task.dueDate);
       return taskDate.toDateString() === date.toDateString();
@@ -193,7 +195,7 @@ const ProjectCalendar = ({ projects, onCreateProject, onProjectClick }: ProjectC
   ];
 
   const todayTasks = getTasksForDate(new Date());
-  const overdueTasks = allTasks.filter(task => {
+  const overdueTasks = safeTasks.filter(task => {
     if (!task.dueDate || task.status === 'completed') return false;
     return new Date(task.dueDate) < new Date();
   });
@@ -286,3 +288,5 @@ const ProjectCalendar = ({ projects, onCreateProject, onProjectClick }: ProjectC
 };
 
 export default ProjectCalendar;
+
+</edits_to_apply>
