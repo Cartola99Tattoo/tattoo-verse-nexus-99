@@ -23,7 +23,7 @@ const BudgetItemForm = ({ open, onOpenChange, onSubmit, projectId, smartGoals = 
     estimatedCost: editItem?.estimatedCost || 0,
     realCost: editItem?.realCost || 0,
     status: editItem?.status || 'estimated' as const,
-    smartGoalId: editItem?.smartGoalId || ''
+    smartGoalId: editItem?.smartGoalId || 'none'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -34,10 +34,10 @@ const BudgetItemForm = ({ open, onOpenChange, onSubmit, projectId, smartGoals = 
       estimatedCost: formData.estimatedCost,
       realCost: formData.realCost,
       status: formData.status,
-      smartGoalId: formData.smartGoalId || undefined
+      smartGoalId: formData.smartGoalId === 'none' ? undefined : formData.smartGoalId
     });
     onOpenChange(false);
-    setFormData({ description: '', estimatedCost: 0, realCost: 0, status: 'estimated', smartGoalId: '' });
+    setFormData({ description: '', estimatedCost: 0, realCost: 0, status: 'estimated', smartGoalId: 'none' });
   };
 
   return (
@@ -69,7 +69,7 @@ const BudgetItemForm = ({ open, onOpenChange, onSubmit, projectId, smartGoals = 
                   <SelectValue placeholder="Selecionar meta SMART (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma meta associada</SelectItem>
+                  <SelectItem value="none">Nenhuma meta associada</SelectItem>
                   {smartGoals.map((goal) => (
                     <SelectItem key={goal.id} value={goal.id}>
                       {goal.title}

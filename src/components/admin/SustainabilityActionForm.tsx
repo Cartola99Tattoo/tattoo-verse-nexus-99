@@ -31,7 +31,7 @@ const SustainabilityActionForm = ({
     responsible: editAction?.responsible || '',
     deadline: editAction?.deadline || '',
     status: editAction?.status || 'pending' as const,
-    smartGoalId: editAction?.smartGoalId || ''
+    smartGoalId: editAction?.smartGoalId || 'none'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,7 +43,7 @@ const SustainabilityActionForm = ({
       responsible: formData.responsible,
       deadline: formData.deadline || undefined,
       status: formData.status,
-      smartGoalId: formData.smartGoalId || undefined
+      smartGoalId: formData.smartGoalId === 'none' ? undefined : formData.smartGoalId
     });
     onOpenChange(false);
     setFormData({ 
@@ -52,7 +52,7 @@ const SustainabilityActionForm = ({
       responsible: '', 
       deadline: '', 
       status: 'pending',
-      smartGoalId: ''
+      smartGoalId: 'none'
     });
   };
 
@@ -96,7 +96,7 @@ const SustainabilityActionForm = ({
                   <SelectValue placeholder="Selecionar meta SMART (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma meta associada</SelectItem>
+                  <SelectItem value="none">Nenhuma meta associada</SelectItem>
                   {smartGoals.map((goal) => (
                     <SelectItem key={goal.id} value={goal.id}>
                       {goal.title}

@@ -30,7 +30,7 @@ const ExpansionResourceForm = ({
     justification: editResource?.justification || '',
     estimatedCost: editResource?.estimatedCost || 0,
     status: editResource?.status || 'planning' as const,
-    smartGoalId: editResource?.smartGoalId || ''
+    smartGoalId: editResource?.smartGoalId || 'none'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,7 +41,7 @@ const ExpansionResourceForm = ({
       justification: formData.justification,
       estimatedCost: formData.estimatedCost,
       status: formData.status,
-      smartGoalId: formData.smartGoalId || undefined
+      smartGoalId: formData.smartGoalId === 'none' ? undefined : formData.smartGoalId
     });
     onOpenChange(false);
     setFormData({ 
@@ -49,7 +49,7 @@ const ExpansionResourceForm = ({
       justification: '', 
       estimatedCost: 0, 
       status: 'planning',
-      smartGoalId: ''
+      smartGoalId: 'none'
     });
   };
 
@@ -93,7 +93,7 @@ const ExpansionResourceForm = ({
                   <SelectValue placeholder="Selecionar meta SMART (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma meta associada</SelectItem>
+                  <SelectItem value="none">Nenhuma meta associada</SelectItem>
                   {smartGoals.map((goal) => (
                     <SelectItem key={goal.id} value={goal.id}>
                       {goal.title}

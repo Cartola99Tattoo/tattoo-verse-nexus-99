@@ -32,7 +32,7 @@ const ImprovementActionForm = ({
     priority: editAction?.priority || 'medium' as const,
     status: editAction?.status || 'pending' as const,
     dueDate: editAction?.dueDate || '',
-    smartGoalId: editAction?.smartGoalId || ''
+    smartGoalId: editAction?.smartGoalId || 'none'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -45,7 +45,7 @@ const ImprovementActionForm = ({
       priority: formData.priority,
       status: formData.status,
       dueDate: formData.dueDate || undefined,
-      smartGoalId: formData.smartGoalId || undefined
+      smartGoalId: formData.smartGoalId === 'none' ? undefined : formData.smartGoalId
     });
     onOpenChange(false);
     setFormData({ 
@@ -55,7 +55,7 @@ const ImprovementActionForm = ({
       priority: 'medium',
       status: 'pending',
       dueDate: '',
-      smartGoalId: ''
+      smartGoalId: 'none'
     });
   };
 
@@ -99,7 +99,7 @@ const ImprovementActionForm = ({
                   <SelectValue placeholder="Selecionar meta SMART (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma meta associada</SelectItem>
+                  <SelectItem value="none">Nenhuma meta associada</SelectItem>
                   {smartGoals.map((goal) => (
                     <SelectItem key={goal.id} value={goal.id}>
                       {goal.title}
