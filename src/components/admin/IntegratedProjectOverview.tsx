@@ -19,7 +19,12 @@ import {
 import { IProject, IProjectTask, IProjectSmartGoal } from "@/services/interfaces/IProjectService";
 import EnhancedSmartGoalsDashboard from "@/components/admin/EnhancedSmartGoalsDashboard";
 import EnhancedSmartGoalsManager from "@/components/admin/EnhancedSmartGoalsManager";
+import BudgetItemForm from "@/components/admin/BudgetItemForm";
+import ImprovementActionForm from "@/components/admin/ImprovementActionForm";
+import ExpansionResourceForm from "@/components/admin/ExpansionResourceForm";
+import SustainabilityActionForm from "@/components/admin/SustainabilityActionForm";
 import { getProjectService } from "@/services/serviceFactory";
+import { toast } from "@/hooks/use-toast";
 
 interface IntegratedProjectOverviewProps {
   project: IProject;
@@ -39,6 +44,11 @@ const IntegratedProjectOverview = ({
   onRefreshGoals 
 }: IntegratedProjectOverviewProps) => {
   const [activeSection, setActiveSection] = useState<string>('smart-goals');
+  const [showBudgetForm, setShowBudgetForm] = useState(false);
+  const [showImprovementForm, setShowImprovementForm] = useState(false);
+  const [showExpansionForm, setShowExpansionForm] = useState(false);
+  const [showSustainabilityForm, setShowSustainabilityForm] = useState(false);
+  
   const projectService = getProjectService();
 
   const overallProgress = goals.length > 0 
@@ -77,6 +87,71 @@ const IntegratedProjectOverview = ({
     { id: 'expansion', name: 'Recursos para Expansão', icon: Users, color: 'purple' },
     { id: 'sustainability', name: 'Sustentabilidade', icon: Leaf, color: 'green' }
   ];
+
+  // Handlers para adicionar itens com associação SMART
+  const handleAddBudgetItem = async (item: any) => {
+    try {
+      await projectService.createBudgetItem(item);
+      toast({
+        title: "Item de orçamento adicionado",
+        description: "Item adicionado com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar item de orçamento.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAddImprovementAction = async (action: any) => {
+    try {
+      await projectService.createImprovementAction(action);
+      toast({
+        title: "Ação de melhoria adicionada",
+        description: "Ação adicionada com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar ação de melhoria.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAddExpansionResource = async (resource: any) => {
+    try {
+      await projectService.createExpansionResource(resource);
+      toast({
+        title: "Recurso de expansão adicionado",
+        description: "Recurso adicionado com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar recurso de expansão.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAddSustainabilityAction = async (action: any) => {
+    try {
+      await projectService.createSustainabilityAction(action);
+      toast({
+        title: "Ação de sustentabilidade adicionada",
+        description: "Ação adicionada com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar ação de sustentabilidade.",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -211,7 +286,10 @@ const IntegratedProjectOverview = ({
                 <p className="text-gray-600 mb-6">
                   Configure e acompanhe o orçamento, custos e investimentos do projeto
                 </p>
-                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                <Button 
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => setShowBudgetForm(true)}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar Item de Orçamento
                 </Button>
@@ -263,7 +341,10 @@ const IntegratedProjectOverview = ({
                 <p className="text-gray-600 mb-6">
                   Planeje e implemente melhorias contínuas no projeto e processos
                 </p>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => setShowImprovementForm(true)}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar Ação de Melhoria
                 </Button>
@@ -289,7 +370,10 @@ const IntegratedProjectOverview = ({
                 <p className="text-gray-600 mb-6">
                   Recursos, investimentos e estratégias para crescimento e expansão
                 </p>
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                <Button 
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  onClick={() => setShowExpansionForm(true)}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar Recurso de Expansão
                 </Button>
@@ -315,7 +399,10 @@ const IntegratedProjectOverview = ({
                 <p className="text-gray-600 mb-6">
                   Iniciativas sustentáveis, responsabilidade social e relacionamento com stakeholders
                 </p>
-                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                <Button 
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => setShowSustainabilityForm(true)}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar Ação Sustentável
                 </Button>
@@ -324,6 +411,39 @@ const IntegratedProjectOverview = ({
           </Card>
         )}
       </div>
+
+      {/* Formulários */}
+      <BudgetItemForm
+        open={showBudgetForm}
+        onOpenChange={setShowBudgetForm}
+        onSubmit={handleAddBudgetItem}
+        projectId={project.id}
+        smartGoals={goals}
+      />
+
+      <ImprovementActionForm
+        open={showImprovementForm}
+        onOpenChange={setShowImprovementForm}
+        onSubmit={handleAddImprovementAction}
+        projectId={project.id}
+        smartGoals={goals}
+      />
+
+      <ExpansionResourceForm
+        open={showExpansionForm}
+        onOpenChange={setShowExpansionForm}
+        onSubmit={handleAddExpansionResource}
+        projectId={project.id}
+        smartGoals={goals}
+      />
+
+      <SustainabilityActionForm
+        open={showSustainabilityForm}
+        onOpenChange={setShowSustainabilityForm}
+        onSubmit={handleAddSustainabilityAction}
+        projectId={project.id}
+        smartGoals={goals}
+      />
     </div>
   );
 };

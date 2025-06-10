@@ -6,23 +6,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { IProjectSustainabilityAction } from "@/services/interfaces/IProjectService";
+import { IProjectSustainabilityAction, IProjectSmartGoal } from "@/services/interfaces/IProjectService";
 
 interface SustainabilityActionFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (action: Omit<IProjectSustainabilityAction, 'id' | 'createdAt'>) => void;
   projectId: string;
+  smartGoals?: IProjectSmartGoal[];
   editAction?: IProjectSustainabilityAction;
 }
 
-const SustainabilityActionForm = ({ open, onOpenChange, onSubmit, projectId, editAction }: SustainabilityActionFormProps) => {
+const SustainabilityActionForm = ({ 
+  open, 
+  onOpenChange, 
+  onSubmit, 
+  projectId, 
+  smartGoals = [],
+  editAction 
+}: SustainabilityActionFormProps) => {
   const [formData, setFormData] = useState({
     title: editAction?.title || '',
     description: editAction?.description || '',
     responsible: editAction?.responsible || '',
     deadline: editAction?.deadline || '',
-    status: editAction?.status || 'pending' as const
+    status: editAction?.status || 'pending' as const,
+    smartGoalId: editAction?.smartGoalId || ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,17 +42,27 @@ const SustainabilityActionForm = ({ open, onOpenChange, onSubmit, projectId, edi
       description: formData.description,
       responsible: formData.responsible,
       deadline: formData.deadline || undefined,
-      status: formData.status
+      status: formData.status,
+      smartGoalId: formData.smartGoalId || undefined
     });
     onOpenChange(false);
-    setFormData({ title: '', description: '', responsible: '', deadline: '', status: 'pending' });
+    setFormData({ 
+      title: '', 
+      description: '', 
+      responsible: '', 
+      deadline: '', 
+      status: 'pending',
+      smartGoalId: ''
+    });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{editAction ? 'Editar Ação de Sustentabilidade' : 'Nova Ação de Sustentabilidade'}</DialogTitle>
+          <DialogTitle className="text-red-800">
+            {editAction ? 'Editar Ação de Sustentabilidade' : 'Nova Ação de Sustentabilidade'}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -54,6 +73,7 @@ const SustainabilityActionForm = ({ open, onOpenChange, onSubmit, projectId, edi
               onChange={(e) => setFormData({...formData, title: e.target.value})}
               placeholder="Ex: Cronograma de posts pós-evento"
               required
+              className="border-red-200 focus:border-red-400"
             />
           </div>
           
@@ -64,8 +84,28 @@ const SustainabilityActionForm = ({ open, onOpenChange, onSubmit, projectId, edi
               value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
               placeholder="Descreva a ação de sustentabilidade..."
+              className="border-red-200 focus:border-red-400"
             />
           </div>
+
+          {smartGoals.length > 0 && (
+            <div className="space-y-2">
+              <Label>Meta SMART Associada</Label>
+              <Select value={formData.smartGoalId} onValueChange={(value) => setFormData({...formData, smartGoalId: value})}>
+                <SelectTrigger className="border-red-200 focus:border-red-400">
+                  <SelectValue placeholder="Selecionar meta SMART (opcional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhuma meta associada</SelectItem>
+                  {smartGoals.map((goal) => (
+                    <SelectItem key={goal.id} value={goal.id}>
+                      {goal.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -75,6 +115,7 @@ const SustainabilityActionForm = ({ open, onOpenChange, onSubmit, projectId, edi
                 value={formData.responsible}
                 onChange={(e) => setFormData({...formData, responsible: e.target.value})}
                 placeholder="Nome do responsável"
+                className="border-red-200 focus:border-red-400"
               />
             </div>
             <div className="space-y-2">
@@ -84,6 +125,7 @@ const SustainabilityActionForm = ({ open, onOpenChange, onSubmit, projectId, edi
                 type="date"
                 value={formData.deadline}
                 onChange={(e) => setFormData({...formData, deadline: e.target.value})}
+                className="border-red-200 focus:border-red-400"
               />
             </div>
           </div>
@@ -91,7 +133,7 @@ const SustainabilityActionForm = ({ open, onOpenChange, onSubmit, projectId, edi
           <div className="space-y-2">
             <Label>Status</Label>
             <Select value={formData.status} onValueChange={(value: any) => setFormData({...formData, status: value})}>
-              <SelectTrigger>
+              <SelectTrigger className="border-red-200 focus:border-red-400">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -103,7 +145,7 @@ const SustainabilityActionForm = ({ open, onOpenChange, onSubmit, projectId, edi
           </div>
           
           <div className="flex gap-2 pt-4">
-            <Button type="submit" className="flex-1">
+            <Button type="submit" className="flex-1 bg-red-600 hover:bg-red-700">
               {editAction ? 'Atualizar' : 'Adicionar'} Ação
             </Button>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

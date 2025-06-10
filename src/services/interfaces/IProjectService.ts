@@ -1,3 +1,4 @@
+
 import { CRUDOperations } from '../base/BaseService';
 
 export interface IProject {
@@ -86,7 +87,7 @@ export interface IProjectTask {
   order: number;
   storyPoints?: number;
   estimatedHours?: number;
-  smartGoalAssociation?: 'specific' | 'measurable' | 'achievable' | 'relevant' | 'timeBound';
+  smartGoalAssociation?: string[];
 }
 
 export interface IKanbanStage {
@@ -105,6 +106,7 @@ export interface IProjectBudgetItem {
   estimatedCost: number;
   realCost: number;
   status: 'estimated' | 'paid' | 'pending';
+  smartGoalId?: string;
   createdAt: string;
 }
 
@@ -117,6 +119,7 @@ export interface IProjectImprovementAction {
   priority: 'low' | 'medium' | 'high';
   status: 'pending' | 'in_progress' | 'completed';
   dueDate?: string;
+  smartGoalId?: string;
   createdAt: string;
 }
 
@@ -127,6 +130,7 @@ export interface IProjectExpansionResource {
   justification: string;
   estimatedCost: number;
   status: 'planning' | 'researching' | 'approved' | 'acquired';
+  smartGoalId?: string;
   createdAt: string;
 }
 
@@ -138,6 +142,7 @@ export interface IProjectSustainabilityAction {
   responsible?: string;
   deadline?: string;
   status: 'pending' | 'in_progress' | 'completed';
+  smartGoalId?: string;
   createdAt: string;
 }
 

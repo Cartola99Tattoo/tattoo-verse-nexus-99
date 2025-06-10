@@ -1,301 +1,287 @@
 
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save, Target } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft } from "lucide-react";
 import { getProjectService } from "@/services/serviceFactory";
 import { IProject, IKanbanStage, IProjectSmartGoal } from "@/services/interfaces/IProjectService";
-import { toast } from "@/hooks/use-toast";
+import { mockTeamMembers } from "@/data/mockTeamMembers";
 import { useDataQuery } from "@/hooks/useDataQuery";
+import { toast } from "@/hooks/use-toast";
 
 interface CreateTaskFormProps {
   project: IProject;
   stages: IKanbanStage[];
   onTaskCreated: () => void;
   onCancel: () => void;
+  initialStage?: string;
 }
 
-const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel }: CreateTaskFormProps) => {
+const CreateTaskForm = ({ project, stages, onTaskCreated, onCancel, initialStage }: CreateTaskFormProps) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    status: stages[0]?.id || '',
+    status: initialStage || stages[0]?.id || 'ideas',
     priority: 'medium' as const,
     assignedTo: '',
     dueDate: '',
-    order: 0,
-    estimatedHours: 0,
-    smartGoalAssociation: 'none' as any
+    estimatedHours: '',
+    smartGoalAssociation: [] as string[]
   });
-  const [loading, setLoading] = useState(false);
+
   const projectService = getProjectService();
 
-  // Buscar metas SMART do projeto
   const { data: smartGoals = [] } = useDataQuery<IProjectSmartGoal[]>(
     () => projectService.fetchProjectSmartGoals(project.id),
     [project.id]
   );
 
-  // Mock data para responsáveis (tatuadores)
-  const mockResponsaveis = [
-    'Marcus Silva - Tatuador Sênior',
-    'Ana Costa - Tatuadora Especialista',
-    'João Santos - Tatuador Júnior',
-    'Maria Oliveira - Tatuadora Realismo',
-    'Pedro Lima - Tatuador Tradicional',
-    'Carla Souza - Tatuadora Fine Line'
-  ];
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim()) {
-      toast({
-        title: "Erro",
-        description: "Título da tarefa é obrigatório",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (smartGoals && smartGoals.length > 0 && formData.smartGoalAssociation === 'none') {
-      toast({
-        title: "Atenção",
-        description: "Recomendamos associar esta tarefa a uma Meta SMART para melhor direcionamento estratégico.",
-      });
-    }
-
-    setLoading(true);
+    
     try {
-      await projectService.createTask({
-        ...formData,
+      const taskData = {
         projectId: project.id,
-        smartGoalAssociation: formData.smartGoalAssociation === 'none' ? undefined : formData.smartGoalAssociation
-      });
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        priority: formData.priority,
+        assignedTo: formData.assignedTo || undefined,
+        dueDate: formData.dueDate || undefined,
+        estimatedHours: formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined,
+        smartGoalAssociation: formData.smartGoalAssociation.length > 0 ? formData.smartGoalAssociation : undefined,
+        order: 0
+      };
+
+      await projectService.createTask(taskData);
+      
       toast({
-        title: "Sucesso",
-        description: "Tarefa criada com sucesso!",
+        title: "Tarefa criada",
+        description: "A tarefa foi criada com sucesso.",
       });
+      
       onTaskCreated();
     } catch (error) {
+      console.error('Error creating task:', error);
       toast({
         title: "Erro",
-        description: "Erro ao criar tarefa. Tente novamente.",
-        variant: "destructive",
+        description: "Erro ao criar a tarefa. Tente novamente.",
+        variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical': return 'text-red-600';
-      case 'high': return 'text-orange-600';
-      case 'medium': return 'text-yellow-600';
-      case 'low': return 'text-green-600';
-      default: return 'text-gray-600';
-    }
-  };
-
-  const getSmartGoalTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      'specific': 'Específica (Specific)',
-      'measurable': 'Mensurável (Measurable)', 
-      'achievable': 'Atingível (Achievable)',
-      'relevant': 'Relevante (Relevant)',
-      'timeBound': 'Temporal (Time-bound)'
-    };
-    return labels[type] || type;
+  const handleSmartGoalToggle = (goalId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      smartGoalAssociation: prev.smartGoalAssociation.includes(goalId)
+        ? prev.smartGoalAssociation.filter(id => id !== goalId)
+        : [...prev.smartGoalAssociation, goalId]
+    }));
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" onClick={onCancel}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nova Tarefa</h1>
-          <p className="text-gray-600">Adicionar tarefa ao projeto "{project.name}"</p>
+    <div className="p-6 bg-gradient-to-br from-gray-50 to-white min-h-screen">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="outline" onClick={onCancel} className="border-red-300 text-red-600 hover:bg-red-50">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+          <h1 className="text-3xl font-bold text-gray-900 font-heading">Nova Tarefa</h1>
         </div>
-      </div>
 
-      <Card className="max-w-4xl">
-        <CardHeader>
-          <CardTitle>Detalhes da Tarefa</CardTitle>
-          <CardDescription>
-            Preencha as informações detalhadas da nova tarefa. Associe-a a uma Meta SMART para direcionamento estratégico.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="title">Título da Tarefa *</Label>
-              <Input
-                id="title"
-                placeholder="Ex: Criar 10 designs flash para evento"
-                value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição Detalhada</Label>
-              <Textarea
-                id="description"
-                placeholder="Descreva os detalhes da tarefa, objetivos específicos, materiais necessários, etc..."
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                rows={4}
-              />
-            </div>
-
-            {smartGoals && smartGoals.length > 0 && (
+        <Card className="border-l-4 border-l-red-600 shadow-tattoo bg-gradient-to-br from-white to-red-50">
+          <CardHeader className="bg-gradient-to-r from-red-50 to-white border-b border-red-100">
+            <CardTitle className="text-red-800">Detalhes da Tarefa</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Título da Tarefa */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Target className="h-4 w-4 text-red-600" />
-                  Associação à Meta SMART *
+                <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
+                  Título da Tarefa *
                 </Label>
-                <Select
-                  value={formData.smartGoalAssociation}
-                  onValueChange={(value) => handleInputChange('smartGoalAssociation', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione qual meta esta tarefa ajuda a atingir" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Nenhuma associação</SelectItem>
-                    <SelectItem value="specific">Específica (Specific)</SelectItem>
-                    <SelectItem value="measurable">Mensurável (Measurable)</SelectItem>
-                    <SelectItem value="achievable">Atingível (Achievable)</SelectItem>
-                    <SelectItem value="relevant">Relevante (Relevant)</SelectItem>
-                    <SelectItem value="timeBound">Temporal (Time-bound)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-gray-500">
-                  Escolha qual critério SMART esta tarefa contribui mais diretamente para alcançar.
-                </p>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label>Etapa Inicial</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value) => handleInputChange('status', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {stages.map((stage) => (
-                      <SelectItem key={stage.id} value={stage.id}>
-                        {stage.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Prioridade *</Label>
-                <Select
-                  value={formData.priority}
-                  onValueChange={(value) => handleInputChange('priority', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">
-                      <span className={getPriorityColor('low')}>Baixa</span>
-                    </SelectItem>
-                    <SelectItem value="medium">
-                      <span className={getPriorityColor('medium')}>Média</span>
-                    </SelectItem>
-                    <SelectItem value="high">
-                      <span className={getPriorityColor('high')}>Alta</span>
-                    </SelectItem>
-                    <SelectItem value="critical">
-                      <span className={getPriorityColor('critical')}>Crítica</span>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="assignedTo">Responsável *</Label>
-                <Select
-                  value={formData.assignedTo}
-                  onValueChange={(value) => handleInputChange('assignedTo', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um responsável" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockResponsaveis.map((responsavel) => (
-                      <SelectItem key={responsavel} value={responsavel}>
-                        {responsavel}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dueDate">Data de Vencimento *</Label>
                 <Input
-                  id="dueDate"
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  placeholder="Ex: Criar material promocional para evento"
                   required
+                  className="border-red-200 focus:border-red-400"
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="estimatedHours">Tempo Estimado (horas) *</Label>
-              <Input
-                id="estimatedHours"
-                type="number"
-                min="0.5"
-                step="0.5"
-                placeholder="Ex: 8"
-                value={formData.estimatedHours}
-                onChange={(e) => handleInputChange('estimatedHours', parseFloat(e.target.value) || 0)}
-                required
-              />
-              <p className="text-xs text-gray-500">
-                Tempo médio estimado para completar esta tarefa (em horas).
-              </p>
-            </div>
+              {/* Descrição */}
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-sm font-semibold text-gray-700">
+                  Descrição
+                </Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  placeholder="Descreva os detalhes da tarefa..."
+                  rows={3}
+                  className="border-red-200 focus:border-red-400"
+                />
+              </div>
 
-            <div className="flex gap-3 pt-6">
-              <Button type="submit" disabled={loading} className="flex-1">
-                <Save className="h-4 w-4 mr-2" />
-                {loading ? 'Criando...' : 'Criar Tarefa'}
-              </Button>
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancelar
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+              {/* Etapa Inicial e Prioridade */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-gray-700">Etapa Inicial</Label>
+                  <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+                    <SelectTrigger className="border-red-200 focus:border-red-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {stages.map((stage) => (
+                        <SelectItem key={stage.id} value={stage.id}>
+                          {stage.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-gray-700">Prioridade</Label>
+                  <Select value={formData.priority} onValueChange={(value: any) => setFormData({...formData, priority: value})}>
+                    <SelectTrigger className="border-red-200 focus:border-red-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Baixa</SelectItem>
+                      <SelectItem value="medium">Média</SelectItem>
+                      <SelectItem value="high">Alta</SelectItem>
+                      <SelectItem value="critical">Crítica</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Responsável e Data de Vencimento */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-gray-700">Responsável</Label>
+                  <Select value={formData.assignedTo} onValueChange={(value) => setFormData({...formData, assignedTo: value})}>
+                    <SelectTrigger className="border-red-200 focus:border-red-400">
+                      <SelectValue placeholder="Selecionar responsável" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockTeamMembers.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {member.name} - {member.role}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="dueDate" className="text-sm font-semibold text-gray-700">
+                    Data de Vencimento
+                  </Label>
+                  <Input
+                    id="dueDate"
+                    type="date"
+                    value={formData.dueDate}
+                    onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
+                    className="border-red-200 focus:border-red-400"
+                  />
+                </div>
+              </div>
+
+              {/* Tempo Médio */}
+              <div className="space-y-2">
+                <Label htmlFor="estimatedHours" className="text-sm font-semibold text-gray-700">
+                  Tempo Médio para Realizar (horas)
+                </Label>
+                <Input
+                  id="estimatedHours"
+                  type="number"
+                  value={formData.estimatedHours}
+                  onChange={(e) => setFormData({...formData, estimatedHours: e.target.value})}
+                  placeholder="Ex: 8"
+                  min="0"
+                  step="0.5"
+                  className="border-red-200 focus:border-red-400"
+                />
+              </div>
+
+              {/* Associação à Meta SMART */}
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold text-red-600">
+                  Associação à Meta SMART
+                </Label>
+                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                  {smartGoals.length === 0 ? (
+                    <p className="text-sm text-gray-600 italic">
+                      Nenhuma Meta SMART definida para este projeto. 
+                      Considere criar metas SMART para orientar estrategicamente suas tarefas.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-sm text-red-700 font-medium">
+                        Selecione as metas SMART que esta tarefa ajudará a alcançar:
+                      </p>
+                      <div className="space-y-2">
+                        {smartGoals.map((goal) => (
+                          <div key={goal.id} className="flex items-start space-x-2">
+                            <Checkbox
+                              id={`goal-${goal.id}`}
+                              checked={formData.smartGoalAssociation.includes(goal.id)}
+                              onCheckedChange={() => handleSmartGoalToggle(goal.id)}
+                              className="mt-1"
+                            />
+                            <div className="flex-1">
+                              <Label 
+                                htmlFor={`goal-${goal.id}`} 
+                                className="text-sm font-medium cursor-pointer"
+                              >
+                                {goal.title}
+                              </Label>
+                              {goal.specific && (
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {goal.specific}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Botões */}
+              <div className="flex gap-3 pt-6 border-t border-red-100">
+                <Button 
+                  type="submit" 
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white shadow-red-glow"
+                >
+                  Criar Tarefa
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={onCancel}
+                  className="border-red-300 text-red-600 hover:bg-red-50"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
