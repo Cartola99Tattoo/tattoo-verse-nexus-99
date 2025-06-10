@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import ProjectKanbanSettings from "@/components/admin/ProjectKanbanSettings";
 import ProjectPlanningTabs from "@/components/admin/ProjectPlanningTabs";
 import SmartGoalsDashboard from "@/components/admin/SmartGoalsDashboard";
 import EnhancedSmartGoalsManager from "@/components/admin/EnhancedSmartGoalsManager";
+import EnhancedSmartGoalsDashboard from "@/components/admin/EnhancedSmartGoalsDashboard";
 
 interface ProjectKanbanProps {
   project: IProject;
@@ -112,6 +112,20 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
     refreshStages();
   };
 
+  const handleSmartGoalUpdate = async (goalId: string, updates: Partial<IProjectSmartGoal>) => {
+    try {
+      await projectService.updateSmartGoal(goalId, updates);
+      refreshSmartGoals();
+    } catch (error) {
+      console.error('Error updating smart goal:', error);
+    }
+  };
+
+  const handleAddSmartGoal = () => {
+    // Redirect to enhanced smart goals manager
+    setActiveTab('smart-goals');
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'planning': return 'bg-purple-100 text-purple-800';
@@ -195,16 +209,15 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
         </Card>
       )}
 
-      {/* Painel de Metas SMART Integrado */}
-      <div className="mb-6">
-        <SmartGoalsDashboard goals={safeSmartGoals} tasks={safeTasks} />
-      </div>
-
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Target className="h-4 w-4" />
             Visão Geral
+          </TabsTrigger>
+          <TabsTrigger value="smart-goals" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Gerenciar Metas
           </TabsTrigger>
           <TabsTrigger value="planning" className="flex items-center gap-2">
             <LayoutDashboard className="h-4 w-4" />
@@ -218,29 +231,38 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
 
         <TabsContent value="overview" className="mt-6">
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5 text-red-600" />
-                  Gerenciar Metas SMART
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <EnhancedSmartGoalsManager
-                  projectId={project.id}
-                  goals={safeSmartGoals}
-                  onAddGoal={async (goal) => {
-                    await projectService.createSmartGoal(goal);
-                    refreshSmartGoals();
-                  }}
-                  onUpdateGoal={async (id, goal) => {
-                    await projectService.updateSmartGoal(id, goal);
-                    refreshSmartGoals();
-                  }}
-                />
-              </CardContent>
-            </Card>
+            <EnhancedSmartGoalsDashboard
+              goals={safeSmartGoals}
+              tasks={safeTasks}
+              onUpdateGoal={handleSmartGoalUpdate}
+              onAddGoal={handleAddSmartGoal}
+            />
           </div>
+        </TabsContent>
+
+        <TabsContent value="smart-goals" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-red-600" />
+                Gerenciar Metas SMART
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EnhancedSmartGoalsManager
+                projectId={project.id}
+                goals={safeSmartGoals}
+                onAddGoal={async (goal) => {
+                  await projectService.createSmartGoal(goal);
+                  refreshSmartGoals();
+                }}
+                onUpdateGoal={async (id, goal) => {
+                  await projectService.updateSmartGoal(id, goal);
+                  refreshSmartGoals();
+                }}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="planning" className="mt-6">
