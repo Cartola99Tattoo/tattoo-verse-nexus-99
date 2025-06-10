@@ -34,6 +34,16 @@ const Header = () => {
     return location.pathname === path;
   };
 
+  const getNavLinkClass = (path: string) => {
+    const isActive = isActiveRoute(path);
+    
+    if (isActive) {
+      return "px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-bold rounded-lg shadow-lg hover:shadow-xl hover:from-red-700 hover:to-red-900 transition-all duration-300 transform hover:scale-105";
+    }
+    
+    return "relative px-4 py-2 rounded-md transition-all duration-300 text-white hover:text-red-300 hover:bg-red-600/20";
+  };
+
   return (
     <header className="bg-gradient-to-r from-black to-gray-900 shadow-2xl sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -48,109 +58,26 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            <Link 
-              to="/" 
-              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
-                isActiveRoute('/') 
-                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
-                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
-              }`}
-            >
+            <Link to="/" className={getNavLinkClass('/')}>
               Início
-              {isActiveRoute('/') && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
-              )}
             </Link>
-            <Link 
-              to="/consultoria" 
-              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
-                isActiveRoute('/consultoria') 
-                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
-                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
-              }`}
-            >
+            <Link to="/consultoria" className={getNavLinkClass('/consultoria')}>
               Consultoria
-              {isActiveRoute('/consultoria') && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
-              )}
             </Link>
-            <Link 
-              to="/artists" 
-              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
-                isActiveRoute('/artists') 
-                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
-                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
-              }`}
-            >
+            <Link to="/artists" className={getNavLinkClass('/artists')}>
               Artistas
-              {isActiveRoute('/artists') && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
-              )}
             </Link>
-            <Link 
-              to="/shop" 
-              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
-                isActiveRoute('/shop') 
-                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
-                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
-              }`}
-            >
+            <Link to="/shop" className={getNavLinkClass('/shop')}>
               Loja
-              {isActiveRoute('/shop') && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
-              )}
             </Link>
-            <Link 
-              to="/blog" 
-              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
-                isActiveRoute('/blog') 
-                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
-                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
-              }`}
-            >
+            <Link to="/blog" className={getNavLinkClass('/blog')}>
               Blog
-              {isActiveRoute('/blog') && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
-              )}
             </Link>
-            <Link 
-              to="/events" 
-              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
-                isActiveRoute('/events') 
-                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
-                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
-              }`}
-            >
+            <Link to="/events" className={getNavLinkClass('/events')}>
               Eventos
-              {isActiveRoute('/events') && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
-              )}
             </Link>
-            <Link 
-              to="/tatuagem-em-eventos" 
-              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
-                isActiveRoute('/tatuagem-em-eventos') 
-                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
-                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
-              }`}
-            >
-              Eventos Customizados
-              {isActiveRoute('/tatuagem-em-eventos') && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
-              )}
-            </Link>
-            <Link 
-              to="/contact" 
-              className={`relative px-4 py-2 rounded-md transition-all duration-300 ${
-                isActiveRoute('/contact') 
-                  ? 'text-red-300 bg-red-600/30 font-medium shadow-lg' 
-                  : 'text-white hover:text-red-300 hover:bg-red-600/20'
-              }`}
-            >
+            <Link to="/contact" className={getNavLinkClass('/contact')}>
               Contato
-              {isActiveRoute('/contact') && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full shadow-lg"></div>
-              )}
             </Link>
           </nav>
 
