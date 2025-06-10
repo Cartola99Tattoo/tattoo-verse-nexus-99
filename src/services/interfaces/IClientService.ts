@@ -22,6 +22,23 @@ export interface Client {
   next_appointment_date?: string;
   next_appointment_artist?: string;
   appointment_status?: 'scheduled' | 'confirmed' | 'cancelled';
+  
+  // Novos campos para qualificação de leads
+  lead_score?: number; // Pontuação de 0 a 100
+  last_activity?: string; // Data da última atividade
+  qualified_interests?: string[]; // Interesses identificados
+  origin?: string; // Origem do lead
+}
+
+export interface PageVisit {
+  id: string;
+  client_id?: string;
+  session_id: string;
+  url: string;
+  page_title?: string;
+  timestamp: string;
+  duration_seconds?: number;
+  user_agent?: string;
 }
 
 export interface Appointment {
@@ -104,4 +121,9 @@ export interface IClientService extends CRUDOperations<Client> {
   fetchAppointmentsByClient(clientId: string): Promise<Appointment[]>;
   updateAppointment(id: string, updates: Partial<Appointment>): Promise<Appointment>;
   deleteAppointment(id: string): Promise<void>;
+  
+  // Novos métodos para qualificação de leads
+  fetchClientPageVisits(clientId: string): Promise<PageVisit[]>;
+  updateLeadScore(clientId: string, score: number): Promise<void>;
+  updateQualifiedInterests(clientId: string, interests: string[]): Promise<void>;
 }

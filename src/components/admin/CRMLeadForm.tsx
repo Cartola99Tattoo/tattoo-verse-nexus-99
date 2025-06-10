@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Slider } from "@/components/ui/slider";
 import { getClientService } from "@/services/serviceFactory";
 import { toast } from "@/hooks/use-toast";
 
@@ -22,6 +23,8 @@ const formSchema = z.object({
   notes: z.string().optional(),
   tags: z.string().optional(),
   origin: z.string().optional(),
+  lead_score: z.number().min(0).max(100).optional(),
+  qualified_interests: z.string().optional(),
 });
 
 interface CRMLeadFormProps {
@@ -43,6 +46,8 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
       notes: "",
       tags: "",
       origin: "manual",
+      lead_score: 50,
+      qualified_interests: "",
     },
   });
 
@@ -51,8 +56,11 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
       const processedData = {
         ...leadData,
         tags: leadData.tags ? leadData.tags.split(',').map((tag: string) => tag.trim()) : [],
+        qualified_interests: leadData.qualified_interests ? 
+          leadData.qualified_interests.split(',').map((interest: string) => interest.trim()) : [],
         total_spent: 0,
         total_orders: 0,
+        last_activity: new Date().toISOString(),
       };
       return clientService.createClient(processedData);
     },
@@ -74,6 +82,16 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     createLeadMutation.mutate(values);
+  };
+
+  const watchedLeadScore = form.watch("lead_score") || 50;
+
+  const getScoreLabel = (score: number) => {
+    if (score >= 80) return "🔥 Muito Quente";
+    if (score >= 60) return "🔶 Quente";
+    if (score >= 40) return "🟡 Morno";
+    if (score >= 20) return "❄️ Frio";
+    return "🧊 Muito Frio";
   };
 
   return (
@@ -211,6 +229,33 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
           />
         </div>
 
+        {/* Pontuação do Lead */}
+        <FormField
+          control={form.control}
+          name="lead_score"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pontuação Inicial do Lead (0-100)</FormLabel>
+              <FormControl>
+                <div className="space-y-2">
+                  <Slider
+                    value={[field.value || 50]}
+                    onValueChange={(value) => field.onChange(value[0])}
+                    max={100}
+                    step={5}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">{watchedLeadScore}/100</span>
+                    <span className="text-sm text-gray-600">{getScoreLabel(watchedLeadScore)}</span>
+                  </div>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="preferred_style"
@@ -220,6 +265,23 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
               <FormControl>
                 <Input 
                   placeholder="Ex: Eventos corporativos, Realismo, etc." 
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="qualified_interests"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Interesses Qualificados (separados por vírgula)</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Ex: Tatuagem Floral, Eventos Corporativos, Realismo"
                   {...field} 
                 />
               </FormControl>
@@ -265,7 +327,6 @@ const CRMLeadForm: React.FC<CRMLeadFormProps> = ({ onSuccess }) => {
         <div className="flex justify-end gap-2">
           <Button 
             type="submit" 
-            variant="tattoo"
             disabled={createLeadMutation.isPending}
           >
             {createLeadMutation.isPending ? "Criando..." : "Criar Lead"}

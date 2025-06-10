@@ -14,9 +14,11 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { 
   User, Phone, Mail, MapPin, Calendar, Clock, MessageSquare, 
   Edit, Save, X, Plus, ExternalLink, Target, Heart, Briefcase,
-  Users, TrendingUp, FileText, Tag
+  Users, TrendingUp, FileText, Tag, Activity, Brain
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import LeadQualificationForm from "./LeadQualificationForm";
+import PageVisitsHistory from "./PageVisitsHistory";
 
 interface CRMClientDetailProps {
   clientId: string;
@@ -76,6 +78,30 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
     },
   });
 
+  // Mutação para atualizar pontuação
+  const updateLeadScoreMutation = useMutation({
+    mutationFn: (score: number) => clientService.updateLeadScore(clientId, score),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-client', clientId] });
+      toast({
+        title: "Pontuação atualizada",
+        description: "A pontuação do lead foi atualizada com sucesso.",
+      });
+    },
+  });
+
+  // Mutação para atualizar interesses
+  const updateInterestsMutation = useMutation({
+    mutationFn: (interests: string[]) => clientService.updateQualifiedInterests(clientId, interests),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-client', clientId] });
+      toast({
+        title: "Interesses atualizados",
+        description: "Os interesses qualificados foram atualizados com sucesso.",
+      });
+    },
+  });
+
   const handleAddInteraction = () => {
     if (!newInteraction.trim()) return;
     
@@ -93,16 +119,24 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
     updateClientMutation.mutate({ status: newStatus });
   };
 
+  const handleUpdateLeadScore = (score: number) => {
+    updateLeadScoreMutation.mutate(score);
+  };
+
+  const handleUpdateInterests = (interests: string[]) => {
+    updateInterestsMutation.mutate(interests);
+  };
+
   const getStatusBadge = (status: string) => {
     const variants = {
-      new: { variant: "tattooInfo", label: "Novo Lead" },
-      interested: { variant: "tattooWarning", label: "Interessado" },
-      pending: { variant: "tattooWarning", label: "Proposta Enviada" },
-      active: { variant: "tattooSuccess", label: "Em Negociação" },
-      completed: { variant: "tattooSuccess", label: "Convertido" },
+      new: { variant: "secondary", label: "Novo Lead" },
+      interested: { variant: "secondary", label: "Interessado" },
+      pending: { variant: "secondary", label: "Proposta Enviada" },
+      active: { variant: "secondary", label: "Em Negociação" },
+      completed: { variant: "secondary", label: "Convertido" },
       inactive: { variant: "secondary", label: "Perdido" },
-      returning: { variant: "tattoo", label: "Retorno" },
-      vip: { variant: "tattoo", label: "VIP" },
+      returning: { variant: "secondary", label: "Retorno" },
+      vip: { variant: "secondary", label: "VIP" },
     };
     
     const variant = variants[status as keyof typeof variants];
@@ -112,7 +146,7 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
   if (isLoading) {
     return (
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-auto">
           <div className="text-center py-8">Carregando dados do cliente...</div>
         </DialogContent>
       </Dialog>
@@ -122,7 +156,7 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
   if (!client) {
     return (
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-auto">
           <div className="text-center py-8">Cliente não encontrado</div>
         </DialogContent>
       </Dialog>
@@ -131,18 +165,18 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
+      <DialogContent className="max-w-7xl max-h-[90vh] overflow-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="text-2xl">Ficha Completa do Cliente</DialogTitle>
+              <DialogTitle className="text-2xl">Ficha 360° do Cliente</DialogTitle>
               <DialogDescription>
-                Visão 360° de {client.name}
+                Visão completa e qualificada de {client.name}
               </DialogDescription>
             </div>
             <div className="flex gap-2">
               <Button 
-                variant="tattooOutline" 
+                variant="outline" 
                 size="sm"
                 onClick={() => setIsEditing(!isEditing)}
               >
@@ -156,14 +190,14 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
           </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Coluna 1: Dados Pessoais e Status */}
           <div className="space-y-4">
             {/* Dados Pessoais */}
-            <Card variant="tattoo">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <User className="h-4 w-4" />
                   Dados Pessoais
                 </CardTitle>
               </CardHeader>
@@ -202,14 +236,25 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
                   <Calendar className="h-4 w-4 text-gray-500" />
                   <span>Cliente desde {formatDate(client.created_at)}</span>
                 </div>
+
+                {/* Última Atividade */}
+                {client.last_activity && (
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-gray-500" />
+                    <div>
+                      <span className="text-sm">Última atividade:</span>
+                      <div className="text-sm text-gray-600">{formatDate(client.last_activity)}</div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Status e Classificação */}
-            <Card variant="tattoo">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Target className="h-4 w-4" />
                   Status e Classificação
                 </CardTitle>
               </CardHeader>
@@ -241,7 +286,7 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
                   <div>
                     <label className="text-sm font-medium text-gray-600">Temperatura</label>
                     <div className="mt-1">
-                      <Badge variant={client.temperature === 'hot' ? 'destructive' : client.temperature === 'warm' ? 'tattooWarning' : 'tattooInfo'}>
+                      <Badge variant={client.temperature === 'hot' ? 'destructive' : client.temperature === 'warm' ? 'secondary' : 'secondary'}>
                         {client.temperature === 'hot' ? '🔥 Quente' : client.temperature === 'warm' ? '🔶 Morno' : '❄️ Frio'}
                       </Badge>
                     </div>
@@ -257,14 +302,34 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
                   <label className="text-sm font-medium text-gray-600">Total de Pedidos</label>
                   <div className="text-lg font-medium">{client.total_orders}</div>
                 </div>
+
+                {/* Origem do Lead */}
+                {client.origin && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Origem do Lead</label>
+                    <div className="mt-1">
+                      <Badge variant="outline">{client.origin}</Badge>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
+          </div>
+
+          {/* Coluna 2: Qualificação do Lead */}
+          <div className="space-y-4">
+            <LeadQualificationForm
+              client={client}
+              onUpdateLeadScore={handleUpdateLeadScore}
+              onUpdateInterests={handleUpdateInterests}
+              isEditing={isEditing}
+            />
 
             {/* Preferências */}
-            <Card variant="tattoo">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Heart className="h-4 w-4" />
                   Preferências
                 </CardTitle>
               </CardHeader>
@@ -284,17 +349,17 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
             </Card>
           </div>
 
-          {/* Coluna 2: Histórico de Interações */}
+          {/* Coluna 3: Histórico de Interações */}
           <div className="space-y-4">
-            <Card variant="tattoo">
+            <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <MessageSquare className="h-4 w-4" />
                     Histórico de Interações
                   </CardTitle>
                   <Button 
-                    variant="tattooOutline" 
+                    variant="outline" 
                     size="sm"
                     onClick={() => setIsAddingInteraction(!isAddingInteraction)}
                   >
@@ -341,7 +406,7 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
                         {interaction.description && (
                           <p className="text-sm text-gray-600 mt-1">{interaction.description}</p>
                         )}
-                        <Badge variant="tattooSecondary" className="mt-2">
+                        <Badge variant="secondary" className="mt-2">
                           {interaction.type === 'call' ? 'Ligação' :
                            interaction.type === 'email' ? 'Email' :
                            interaction.type === 'visit' ? 'Visita' :
@@ -357,13 +422,16 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
             </Card>
           </div>
 
-          {/* Coluna 3: Agendamentos e Próximos Passos */}
+          {/* Coluna 4: Histórico de Navegação e Agendamentos */}
           <div className="space-y-4">
+            {/* Histórico de Visitas */}
+            <PageVisitsHistory clientId={clientId} />
+
             {/* Próximos Agendamentos */}
-            <Card variant="tattoo">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Calendar className="h-4 w-4" />
                   Agendamentos
                 </CardTitle>
               </CardHeader>
@@ -379,7 +447,7 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
                       <div className="text-sm text-gray-600">Com: {client.next_appointment_artist}</div>
                     )}
                     {client.appointment_status && (
-                      <Badge variant="tattooWarning" className="mt-2">
+                      <Badge variant="secondary" className="mt-2">
                         {client.appointment_status}
                       </Badge>
                     )}
@@ -409,10 +477,10 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
 
             {/* Informações do Lead */}
             {client.notes && (
-              <Card variant="tattoo">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <FileText className="h-4 w-4" />
                     Observações
                   </CardTitle>
                 </CardHeader>
@@ -424,17 +492,17 @@ const CRMClientDetail: React.FC<CRMClientDetailProps> = ({ clientId, onClose }) 
 
             {/* Tags */}
             {client.tags && client.tags.length > 0 && (
-              <Card variant="tattoo">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tag className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Tag className="h-4 w-4" />
                     Tags
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {client.tags.map((tag, index) => (
-                      <Badge key={index} variant="tattooSecondary">
+                      <Badge key={index} variant="secondary">
                         {tag}
                       </Badge>
                     ))}

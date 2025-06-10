@@ -1,6 +1,5 @@
-
 import { BaseService, ServiceError } from '../base/BaseService';
-import { IClientService, Client, ClientStats, ClientInteraction, KanbanStage, Appointment } from '../interfaces/IClientService';
+import { IClientService, Client, ClientStats, ClientInteraction, KanbanStage, Appointment, PageVisit } from '../interfaces/IClientService';
 
 export class SupabaseClientService extends BaseService implements IClientService {
   async create(clientData: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'total_spent' | 'total_orders'>): Promise<Client> {
@@ -17,6 +16,9 @@ export class SupabaseClientService extends BaseService implements IClientService
         total_orders: 0,
         temperature: 'cold',
         temperature_score: 0,
+        lead_score: 0,
+        last_activity: new Date().toISOString(),
+        qualified_interests: [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -233,6 +235,55 @@ export class SupabaseClientService extends BaseService implements IClientService
   async deleteAppointment(id: string): Promise<void> {
     await this.simulateDelay(500);
     console.log('SupabaseClientService: Deleting appointment', id);
+  }
+
+  // Novos métodos para qualificação de leads
+  async fetchClientPageVisits(clientId: string): Promise<PageVisit[]> {
+    await this.simulateDelay(600);
+    console.log('SupabaseClientService: Fetching client page visits', clientId);
+    
+    // Mock data para demonstração
+    return [
+      {
+        id: this.generateId(),
+        client_id: clientId,
+        session_id: 'session-123',
+        url: '/artists',
+        page_title: 'Tatuadores',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 horas atrás
+        duration_seconds: 180,
+      },
+      {
+        id: this.generateId(),
+        client_id: clientId,
+        session_id: 'session-123',
+        url: '/events',
+        page_title: 'Eventos de Tatuagem',
+        timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hora atrás
+        duration_seconds: 240,
+      },
+      {
+        id: this.generateId(),
+        client_id: clientId,
+        session_id: 'session-123',
+        url: '/artists/1',
+        page_title: 'Portfólio do Tatuador',
+        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 min atrás
+        duration_seconds: 320,
+      }
+    ];
+  }
+
+  async updateLeadScore(clientId: string, score: number): Promise<void> {
+    await this.simulateDelay(500);
+    console.log('SupabaseClientService: Updating lead score', clientId, score);
+    // Mock implementation - will be replaced with real Supabase update
+  }
+
+  async updateQualifiedInterests(clientId: string, interests: string[]): Promise<void> {
+    await this.simulateDelay(500);
+    console.log('SupabaseClientService: Updating qualified interests', clientId, interests);
+    // Mock implementation - will be replaced with real Supabase update
   }
 }
 
