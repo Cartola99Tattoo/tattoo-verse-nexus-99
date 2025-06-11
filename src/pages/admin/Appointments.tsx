@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +10,7 @@ import { getClientService, getBedService } from "@/services/serviceFactory";
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Filter, Calendar as CalendarIcon, Clock, User, Eye, Phone, Mail, UserPlus, AlertCircle, Bed, Settings, Sparkles, TrendingUp, DollarSign } from "lucide-react";
+import { Plus, Filter, Calendar as CalendarIcon, Clock, User, Eye, Phone, Mail, UserPlus, AlertCircle, Bed, Settings, Sparkles, TrendingUp, DollarSign, ArrowLeft, Printer, Upload, Edit } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Appointment, Client } from "@/services/interfaces/IClientService";
 import { Bed as BedType } from "@/services/interfaces/IBedService";
@@ -35,7 +34,7 @@ const localizer = dateFnsLocalizer({
 });
 
 const Appointments = () => {
-  const [view, setView] = useState<View>('week');
+  const [view, setView] = useState<View>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedArtist, setSelectedArtist] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -45,6 +44,7 @@ const Appointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
   const [conflictWarning, setConflictWarning] = useState<string | null>(null);
+  const [isDayViewFocused, setIsDayViewFocused] = useState(false);
 
   const queryClient = useQueryClient();
   const clientService = getClientService();
@@ -281,12 +281,27 @@ const Appointments = () => {
     setSelectedAppointment(event.resource.appointment);
   };
 
+  const handleNavigate = (newDate: Date, view: View, action: string) => {
+    setSelectedDate(newDate);
+    
+    // Se estivermos na visualização de mês e o usuário clicou em um dia
+    if (view === 'month' && action === 'click') {
+      setView('day');
+      setIsDayViewFocused(true);
+    }
+  };
+
+  const handleBackToMonth = () => {
+    setView('month');
+    setIsDayViewFocused(false);
+  };
+
   // Enhanced Event Component with better information display
   const EventComponent = ({ event }: any) => {
     const { appointment, client, bed } = event.resource;
     
     return (
-      <div className="text-xs p-2 rounded-lg group relative bg-gradient-to-br from-red-500 to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-red-400">
+      <div className="text-xs p-2 rounded-lg group relative bg-gradient-to-br from-red-500 to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-red-400 cursor-pointer">
         <div className="font-bold truncate text-white">{client?.name}</div>
         <div className="text-xs opacity-90 flex items-center gap-1 text-red-100">
           <span>{appointment.service_type === 'tattoo' ? '🎨' : appointment.service_type === 'piercing' ? '💎' : '💬'}</span>
@@ -365,6 +380,7 @@ const Appointments = () => {
     time: 'Hora',
     event: 'Evento',
     noEventsInRange: 'Não há agendamentos neste período.',
+    showMore: (total: number) => `+ ${total} mais`,
   };
 
   const artists = [
@@ -601,67 +617,40 @@ const Appointments = () => {
             </div>
           </div>
 
-          {/* Enhanced Calendar with Fixed Contrast and 99Tattoo Styling */}
+          {/* Enhanced Calendar with Dynamic Navigation and Day Focus */}
           <Card className="shadow-2xl bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-red-100/30 rounded-full transform translate-x-16 -translate-y-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-100/20 rounded-full transform -translate-x-12 translate-y-12"></div>
             
             <CardHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-t-lg relative z-10">
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-2xl font-black flex items-center gap-2">
-                    <CalendarIcon className="h-6 w-6" />
-                    Calendário de Agendamentos
-                  </CardTitle>
-                  <CardDescription className="text-red-100 font-medium">
-                    Visualize e gerencie todos os agendamentos com estilo
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant={view === 'day' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => handleViewChange('day')}
-                    className={view === 'day' 
-                      ? 'bg-gray-900 text-white font-bold shadow-xl border-2 border-gray-800 hover:bg-gray-800 hover:text-white' 
-                      : 'border-2 border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-300 font-bold transition-all duration-300 shadow-lg'
-                    }
-                  >
-                    Dia
-                  </Button>
-                  <Button
-                    variant={view === 'week' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => handleViewChange('week')}
-                    className={view === 'week' 
-                      ? 'bg-gray-900 text-white font-bold shadow-xl border-2 border-gray-800 hover:bg-gray-800 hover:text-white' 
-                      : 'border-2 border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-300 font-bold transition-all duration-300 shadow-lg'
-                    }
-                  >
-                    Semana
-                  </Button>
-                  <Button
-                    variant={view === 'month' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => handleViewChange('month')}
-                    className={view === 'month' 
-                      ? 'bg-gray-900 text-white font-bold shadow-xl border-2 border-gray-800 hover:bg-gray-800 hover:text-white' 
-                      : 'border-2 border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-300 font-bold transition-all duration-300 shadow-lg'
-                    }
-                  >
-                    Mês
-                  </Button>
-                  <Button
-                    variant={view === 'agenda' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => handleViewChange('agenda')}
-                    className={view === 'agenda' 
-                      ? 'bg-gray-900 text-white font-bold shadow-xl border-2 border-gray-800 hover:bg-gray-800 hover:text-white' 
-                      : 'border-2 border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-300 font-bold transition-all duration-300 shadow-lg'
-                    }
-                  >
-                    Agenda
-                  </Button>
+                <div className="flex items-center gap-4">
+                  {isDayViewFocused && (
+                    <Button
+                      onClick={handleBackToMonth}
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:bg-red-700 transition-all duration-300"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Voltar ao Mês
+                    </Button>
+                  )}
+                  <div>
+                    <CardTitle className="text-2xl font-black flex items-center gap-2">
+                      <CalendarIcon className="h-6 w-6" />
+                      {isDayViewFocused ? 
+                        `Detalhes do Dia - ${format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}` :
+                        'Calendário de Agendamentos'
+                      }
+                    </CardTitle>
+                    <CardDescription className="text-red-100 font-medium">
+                      {isDayViewFocused ? 
+                        'Gestão detalhada de agendamentos por hora' :
+                        'Clique em um dia para visualização detalhada'
+                      }
+                    </CardDescription>
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -674,14 +663,15 @@ const Appointments = () => {
                   endAccessor="end"
                   style={{ height: '100%' }}
                   view={view}
-                  onView={handleViewChange}
+                  onView={setView}
                   date={selectedDate}
-                  onNavigate={setSelectedDate}
+                  onNavigate={handleNavigate}
                   onSelectSlot={handleSelectSlot}
                   onSelectEvent={handleSelectEvent}
                   selectable
                   popup
                   messages={messages}
+                  culture="pt-BR"
                   eventPropGetter={(event) => ({
                     style: {
                       backgroundColor: getStatusColor(event.resource.appointment.status),
@@ -700,6 +690,15 @@ const Appointments = () => {
                   max={new Date(0, 0, 0, 20, 0, 0)}
                   step={30}
                   timeslots={2}
+                  formats={{
+                    monthHeaderFormat: (date: Date) => format(date, 'MMMM yyyy', { locale: ptBR }),
+                    dayHeaderFormat: (date: Date) => format(date, 'EEEE, dd/MM', { locale: ptBR }),
+                    dayRangeHeaderFormat: ({ start, end }: { start: Date; end: Date }) => 
+                      `${format(start, 'dd/MM', { locale: ptBR })} - ${format(end, 'dd/MM', { locale: ptBR })}`,
+                    timeGutterFormat: (date: Date) => format(date, 'HH:mm', { locale: ptBR }),
+                    eventTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
+                      `${format(start, 'HH:mm', { locale: ptBR })} - ${format(end, 'HH:mm', { locale: ptBR })}`,
+                  }}
                 />
               </div>
             </CardContent>
@@ -711,22 +710,88 @@ const Appointments = () => {
               open={!!selectedAppointment} 
               onOpenChange={() => setSelectedAppointment(null)}
             >
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Detalhes do Agendamento</DialogTitle>
+                  <DialogTitle className="text-2xl font-bold text-red-800 flex items-center gap-2">
+                    <CalendarIcon className="h-6 w-6" />
+                    Detalhes Completos do Agendamento
+                  </DialogTitle>
                   <DialogDescription>
-                    Visualizar e editar informações do agendamento
+                    Visualizar, editar informações e gerenciar agendamento
                   </DialogDescription>
                 </DialogHeader>
-                <AppointmentCard 
-                  appointment={selectedAppointment}
-                  client={clients.find(c => c.id === selectedAppointment.client_id)}
-                  onClose={() => setSelectedAppointment(null)}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({ queryKey: ['appointments'] });
-                    setSelectedAppointment(null);
-                  }}
-                />
+                
+                <div className="space-y-6">
+                  <AppointmentCard 
+                    appointment={selectedAppointment}
+                    client={clients.find(c => c.id === selectedAppointment.client_id)}
+                    onClose={() => setSelectedAppointment(null)}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+                      setSelectedAppointment(null);
+                    }}
+                  />
+                  
+                  {/* Additional Action Buttons */}
+                  <div className="flex flex-wrap gap-3 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                    <Button
+                      onClick={() => {
+                        const clientId = selectedAppointment.client_id;
+                        window.open(`/admin/clients/${clientId}`, '_blank');
+                      }}
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Ver Perfil Completo do Cliente
+                    </Button>
+                    
+                    <Button
+                      onClick={() => {
+                        console.log('Simulando upload de foto de referência...');
+                        toast({
+                          title: "Upload simulado",
+                          description: "Funcionalidade de upload de fotos de referência em desenvolvimento.",
+                        });
+                      }}
+                      variant="outline"
+                      className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Adicionar Fotos de Referência
+                    </Button>
+                    
+                    <Button
+                      onClick={() => {
+                        console.log('Simulando impressão de ficha de anamnese...');
+                        toast({
+                          title: "Impressão simulada",
+                          description: "Gerando ficha de anamnese para impressão...",
+                        });
+                      }}
+                      variant="outline"
+                      className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Printer className="h-4 w-4 mr-2" />
+                      Imprimir Ficha de Anamnese
+                    </Button>
+                    
+                    <Button
+                      onClick={() => {
+                        setSelectedAppointment(null);
+                        // Aqui abriria o formulário de edição
+                        toast({
+                          title: "Modo de edição",
+                          description: "Funcionalidade de edição será implementada em breve.",
+                        });
+                      }}
+                      variant="outline"
+                      className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Editar Agendamento
+                    </Button>
+                  </div>
+                </div>
               </DialogContent>
             </Dialog>
           )}

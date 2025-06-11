@@ -1,6 +1,5 @@
 
-
-/* React Big Calendar Custom Styles - 99Tattoo Theme */
+/* React Big Calendar Custom Styles - 99Tattoo Theme - Português Brasil */
 
 /* Calendar Container */
 .rbc-calendar {
@@ -42,6 +41,7 @@
 .rbc-toolbar-label {
   @apply text-red-800 font-black text-xl;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-transform: capitalize;
 }
 
 /* Time Slots */
@@ -158,6 +158,13 @@
 .rbc-date-cell {
   @apply text-red-700 font-semibold;
   padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rbc-date-cell:hover {
+  @apply bg-red-100 text-red-800;
+  transform: scale(1.05);
 }
 
 .rbc-date-cell.rbc-off-range {
@@ -303,6 +310,30 @@
   transform: rotate(5deg);
 }
 
+/* Enhanced Month Navigation for Portuguese */
+.rbc-btn-group button {
+  text-transform: capitalize;
+}
+
+/* Day Names in Portuguese */
+.rbc-header {
+  text-transform: capitalize;
+}
+
+/* Enhanced Day View for Detailed Hour Management */
+.rbc-day-view .rbc-time-content {
+  min-height: 600px;
+}
+
+.rbc-day-view .rbc-time-slot {
+  min-height: 50px;
+  border-bottom: 1px solid #fecaca;
+}
+
+.rbc-day-view .rbc-time-slot:nth-child(even) {
+  background-color: #fef2f2;
+}
+
 /* Force visibility for all events */
 .rbc-event,
 .rbc-event * {
@@ -311,7 +342,7 @@
   display: block !important;
 }
 
-/* Responsive */
+/* Enhanced Responsive Design */
 @media (max-width: 768px) {
   .rbc-toolbar {
     flex-direction: column;
@@ -333,5 +364,35 @@
     padding: 8px 4px;
     font-size: 12px;
   }
+  
+  .rbc-toolbar-label {
+    font-size: 16px;
+  }
 }
 
+/* Custom Portuguese Month Names Styling */
+.rbc-month-header {
+  text-transform: capitalize;
+  font-weight: bold;
+}
+
+/* Enhanced Click Effect for Day Navigation */
+.rbc-date-cell.rbc-button-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.rbc-date-cell.rbc-button-link::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.rbc-date-cell.rbc-button-link:hover::after {
+  left: 100%;
+}
