@@ -104,12 +104,11 @@ const Appointments = () => {
       ['1', '2', '3'][index] === appointment.artist_id
     );
 
-    // Extrair apenas o primeiro nome do cliente
     const firstName = client?.name?.split(' ')[0] || 'Cliente';
     const artistFirstName = artist?.split(' ')[0] || 'Artista';
 
     return (
-      <div className="appointment-card bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white rounded-lg shadow-lg border border-red-400 hover:shadow-xl transition-all duration-300 cursor-pointer group overflow-hidden h-full">
+      <div className="appointment-card bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white rounded-lg shadow-lg border-2 border-red-400 hover:shadow-2xl transition-all duration-300 cursor-pointer group overflow-hidden h-full">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
         <div className="relative z-10 p-2 h-full flex flex-col justify-between">
           <div className="space-y-1">
@@ -131,7 +130,7 @@ const Appointments = () => {
     );
   };
 
-  // Mensagens completamente em português brasileiro
+  // Mensagens em português brasileiro
   const messages = {
     today: 'Hoje',
     previous: '← Anterior',
@@ -166,40 +165,40 @@ const Appointments = () => {
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-32 translate-y-32"></div>
 
       <div className="relative z-10">
-        {/* Cabeçalho Otimizado */}
-        <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-2xl shadow-2xl mb-6 relative overflow-hidden">
+        {/* Cabeçalho Compacto */}
+        <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-2xl shadow-2xl mb-4 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] animate-pulse"></div>
-          <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
             <div>
-              <h1 className="text-3xl font-black mb-2 flex items-center gap-3">
-                <CalendarIcon className="h-8 w-8" />
+              <h1 className="text-2xl font-black mb-1 flex items-center gap-2">
+                <CalendarIcon className="h-6 w-6" />
                 Calendário de Agendamentos
               </h1>
-              <p className="text-red-100 font-semibold">Gerencie todos os agendamentos do estúdio</p>
+              <p className="text-red-100 font-semibold text-sm">Gerencie todos os agendamentos do estúdio</p>
             </div>
             
             <Button
               onClick={() => setShowCreateForm(true)}
-              className="bg-white text-red-700 hover:bg-red-50 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 px-6 py-3 h-auto rounded-xl font-bold relative overflow-hidden group"
+              className="bg-white text-red-700 hover:bg-red-50 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 px-6 py-2 h-auto rounded-xl font-bold relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-100/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <Plus className="h-5 w-5 mr-2" />
+              <Plus className="h-4 w-4 mr-2" />
               Novo Agendamento
             </Button>
           </div>
         </div>
 
-        {/* Calendário Principal */}
-        <div className="bg-white rounded-2xl shadow-2xl border-2 border-red-100/50 p-6 backdrop-blur-sm relative overflow-hidden">
+        {/* Calendário Principal Unificado */}
+        <div className="bg-white rounded-2xl shadow-2xl border-2 border-red-100/50 backdrop-blur-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-50/30 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
           
-          <div className="relative z-10">
+          <div className="relative z-10 p-4">
             <Calendar
               localizer={localizer}
               events={calendarEvents}
               startAccessor="start"
               endAccessor="end"
-              style={{ height: 700 }}
+              style={{ height: 750 }}
               onSelectSlot={handleSelectSlot}
               onSelectEvent={handleSelectEvent}
               selectable
@@ -213,10 +212,10 @@ const Appointments = () => {
               components={{
                 event: EventComponent,
               }}
-              className="rounded-lg overflow-hidden calendar-99tattoo-enhanced"
+              className="rounded-lg overflow-hidden calendar-99tattoo-unified"
               eventPropGetter={(event) => ({
                 className: cn(
-                  "transition-all duration-300 hover:shadow-lg appointment-event-card",
+                  "transition-all duration-300 hover:shadow-xl appointment-event-enhanced",
                   event.resource.status === 'confirmed' && "appointment-confirmed",
                   event.resource.status === 'cancelled' && "appointment-cancelled",
                   event.resource.status === 'completed' && "appointment-completed"
@@ -224,8 +223,8 @@ const Appointments = () => {
               })}
               dayPropGetter={(date) => ({
                 className: cn(
-                  "hover:bg-red-50/50 transition-colors duration-200",
-                  format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && "bg-red-100/30"
+                  "hover:bg-red-50/60 transition-colors duration-200",
+                  format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && "bg-red-100/40"
                 ),
               })}
               formats={{
@@ -235,11 +234,19 @@ const Appointments = () => {
                   localizer?.format(date, 'EEEE', culture) || '',
                 monthHeaderFormat: (date, culture, localizer) =>
                   localizer?.format(date, 'MMMM yyyy', culture) || '',
+                agendaDateFormat: (date, culture, localizer) =>
+                  localizer?.format(date, 'dd/MM', culture) || '',
+                agendaTimeFormat: (date, culture, localizer) =>
+                  localizer?.format(date, 'HH:mm', culture) || '',
+                timeGutterFormat: (date, culture, localizer) =>
+                  localizer?.format(date, 'HH:mm', culture) || '',
               }}
               step={30}
               timeslots={2}
               min={new Date(2024, 0, 1, 8, 0)}
               max={new Date(2024, 0, 1, 20, 0)}
+              popup={true}
+              popupOffset={30}
             />
           </div>
         </div>

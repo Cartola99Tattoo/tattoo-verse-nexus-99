@@ -1,145 +1,158 @@
 
-/* React Big Calendar Custom Styles - 99Tattoo Theme - Português Brasil - Enhanced */
+/* React Big Calendar Custom Styles - 99Tattoo Theme - Português Brasil - Unified Enhanced */
 
 /* Calendar Container */
 .rbc-calendar {
   @apply bg-white rounded-xl shadow-2xl border-2 border-red-200;
-  min-height: 600px;
+  min-height: 700px;
   font-family: inherit;
 }
 
-/* Calendar Header */
+/* Enhanced Unified Calendar Header */
 .rbc-header {
-  @apply bg-gradient-to-r from-red-600 to-red-700 text-white font-bold text-sm;
-  padding: 12px 8px;
+  @apply bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white font-bold text-sm;
+  padding: 14px 10px;
   border-bottom: 2px solid #dc2626;
   text-transform: capitalize;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
 }
 
 .rbc-header + .rbc-header {
   border-left: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Calendar Navigation */
+/* Enhanced Calendar Navigation - Unified Design */
 .rbc-toolbar {
-  @apply bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-t-xl border-b-2 border-red-200;
+  @apply bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-t-xl shadow-xl;
   margin-bottom: 0;
+  border-bottom: 3px solid #dc2626;
 }
 
 .rbc-toolbar button {
-  @apply bg-white border-2 border-red-300 text-red-700 font-semibold px-4 py-2 rounded-lg;
+  @apply bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white font-bold px-6 py-3 rounded-xl;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .rbc-toolbar button:hover {
-  @apply bg-red-50 border-red-400 shadow-lg transform scale-105;
+  @apply bg-white/20 border-white/40 shadow-2xl transform scale-105;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
 }
 
 .rbc-toolbar button.rbc-active {
-  @apply bg-red-600 text-white border-red-700 shadow-xl;
+  @apply bg-white text-red-700 border-white shadow-2xl;
+  transform: scale(1.05);
 }
 
 .rbc-toolbar-label {
-  @apply text-red-800 font-black text-xl;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  @apply text-white font-black text-2xl;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   text-transform: capitalize;
+  margin: 0 20px;
 }
 
-/* Enhanced Event Styles - Compact and Informative */
+/* Enhanced Event Styles - More Prominent */
 .appointment-card {
-  min-height: 50px !important;
-  max-height: 80px !important;
-  font-size: 10px !important;
-  border-radius: 8px !important;
-  padding: 6px !important;
-  margin: 1px !important;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3) !important;
+  min-height: 55px !important;
+  max-height: 85px !important;
+  font-size: 11px !important;
+  border-radius: 10px !important;
+  padding: 8px !important;
+  margin: 2px !important;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4) !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
 }
 
 .appointment-card:hover {
-  transform: scale(1.03) !important;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5) !important;
-  z-index: 20 !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.6) !important;
+  z-index: 30 !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* Status-based styles */
+/* Enhanced Status-based styles */
 .appointment-confirmed {
-  background: linear-gradient(135deg, #059669, #10b981) !important;
+  background: linear-gradient(135deg, #059669, #10b981, #34d399) !important;
   border-color: #047857 !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4) !important;
 }
 
 .appointment-cancelled {
-  background: linear-gradient(135deg, #6b7280, #9ca3af) !important;
+  background: linear-gradient(135deg, #6b7280, #9ca3af, #d1d5db) !important;
   border-color: #4b5563 !important;
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4) !important;
 }
 
 .appointment-completed {
-  background: linear-gradient(135deg, #0d9488, #14b8a6) !important;
+  background: linear-gradient(135deg, #0d9488, #14b8a6, #5eead4) !important;
   border-color: #0f766e !important;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4) !important;
 }
 
-/* Month View Events - More Compact */
+/* Enhanced Month View Events */
 .rbc-month-view .rbc-event {
-  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
-  border: 1px solid #991b1b !important;
-  border-radius: 6px !important;
-  padding: 2px 4px !important;
-  margin: 1px 0 !important;
-  font-size: 9px !important;
+  background: linear-gradient(135deg, #dc2626, #b91c1c, #ef4444) !important;
+  border: 2px solid #991b1b !important;
+  border-radius: 8px !important;
+  padding: 4px 6px !important;
+  margin: 2px 0 !important;
+  font-size: 10px !important;
   color: white !important;
   opacity: 1 !important;
   visibility: visible !important;
-  min-height: 18px !important;
-  max-height: 22px !important;
+  min-height: 22px !important;
+  max-height: 26px !important;
   display: flex !important;
   align-items: center !important;
-  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.3) !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4) !important;
   overflow: hidden !important;
+  font-weight: bold !important;
 }
 
 .rbc-month-view .rbc-event:hover {
-  background: linear-gradient(135deg, #b91c1c, #991b1b) !important;
-  transform: scale(1.01) !important;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
-  z-index: 15 !important;
+  background: linear-gradient(135deg, #b91c1c, #991b1b, #dc2626) !important;
+  transform: scale(1.02) !important;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.5) !important;
+  z-index: 20 !important;
 }
 
-/* Week/Day View Events - Enhanced Compact Design */
+/* Enhanced Week/Day View Events */
 .rbc-time-view .rbc-event {
-  border-radius: 8px !important;
-  padding: 4px 6px !important;
-  min-height: 45px !important;
-  max-height: 70px !important;
-  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  border-radius: 10px !important;
+  padding: 6px 8px !important;
+  min-height: 50px !important;
+  max-height: 80px !important;
+  background: linear-gradient(135deg, #dc2626, #b91c1c, #ef4444) !important;
   border: 2px solid #991b1b !important;
   color: white !important;
   font-weight: bold !important;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4) !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
   overflow: hidden !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
 }
 
 .rbc-time-view .rbc-event:hover {
-  background: linear-gradient(135deg, #b91c1c, #991b1b) !important;
-  box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3) !important;
-  transform: scale(1.02) !important;
-  z-index: 25 !important;
+  background: linear-gradient(135deg, #b91c1c, #991b1b, #ef4444) !important;
+  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.5) !important;
+  transform: scale(1.03) !important;
+  z-index: 30 !important;
 }
 
-/* Time Slots */
+/* Enhanced Time Slots for Week/Day View */
 .rbc-time-view {
   border: none;
 }
 
 .rbc-time-header {
-  @apply border-b-2 border-red-200;
+  @apply border-b-3 border-red-300;
+  background: linear-gradient(to bottom, #fef2f2, #fee2e2);
 }
 
 .rbc-time-content {
@@ -147,43 +160,54 @@
 }
 
 .rbc-timeslot-group {
-  @apply border-b border-red-100;
-  min-height: 50px;
+  @apply border-b-2 border-red-100;
+  min-height: 60px;
+  background: linear-gradient(to right, #fefefe, #fdfdfd);
 }
 
 .rbc-time-slot {
-  @apply border-r border-red-100;
-  min-height: 25px;
+  @apply border-r-2 border-red-100;
+  min-height: 30px;
+  transition: all 0.2s ease;
 }
 
 .rbc-time-slot:hover {
   @apply bg-red-50;
+  transform: scale(1.01);
 }
 
-/* Time Labels */
+/* Enhanced Time Labels */
 .rbc-time-header-gutter,
 .rbc-time-gutter {
-  @apply bg-gradient-to-b from-red-50 to-red-100 border-r-2 border-red-200;
+  @apply bg-gradient-to-b from-red-100 via-red-50 to-red-100 border-r-3 border-red-300;
+  box-shadow: inset -2px 0 4px rgba(220, 38, 38, 0.1);
 }
 
 .rbc-time-header-cell {
-  @apply text-red-700 font-semibold text-center;
-  padding: 8px;
+  @apply text-red-800 font-bold text-center;
+  padding: 10px;
   text-transform: capitalize;
+  background: linear-gradient(to bottom, #fee2e2, #fecaca);
+  border-bottom: 2px solid #fca5a5;
 }
 
 .rbc-label {
-  @apply text-red-600 font-medium text-xs;
-  padding: 4px 8px;
+  @apply text-red-700 font-bold text-sm;
+  padding: 6px 10px;
+  background: linear-gradient(to right, #fef2f2, #fee2e2);
+  border-radius: 4px;
+  margin: 2px;
 }
 
-/* Day/Week/Month Views */
+/* Enhanced Day/Week/Month Views */
 .rbc-month-view {
-  @apply border border-red-200 rounded-lg;
+  @apply border-2 border-red-200 rounded-xl;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
 }
 
 .rbc-month-row {
-  @apply border-b border-red-100;
+  @apply border-b-2 border-red-100;
+  min-height: 120px;
 }
 
 .rbc-month-row:last-child {
@@ -191,15 +215,18 @@
 }
 
 .rbc-date-cell {
-  @apply text-red-700 font-semibold;
-  padding: 8px;
+  @apply text-red-800 font-bold;
+  padding: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin: 2px;
 }
 
 .rbc-date-cell:hover {
-  @apply bg-red-100 text-red-800;
-  transform: scale(1.05);
+  @apply bg-red-100 text-red-900;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
 }
 
 .rbc-date-cell.rbc-off-range {
@@ -207,38 +234,25 @@
 }
 
 .rbc-date-cell.rbc-now {
-  @apply bg-red-100 font-black;
+  @apply bg-gradient-to-br from-red-200 to-red-300 font-black;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  color: #7f1d1d;
 }
 
 .rbc-day-bg {
   @apply hover:bg-red-50;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .rbc-today {
-  @apply bg-gradient-to-br from-red-100 to-red-200;
+  @apply bg-gradient-to-br from-red-100 via-red-200 to-red-300;
+  box-shadow: inset 0 2px 4px rgba(220, 38, 38, 0.2);
 }
 
-/* Enhanced Multiple Events Handling */
-.rbc-row-content {
-  position: relative;
-  z-index: 5;
-}
-
-.rbc-row-segment {
-  padding: 0 1px;
-}
-
-.rbc-event-content {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100%;
-}
-
-/* Agenda View */
+/* Enhanced Agenda View */
 .rbc-agenda-view {
-  @apply border border-red-200 rounded-lg;
+  @apply border-2 border-red-200 rounded-xl;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
 }
 
 .rbc-agenda-view table {
@@ -250,106 +264,124 @@
 }
 
 .rbc-agenda-table thead th {
-  @apply bg-gradient-to-r from-red-600 to-red-700 text-white font-bold p-3 border-b-2 border-red-800;
+  @apply bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white font-black p-4 border-b-3 border-red-900;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
 }
 
 .rbc-agenda-table tbody tr {
-  @apply border-b border-red-100 hover:bg-red-50;
-  transition: background-color 0.2s ease;
+  @apply border-b-2 border-red-100 hover:bg-red-50;
+  transition: all 0.2s ease;
+}
+
+.rbc-agenda-table tbody tr:hover {
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
 }
 
 .rbc-agenda-table tbody td {
-  @apply p-3 text-red-700;
+  @apply p-4 text-red-800 font-semibold;
 }
 
 .rbc-agenda-event-cell {
-  @apply font-semibold;
+  @apply font-bold;
 }
 
 .rbc-agenda-date-cell {
-  @apply text-red-600 font-bold;
+  @apply text-red-700 font-black;
 }
 
 .rbc-agenda-time-cell {
-  @apply text-red-500 font-medium;
+  @apply text-red-600 font-bold;
 }
 
-/* Current Time Indicator */
+/* Enhanced Current Time Indicator */
 .rbc-current-time-indicator {
   @apply bg-red-600;
-  height: 2px;
-  z-index: 10;
+  height: 3px;
+  z-index: 15;
+  box-shadow: 0 1px 4px rgba(220, 38, 38, 0.5);
 }
 
 .rbc-current-time-indicator::before {
   content: '';
   @apply bg-red-600 rounded-full;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   position: absolute;
-  left: -4px;
-  top: -3px;
+  left: -5px;
+  top: -4px;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
 }
 
-/* Selection */
+/* Enhanced Selection */
 .rbc-slot-selection {
   @apply bg-red-200;
-  border: 2px solid #dc2626;
-  opacity: 0.8;
+  border: 3px solid #dc2626;
+  opacity: 0.9;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
-/* Show More Link */
+/* Enhanced Show More Link */
 .rbc-show-more {
-  @apply text-red-600 font-semibold hover:text-red-800 hover:underline;
+  @apply text-red-700 font-bold hover:text-red-900 hover:underline;
   cursor: pointer;
-  font-size: 10px;
-  padding: 2px 4px;
-  background: rgba(220, 38, 38, 0.1);
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  font-size: 11px;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.2));
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(220, 38, 38, 0.3);
 }
 
 .rbc-show-more:hover {
-  background: rgba(220, 38, 38, 0.2);
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(220, 38, 38, 0.3));
   transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
 }
 
 /* Enhanced Responsive Design */
 @media (max-width: 768px) {
   .rbc-toolbar {
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
+    padding: 16px;
   }
   
   .rbc-toolbar button {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-  
-  .appointment-card {
-    font-size: 9px !important;
-    padding: 3px !important;
-    min-height: 40px !important;
-    max-height: 60px !important;
-  }
-  
-  .rbc-month-view .rbc-event {
-    font-size: 8px !important;
-    min-height: 16px !important;
-    max-height: 20px !important;
-  }
-  
-  .rbc-header {
-    padding: 8px 4px;
-    font-size: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
   }
   
   .rbc-toolbar-label {
-    font-size: 16px;
+    font-size: 18px;
+    margin: 8px 0;
+  }
+  
+  .appointment-card {
+    font-size: 10px !important;
+    padding: 6px !important;
+    min-height: 45px !important;
+    max-height: 65px !important;
+  }
+  
+  .rbc-month-view .rbc-event {
+    font-size: 9px !important;
+    min-height: 18px !important;
+    max-height: 22px !important;
+  }
+  
+  .rbc-header {
+    padding: 10px 6px;
+    font-size: 11px;
   }
   
   .rbc-time-slot {
-    min-height: 40px;
+    min-height: 50px;
+  }
+  
+  .rbc-month-row {
+    min-height: 100px;
   }
 }
 
@@ -362,34 +394,59 @@
 
 .rbc-events-container .rbc-event {
   position: absolute !important;
-  left: 1% !important;
-  right: 1% !important;
+  left: 2% !important;
+  right: 2% !important;
   width: auto !important;
-  max-width: 98% !important;
+  max-width: 96% !important;
 }
 
 /* Enhanced Calendar Class */
-.calendar-99tattoo-enhanced .rbc-month-view .rbc-row {
-  min-height: 80px;
+.calendar-99tattoo-unified .rbc-month-view .rbc-row {
+  min-height: 120px;
 }
 
-.calendar-99tattoo-enhanced .rbc-time-view .rbc-time-content {
-  min-height: 600px;
+.calendar-99tattoo-unified .rbc-time-view .rbc-time-content {
+  min-height: 650px;
 }
 
-.calendar-99tattoo-enhanced .rbc-time-view .rbc-timeslot-group {
-  min-height: 60px;
+.calendar-99tattoo-unified .rbc-time-view .rbc-timeslot-group {
+  min-height: 65px;
 }
 
-/* Smooth animations for better UX */
+/* Enhanced animations for better UX */
 .rbc-event {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .rbc-day-bg {
-  transition: background-color 0.15s ease !important;
+  transition: all 0.2s ease !important;
 }
 
 .rbc-date-cell {
-  transition: all 0.15s ease !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Navigation buttons enhanced styling */
+.rbc-btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.rbc-btn-group button {
+  border-radius: 10px !important;
+  font-weight: bold !important;
+}
+
+/* Popup enhancement */
+.rbc-overlay {
+  background: rgba(220, 38, 38, 0.1) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.rbc-overlay-header {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  color: white !important;
+  font-weight: bold !important;
+  padding: 12px !important;
+  border-radius: 8px 8px 0 0 !important;
 }
