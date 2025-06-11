@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -34,14 +34,15 @@ const Appointments = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [currentView, setCurrentView] = useState<'month' | 'week' | 'day' | 'agenda'>('month');
+  const [currentView, setCurrentView] = useState<View>('month');
 
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
+  // Fixed: Use the correct method name from IClientService
   const { data: appointments = [], isLoading: appointmentsLoading } = useQuery({
     queryKey: ['appointments'],
-    queryFn: () => clientService.fetchAppointments(),
+    queryFn: () => clientService.getAppointments(),
   });
 
   const { data: clients = [] } = useQuery({
@@ -92,6 +93,11 @@ const Appointments = () => {
     queryClient.invalidateQueries({ queryKey: ['appointments'] });
     handleCloseEditModal();
   };
+
+  // Fixed: Create proper view handler function
+  const handleViewChange = useCallback((view: View) => {
+    setCurrentView(view);
+  }, []);
 
   // Componente otimizado para os cards de agendamento
   const EventComponent = ({ event }: { event: any }) => {
@@ -199,7 +205,7 @@ const Appointments = () => {
               selectable
               views={['month', 'week', 'day', 'agenda']}
               view={currentView}
-              onView={setCurrentView}
+              onView={handleViewChange}
               date={currentDate}
               onNavigate={setCurrentDate}
               messages={messages}
