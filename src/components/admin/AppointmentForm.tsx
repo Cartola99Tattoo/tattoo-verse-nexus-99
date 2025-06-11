@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,10 +43,9 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   const [selectedDate, setSelectedDate] = useState<Date>(selectedSlot?.start || new Date());
   const [clientSearch, setClientSearch] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [validationState, setValidationState] = useState<'idle' | 'checking' | 'available' | 'conflict'>('idle');
+  const [validationState, setValidationState] = useState<'idle' | 'available' | 'conflict'>('idle');
   const [conflictMessage, setConflictMessage] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const clientService = getClientService();
   const bedService = getBedService();
@@ -74,27 +74,19 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 
   const watchedFields = watch(['artist_id', 'bed_id', 'date', 'time', 'duration_minutes']);
 
-  // Validação estabilizada sem "piscar"
+  // Validação simplificada e estável
   useEffect(() => {
     const [artist_id, bed_id, date, time, duration_minutes] = watchedFields;
     
-    // Limpar timeout anterior
-    if (validationTimeoutRef.current) {
-      clearTimeout(validationTimeoutRef.current);
-    }
-    
     if (artist_id && date && time && duration_minutes) {
-      setValidationState('checking');
-      
-      validationTimeoutRef.current = setTimeout(async () => {
+      const validateAvailability = async () => {
         try {
-          const endTime = format(
-            new Date(new Date(`${date}T${time}`).getTime() + duration_minutes * 60000), 
-            'HH:mm'
-          );
-          
-          // Verificar apenas se maca foi selecionada
           if (bed_id && bed_id !== "none") {
+            const endTime = format(
+              new Date(new Date(`${date}T${time}`).getTime() + duration_minutes * 60000), 
+              'HH:mm'
+            );
+            
             const isAvailable = await bedService.checkBedAvailability(bed_id, date, time, endTime);
             if (!isAvailable) {
               setValidationState('conflict');
@@ -109,17 +101,14 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
           setValidationState('conflict');
           setConflictMessage('Erro ao verificar disponibilidade');
         }
-      }, 1500); // Timeout mais longo para estabilidade
+      };
+
+      const timeoutId = setTimeout(validateAvailability, 800);
+      return () => clearTimeout(timeoutId);
     } else {
       setValidationState('idle');
       setConflictMessage('');
     }
-
-    return () => {
-      if (validationTimeoutRef.current) {
-        clearTimeout(validationTimeoutRef.current);
-      }
-    };
   }, [watchedFields, bedService]);
 
   const createAppointmentMutation = useMutation({
@@ -263,19 +252,12 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         {/* Indicador de validação estabilizado */}
         {validationState !== 'idle' && (
           <div className={`mb-6 p-4 rounded-xl border-2 transition-all duration-500 ${
-            validationState === 'checking' 
-              ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-300' 
-              : validationState === 'conflict' 
-                ? 'bg-gradient-to-r from-red-50 to-red-100 border-red-300 shadow-lg' 
-                : 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-lg'
+            validationState === 'conflict' 
+              ? 'bg-gradient-to-r from-red-50 to-red-100 border-red-300 shadow-lg' 
+              : 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-lg'
           }`}>
             <div className="flex items-center gap-3">
-              {validationState === 'checking' ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
-                  <span className="text-blue-800 font-bold">Verificando disponibilidade...</span>
-                </>
-              ) : validationState === 'conflict' ? (
+              {validationState === 'conflict' ? (
                 <>
                   <AlertTriangle className="h-5 w-5 text-red-600" />
                   <span className="text-red-800 font-bold">{conflictMessage}</span>
@@ -646,5 +628,3 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 };
 
 export default AppointmentForm;
-
-</initial_code>
