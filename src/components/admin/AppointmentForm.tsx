@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,10 +41,9 @@ interface AppointmentFormProps {
 const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormProps) => {
   const [selectedDate, setSelectedDate] = useState<Date>(selectedSlot?.start || new Date());
   const [clientSearch, setClientSearch] = useState("");
-  const [conflictCheck, setConflictCheck] = useState<string | null>(null);
-  const [isValidating, setIsValidating] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [validationComplete, setValidationComplete] = useState(false);
+  const [validationState, setValidationState] = useState<'idle' | 'checking' | 'available' | 'conflict'>('idle');
+  const [conflictMessage, setConflictMessage] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -76,56 +74,46 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 
   const watchedFields = watch(['artist_id', 'bed_id', 'date', 'time', 'duration_minutes']);
 
-  // Validação otimizada e estabilizada
+  // Validação estabilizada sem "piscar"
   useEffect(() => {
-    const validateConflicts = async () => {
-      const [artist_id, bed_id, date, time, duration_minutes] = watchedFields;
+    const [artist_id, bed_id, date, time, duration_minutes] = watchedFields;
+    
+    // Limpar timeout anterior
+    if (validationTimeoutRef.current) {
+      clearTimeout(validationTimeoutRef.current);
+    }
+    
+    if (artist_id && date && time && duration_minutes) {
+      setValidationState('checking');
       
-      // Limpar timeout anterior
-      if (validationTimeoutRef.current) {
-        clearTimeout(validationTimeoutRef.current);
-      }
-      
-      if (artist_id && date && time && duration_minutes) {
-        setIsValidating(true);
-        setConflictCheck(null);
-        setValidationComplete(false);
-        
-        validationTimeoutRef.current = setTimeout(async () => {
-          try {
-            const endTime = format(
-              new Date(new Date(`${date}T${time}`).getTime() + duration_minutes * 60000), 
-              'HH:mm'
-            );
-            
-            // Verificar disponibilidade da maca se selecionada
-            if (bed_id && bed_id !== "none") {
-              const isAvailable = await bedService.checkBedAvailability(bed_id, date, time, endTime);
-              if (!isAvailable) {
-                setConflictCheck('Maca não disponível no horário selecionado');
-                setIsValidating(false);
-                setValidationComplete(true);
-                return;
-              }
+      validationTimeoutRef.current = setTimeout(async () => {
+        try {
+          const endTime = format(
+            new Date(new Date(`${date}T${time}`).getTime() + duration_minutes * 60000), 
+            'HH:mm'
+          );
+          
+          // Verificar apenas se maca foi selecionada
+          if (bed_id && bed_id !== "none") {
+            const isAvailable = await bedService.checkBedAvailability(bed_id, date, time, endTime);
+            if (!isAvailable) {
+              setValidationState('conflict');
+              setConflictMessage('Maca não disponível no horário selecionado');
+              return;
             }
-            
-            setConflictCheck(null);
-            setIsValidating(false);
-            setValidationComplete(true);
-          } catch (error) {
-            setConflictCheck('Erro ao verificar disponibilidade');
-            setIsValidating(false);
-            setValidationComplete(true);
           }
-        }, 1000); // Debounce estável de 1 segundo
-      } else {
-        setIsValidating(false);
-        setConflictCheck(null);
-        setValidationComplete(false);
-      }
-    };
-
-    validateConflicts();
+          
+          setValidationState('available');
+          setConflictMessage('');
+        } catch (error) {
+          setValidationState('conflict');
+          setConflictMessage('Erro ao verificar disponibilidade');
+        }
+      }, 1500); // Timeout mais longo para estabilidade
+    } else {
+      setValidationState('idle');
+      setConflictMessage('');
+    }
 
     return () => {
       if (validationTimeoutRef.current) {
@@ -136,6 +124,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (data: AppointmentFormData) => {
+      // Verificação final antes de criar
       if (data.bed_id && data.bed_id !== "none") {
         const endTime = format(
           new Date(new Date(`${data.date}T${data.time}`).getTime() + data.duration_minutes * 60000), 
@@ -154,7 +143,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         }
       }
 
-      // Simular armazenamento de fotos
+      // Preparar referências de fotos
       const photoReferences = uploadedFiles.map(file => ({
         name: file.name,
         size: file.size,
@@ -197,10 +186,10 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   });
 
   const onSubmit = (data: AppointmentFormData) => {
-    if (conflictCheck) {
+    if (validationState === 'conflict') {
       toast({
         title: "Conflito detectado",
-        description: conflictCheck,
+        description: conflictMessage,
         variant: "destructive",
       });
       return;
@@ -253,38 +242,50 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   const activeBeds = beds.filter(bed => bed.isActive);
 
   return (
-    <div className="bg-gradient-to-br from-white via-red-50/20 to-white rounded-2xl shadow-2xl border-2 border-red-200/50 relative overflow-hidden max-h-[90vh] overflow-y-auto">
+    <div className="bg-gradient-to-br from-white via-red-50/30 to-white rounded-2xl shadow-2xl border-2 border-red-200/50 relative overflow-hidden max-h-[95vh] overflow-y-auto">
       {/* Elementos decorativos de fundo */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/30 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/20 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
       
+      {/* Cabeçalho */}
+      <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-t-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] animate-pulse"></div>
+        <div className="relative z-10">
+          <h2 className="text-2xl font-black mb-2 flex items-center gap-3">
+            <Sparkles className="h-6 w-6" />
+            Criar Novo Agendamento
+          </h2>
+          <p className="text-red-100 font-semibold">Preencha os dados para criar um novo agendamento</p>
+        </div>
+      </div>
+      
       <div className="relative z-10 p-6">
         {/* Indicador de validação estabilizado */}
-        {(isValidating || validationComplete) && (
-          <div className={`mb-4 p-4 rounded-xl border-2 transition-all duration-300 ${
-            isValidating 
+        {validationState !== 'idle' && (
+          <div className={`mb-6 p-4 rounded-xl border-2 transition-all duration-500 ${
+            validationState === 'checking' 
               ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-300' 
-              : conflictCheck 
+              : validationState === 'conflict' 
                 ? 'bg-gradient-to-r from-red-50 to-red-100 border-red-300 shadow-lg' 
                 : 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-lg'
           }`}>
             <div className="flex items-center gap-3">
-              {isValidating ? (
+              {validationState === 'checking' ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
-                  <span className="text-blue-800 font-semibold">Verificando disponibilidade...</span>
+                  <span className="text-blue-800 font-bold">Verificando disponibilidade...</span>
                 </>
-              ) : conflictCheck ? (
+              ) : validationState === 'conflict' ? (
                 <>
                   <AlertTriangle className="h-5 w-5 text-red-600" />
-                  <span className="text-red-800 font-semibold">{conflictCheck}</span>
+                  <span className="text-red-800 font-bold">{conflictMessage}</span>
                 </>
-              ) : validationComplete ? (
+              ) : (
                 <>
                   <CheckCircle className="h-5 w-5 text-green-600" />
-                  <span className="text-green-800 font-semibold">Horário disponível! ✨</span>
+                  <span className="text-green-800 font-bold">Horário disponível! ✨</span>
                 </>
-              ) : null}
+              )}
             </div>
           </div>
         )}
@@ -304,18 +305,18 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                     placeholder="Buscar cliente..."
                     value={clientSearch}
                     onChange={(e) => setClientSearch(e.target.value)}
-                    className="pl-10 h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                    className="pl-10 h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
                   />
                 </div>
                 <Select onValueChange={(value) => setValue('client_id', value)}>
-                  <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                     <SelectValue placeholder="Selecione um cliente" />
                   </SelectTrigger>
                   <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg max-h-48">
                     {filteredClients.map((client) => (
                       <SelectItem key={client.id} value={client.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                         <div className="flex flex-col">
-                          <div className="font-semibold text-gray-900 text-sm">{client.name}</div>
+                          <div className="font-bold text-gray-900">{client.name}</div>
                           <div className="text-xs text-gray-600">{client.email}</div>
                         </div>
                       </SelectItem>
@@ -338,13 +339,13 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 Artista *
               </Label>
               <Select onValueChange={(value) => setValue('artist_id', value)}>
-                <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                   <SelectValue placeholder="Selecione um artista" />
                 </SelectTrigger>
                 <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
                   {artists.map((artist) => (
                     <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
-                      <div className="font-semibold text-gray-900 text-sm">{artist.name}</div>
+                      <div className="font-bold text-gray-900">{artist.name}</div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -357,43 +358,6 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
               )}
             </div>
 
-            {/* Maca */}
-            <div className="space-y-3">
-              <Label htmlFor="bed_id" className="text-sm font-bold text-red-700 flex items-center gap-2">
-                <Bed className="h-4 w-4" />
-                Maca
-              </Label>
-              <Select onValueChange={(value) => setValue('bed_id', value)} defaultValue="none">
-                <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
-                  <SelectValue placeholder="Selecione a maca (opcional)" />
-                </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
-                  {bedsLoading ? (
-                    <SelectItem value="loading" disabled className="p-3">
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-red-600 border-t-transparent"></div>
-                        <span className="text-sm">Carregando macas...</span>
-                      </div>
-                    </SelectItem>
-                  ) : (
-                    <>
-                      <SelectItem value="none" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
-                        <div className="font-semibold text-gray-600 text-sm">Nenhuma maca específica</div>
-                      </SelectItem>
-                      {activeBeds.map((bed) => (
-                        <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
-                          <div className="flex items-center gap-2">
-                            <Bed className="h-3 w-3 text-red-600" />
-                            <span className="font-semibold text-sm">{bed.name} (Maca {bed.number})</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Data */}
             <div className="space-y-3">
               <Label className="text-sm font-bold text-red-700 flex items-center gap-2">
@@ -404,13 +368,13 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full h-10 justify-start text-left font-normal border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                    className="w-full h-12 justify-start text-left font-normal border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4 text-red-600" />
                     {selectedDate ? (
-                      <span className="font-semibold text-sm">{format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}</span>
+                      <span className="font-bold">{format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}</span>
                     ) : (
-                      <span className="text-gray-500 text-sm">Selecione uma data</span>
+                      <span className="text-gray-500">Selecione uma data</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -445,13 +409,13 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 Horário *
               </Label>
               <Select onValueChange={(value) => setValue('time', value)} defaultValue={watch('time')}>
-                <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                   <SelectValue placeholder="Selecione um horário" />
                 </SelectTrigger>
                 <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg max-h-48">
                   {timeSlots.map((time) => (
                     <SelectItem key={time} value={time} className="hover:bg-red-50 focus:bg-red-100 p-2 rounded-md">
-                      <span className="font-semibold text-sm">{time}</span>
+                      <span className="font-bold">{time}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -475,7 +439,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 min="30"
                 step="30"
                 {...register('duration_minutes', { valueAsNumber: true })}
-                className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
               />
               {errors.duration_minutes && (
                 <p className="text-xs text-red-600 font-medium flex items-center gap-1">
@@ -484,9 +448,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 </p>
               )}
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Tipo de Serviço */}
             <div className="space-y-3">
               <Label htmlFor="service_type" className="text-sm font-bold text-red-700 flex items-center gap-2">
@@ -494,26 +456,26 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 Tipo de Serviço *
               </Label>
               <Select onValueChange={(value: any) => setValue('service_type', value)} defaultValue="tattoo">
-                <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
                   <SelectItem value="tattoo" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🎨</span>
-                      <span className="font-semibold text-sm">Tatuagem</span>
+                      <span className="font-bold">Tatuagem</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="piercing" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">💎</span>
-                      <span className="font-semibold text-sm">Piercing</span>
+                      <span className="font-bold">Piercing</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="consultation" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">💬</span>
-                      <span className="font-semibold text-sm">Consulta</span>
+                      <span className="font-bold">Consulta</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -524,6 +486,43 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                   {errors.service_type.message}
                 </p>
               )}
+            </div>
+
+            {/* Maca */}
+            <div className="space-y-3">
+              <Label htmlFor="bed_id" className="text-sm font-bold text-red-700 flex items-center gap-2">
+                <Bed className="h-4 w-4" />
+                Maca
+              </Label>
+              <Select onValueChange={(value) => setValue('bed_id', value)} defaultValue="none">
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                  <SelectValue placeholder="Selecione a maca (opcional)" />
+                </SelectTrigger>
+                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
+                  {bedsLoading ? (
+                    <SelectItem value="loading" disabled className="p-3">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-red-600 border-t-transparent"></div>
+                        <span>Carregando macas...</span>
+                      </div>
+                    </SelectItem>
+                  ) : (
+                    <>
+                      <SelectItem value="none" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
+                        <div className="font-bold text-gray-600">Nenhuma maca específica</div>
+                      </SelectItem>
+                      {activeBeds.map((bed) => (
+                        <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
+                          <div className="flex items-center gap-2">
+                            <Bed className="h-3 w-3 text-red-600" />
+                            <span className="font-bold">{bed.name} (Maca {bed.number})</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Preço Estimado */}
@@ -538,19 +537,19 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 step="0.01"
                 placeholder="0,00"
                 {...register('estimated_price', { valueAsNumber: true })}
-                className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
               />
             </div>
           </div>
 
           {/* Upload de Fotos de Referência */}
-          <div className="space-y-3">
+          <div className="space-y-4 bg-gradient-to-r from-red-50/80 via-white/90 to-red-50/80 rounded-xl p-6 border-2 border-red-100/50 shadow-lg backdrop-blur-sm">
             <Label className="text-sm font-bold text-red-700 flex items-center gap-2">
               <Image className="h-4 w-4" />
-              Fotos de Referência
+              Fotos de Referência da Tatuagem
             </Label>
             <div className="space-y-3">
-              <div className="border-2 border-dashed border-red-200 rounded-lg p-4 text-center bg-red-50/30 hover:bg-red-50/50 transition-all duration-300">
+              <div className="border-2 border-dashed border-red-200 rounded-lg p-6 text-center bg-red-50/30 hover:bg-red-50/50 transition-all duration-300">
                 <Input
                   ref={fileInputRef}
                   type="file"
@@ -563,34 +562,34 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                   type="button"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-red-300 text-red-700 hover:bg-red-100 shadow-md hover:shadow-lg transition-all duration-300 rounded-lg"
+                  className="border-2 border-red-300 text-red-700 hover:bg-red-100 shadow-md hover:shadow-lg transition-all duration-300 rounded-lg px-6 py-3 h-auto font-bold"
                 >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Escolher Fotos
+                  <Upload className="h-5 w-5 mr-2" />
+                  Escolher Fotos de Referência
                 </Button>
-                <p className="text-xs text-gray-600 mt-2">JPG, PNG até 10MB cada</p>
+                <p className="text-xs text-gray-600 mt-3 font-medium">JPG, PNG até 10MB cada</p>
               </div>
               
               {/* Preview das fotos selecionadas */}
               {uploadedFiles.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {uploadedFiles.map((file, index) => (
                     <div key={index} className="relative group">
                       <img
                         src={URL.createObjectURL(file)}
                         alt={`Referência ${index + 1}`}
-                        className="w-full h-20 object-cover rounded-lg border-2 border-red-200 shadow-md"
+                        className="w-full h-24 object-cover rounded-lg border-2 border-red-200 shadow-md group-hover:shadow-lg transition-all duration-300"
                       />
                       <Button
                         type="button"
                         variant="destructive"
                         size="sm"
                         onClick={() => removeFile(index)}
-                        className="absolute top-1 right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
+                        className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-full shadow-lg"
                       >
                         <X className="h-3 w-3" />
                       </Button>
-                      <p className="text-xs text-gray-600 mt-1 truncate">{file.name}</p>
+                      <p className="text-xs text-gray-600 mt-1 truncate font-medium">{file.name}</p>
                     </div>
                   ))}
                 </div>
@@ -602,10 +601,10 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
           <div className="space-y-3">
             <Label htmlFor="service_description" className="text-sm font-bold text-red-700">Descrição do Serviço</Label>
             <Textarea
-              placeholder="Descreva a tatuagem, localização, tamanho, etc..."
+              placeholder="Descreva a tatuagem, localização, tamanho, estilo, etc..."
               {...register('service_description')}
-              className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 min-h-20 bg-white/90 backdrop-blur-sm rounded-lg resize-none"
-              rows={3}
+              className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 min-h-24 bg-white/90 backdrop-blur-sm rounded-lg resize-none"
+              rows={4}
             />
           </div>
 
@@ -620,21 +619,21 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t-2 border-red-100">
+          <div className="flex justify-end gap-3 pt-6 border-t-2 border-red-100">
             <Button 
               type="submit" 
-              disabled={isSubmitting || !!conflictCheck}
-              className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-xl hover:shadow-red-500/25 transition-all duration-500 transform hover:scale-105 px-8 py-2 h-10 rounded-lg font-bold relative overflow-hidden group"
+              disabled={isSubmitting || validationState === 'conflict'}
+              className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-xl hover:shadow-red-500/25 transition-all duration-500 transform hover:scale-105 px-8 py-3 h-auto rounded-lg font-black text-lg relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  Criando...
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                  Criando Agendamento...
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4 mr-2" />
+                  <Sparkles className="h-5 w-5 mr-2" />
                   Criar Agendamento
                 </>
               )}
@@ -647,3 +646,5 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 };
 
 export default AppointmentForm;
+
+</initial_code>

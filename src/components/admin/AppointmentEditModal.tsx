@@ -40,9 +40,8 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
   const queryClient = useQueryClient();
   const clientService = getClientService();
   const bedService = getBedService();
-  const [conflictCheck, setConflictCheck] = useState<string | null>(null);
-  const [isValidating, setIsValidating] = useState(false);
-  const [validationComplete, setValidationComplete] = useState(false);
+  const [validationState, setValidationState] = useState<'idle' | 'checking' | 'available' | 'conflict'>('idle');
+  const [conflictMessage, setConflictMessage] = useState<string>("");
 
   const { data: beds = [] } = useQuery({
     queryKey: ['beds'],
@@ -76,16 +75,15 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
     }
   }, [appointment, isOpen, reset]);
 
-  // Validação em tempo real estabilizada
+  // Validação estabilizada
   useEffect(() => {
     const validateConflicts = async () => {
       const [artist_id, bed_id, date, time, duration_minutes] = watchedFields;
       
       if (artist_id && date && time && duration_minutes && appointment) {
-        setIsValidating(true);
-        setValidationComplete(false);
+        setValidationState('checking');
         try {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 1000));
           
           const endTime = format(
             new Date(new Date(`${date}T${time}`).getTime() + duration_minutes * 60000), 
@@ -95,24 +93,25 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
           if (bed_id && bed_id !== "none") {
             const isAvailable = await bedService.checkBedAvailability(bed_id, date, time, endTime);
             if (!isAvailable) {
-              setConflictCheck('Maca não disponível no horário selecionado');
-              setIsValidating(false);
-              setValidationComplete(true);
+              setValidationState('conflict');
+              setConflictMessage('Maca não disponível no horário selecionado');
               return;
             }
           }
           
-          setConflictCheck(null);
-          setValidationComplete(true);
+          setValidationState('available');
+          setConflictMessage('');
         } catch (error) {
-          setConflictCheck('Erro ao verificar disponibilidade');
-          setValidationComplete(true);
+          setValidationState('conflict');
+          setConflictMessage('Erro ao verificar disponibilidade');
         }
-        setIsValidating(false);
+      } else {
+        setValidationState('idle');
+        setConflictMessage('');
       }
     };
 
-    const timeoutId = setTimeout(validateConflicts, 800);
+    const timeoutId = setTimeout(validateConflicts, 1200);
     return () => clearTimeout(timeoutId);
   }, [watchedFields, bedService, appointment]);
 
@@ -148,10 +147,10 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
   }
 
   const onSubmit = (data: EditAppointmentFormData) => {
-    if (conflictCheck) {
+    if (validationState === 'conflict') {
       toast({
         title: "Conflito detectado",
-        description: conflictCheck,
+        description: conflictMessage,
         variant: "destructive",
       });
       return;
@@ -186,7 +185,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white via-red-50/30 to-white border-2 border-red-200/50 shadow-2xl rounded-2xl relative">
+      <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white via-red-50/30 to-white border-2 border-red-200/50 shadow-2xl rounded-2xl relative">
         {/* Elementos decorativos */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
@@ -229,9 +228,9 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                     window.open(`/admin/clients/${client.id}`, '_blank');
                   }
                 }}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-lg text-sm px-4 py-2"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-lg px-4 py-2 h-auto font-bold"
               >
-                <UserPlus className="h-3 w-3 mr-2" />
+                <UserPlus className="h-4 w-4 mr-2" />
                 Ver Perfil
               </Button>
               
@@ -242,9 +241,9 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   }
                 }}
                 variant="outline"
-                className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-lg text-sm px-4 py-2"
+                className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-lg px-4 py-2 h-auto font-bold"
               >
-                <Phone className="h-3 w-3 mr-2" />
+                <Phone className="h-4 w-4 mr-2" />
                 Ligar
               </Button>
               
@@ -255,40 +254,40 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   }
                 }}
                 variant="outline"
-                className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-lg text-sm px-4 py-2"
+                className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-lg px-4 py-2 h-auto font-bold"
               >
-                <Mail className="h-3 w-3 mr-2" />
+                <Mail className="h-4 w-4 mr-2" />
                 E-mail
               </Button>
             </div>
           </div>
 
           {/* Indicador de validação */}
-          {(isValidating || validationComplete) && (
+          {validationState !== 'idle' && (
             <div className={`p-4 rounded-xl border-2 transition-all duration-500 transform shadow-lg ${
-              isValidating 
+              validationState === 'checking' 
                 ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-300 animate-pulse' 
-                : conflictCheck 
+                : validationState === 'conflict' 
                   ? 'bg-gradient-to-r from-red-50 to-red-100 border-red-300' 
                   : 'bg-gradient-to-r from-green-50 to-green-100 border-green-300'
             }`}>
               <div className="flex items-center gap-3">
-                {isValidating ? (
+                {validationState === 'checking' ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
                     <span className="text-blue-800 font-bold">Verificando disponibilidade...</span>
                   </>
-                ) : conflictCheck ? (
+                ) : validationState === 'conflict' ? (
                   <>
                     <AlertTriangle className="h-5 w-5 text-red-600 animate-bounce" />
-                    <span className="text-red-800 font-bold">{conflictCheck}</span>
+                    <span className="text-red-800 font-bold">{conflictMessage}</span>
                   </>
-                ) : validationComplete ? (
+                ) : (
                   <>
                     <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-green-800 font-bold">Horário disponível! ✨</span>
                   </>
-                ) : null}
+                )}
               </div>
             </div>
           )}
@@ -305,7 +304,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                 <Input
                   type="date"
                   {...register('date')}
-                  className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
                 />
                 {errors.date && (
                   <p className="text-xs text-red-600 font-medium flex items-center gap-1">
@@ -324,7 +323,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                 <Input
                   type="time"
                   {...register('time')}
-                  className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
                 />
                 {errors.time && (
                   <p className="text-xs text-red-600 font-medium flex items-center gap-1">
@@ -345,7 +344,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   min="30"
                   step="30"
                   {...register('duration_minutes', { valueAsNumber: true })}
-                  className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
                 />
                 {errors.duration_minutes && (
                   <p className="text-xs text-red-600 font-medium flex items-center gap-1">
@@ -362,13 +361,13 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   Artista *
                 </Label>
                 <Select onValueChange={(value) => setValue('artist_id', value)} defaultValue={watch('artist_id')}>
-                  <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                     <SelectValue placeholder="Selecione um artista" />
                   </SelectTrigger>
                   <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
                     {artists.map((artist) => (
                       <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
-                        <span className="font-semibold text-sm">{artist.name}</span>
+                        <span className="font-bold">{artist.name}</span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -388,18 +387,18 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   Maca
                 </Label>
                 <Select onValueChange={(value) => setValue('bed_id', value)} defaultValue={watch('bed_id')}>
-                  <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                     <SelectValue placeholder="Selecione a maca" />
                   </SelectTrigger>
                   <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
                     <SelectItem value="none" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
-                      <span className="font-semibold text-gray-600 text-sm">Nenhuma maca específica</span>
+                      <span className="font-bold text-gray-600">Nenhuma maca específica</span>
                     </SelectItem>
                     {activeBeds.map((bed) => (
                       <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                         <div className="flex items-center gap-2">
                           <Bed className="h-3 w-3 text-red-600" />
-                          <span className="font-semibold text-sm">{bed.name} (Maca {bed.number})</span>
+                          <span className="font-bold">{bed.name} (Maca {bed.number})</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -419,7 +418,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   step="0.01"
                   placeholder="0,00"
                   {...register('estimated_price', { valueAsNumber: true })}
-                  className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
                 />
               </div>
             </div>
@@ -430,8 +429,8 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
               <textarea
                 {...register('notes')}
                 placeholder="Observações adicionais..."
-                className="w-full min-h-20 p-3 border-2 border-red-200 focus:border-red-500 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 resize-none bg-white/90 backdrop-blur-sm text-sm"
-                rows={3}
+                className="w-full min-h-24 p-4 border-2 border-red-200 focus:border-red-500 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 resize-none bg-white/90 backdrop-blur-sm"
+                rows={4}
               />
             </div>
 
@@ -446,9 +445,9 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   });
                 }}
                 variant="outline"
-                className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 rounded-lg text-sm px-4 py-2"
+                className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 rounded-lg px-4 py-2 h-auto font-bold"
               >
-                <Upload className="h-3 w-3 mr-2" />
+                <Upload className="h-4 w-4 mr-2" />
                 Adicionar Fotos
               </Button>
               
@@ -461,9 +460,9 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   });
                 }}
                 variant="outline"
-                className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 rounded-lg text-sm px-4 py-2"
+                className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 rounded-lg px-4 py-2 h-auto font-bold"
               >
-                <Printer className="h-3 w-3 mr-2" />
+                <Printer className="h-4 w-4 mr-2" />
                 Imprimir Ficha
               </Button>
             </div>
@@ -474,15 +473,15 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                 type="button"
                 onClick={onClose}
                 variant="outline"
-                className="border-2 border-gray-300 text-gray-600 hover:bg-gray-50 shadow-md hover:shadow-lg transition-all duration-300 rounded-lg px-6 py-2 text-sm"
+                className="border-2 border-gray-300 text-gray-600 hover:bg-gray-50 shadow-md hover:shadow-lg transition-all duration-300 rounded-lg px-6 py-3 h-auto font-bold"
               >
-                <X className="h-3 w-3 mr-2" />
+                <X className="h-4 w-4 mr-2" />
                 Cancelar
               </Button>
               <Button 
                 type="submit" 
-                disabled={isSubmitting || !!conflictCheck}
-                className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-xl hover:shadow-red-500/25 transition-all duration-500 transform hover:scale-105 px-8 py-2 rounded-lg font-bold text-sm relative overflow-hidden group"
+                disabled={isSubmitting || validationState === 'conflict'}
+                className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-xl hover:shadow-red-500/25 transition-all duration-500 transform hover:scale-105 px-8 py-3 h-auto rounded-lg font-black relative overflow-hidden group"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 {isSubmitting ? (
