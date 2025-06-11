@@ -29,7 +29,7 @@ const editAppointmentSchema = z.object({
 type EditAppointmentFormData = z.infer<typeof editAppointmentSchema>;
 
 interface AppointmentEditModalProps {
-  appointment: Appointment;
+  appointment: Appointment | null;
   client?: Client;
   isOpen: boolean;
   onClose: () => void;
@@ -40,6 +40,11 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
   const queryClient = useQueryClient();
   const clientService = getClientService();
   const bedService = getBedService();
+
+  // Early return if appointment is null
+  if (!appointment) {
+    return null;
+  }
 
   const { data: beds = [] } = useQuery({
     queryKey: ['beds'],
