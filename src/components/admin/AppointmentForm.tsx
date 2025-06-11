@@ -45,6 +45,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   const [conflictCheck, setConflictCheck] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [validationComplete, setValidationComplete] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -75,7 +76,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 
   const watchedFields = watch(['artist_id', 'bed_id', 'date', 'time', 'duration_minutes']);
 
-  // Validação otimizada com debounce adequado
+  // Validação otimizada e estabilizada
   useEffect(() => {
     const validateConflicts = async () => {
       const [artist_id, bed_id, date, time, duration_minutes] = watchedFields;
@@ -88,6 +89,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
       if (artist_id && date && time && duration_minutes) {
         setIsValidating(true);
         setConflictCheck(null);
+        setValidationComplete(false);
         
         validationTimeoutRef.current = setTimeout(async () => {
           try {
@@ -102,26 +104,29 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
               if (!isAvailable) {
                 setConflictCheck('Maca não disponível no horário selecionado');
                 setIsValidating(false);
+                setValidationComplete(true);
                 return;
               }
             }
             
             setConflictCheck(null);
             setIsValidating(false);
+            setValidationComplete(true);
           } catch (error) {
             setConflictCheck('Erro ao verificar disponibilidade');
             setIsValidating(false);
+            setValidationComplete(true);
           }
-        }, 800); // Debounce de 800ms para evitar validações excessivas
+        }, 1000); // Debounce estável de 1 segundo
       } else {
         setIsValidating(false);
         setConflictCheck(null);
+        setValidationComplete(false);
       }
     };
 
     validateConflicts();
 
-    // Cleanup function
     return () => {
       if (validationTimeoutRef.current) {
         clearTimeout(validationTimeoutRef.current);
@@ -154,7 +159,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         name: file.name,
         size: file.size,
         type: file.type,
-        url: URL.createObjectURL(file) // Em produção seria uma URL real
+        url: URL.createObjectURL(file)
       }));
 
       const appointmentData = {
@@ -170,7 +175,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         estimated_price: data.estimated_price || 0,
         notes: data.notes || '',
         price: data.estimated_price || 0,
-        photo_references: photoReferences, // Incluir fotos de referência
+        photo_references: photoReferences,
       };
       return clientService.createAppointment(appointmentData);
     },
@@ -248,15 +253,15 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   const activeBeds = beds.filter(bed => bed.isActive);
 
   return (
-    <div className="bg-gradient-to-br from-white via-red-50/20 to-white rounded-2xl shadow-2xl border-2 border-red-200/50 relative overflow-hidden">
+    <div className="bg-gradient-to-br from-white via-red-50/20 to-white rounded-2xl shadow-2xl border-2 border-red-200/50 relative overflow-hidden max-h-[90vh] overflow-y-auto">
       {/* Elementos decorativos de fundo */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/30 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/20 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
       
-      <div className="relative z-10 p-8">
-        {/* Indicador de validação otimizado */}
-        {(isValidating || conflictCheck !== null) && (
-          <div className={`mb-6 p-4 rounded-xl border-2 transition-all duration-300 ${
+      <div className="relative z-10 p-6">
+        {/* Indicador de validação estabilizado */}
+        {(isValidating || validationComplete) && (
+          <div className={`mb-4 p-4 rounded-xl border-2 transition-all duration-300 ${
             isValidating 
               ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-300' 
               : conflictCheck 
@@ -274,44 +279,44 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                   <AlertTriangle className="h-5 w-5 text-red-600" />
                   <span className="text-red-800 font-semibold">{conflictCheck}</span>
                 </>
-              ) : (
+              ) : validationComplete ? (
                 <>
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <span className="text-green-800 font-semibold">Horário disponível! ✨</span>
                 </>
-              )}
+              ) : null}
             </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Cliente */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Label htmlFor="client_id" className="text-sm font-bold text-red-700 flex items-center gap-2">
-                <User className="h-5 w-5" />
+                <User className="h-4 w-4" />
                 Cliente *
               </Label>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="relative group">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-red-400 transition-colors group-focus-within:text-red-600" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-400 transition-colors group-focus-within:text-red-600" />
                   <Input
-                    placeholder="Buscar cliente por nome ou email..."
+                    placeholder="Buscar cliente..."
                     value={clientSearch}
                     onChange={(e) => setClientSearch(e.target.value)}
-                    className="pl-12 h-12 border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-xl"
+                    className="pl-10 h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
                   />
                 </div>
                 <Select onValueChange={(value) => setValue('client_id', value)}>
-                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-xl">
+                  <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                     <SelectValue placeholder="Selecione um cliente" />
                   </SelectTrigger>
-                  <SelectContent className="border-2 border-red-200 shadow-2xl rounded-xl max-h-64">
+                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg max-h-48">
                     {filteredClients.map((client) => (
-                      <SelectItem key={client.id} value={client.id} className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                      <SelectItem key={client.id} value={client.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                         <div className="flex flex-col">
-                          <div className="font-semibold text-gray-900">{client.name}</div>
-                          <div className="text-sm text-gray-600">{client.email}</div>
+                          <div className="font-semibold text-gray-900 text-sm">{client.name}</div>
+                          <div className="text-xs text-gray-600">{client.email}</div>
                         </div>
                       </SelectItem>
                     ))}
@@ -319,67 +324,67 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 </Select>
               </div>
               {errors.client_id && (
-                <p className="text-sm text-red-600 font-medium flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4" />
+                <p className="text-xs text-red-600 font-medium flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
                   {errors.client_id.message}
                 </p>
               )}
             </div>
 
             {/* Artista */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Label htmlFor="artist_id" className="text-sm font-bold text-red-700 flex items-center gap-2">
-                <User className="h-5 w-5" />
+                <User className="h-4 w-4" />
                 Artista *
               </Label>
               <Select onValueChange={(value) => setValue('artist_id', value)}>
-                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-xl">
+                <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                   <SelectValue placeholder="Selecione um artista" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-2xl rounded-xl">
+                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
                   {artists.map((artist) => (
-                    <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
-                      <div className="font-semibold text-gray-900">{artist.name}</div>
+                    <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
+                      <div className="font-semibold text-gray-900 text-sm">{artist.name}</div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {errors.artist_id && (
-                <p className="text-sm text-red-600 font-medium flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4" />
+                <p className="text-xs text-red-600 font-medium flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
                   {errors.artist_id.message}
                 </p>
               )}
             </div>
 
             {/* Maca */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Label htmlFor="bed_id" className="text-sm font-bold text-red-700 flex items-center gap-2">
-                <Bed className="h-5 w-5" />
+                <Bed className="h-4 w-4" />
                 Maca
               </Label>
               <Select onValueChange={(value) => setValue('bed_id', value)} defaultValue="none">
-                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-xl">
+                <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                   <SelectValue placeholder="Selecione a maca (opcional)" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-2xl rounded-xl">
+                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
                   {bedsLoading ? (
-                    <SelectItem value="loading" disabled className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-600 border-t-transparent"></div>
-                        <span>Carregando macas...</span>
+                    <SelectItem value="loading" disabled className="p-3">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-red-600 border-t-transparent"></div>
+                        <span className="text-sm">Carregando macas...</span>
                       </div>
                     </SelectItem>
                   ) : (
                     <>
-                      <SelectItem value="none" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
-                        <div className="font-semibold text-gray-600">Nenhuma maca específica</div>
+                      <SelectItem value="none" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
+                        <div className="font-semibold text-gray-600 text-sm">Nenhuma maca específica</div>
                       </SelectItem>
                       {activeBeds.map((bed) => (
-                        <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <Bed className="h-4 w-4 text-red-600" />
-                            <span className="font-semibold">{bed.name} (Maca {bed.number})</span>
+                        <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
+                          <div className="flex items-center gap-2">
+                            <Bed className="h-3 w-3 text-red-600" />
+                            <span className="font-semibold text-sm">{bed.name} (Maca {bed.number})</span>
                           </div>
                         </SelectItem>
                       ))}
@@ -390,26 +395,26 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
             </div>
 
             {/* Data */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Label className="text-sm font-bold text-red-700 flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5" />
+                <CalendarIcon className="h-4 w-4" />
                 Data *
               </Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full h-12 justify-start text-left font-normal border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-xl"
+                    className="w-full h-10 justify-start text-left font-normal border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
                   >
-                    <CalendarIcon className="mr-3 h-5 w-5 text-red-600" />
+                    <CalendarIcon className="mr-2 h-4 w-4 text-red-600" />
                     {selectedDate ? (
-                      <span className="font-semibold">{format(selectedDate, "PPP", { locale: ptBR })}</span>
+                      <span className="font-semibold text-sm">{format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}</span>
                     ) : (
-                      <span className="text-gray-500">Selecione uma data</span>
+                      <span className="text-gray-500 text-sm">Selecione uma data</span>
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 border-2 border-red-200 shadow-2xl rounded-xl">
+                <PopoverContent className="w-auto p-0 border-2 border-red-200 shadow-xl rounded-lg">
                   <Calendar
                     mode="single"
                     selected={selectedDate}
@@ -421,48 +426,48 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                     }}
                     disabled={(date) => date < new Date()}
                     initialFocus
-                    className="rounded-xl"
+                    className="rounded-lg"
                   />
                 </PopoverContent>
               </Popover>
               {errors.date && (
-                <p className="text-sm text-red-600 font-medium flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4" />
+                <p className="text-xs text-red-600 font-medium flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
                   {errors.date.message}
                 </p>
               )}
             </div>
 
             {/* Horário */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Label htmlFor="time" className="text-sm font-bold text-red-700 flex items-center gap-2">
-                <Clock className="h-5 w-5" />
+                <Clock className="h-4 w-4" />
                 Horário *
               </Label>
               <Select onValueChange={(value) => setValue('time', value)} defaultValue={watch('time')}>
-                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-xl">
+                <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                   <SelectValue placeholder="Selecione um horário" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-2xl rounded-xl max-h-64">
+                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg max-h-48">
                   {timeSlots.map((time) => (
-                    <SelectItem key={time} value={time} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-lg">
-                      <span className="font-semibold">{time}</span>
+                    <SelectItem key={time} value={time} className="hover:bg-red-50 focus:bg-red-100 p-2 rounded-md">
+                      <span className="font-semibold text-sm">{time}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {errors.time && (
-                <p className="text-sm text-red-600 font-medium flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4" />
+                <p className="text-xs text-red-600 font-medium flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
                   {errors.time.message}
                 </p>
               )}
             </div>
 
             {/* Duração */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Label htmlFor="duration_minutes" className="text-sm font-bold text-red-700 flex items-center gap-2">
-                <Clock className="h-5 w-5" />
+                <Clock className="h-4 w-4" />
                 Duração (minutos) *
               </Label>
               <Input
@@ -470,61 +475,61 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 min="30"
                 step="30"
                 {...register('duration_minutes', { valueAsNumber: true })}
-                className="h-12 border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-xl"
+                className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
               />
               {errors.duration_minutes && (
-                <p className="text-sm text-red-600 font-medium flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4" />
+                <p className="text-xs text-red-600 font-medium flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
                   {errors.duration_minutes.message}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Tipo de Serviço */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Label htmlFor="service_type" className="text-sm font-bold text-red-700 flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
+                <Sparkles className="h-4 w-4" />
                 Tipo de Serviço *
               </Label>
               <Select onValueChange={(value: any) => setValue('service_type', value)} defaultValue="tattoo">
-                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-xl">
+                <SelectTrigger className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-2xl rounded-xl">
-                  <SelectItem value="tattoo" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">🎨</span>
-                      <span className="font-semibold">Tatuagem</span>
+                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
+                  <SelectItem value="tattoo" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🎨</span>
+                      <span className="font-semibold text-sm">Tatuagem</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="piercing" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">💎</span>
-                      <span className="font-semibold">Piercing</span>
+                  <SelectItem value="piercing" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">💎</span>
+                      <span className="font-semibold text-sm">Piercing</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="consultation" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">💬</span>
-                      <span className="font-semibold">Consulta</span>
+                  <SelectItem value="consultation" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">💬</span>
+                      <span className="font-semibold text-sm">Consulta</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
               </Select>
               {errors.service_type && (
-                <p className="text-sm text-red-600 font-medium flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4" />
+                <p className="text-xs text-red-600 font-medium flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
                   {errors.service_type.message}
                 </p>
               )}
             </div>
 
             {/* Preço Estimado */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Label htmlFor="estimated_price" className="text-sm font-bold text-red-700 flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
+                <DollarSign className="h-4 w-4" />
                 Preço Estimado (R$)
               </Label>
               <Input
@@ -533,19 +538,19 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 step="0.01"
                 placeholder="0,00"
                 {...register('estimated_price', { valueAsNumber: true })}
-                className="h-12 border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-xl"
+                className="h-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
               />
             </div>
           </div>
 
           {/* Upload de Fotos de Referência */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label className="text-sm font-bold text-red-700 flex items-center gap-2">
-              <Image className="h-5 w-5" />
+              <Image className="h-4 w-4" />
               Fotos de Referência
             </Label>
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-red-200 rounded-xl p-6 text-center bg-red-50/30 hover:bg-red-50/50 transition-all duration-300">
+            <div className="space-y-3">
+              <div className="border-2 border-dashed border-red-200 rounded-lg p-4 text-center bg-red-50/30 hover:bg-red-50/50 transition-all duration-300">
                 <Input
                   ref={fileInputRef}
                   type="file"
@@ -558,30 +563,30 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                   type="button"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-red-300 text-red-700 hover:bg-red-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+                  className="border-2 border-red-300 text-red-700 hover:bg-red-100 shadow-md hover:shadow-lg transition-all duration-300 rounded-lg"
                 >
-                  <Upload className="h-5 w-5 mr-2" />
+                  <Upload className="h-4 w-4 mr-2" />
                   Escolher Fotos
                 </Button>
-                <p className="text-sm text-gray-600 mt-2">JPG, PNG até 10MB cada</p>
+                <p className="text-xs text-gray-600 mt-2">JPG, PNG até 10MB cada</p>
               </div>
               
               {/* Preview das fotos selecionadas */}
               {uploadedFiles.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {uploadedFiles.map((file, index) => (
                     <div key={index} className="relative group">
                       <img
                         src={URL.createObjectURL(file)}
                         alt={`Referência ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg border-2 border-red-200 shadow-lg"
+                        className="w-full h-20 object-cover rounded-lg border-2 border-red-200 shadow-md"
                       />
                       <Button
                         type="button"
                         variant="destructive"
                         size="sm"
                         onClick={() => removeFile(index)}
-                        className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
+                        className="absolute top-1 right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
                       >
                         <X className="h-3 w-3" />
                       </Button>
@@ -594,42 +599,42 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
           </div>
 
           {/* Descrição do Serviço */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label htmlFor="service_description" className="text-sm font-bold text-red-700">Descrição do Serviço</Label>
             <Textarea
               placeholder="Descreva a tatuagem, localização, tamanho, etc..."
               {...register('service_description')}
-              className="border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 min-h-24 bg-white/90 backdrop-blur-sm rounded-xl resize-none"
-              rows={4}
+              className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 min-h-20 bg-white/90 backdrop-blur-sm rounded-lg resize-none"
+              rows={3}
             />
           </div>
 
           {/* Observações */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label htmlFor="notes" className="text-sm font-bold text-red-700">Observações</Label>
             <Textarea
               placeholder="Observações adicionais..."
               {...register('notes')}
-              className="border-2 border-red-200 focus:border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 min-h-24 bg-white/90 backdrop-blur-sm rounded-xl resize-none"
-              rows={4}
+              className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 min-h-20 bg-white/90 backdrop-blur-sm rounded-lg resize-none"
+              rows={3}
             />
           </div>
 
-          <div className="flex justify-end gap-4 pt-6 border-t-2 border-red-100">
+          <div className="flex justify-end gap-3 pt-4 border-t-2 border-red-100">
             <Button 
               type="submit" 
               disabled={isSubmitting || !!conflictCheck}
-              className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-2xl hover:shadow-red-500/25 transition-all duration-500 transform hover:scale-105 px-10 py-3 h-12 rounded-xl font-bold text-lg relative overflow-hidden group"
+              className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-xl hover:shadow-red-500/25 transition-all duration-500 transform hover:scale-105 px-8 py-2 h-10 rounded-lg font-bold relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-3"></div>
-                  Criando Agendamento...
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                  Criando...
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-5 w-5 mr-3" />
+                  <Sparkles className="h-4 w-4 mr-2" />
                   Criar Agendamento
                 </>
               )}
