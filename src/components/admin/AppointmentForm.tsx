@@ -12,7 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Search, Bed } from "lucide-react";
+import { CalendarIcon, Search, Bed, DollarSign, Clock, User } from "lucide-react";
 import { Client } from "@/services/interfaces/IClientService";
 import { getClientService, getBedService } from "@/services/serviceFactory";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -46,7 +46,6 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   const clientService = getClientService();
   const bedService = getBedService();
 
-  // Buscar macas disponíveis
   const { data: beds = [], isLoading: bedsLoading } = useQuery({
     queryKey: ['beds'],
     queryFn: () => bedService.fetchBeds(),
@@ -71,7 +70,6 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (data: AppointmentFormData) => {
-      // Verificar disponibilidade da maca se selecionada
       if (data.bed_id && data.bed_id !== "none") {
         const endTime = format(
           new Date(new Date(`${data.date}T${data.time}`).getTime() + data.duration_minutes * 60000), 
@@ -90,7 +88,6 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         }
       }
 
-      // Ensure all required fields are present
       const appointmentData = {
         client_id: data.client_id,
         artist_id: data.artist_id,
@@ -103,13 +100,14 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         service_description: data.service_description || '',
         estimated_price: data.estimated_price || 0,
         notes: data.notes || '',
+        price: data.estimated_price || 0, // Add price for financial integration
       };
       return clientService.createAppointment(appointmentData);
     },
     onSuccess: () => {
       toast({
-        title: "Agendamento criado",
-        description: "O agendamento foi criado com sucesso.",
+        title: "Agendamento criado com sucesso! ✨",
+        description: "O agendamento foi criado e aparecerá no calendário.",
       });
       onSuccess();
     },
@@ -123,6 +121,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   });
 
   const onSubmit = (data: AppointmentFormData) => {
+    console.log('Submitting appointment data:', data);
     createAppointmentMutation.mutate(data);
   };
 
@@ -145,217 +144,261 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
     }
   }
 
-  // Filtrar macas ativas
   const activeBeds = beds.filter(bed => bed.isActive);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Cliente */}
-        <div className="space-y-2">
-          <Label htmlFor="client_id">Cliente *</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Buscar cliente..."
-              value={clientSearch}
-              onChange={(e) => setClientSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select onValueChange={(value) => setValue('client_id', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione um cliente" />
-            </SelectTrigger>
-            <SelectContent>
-              {filteredClients.map((client) => (
-                <SelectItem key={client.id} value={client.id}>
-                  <div>
-                    <div className="font-medium">{client.name}</div>
-                    <div className="text-sm text-gray-500">{client.email}</div>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.client_id && (
-            <p className="text-sm text-red-600">{errors.client_id.message}</p>
-          )}
-        </div>
-
-        {/* Artista */}
-        <div className="space-y-2">
-          <Label htmlFor="artist_id">Artista *</Label>
-          <Select onValueChange={(value) => setValue('artist_id', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione um artista" />
-            </SelectTrigger>
-            <SelectContent>
-              {artists.map((artist) => (
-                <SelectItem key={artist.id} value={artist.id}>
-                  {artist.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.artist_id && (
-            <p className="text-sm text-red-600">{errors.artist_id.message}</p>
-          )}
-        </div>
-
-        {/* Maca */}
-        <div className="space-y-2">
-          <Label htmlFor="bed_id">Maca</Label>
-          <Select onValueChange={(value) => setValue('bed_id', value)} defaultValue="none">
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione a maca (opcional)" />
-            </SelectTrigger>
-            <SelectContent>
-              {bedsLoading ? (
-                <SelectItem value="loading" disabled>Carregando macas...</SelectItem>
-              ) : (
-                <>
-                  <SelectItem value="none">Nenhuma maca específica</SelectItem>
-                  {activeBeds.map((bed) => (
-                    <SelectItem key={bed.id} value={bed.id}>
-                      <div className="flex items-center gap-2">
-                        <Bed className="h-4 w-4" />
-                        <span>{bed.name} (Maca {bed.number})</span>
+    <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-xl shadow-inner border border-red-100">
+      <div className="p-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Cliente */}
+            <div className="space-y-3">
+              <Label htmlFor="client_id" className="text-sm font-bold text-red-700 flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Cliente *
+              </Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-red-400" />
+                <Input
+                  placeholder="Buscar cliente..."
+                  value={clientSearch}
+                  onChange={(e) => setClientSearch(e.target.value)}
+                  className="pl-10 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300"
+                />
+              </div>
+              <Select onValueChange={(value) => setValue('client_id', value)}>
+                <SelectTrigger className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white">
+                  <SelectValue placeholder="Selecione um cliente" />
+                </SelectTrigger>
+                <SelectContent className="border-2 border-red-200 shadow-xl max-h-48">
+                  {filteredClients.map((client) => (
+                    <SelectItem key={client.id} value={client.id} className="hover:bg-red-50">
+                      <div>
+                        <div className="font-medium">{client.name}</div>
+                        <div className="text-sm text-gray-500">{client.email}</div>
                       </div>
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+              {errors.client_id && (
+                <p className="text-sm text-red-600 font-medium">{errors.client_id.message}</p>
+              )}
+            </div>
+
+            {/* Artista */}
+            <div className="space-y-3">
+              <Label htmlFor="artist_id" className="text-sm font-bold text-red-700 flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Artista *
+              </Label>
+              <Select onValueChange={(value) => setValue('artist_id', value)}>
+                <SelectTrigger className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white">
+                  <SelectValue placeholder="Selecione um artista" />
+                </SelectTrigger>
+                <SelectContent className="border-2 border-red-200 shadow-xl">
+                  {artists.map((artist) => (
+                    <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50">
+                      {artist.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.artist_id && (
+                <p className="text-sm text-red-600 font-medium">{errors.artist_id.message}</p>
+              )}
+            </div>
+
+            {/* Maca */}
+            <div className="space-y-3">
+              <Label htmlFor="bed_id" className="text-sm font-bold text-red-700 flex items-center gap-2">
+                <Bed className="h-4 w-4" />
+                Maca
+              </Label>
+              <Select onValueChange={(value) => setValue('bed_id', value)} defaultValue="none">
+                <SelectTrigger className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white">
+                  <SelectValue placeholder="Selecione a maca (opcional)" />
+                </SelectTrigger>
+                <SelectContent className="border-2 border-red-200 shadow-xl">
+                  {bedsLoading ? (
+                    <SelectItem value="loading" disabled>Carregando macas...</SelectItem>
+                  ) : (
+                    <>
+                      <SelectItem value="none" className="hover:bg-red-50">Nenhuma maca específica</SelectItem>
+                      {activeBeds.map((bed) => (
+                        <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50">
+                          <div className="flex items-center gap-2">
+                            <Bed className="h-4 w-4" />
+                            <span>{bed.name} (Maca {bed.number})</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Data */}
+            <div className="space-y-3">
+              <Label className="text-sm font-bold text-red-700 flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                Data *
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 text-red-600" />
+                    {selectedDate ? (
+                      format(selectedDate, "PPP", { locale: ptBR })
+                    ) : (
+                      <span>Selecione uma data</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 border-2 border-red-200 shadow-xl">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      if (date) {
+                        setSelectedDate(date);
+                        setValue('date', format(date, 'yyyy-MM-dd'));
+                      }
+                    }}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              {errors.date && (
+                <p className="text-sm text-red-600 font-medium">{errors.date.message}</p>
+              )}
+            </div>
+
+            {/* Horário */}
+            <div className="space-y-3">
+              <Label htmlFor="time" className="text-sm font-bold text-red-700 flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Horário *
+              </Label>
+              <Select onValueChange={(value) => setValue('time', value)} defaultValue={watch('time')}>
+                <SelectTrigger className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white">
+                  <SelectValue placeholder="Selecione um horário" />
+                </SelectTrigger>
+                <SelectContent className="border-2 border-red-200 shadow-xl max-h-48">
+                  {timeSlots.map((time) => (
+                    <SelectItem key={time} value={time} className="hover:bg-red-50">
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.time && (
+                <p className="text-sm text-red-600 font-medium">{errors.time.message}</p>
+              )}
+            </div>
+
+            {/* Duração */}
+            <div className="space-y-3">
+              <Label htmlFor="duration_minutes" className="text-sm font-bold text-red-700 flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Duração (minutos) *
+              </Label>
+              <Input
+                type="number"
+                min="30"
+                step="30"
+                {...register('duration_minutes', { valueAsNumber: true })}
+                className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300"
+              />
+              {errors.duration_minutes && (
+                <p className="text-sm text-red-600 font-medium">{errors.duration_minutes.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Tipo de Serviço */}
+            <div className="space-y-3">
+              <Label htmlFor="service_type" className="text-sm font-bold text-red-700">Tipo de Serviço *</Label>
+              <Select onValueChange={(value: any) => setValue('service_type', value)} defaultValue="tattoo">
+                <SelectTrigger className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent className="border-2 border-red-200 shadow-xl">
+                  <SelectItem value="tattoo" className="hover:bg-red-50">🎨 Tatuagem</SelectItem>
+                  <SelectItem value="piercing" className="hover:bg-red-50">💎 Piercing</SelectItem>
+                  <SelectItem value="consultation" className="hover:bg-red-50">💬 Consulta</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.service_type && (
+                <p className="text-sm text-red-600 font-medium">{errors.service_type.message}</p>
+              )}
+            </div>
+
+            {/* Preço Estimado */}
+            <div className="space-y-3">
+              <Label htmlFor="estimated_price" className="text-sm font-bold text-red-700 flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                Preço Estimado (R$)
+              </Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0,00"
+                {...register('estimated_price', { valueAsNumber: true })}
+                className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300"
+              />
+            </div>
+          </div>
+
+          {/* Descrição do Serviço */}
+          <div className="space-y-3">
+            <Label htmlFor="service_description" className="text-sm font-bold text-red-700">Descrição do Serviço</Label>
+            <Textarea
+              placeholder="Descreva a tatuagem, localização, tamanho, etc..."
+              {...register('service_description')}
+              className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 min-h-20"
+            />
+          </div>
+
+          {/* Observações */}
+          <div className="space-y-3">
+            <Label htmlFor="notes" className="text-sm font-bold text-red-700">Observações</Label>
+            <Textarea
+              placeholder="Observações adicionais..."
+              {...register('notes')}
+              className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 min-h-20"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-red-200">
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 px-8 py-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  Criando...
+                </>
+              ) : (
+                <>
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  Criar Agendamento
                 </>
               )}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Data */}
-        <div className="space-y-2">
-          <Label>Data *</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start text-left font-normal"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? (
-                  format(selectedDate, "PPP", { locale: ptBR })
-                ) : (
-                  <span>Selecione uma data</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => {
-                  if (date) {
-                    setSelectedDate(date);
-                    setValue('date', format(date, 'yyyy-MM-dd'));
-                  }
-                }}
-                disabled={(date) => date < new Date()}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          {errors.date && (
-            <p className="text-sm text-red-600">{errors.date.message}</p>
-          )}
-        </div>
-
-        {/* Horário */}
-        <div className="space-y-2">
-          <Label htmlFor="time">Horário *</Label>
-          <Select onValueChange={(value) => setValue('time', value)} defaultValue={watch('time')}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione um horário" />
-            </SelectTrigger>
-            <SelectContent>
-              {timeSlots.map((time) => (
-                <SelectItem key={time} value={time}>
-                  {time}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.time && (
-            <p className="text-sm text-red-600">{errors.time.message}</p>
-          )}
-        </div>
-
-        {/* Duração */}
-        <div className="space-y-2">
-          <Label htmlFor="duration_minutes">Duração (minutos) *</Label>
-          <Input
-            type="number"
-            min="30"
-            step="30"
-            {...register('duration_minutes', { valueAsNumber: true })}
-          />
-          {errors.duration_minutes && (
-            <p className="text-sm text-red-600">{errors.duration_minutes.message}</p>
-          )}
-        </div>
-
-        {/* Tipo de Serviço */}
-        <div className="space-y-2">
-          <Label htmlFor="service_type">Tipo de Serviço *</Label>
-          <Select onValueChange={(value: any) => setValue('service_type', value)} defaultValue="tattoo">
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="tattoo">Tatuagem</SelectItem>
-              <SelectItem value="piercing">Piercing</SelectItem>
-              <SelectItem value="consultation">Consulta</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.service_type && (
-            <p className="text-sm text-red-600">{errors.service_type.message}</p>
-          )}
-        </div>
+            </Button>
+          </div>
+        </form>
       </div>
-
-      {/* Descrição do Serviço */}
-      <div className="space-y-2">
-        <Label htmlFor="service_description">Descrição do Serviço</Label>
-        <Textarea
-          placeholder="Descreva a tatuagem, localização, tamanho, etc..."
-          {...register('service_description')}
-        />
-      </div>
-
-      {/* Preço Estimado */}
-      <div className="space-y-2">
-        <Label htmlFor="estimated_price">Preço Estimado (R$)</Label>
-        <Input
-          type="number"
-          min="0"
-          step="0.01"
-          placeholder="0,00"
-          {...register('estimated_price', { valueAsNumber: true })}
-        />
-      </div>
-
-      {/* Observações */}
-      <div className="space-y-2">
-        <Label htmlFor="notes">Observações</Label>
-        <Textarea
-          placeholder="Observações adicionais..."
-          {...register('notes')}
-        />
-      </div>
-
-      <div className="flex justify-end gap-2">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Criando..." : "Criar Agendamento"}
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 };
 

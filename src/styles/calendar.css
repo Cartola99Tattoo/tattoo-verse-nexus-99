@@ -99,6 +99,7 @@
   visibility: visible !important;
   color: white !important;
   font-weight: bold !important;
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3) !important;
 }
 
 .rbc-event:hover {
@@ -195,11 +196,16 @@
   color: white !important;
   opacity: 1 !important;
   visibility: visible !important;
+  min-height: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2) !important;
 }
 
 .rbc-month-view .rbc-event:hover {
   @apply bg-gradient-to-r from-red-700 to-red-800;
   transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4) !important;
 }
 
 /* Week/Day view events */
@@ -212,6 +218,10 @@
   color: white !important;
   font-weight: bold !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
 }
 
 .rbc-time-view .rbc-event:hover {
@@ -395,4 +405,22 @@
 
 .rbc-date-cell.rbc-button-link:hover::after {
   left: 100%;
+}
+
+/* Enhanced event content visibility */
+.rbc-event .rbc-event-content,
+.rbc-event .rbc-event-label {
+  width: 100% !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+/* Better event positioning */
+.rbc-events-container .rbc-event {
+  position: absolute !important;
+  left: 1% !important;
+  right: 1% !important;
+  width: auto !important;
+  max-width: 98% !important;
 }

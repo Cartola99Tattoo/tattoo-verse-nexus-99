@@ -149,21 +149,10 @@ const Appointments = () => {
     mutationFn: async (appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at'> & { price?: number }) => {
       console.log('Creating appointment with financial integration:', appointmentData);
       
-      // Create the appointment
       const newAppointment = await clientService.createAppointment(appointmentData);
       
-      // Simulate financial integration for pending revenue
       if (appointmentData.price && appointmentData.price > 0) {
         console.log(`Financial Integration: Pending revenue of R$ ${appointmentData.price} registered for appointment ${newAppointment.id}`);
-        
-        // In a real implementation, this would call:
-        // await financialService.addPendingRevenue({
-        //   amount: appointmentData.price,
-        //   source: 'appointment',
-        //   appointmentId: newAppointment.id,
-        //   description: `Agendamento - ${appointmentData.service_type}`,
-        //   dueDate: appointmentData.date
-        // });
       }
       
       return newAppointment;
@@ -172,9 +161,12 @@ const Appointments = () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       const priceMessage = variables.price ? ` (R$ ${variables.price} em receita pendente)` : '';
       toast({
-        title: "Agendamento criado com sucesso!",
+        title: "Agendamento criado com sucesso! ✨",
         description: `Agendamento registrado${priceMessage}`,
       });
+      setIsCreateDialogOpen(false);
+      setIsQuickAddOpen(false);
+      setSelectedSlot(null);
     },
     onError: () => {
       toast({
@@ -189,23 +181,11 @@ const Appointments = () => {
     mutationFn: async ({ appointmentId, status, price }: { appointmentId: string; status: Appointment['status']; price?: number }) => {
       console.log('Updating appointment status with financial integration:', { appointmentId, status, price });
       
-      // Update appointment status
       await clientService.updateAppointmentStatus(appointmentId, status);
       
-      // Financial integration when marking as completed
       if (status === 'completed' && price && price > 0) {
         console.log(`Financial Integration: Converting pending revenue to confirmed revenue of R$ ${price} for appointment ${appointmentId}`);
         
-        // In a real implementation, this would call:
-        // await financialService.confirmRevenue({
-        //   appointmentId,
-        //   amount: price,
-        //   completedDate: new Date().toISOString(),
-        //   category: 'service_revenue',
-        //   description: 'Agendamento concluído'
-        // });
-        
-        // Simulate adding to financial dashboard
         toast({
           title: "Receita registrada!",
           description: `R$ ${price.toFixed(2)} adicionados ao módulo financeiro.`,
@@ -284,7 +264,6 @@ const Appointments = () => {
   const handleNavigate = (newDate: Date, view: View, action: string) => {
     setSelectedDate(newDate);
     
-    // Se estivermos na visualização de mês e o usuário clicou em um dia
     if (view === 'month' && action === 'click') {
       setView('day');
       setIsDayViewFocused(true);
@@ -515,13 +494,13 @@ const Appointments = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-between">
             <div className="flex gap-3">
               <Select value={selectedArtist} onValueChange={setSelectedArtist}>
-                <SelectTrigger className="w-[200px] border-2 border-red-200 focus:border-red-500 shadow-lg">
+                <SelectTrigger className="w-[200px] border-2 border-red-200 focus:border-red-500 shadow-lg bg-white hover:bg-red-50 transition-all duration-300">
                   <Filter className="h-4 w-4 mr-2 text-red-600" />
                   <SelectValue placeholder="Filtrar por artista" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-2 border-red-200 shadow-xl">
                   {artists.map((artist) => (
-                    <SelectItem key={artist.id} value={artist.id}>
+                    <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50">
                       {artist.name}
                     </SelectItem>
                   ))}
@@ -529,15 +508,15 @@ const Appointments = () => {
               </Select>
 
               <Select value={selectedBed} onValueChange={setSelectedBed}>
-                <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg">
+                <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg bg-white hover:bg-red-50 transition-all duration-300">
                   <Bed className="h-4 w-4 mr-2 text-red-600" />
                   <SelectValue placeholder="Filtrar por maca" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as Macas</SelectItem>
-                  <SelectItem value="none">Sem Maca Específica</SelectItem>
+                <SelectContent className="border-2 border-red-200 shadow-xl">
+                  <SelectItem value="all" className="hover:bg-red-50">Todas as Macas</SelectItem>
+                  <SelectItem value="none" className="hover:bg-red-50">Sem Maca Específica</SelectItem>
                   {beds.filter(bed => bed.isActive).map((bed) => (
-                    <SelectItem key={bed.id} value={bed.id}>
+                    <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50">
                       {bed.name}
                     </SelectItem>
                   ))}
@@ -545,17 +524,17 @@ const Appointments = () => {
               </Select>
 
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg">
+                <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg bg-white hover:bg-red-50 transition-all duration-300">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Status</SelectItem>
-                  <SelectItem value="scheduled">Agendado</SelectItem>
-                  <SelectItem value="confirmed">Confirmado</SelectItem>
-                  <SelectItem value="in_progress">Em Andamento</SelectItem>
-                  <SelectItem value="completed">Concluído</SelectItem>
-                  <SelectItem value="cancelled">Cancelado</SelectItem>
-                  <SelectItem value="no_show">Não Compareceu</SelectItem>
+                <SelectContent className="border-2 border-red-200 shadow-xl">
+                  <SelectItem value="all" className="hover:bg-red-50">Todos os Status</SelectItem>
+                  <SelectItem value="scheduled" className="hover:bg-red-50">Agendado</SelectItem>
+                  <SelectItem value="confirmed" className="hover:bg-red-50">Confirmado</SelectItem>
+                  <SelectItem value="in_progress" className="hover:bg-red-50">Em Andamento</SelectItem>
+                  <SelectItem value="completed" className="hover:bg-red-50">Concluído</SelectItem>
+                  <SelectItem value="cancelled" className="hover:bg-red-50">Cancelado</SelectItem>
+                  <SelectItem value="no_show" className="hover:bg-red-50">Não Compareceu</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -568,10 +547,13 @@ const Appointments = () => {
                     Agendamento Rápido
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Agendamento Rápido</DialogTitle>
-                    <DialogDescription>
+                <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 shadow-2xl">
+                  <DialogHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white p-4 -m-6 mb-4 rounded-t-lg">
+                    <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                      <Plus className="h-5 w-5" />
+                      Agendamento Rápido
+                    </DialogTitle>
+                    <DialogDescription className="text-red-100">
                       Crie um agendamento rapidamente
                     </DialogDescription>
                   </DialogHeader>
@@ -596,22 +578,27 @@ const Appointments = () => {
                     Novo Agendamento
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Criar Novo Agendamento</DialogTitle>
-                    <DialogDescription>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 shadow-2xl">
+                  <DialogHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 -m-6 mb-6 rounded-t-lg">
+                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                      <CalendarIcon className="h-6 w-6" />
+                      Criar Novo Agendamento
+                    </DialogTitle>
+                    <DialogDescription className="text-red-100 font-medium">
                       Agende uma nova sessão para um cliente
                     </DialogDescription>
                   </DialogHeader>
-                  <AppointmentForm 
-                    selectedSlot={selectedSlot}
-                    clients={clients}
-                    onSuccess={() => {
-                      setIsCreateDialogOpen(false);
-                      setSelectedSlot(null);
-                      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-                    }}
-                  />
+                  <div className="px-2">
+                    <AppointmentForm 
+                      selectedSlot={selectedSlot}
+                      clients={clients}
+                      onSuccess={() => {
+                        setIsCreateDialogOpen(false);
+                        setSelectedSlot(null);
+                        queryClient.invalidateQueries({ queryKey: ['appointments'] });
+                      }}
+                    />
+                  </div>
                 </DialogContent>
               </Dialog>
             </div>
@@ -630,7 +617,7 @@ const Appointments = () => {
                       onClick={handleBackToMonth}
                       variant="ghost"
                       size="sm"
-                      className="text-white hover:bg-red-700 transition-all duration-300"
+                      className="text-white hover:bg-red-700 transition-all duration-300 border border-red-500"
                     >
                       <ArrowLeft className="h-4 w-4 mr-2" />
                       Voltar ao Mês
@@ -651,6 +638,33 @@ const Appointments = () => {
                       }
                     </CardDescription>
                   </div>
+                </div>
+                
+                {/* Enhanced View Selector */}
+                <div className="flex items-center gap-2 bg-red-800/30 rounded-lg p-1">
+                  {[
+                    { key: 'month', label: 'Mês', icon: CalendarIcon },
+                    { key: 'week', label: 'Semana', icon: CalendarIcon },
+                    { key: 'day', label: 'Dia', icon: Clock },
+                    { key: 'agenda', label: 'Agenda', icon: Eye }
+                  ].map(({ key, label, icon: Icon }) => (
+                    <Button
+                      key={key}
+                      onClick={() => setView(key as View)}
+                      variant="ghost"
+                      size="sm"
+                      className={`
+                        px-3 py-1.5 text-xs font-bold transition-all duration-300 rounded-md
+                        ${view === key 
+                          ? 'bg-white text-red-700 shadow-lg transform scale-105' 
+                          : 'text-red-200 hover:text-white hover:bg-red-700/50'
+                        }
+                      `}
+                    >
+                      <Icon className="h-3 w-3 mr-1" />
+                      {label}
+                    </Button>
+                  ))}
                 </div>
               </div>
             </CardHeader>
@@ -710,18 +724,18 @@ const Appointments = () => {
               open={!!selectedAppointment} 
               onOpenChange={() => setSelectedAppointment(null)}
             >
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-red-800 flex items-center gap-2">
+              <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 shadow-2xl">
+                <DialogHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 -m-6 mb-6 rounded-t-lg">
+                  <DialogTitle className="text-2xl font-bold text-white flex items-center gap-2">
                     <CalendarIcon className="h-6 w-6" />
                     Detalhes Completos do Agendamento
                   </DialogTitle>
-                  <DialogDescription>
+                  <DialogDescription className="text-red-100 font-medium">
                     Visualizar, editar informações e gerenciar agendamento
                   </DialogDescription>
                 </DialogHeader>
                 
-                <div className="space-y-6">
+                <div className="space-y-6 px-2">
                   <AppointmentCard 
                     appointment={selectedAppointment}
                     client={clients.find(c => c.id === selectedAppointment.client_id)}
@@ -732,14 +746,14 @@ const Appointments = () => {
                     }}
                   />
                   
-                  {/* Additional Action Buttons */}
-                  <div className="flex flex-wrap gap-3 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                  {/* Enhanced Action Buttons */}
+                  <div className="flex flex-wrap gap-3 p-6 bg-gradient-to-r from-red-50 via-gray-50 to-red-50 rounded-xl border-2 border-red-100 shadow-inner">
                     <Button
                       onClick={() => {
                         const clientId = selectedAppointment.client_id;
                         window.open(`/admin/clients/${clientId}`, '_blank');
                       }}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                     >
                       <User className="h-4 w-4 mr-2" />
                       Ver Perfil Completo do Cliente
@@ -754,7 +768,7 @@ const Appointments = () => {
                         });
                       }}
                       variant="outline"
-                      className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Adicionar Fotos de Referência
@@ -769,7 +783,7 @@ const Appointments = () => {
                         });
                       }}
                       variant="outline"
-                      className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                     >
                       <Printer className="h-4 w-4 mr-2" />
                       Imprimir Ficha de Anamnese
@@ -778,14 +792,13 @@ const Appointments = () => {
                     <Button
                       onClick={() => {
                         setSelectedAppointment(null);
-                        // Aqui abriria o formulário de edição
                         toast({
                           title: "Modo de edição",
                           description: "Funcionalidade de edição será implementada em breve.",
                         });
                       }}
                       variant="outline"
-                      className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                     >
                       <Edit className="h-4 w-4 mr-2" />
                       Editar Agendamento
