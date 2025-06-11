@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -618,45 +619,45 @@ const Appointments = () => {
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    variant={view === 'day' ? 'default' : 'outline'}
+                    variant={view === 'day' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => handleViewChange('day')}
                     className={view === 'day' 
-                      ? 'bg-white text-red-700 font-bold shadow-lg border-2 border-white hover:bg-gray-100 hover:text-red-800' 
-                      : 'border-2 border-white text-white hover:bg-white/10 hover:border-red-200 font-bold transition-all duration-300'
+                      ? 'bg-gray-900 text-white font-bold shadow-xl border-2 border-gray-800 hover:bg-gray-800 hover:text-white' 
+                      : 'border-2 border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-300 font-bold transition-all duration-300 shadow-lg'
                     }
                   >
                     Dia
                   </Button>
                   <Button
-                    variant={view === 'week' ? 'default' : 'outline'}
+                    variant={view === 'week' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => handleViewChange('week')}
                     className={view === 'week' 
-                      ? 'bg-white text-red-700 font-bold shadow-lg border-2 border-white hover:bg-gray-100 hover:text-red-800' 
-                      : 'border-2 border-white text-white hover:bg-white/10 hover:border-red-200 font-bold transition-all duration-300'
+                      ? 'bg-gray-900 text-white font-bold shadow-xl border-2 border-gray-800 hover:bg-gray-800 hover:text-white' 
+                      : 'border-2 border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-300 font-bold transition-all duration-300 shadow-lg'
                     }
                   >
                     Semana
                   </Button>
                   <Button
-                    variant={view === 'month' ? 'default' : 'outline'}
+                    variant={view === 'month' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => handleViewChange('month')}
                     className={view === 'month' 
-                      ? 'bg-white text-red-700 font-bold shadow-lg border-2 border-white hover:bg-gray-100 hover:text-red-800' 
-                      : 'border-2 border-white text-white hover:bg-white/10 hover:border-red-200 font-bold transition-all duration-300'
+                      ? 'bg-gray-900 text-white font-bold shadow-xl border-2 border-gray-800 hover:bg-gray-800 hover:text-white' 
+                      : 'border-2 border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-300 font-bold transition-all duration-300 shadow-lg'
                     }
                   >
                     Mês
                   </Button>
                   <Button
-                    variant={view === 'agenda' ? 'default' : 'outline'}
+                    variant={view === 'agenda' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => handleViewChange('agenda')}
                     className={view === 'agenda' 
-                      ? 'bg-white text-red-700 font-bold shadow-lg border-2 border-white hover:bg-gray-100 hover:text-red-800' 
-                      : 'border-2 border-white text-white hover:bg-white/10 hover:border-red-200 font-bold transition-all duration-300'
+                      ? 'bg-gray-900 text-white font-bold shadow-xl border-2 border-gray-800 hover:bg-gray-800 hover:text-white' 
+                      : 'border-2 border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-300 font-bold transition-all duration-300 shadow-lg'
                     }
                   >
                     Agenda
@@ -688,6 +689,8 @@ const Appointments = () => {
                       borderWidth: '2px',
                       borderRadius: '8px',
                       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                      color: 'white',
+                      fontWeight: 'bold',
                     }
                   })}
                   components={{

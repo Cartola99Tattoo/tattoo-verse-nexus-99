@@ -1,4 +1,5 @@
 
+
 /* React Big Calendar Custom Styles - 99Tattoo Theme */
 
 /* Calendar Container */
@@ -84,30 +85,61 @@
   padding: 4px 8px;
 }
 
-/* Event Styles */
+/* Enhanced Event Styles - Guaranteed Visibility */
 .rbc-event {
   @apply bg-gradient-to-br from-red-600 to-red-700 border-2 border-red-500 text-white rounded-lg shadow-lg;
-  font-size: 11px;
-  padding: 4px 6px;
-  transition: all 0.3s ease;
+  font-size: 11px !important;
+  padding: 4px 6px !important;
+  transition: all 0.3s ease !important;
+  min-height: 30px !important;
+  opacity: 1 !important;
+  z-index: 10 !important;
+  position: relative !important;
+  display: block !important;
+  visibility: visible !important;
+  color: white !important;
+  font-weight: bold !important;
 }
 
 .rbc-event:hover {
   @apply shadow-xl transform scale-105;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4) !important;
+  z-index: 20 !important;
 }
 
 .rbc-event.rbc-selected {
   @apply bg-gradient-to-br from-red-700 to-red-800 border-red-600;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3) !important;
 }
 
 .rbc-event-label {
   @apply font-bold text-white;
+  color: white !important;
+  font-weight: bold !important;
 }
 
 .rbc-event-content {
   @apply text-red-100;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 10px !important;
+}
+
+/* Event Title */
+.rbc-event .rbc-event-label,
+.rbc-event .rbc-addons-dnd-drag-preview .rbc-event-label {
+  color: white !important;
+  font-weight: bold !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure events are always visible */
+.rbc-events-container {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+.rbc-event-overlaps {
+  z-index: 15 !important;
 }
 
 /* Day/Week/Month Views */
@@ -143,6 +175,43 @@
 
 .rbc-today {
   @apply bg-gradient-to-br from-red-100 to-red-200;
+}
+
+/* Month view events */
+.rbc-month-view .rbc-event {
+  @apply bg-gradient-to-r from-red-600 to-red-700 text-white;
+  border: 1px solid #dc2626 !important;
+  border-radius: 4px !important;
+  padding: 2px 4px !important;
+  margin: 1px 0 !important;
+  font-size: 10px !important;
+  color: white !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.rbc-month-view .rbc-event:hover {
+  @apply bg-gradient-to-r from-red-700 to-red-800;
+  transform: scale(1.02);
+}
+
+/* Week/Day view events */
+.rbc-time-view .rbc-event {
+  border-radius: 8px !important;
+  padding: 6px 8px !important;
+  min-height: 40px !important;
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  border: 2px solid #991b1b !important;
+  color: white !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.rbc-time-view .rbc-event:hover {
+  background: linear-gradient(135deg, #b91c1c, #991b1b) !important;
+  box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3) !important;
+  transform: scale(1.05);
+  z-index: 25 !important;
 }
 
 /* Agenda View */
@@ -234,6 +303,14 @@
   transform: rotate(5deg);
 }
 
+/* Force visibility for all events */
+.rbc-event,
+.rbc-event * {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .rbc-toolbar {
@@ -247,8 +324,9 @@
   }
   
   .rbc-event {
-    font-size: 10px;
-    padding: 2px 4px;
+    font-size: 10px !important;
+    padding: 2px 4px !important;
+    min-height: 25px !important;
   }
   
   .rbc-header {
@@ -256,3 +334,4 @@
     font-size: 12px;
   }
 }
+
