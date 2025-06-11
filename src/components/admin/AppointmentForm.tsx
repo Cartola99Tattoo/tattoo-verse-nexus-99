@@ -74,7 +74,6 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 
   const watchedFields = watch(['artist_id', 'bed_id', 'date', 'time', 'duration_minutes']);
 
-  // Validação simplificada e estável
   useEffect(() => {
     const [artist_id, bed_id, date, time, duration_minutes] = watchedFields;
     
@@ -113,7 +112,6 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (data: AppointmentFormData) => {
-      // Verificação final antes de criar
       if (data.bed_id && data.bed_id !== "none") {
         const endTime = format(
           new Date(new Date(`${data.date}T${data.time}`).getTime() + data.duration_minutes * 60000), 
@@ -132,7 +130,6 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         }
       }
 
-      // Preparar referências de fotos
       const photoReferences = uploadedFiles.map(file => ({
         name: file.name,
         size: file.size,
@@ -190,7 +187,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
     const files = Array.from(event.target.files || []);
     const validFiles = files.filter(file => {
       const isValidType = file.type.startsWith('image/');
-      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
+      const isValidSize = file.size <= 10 * 1024 * 1024;
       return isValidType && isValidSize;
     });
 
@@ -231,10 +228,10 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   const activeBeds = beds.filter(bed => bed.isActive);
 
   return (
-    <div className="bg-gradient-to-br from-white via-red-50/30 to-white rounded-2xl shadow-2xl border-2 border-red-200/50 relative overflow-hidden max-h-[95vh] overflow-y-auto">
+    <div className="bg-white rounded-2xl shadow-2xl border-2 border-red-200/50 relative overflow-hidden max-h-[95vh] overflow-y-auto">
       {/* Elementos decorativos de fundo */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/30 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/20 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
       
       {/* Cabeçalho */}
       <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-t-2xl relative overflow-hidden">
@@ -248,8 +245,8 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         </div>
       </div>
       
-      <div className="relative z-10 p-6">
-        {/* Indicador de validação estabilizado */}
+      <div className="relative z-10 p-6 bg-white">
+        {/* Indicador de validação */}
         {validationState !== 'idle' && (
           <div className={`mb-6 p-4 rounded-xl border-2 transition-all duration-500 ${
             validationState === 'conflict' 
@@ -287,14 +284,14 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                     placeholder="Buscar cliente..."
                     value={clientSearch}
                     onChange={(e) => setClientSearch(e.target.value)}
-                    className="pl-10 h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                    className="pl-10 h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg"
                   />
                 </div>
                 <Select onValueChange={(value) => setValue('client_id', value)}>
-                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg">
                     <SelectValue placeholder="Selecione um cliente" />
                   </SelectTrigger>
-                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg max-h-48">
+                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg max-h-48 bg-white z-50">
                     {filteredClients.map((client) => (
                       <SelectItem key={client.id} value={client.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                         <div className="flex flex-col">
@@ -321,10 +318,10 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 Artista *
               </Label>
               <Select onValueChange={(value) => setValue('artist_id', value)}>
-                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg">
                   <SelectValue placeholder="Selecione um artista" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
+                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg bg-white z-50">
                   {artists.map((artist) => (
                     <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                       <div className="font-bold text-gray-900">{artist.name}</div>
@@ -350,7 +347,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full h-12 justify-start text-left font-normal border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                    className="w-full h-12 justify-start text-left font-normal border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4 text-red-600" />
                     {selectedDate ? (
@@ -360,7 +357,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 border-2 border-red-200 shadow-xl rounded-lg">
+                <PopoverContent className="w-auto p-0 border-2 border-red-200 shadow-xl rounded-lg bg-white z-50">
                   <Calendar
                     mode="single"
                     selected={selectedDate}
@@ -373,6 +370,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                     disabled={(date) => date < new Date()}
                     initialFocus
                     className="rounded-lg"
+                    locale={ptBR}
                   />
                 </PopoverContent>
               </Popover>
@@ -391,10 +389,10 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 Horário *
               </Label>
               <Select onValueChange={(value) => setValue('time', value)} defaultValue={watch('time')}>
-                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg">
                   <SelectValue placeholder="Selecione um horário" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg max-h-48">
+                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg max-h-48 bg-white z-50">
                   {timeSlots.map((time) => (
                     <SelectItem key={time} value={time} className="hover:bg-red-50 focus:bg-red-100 p-2 rounded-md">
                       <span className="font-bold">{time}</span>
@@ -421,7 +419,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 min="30"
                 step="30"
                 {...register('duration_minutes', { valueAsNumber: true })}
-                className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg"
               />
               {errors.duration_minutes && (
                 <p className="text-xs text-red-600 font-medium flex items-center gap-1">
@@ -438,10 +436,10 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 Tipo de Serviço *
               </Label>
               <Select onValueChange={(value: any) => setValue('service_type', value)} defaultValue="tattoo">
-                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg">
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
+                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg bg-white z-50">
                   <SelectItem value="tattoo" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🎨</span>
@@ -477,10 +475,10 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 Maca
               </Label>
               <Select onValueChange={(value) => setValue('bed_id', value)} defaultValue="none">
-                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg">
                   <SelectValue placeholder="Selecione a maca (opcional)" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
+                <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg bg-white z-50">
                   {bedsLoading ? (
                     <SelectItem value="loading" disabled className="p-3">
                       <div className="flex items-center gap-2">
@@ -519,13 +517,13 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 step="0.01"
                 placeholder="0,00"
                 {...register('estimated_price', { valueAsNumber: true })}
-                className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg"
               />
             </div>
           </div>
 
           {/* Upload de Fotos de Referência */}
-          <div className="space-y-4 bg-gradient-to-r from-red-50/80 via-white/90 to-red-50/80 rounded-xl p-6 border-2 border-red-100/50 shadow-lg backdrop-blur-sm">
+          <div className="space-y-4 bg-gradient-to-r from-red-50/80 via-white/90 to-red-50/80 rounded-xl p-6 border-2 border-red-100/50 shadow-lg">
             <Label className="text-sm font-bold text-red-700 flex items-center gap-2">
               <Image className="h-4 w-4" />
               Fotos de Referência da Tatuagem
@@ -552,7 +550,6 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 <p className="text-xs text-gray-600 mt-3 font-medium">JPG, PNG até 10MB cada</p>
               </div>
               
-              {/* Preview das fotos selecionadas */}
               {uploadedFiles.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {uploadedFiles.map((file, index) => (
@@ -585,7 +582,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
             <Textarea
               placeholder="Descreva a tatuagem, localização, tamanho, estilo, etc..."
               {...register('service_description')}
-              className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 min-h-24 bg-white/90 backdrop-blur-sm rounded-lg resize-none"
+              className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 min-h-24 bg-white rounded-lg resize-none"
               rows={4}
             />
           </div>
@@ -596,7 +593,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
             <Textarea
               placeholder="Observações adicionais..."
               {...register('notes')}
-              className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 min-h-20 bg-white/90 backdrop-blur-sm rounded-lg resize-none"
+              className="border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 min-h-20 bg-white rounded-lg resize-none"
               rows={3}
             />
           </div>

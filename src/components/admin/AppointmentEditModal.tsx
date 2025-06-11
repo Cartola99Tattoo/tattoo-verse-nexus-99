@@ -75,7 +75,6 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
     }
   }, [appointment, isOpen, reset]);
 
-  // Validação estabilizada
   useEffect(() => {
     const validateConflicts = async () => {
       const [artist_id, bed_id, date, time, duration_minutes] = watchedFields;
@@ -185,7 +184,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white via-red-50/30 to-white border-2 border-red-200/50 shadow-2xl rounded-2xl relative">
+      <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-white border-2 border-red-200/50 shadow-2xl rounded-2xl relative fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
         {/* Elementos decorativos */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
@@ -203,9 +202,9 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative z-10 space-y-6">
+        <div className="relative z-10 space-y-6 p-6 bg-white">
           {/* Informações do Cliente */}
-          <div className="bg-gradient-to-r from-red-50/80 via-white/90 to-red-50/80 rounded-xl p-6 border-2 border-red-100/50 shadow-lg backdrop-blur-sm">
+          <div className="bg-gradient-to-r from-red-50/80 via-white/90 to-red-50/80 rounded-xl p-6 border-2 border-red-100/50 shadow-lg">
             <h3 className="text-lg font-black text-red-700 mb-4 flex items-center gap-2">
               <User className="h-5 w-5" />
               Informações do Cliente
@@ -304,7 +303,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                 <Input
                   type="date"
                   {...register('date')}
-                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg"
                 />
                 {errors.date && (
                   <p className="text-xs text-red-600 font-medium flex items-center gap-1">
@@ -323,7 +322,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                 <Input
                   type="time"
                   {...register('time')}
-                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg"
                 />
                 {errors.time && (
                   <p className="text-xs text-red-600 font-medium flex items-center gap-1">
@@ -344,7 +343,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   min="30"
                   step="30"
                   {...register('duration_minutes', { valueAsNumber: true })}
-                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg"
                 />
                 {errors.duration_minutes && (
                   <p className="text-xs text-red-600 font-medium flex items-center gap-1">
@@ -361,10 +360,10 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   Artista *
                 </Label>
                 <Select onValueChange={(value) => setValue('artist_id', value)} defaultValue={watch('artist_id')}>
-                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg">
                     <SelectValue placeholder="Selecione um artista" />
                   </SelectTrigger>
-                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
+                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg bg-white z-50">
                     {artists.map((artist) => (
                       <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                         <span className="font-bold">{artist.name}</span>
@@ -387,10 +386,10 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   Maca
                 </Label>
                 <Select onValueChange={(value) => setValue('bed_id', value)} defaultValue={watch('bed_id')}>
-                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg">
+                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg">
                     <SelectValue placeholder="Selecione a maca" />
                   </SelectTrigger>
-                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg">
+                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg bg-white z-50">
                     <SelectItem value="none" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                       <span className="font-bold text-gray-600">Nenhuma maca específica</span>
                     </SelectItem>
@@ -418,7 +417,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   step="0.01"
                   placeholder="0,00"
                   {...register('estimated_price', { valueAsNumber: true })}
-                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-lg"
+                  className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg"
                 />
               </div>
             </div>
@@ -429,13 +428,13 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
               <textarea
                 {...register('notes')}
                 placeholder="Observações adicionais..."
-                className="w-full min-h-24 p-4 border-2 border-red-200 focus:border-red-500 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 resize-none bg-white/90 backdrop-blur-sm"
+                className="w-full min-h-24 p-4 border-2 border-red-200 focus:border-red-500 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 resize-none bg-white"
                 rows={4}
               />
             </div>
 
             {/* Ações Adicionais */}
-            <div className="flex flex-wrap gap-3 p-6 bg-gradient-to-r from-red-50/80 via-white/90 to-red-50/80 rounded-xl border-2 border-red-100/50 shadow-lg backdrop-blur-sm">
+            <div className="flex flex-wrap gap-3 p-6 bg-gradient-to-r from-red-50/80 via-white/90 to-red-50/80 rounded-xl border-2 border-red-100/50 shadow-lg">
               <Button
                 type="button"
                 onClick={() => {

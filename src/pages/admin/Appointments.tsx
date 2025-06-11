@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -22,7 +23,7 @@ const locales = {
 const localizer = dateFnsLocalizer({
   format,
   parse,
-  startOfWeek,
+  startOfWeek: (date) => startOfWeek(date, { weekStartsOn: 0 }),
   getDay,
   locales,
 });
@@ -38,7 +39,6 @@ const Appointments = () => {
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
-  // Fixed: Use the correct method name that exists in the service
   const { data: appointments = [], isLoading: appointmentsLoading } = useQuery({
     queryKey: ['appointments'],
     queryFn: () => clientService.fetchUpcomingAppointments(),
@@ -93,12 +93,10 @@ const Appointments = () => {
     handleCloseEditModal();
   };
 
-  // Fixed: Create proper view handler function
   const handleViewChange = useCallback((view: View) => {
     setCurrentView(view);
   }, []);
 
-  // Componente otimizado para os cards de agendamento
   const EventComponent = ({ event }: { event: any }) => {
     const appointment = event.resource;
     const client = clients.find(c => c.id === appointment.client_id);
@@ -133,6 +131,7 @@ const Appointments = () => {
     );
   };
 
+  // Mensagens completamente em português brasileiro
   const messages = {
     today: 'Hoje',
     previous: '← Anterior',
@@ -146,6 +145,8 @@ const Appointments = () => {
     event: 'Evento',
     noEventsInRange: 'Não há agendamentos neste período',
     showMore: (total: number) => `+ ${total} agendamentos`,
+    allDay: 'Dia inteiro',
+    work_week: 'Semana de trabalho',
   };
 
   if (appointmentsLoading) {
@@ -208,6 +209,7 @@ const Appointments = () => {
               date={currentDate}
               onNavigate={setCurrentDate}
               messages={messages}
+              culture="pt-BR"
               components={{
                 event: EventComponent,
               }}
@@ -231,9 +233,9 @@ const Appointments = () => {
         </div>
       </div>
 
-      {/* Modal Criar Agendamento */}
+      {/* Modal Criar Agendamento - CORRIGIDO */}
       <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-        <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-0 border-none shadow-none bg-transparent">
+        <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-white border-2 border-red-200 shadow-2xl rounded-2xl p-0">
           <DialogHeader className="sr-only">
             <DialogTitle>Criar Novo Agendamento</DialogTitle>
           </DialogHeader>
