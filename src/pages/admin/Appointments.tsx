@@ -15,7 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import { Appointment, Client } from "@/services/interfaces/IClientService";
 import { Bed as BedType } from "@/services/interfaces/IBedService";
 import AppointmentForm from "@/components/admin/AppointmentForm";
-import AppointmentCard from "@/components/admin/AppointmentCard";
+import AppointmentEditModal from "@/components/admin/AppointmentEditModal";
 import QuickAppointmentForm from "@/components/admin/QuickAppointmentForm";
 import BedManagement from "@/components/admin/BedManagement";
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -45,6 +45,7 @@ const Appointments = () => {
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
   const [conflictWarning, setConflictWarning] = useState<string | null>(null);
   const [isDayViewFocused, setIsDayViewFocused] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const queryClient = useQueryClient();
   const clientService = getClientService();
@@ -259,6 +260,7 @@ const Appointments = () => {
 
   const handleSelectEvent = (event: any) => {
     setSelectedAppointment(event.resource.appointment);
+    setIsEditModalOpen(true);
   };
 
   const handleNavigate = (newDate: Date, view: View, action: string) => {
@@ -718,96 +720,19 @@ const Appointments = () => {
             </CardContent>
           </Card>
 
-          {/* Enhanced Appointment Details Modal */}
-          {selectedAppointment && (
-            <Dialog 
-              open={!!selectedAppointment} 
-              onOpenChange={() => setSelectedAppointment(null)}
-            >
-              <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 shadow-2xl">
-                <DialogHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 -m-6 mb-6 rounded-t-lg">
-                  <DialogTitle className="text-2xl font-bold text-white flex items-center gap-2">
-                    <CalendarIcon className="h-6 w-6" />
-                    Detalhes Completos do Agendamento
-                  </DialogTitle>
-                  <DialogDescription className="text-red-100 font-medium">
-                    Visualizar, editar informações e gerenciar agendamento
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="space-y-6 px-2">
-                  <AppointmentCard 
-                    appointment={selectedAppointment}
-                    client={clients.find(c => c.id === selectedAppointment.client_id)}
-                    onClose={() => setSelectedAppointment(null)}
-                    onUpdate={() => {
-                      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-                      setSelectedAppointment(null);
-                    }}
-                  />
-                  
-                  {/* Enhanced Action Buttons */}
-                  <div className="flex flex-wrap gap-3 p-6 bg-gradient-to-r from-red-50 via-gray-50 to-red-50 rounded-xl border-2 border-red-100 shadow-inner">
-                    <Button
-                      onClick={() => {
-                        const clientId = selectedAppointment.client_id;
-                        window.open(`/admin/clients/${clientId}`, '_blank');
-                      }}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      <User className="h-4 w-4 mr-2" />
-                      Ver Perfil Completo do Cliente
-                    </Button>
-                    
-                    <Button
-                      onClick={() => {
-                        console.log('Simulando upload de foto de referência...');
-                        toast({
-                          title: "Upload simulado",
-                          description: "Funcionalidade de upload de fotos de referência em desenvolvimento.",
-                        });
-                      }}
-                      variant="outline"
-                      className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Adicionar Fotos de Referência
-                    </Button>
-                    
-                    <Button
-                      onClick={() => {
-                        console.log('Simulando impressão de ficha de anamnese...');
-                        toast({
-                          title: "Impressão simulada",
-                          description: "Gerando ficha de anamnese para impressão...",
-                        });
-                      }}
-                      variant="outline"
-                      className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      <Printer className="h-4 w-4 mr-2" />
-                      Imprimir Ficha de Anamnese
-                    </Button>
-                    
-                    <Button
-                      onClick={() => {
-                        setSelectedAppointment(null);
-                        toast({
-                          title: "Modo de edição",
-                          description: "Funcionalidade de edição será implementada em breve.",
-                        });
-                      }}
-                      variant="outline"
-                      className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Editar Agendamento
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
+          {/* Enhanced Appointment Edit Modal */}
+          <AppointmentEditModal
+            appointment={selectedAppointment!}
+            client={clients.find(c => c.id === selectedAppointment?.client_id)}
+            isOpen={isEditModalOpen}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedAppointment(null);
+            }}
+            onUpdate={() => {
+              queryClient.invalidateQueries({ queryKey: ['appointments'] });
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="beds">

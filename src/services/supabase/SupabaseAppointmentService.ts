@@ -4,6 +4,44 @@ import { IAppointmentService, AppointmentConflict, AppointmentFilters } from '..
 import { Appointment } from '../interfaces/IClientService';
 
 export class SupabaseAppointmentService extends BaseService implements IAppointmentService {
+  // Mock data for demonstration
+  private mockAppointments: Appointment[] = [
+    {
+      id: '1',
+      client_id: 'client-1',
+      artist_id: '1',
+      bed_id: 'bed-1',
+      date: '2025-01-15',
+      time: '14:00',
+      duration_minutes: 120,
+      service_type: 'tattoo',
+      service_description: 'Tatuagem tribal no braço',
+      estimated_price: 350,
+      price: 350,
+      status: 'confirmed',
+      notes: 'Cliente chegou pontualmente',
+      created_at: '2025-01-10T10:00:00Z',
+      updated_at: '2025-01-10T10:00:00Z',
+    },
+    {
+      id: '2', 
+      client_id: 'client-2',
+      artist_id: '2',
+      bed_id: 'bed-2',
+      date: '2025-01-16',
+      time: '10:00',
+      duration_minutes: 180,
+      service_type: 'tattoo',
+      service_description: 'Tatuagem floral colorida',
+      estimated_price: 500,
+      price: 500,
+      status: 'scheduled',
+      notes: 'Primeira sessão',
+      created_at: '2025-01-11T09:00:00Z',
+      updated_at: '2025-01-11T09:00:00Z',
+    }
+  ];
+
   async create(appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at'>): Promise<Appointment> {
     try {
       await this.simulateDelay(700);
@@ -35,6 +73,9 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
         updated_at: new Date().toISOString(),
       };
 
+      // Add to mock data
+      this.mockAppointments.push(newAppointment);
+
       console.log('SupabaseAppointmentService: Creating appointment with financial data', newAppointment);
       
       // Log financial integration
@@ -50,11 +91,11 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
 
   async fetchAll(filters?: AppointmentFilters): Promise<Appointment[]> {
     try {
-      await this.simulateDelay(600);
+      await this.simulateDelay(300);
       console.log('SupabaseAppointmentService: Fetching appointments with filters', filters);
       
-      // Mock implementation
-      return [];
+      // Return mock data for demonstration
+      return this.mockAppointments;
     } catch (error) {
       this.handleError(error, 'buscar agendamentos');
     }
@@ -62,11 +103,11 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
 
   async fetchById(id: string): Promise<Appointment | null> {
     try {
-      await this.simulateDelay(500);
+      await this.simulateDelay(300);
       console.log('SupabaseAppointmentService: Fetching appointment by ID', id);
       
-      // Mock implementation
-      return null;
+      const appointment = this.mockAppointments.find(apt => apt.id === id);
+      return appointment || null;
     } catch (error) {
       this.handleError(error, 'buscar agendamento');
     }
@@ -77,13 +118,42 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
       await this.simulateDelay(500);
       console.log('SupabaseAppointmentService: Updating appointment', id, updates);
       
+      const appointmentIndex = this.mockAppointments.findIndex(apt => apt.id === id);
+      
+      if (appointmentIndex === -1) {
+        throw new ServiceError('Agendamento não encontrado', 'NOT_FOUND', 'update');
+      }
+
       // Check for conflicts if date/time/artist/bed changed
       if (updates.date || updates.time || updates.artist_id || updates.bed_id) {
-        // Mock conflict check - would fetch current appointment and validate
+        const currentAppointment = this.mockAppointments[appointmentIndex];
+        const conflicts = await this.checkConflicts({
+          artist_id: updates.artist_id || currentAppointment.artist_id,
+          bed_id: updates.bed_id || currentAppointment.bed_id,
+          date: updates.date || currentAppointment.date,
+          time: updates.time || currentAppointment.time,
+          duration_minutes: updates.duration_minutes || currentAppointment.duration_minutes,
+          excludeAppointmentId: id
+        });
+
+        if (conflicts.length > 0) {
+          throw new ServiceError(
+            `Conflito detectado: ${conflicts[0].message}`,
+            'CONFLICT_ERROR',
+            'update'
+          );
+        }
       }
+
+      const updatedAppointment = {
+        ...this.mockAppointments[appointmentIndex],
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+
+      this.mockAppointments[appointmentIndex] = updatedAppointment;
       
-      // Mock implementation
-      throw new ServiceError('Agendamento não encontrado', 'NOT_FOUND', 'update');
+      return updatedAppointment;
     } catch (error) {
       this.handleError(error, 'atualizar agendamento');
     }
@@ -94,7 +164,13 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
       await this.simulateDelay(500);
       console.log('SupabaseAppointmentService: Deleting appointment', id);
       
-      // Mock implementation
+      const appointmentIndex = this.mockAppointments.findIndex(apt => apt.id === id);
+      
+      if (appointmentIndex === -1) {
+        throw new ServiceError('Agendamento não encontrado', 'NOT_FOUND', 'delete');
+      }
+
+      this.mockAppointments.splice(appointmentIndex, 1);
     } catch (error) {
       this.handleError(error, 'excluir agendamento');
     }
@@ -122,11 +198,15 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
 
   async fetchUpcomingAppointments(limit?: number): Promise<Appointment[]> {
     try {
-      await this.simulateDelay(600);
+      await this.simulateDelay(300);
       console.log('SupabaseAppointmentService: Fetching upcoming appointments', limit);
       
-      // Mock implementation - would filter by future dates
-      return [];
+      const today = new Date().toISOString().split('T')[0];
+      const upcomingAppointments = this.mockAppointments
+        .filter(apt => apt.date >= today)
+        .sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime());
+      
+      return limit ? upcomingAppointments.slice(0, limit) : upcomingAppointments;
     } catch (error) {
       this.handleError(error, 'buscar próximos agendamentos');
     }
@@ -137,8 +217,7 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
       await this.simulateDelay(600);
       console.log('SupabaseAppointmentService: Fetching appointments by client', clientId);
       
-      // Mock implementation
-      return [];
+      return this.mockAppointments.filter(apt => apt.client_id === clientId);
     } catch (error) {
       this.handleError(error, 'buscar agendamentos do cliente');
     }
@@ -149,8 +228,17 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
       await this.simulateDelay(600);
       console.log('SupabaseAppointmentService: Fetching appointments by artist', artistId, startDate, endDate);
       
-      // Mock implementation
-      return [];
+      let appointments = this.mockAppointments.filter(apt => apt.artist_id === artistId);
+      
+      if (startDate) {
+        appointments = appointments.filter(apt => apt.date >= startDate);
+      }
+      
+      if (endDate) {
+        appointments = appointments.filter(apt => apt.date <= endDate);
+      }
+      
+      return appointments;
     } catch (error) {
       this.handleError(error, 'buscar agendamentos do artista');
     }
@@ -161,12 +249,27 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
       await this.simulateDelay(500);
       console.log('SupabaseAppointmentService: Updating appointment status', id, status);
       
+      const appointmentIndex = this.mockAppointments.findIndex(apt => apt.id === id);
+      
+      if (appointmentIndex === -1) {
+        throw new ServiceError('Agendamento não encontrado', 'NOT_FOUND', 'updateStatus');
+      }
+
+      this.mockAppointments[appointmentIndex] = {
+        ...this.mockAppointments[appointmentIndex],
+        status,
+        updated_at: new Date().toISOString()
+      };
+      
       // Simulate financial integration for completed appointments
       if (status === 'completed') {
+        const appointment = this.mockAppointments[appointmentIndex];
         console.log(`Financial Integration: Appointment ${id} marked as completed - check for revenue recording`);
+        
+        if (appointment.price) {
+          console.log(`Revenue of R$ ${appointment.price} confirmed for appointment ${id}`);
+        }
       }
-      
-      // Mock implementation
     } catch (error) {
       this.handleError(error, 'atualizar status do agendamento');
     }
@@ -186,15 +289,55 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
       
       const conflicts: AppointmentConflict[] = [];
       
-      // Mock conflict detection logic
-      // In real implementation, this would query the database for overlapping appointments
+      const newStart = new Date(`${appointmentData.date}T${appointmentData.time}`);
+      const newEnd = new Date(newStart.getTime() + appointmentData.duration_minutes * 60000);
       
-      // Simulate random conflict (10% chance)
-      if (Math.random() < 0.1) {
+      // Check for artist conflicts
+      const artistConflicts = this.mockAppointments.filter(apt => {
+        if (appointmentData.excludeAppointmentId && apt.id === appointmentData.excludeAppointmentId) {
+          return false;
+        }
+        
+        if (apt.artist_id !== appointmentData.artist_id || apt.date !== appointmentData.date) {
+          return false;
+        }
+        
+        const aptStart = new Date(`${apt.date}T${apt.time}`);
+        const aptEnd = new Date(aptStart.getTime() + apt.duration_minutes * 60000);
+        
+        return (newStart < aptEnd && newEnd > aptStart);
+      });
+      
+      if (artistConflicts.length > 0) {
         conflicts.push({
           type: 'artist',
-          message: 'Artista já possui agendamento neste horário',
+          message: `Artista já possui agendamento das ${artistConflicts[0].time} às ${format(new Date(new Date(`${artistConflicts[0].date}T${artistConflicts[0].time}`).getTime() + artistConflicts[0].duration_minutes * 60000), 'HH:mm')}`,
         });
+      }
+      
+      // Check for bed conflicts
+      if (appointmentData.bed_id) {
+        const bedConflicts = this.mockAppointments.filter(apt => {
+          if (appointmentData.excludeAppointmentId && apt.id === appointmentData.excludeAppointmentId) {
+            return false;
+          }
+          
+          if (apt.bed_id !== appointmentData.bed_id || apt.date !== appointmentData.date) {
+            return false;
+          }
+          
+          const aptStart = new Date(`${apt.date}T${apt.time}`);
+          const aptEnd = new Date(aptStart.getTime() + apt.duration_minutes * 60000);
+          
+          return (newStart < aptEnd && newEnd > aptStart);
+        });
+        
+        if (bedConflicts.length > 0) {
+          conflicts.push({
+            type: 'bed',
+            message: `Maca já está ocupada das ${bedConflicts[0].time} às ${format(new Date(new Date(`${bedConflicts[0].date}T${bedConflicts[0].time}`).getTime() + bedConflicts[0].duration_minutes * 60000), 'HH:mm')}`,
+          });
+        }
       }
       
       return conflicts;
@@ -208,7 +351,6 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
       await this.simulateDelay(700);
       console.log('SupabaseAppointmentService: Rescheduling appointment', id, newDate, newTime);
       
-      // Would fetch current appointment, check conflicts, then update
       return this.update(id, { date: newDate, time: newTime });
     } catch (error) {
       this.handleError(error, 'reagendar compromisso');
@@ -220,7 +362,6 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
       await this.simulateDelay(800);
       console.log('SupabaseAppointmentService: Bulk updating status', appointmentIds, status);
       
-      // Mock implementation - would update multiple appointments
       for (const id of appointmentIds) {
         await this.updateAppointmentStatus(id, status);
       }
