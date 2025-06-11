@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -230,7 +231,7 @@ const Appointments = () => {
 
       return {
         id: appointment.id,
-        title: `${client?.name || 'Cliente'} ${appointment.price ? `- R$ ${appointment.price}` : ''}`,
+        title: `${client?.name || 'Cliente'}${appointment.price ? ` - R$ ${appointment.price}` : ''}`,
         start: startDate,
         end: endDate,
         resource: {
@@ -282,27 +283,32 @@ const Appointments = () => {
     const { appointment, client, bed } = event.resource;
     
     return (
-      <div className="text-xs p-2 rounded-lg group relative bg-gradient-to-br from-red-500 to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-red-400 cursor-pointer">
-        <div className="font-bold truncate text-white">{client?.name}</div>
-        <div className="text-xs opacity-90 flex items-center gap-1 text-red-100">
-          <span>{appointment.service_type === 'tattoo' ? '🎨' : appointment.service_type === 'piercing' ? '💎' : '💬'}</span>
-          <span>{appointment.service_type}</span>
-          {bed && (
-            <>
-              <span>•</span>
-              <Bed className="h-3 w-3" />
-              <span>{bed.name}</span>
-            </>
+      <div className="text-xs p-3 rounded-xl group relative bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white shadow-2xl hover:shadow-red-500/50 transition-all duration-500 transform hover:scale-110 border-2 border-red-400 cursor-pointer overflow-hidden">
+        {/* Elemento decorativo de fundo */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+        
+        <div className="relative z-10">
+          <div className="font-bold truncate text-white text-sm mb-1">{client?.name}</div>
+          <div className="text-xs opacity-90 flex items-center gap-1 text-red-100 mb-1">
+            <span>{appointment.service_type === 'tattoo' ? '🎨' : appointment.service_type === 'piercing' ? '💎' : '💬'}</span>
+            <span className="capitalize">{appointment.service_type}</span>
+            {bed && (
+              <>
+                <span>•</span>
+                <Bed className="h-3 w-3" />
+                <span>{bed.name}</span>
+              </>
+            )}
+          </div>
+          {appointment.price && (
+            <div className="text-xs opacity-90 flex items-center gap-1 text-green-200 font-bold">
+              <DollarSign className="h-3 w-3" />
+              <span>R$ {appointment.price}</span>
+            </div>
           )}
         </div>
-        {appointment.price && (
-          <div className="text-xs opacity-90 flex items-center gap-1 text-green-200 font-bold">
-            <DollarSign className="h-3 w-3" />
-            <span>R$ {appointment.price}</span>
-          </div>
-        )}
         
-        <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-xl rounded-lg p-1 flex gap-1 z-10 border border-gray-200">
+        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 shadow-xl rounded-lg p-1 flex gap-1 z-20 border border-gray-200">
           <Button
             size="sm"
             variant="ghost"
@@ -381,181 +387,185 @@ const Appointments = () => {
     .reduce((total, apt) => total + (apt.price || 0), 0);
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-gray-50 via-red-50/30 to-white min-h-screen">
-      <Tabs defaultValue="calendar" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-white to-gray-50 border-2 border-red-200 shadow-xl rounded-xl">
+    <div className="p-8 space-y-8 bg-gradient-to-br from-gray-50 via-red-50/20 to-white min-h-screen relative overflow-hidden">
+      {/* Elementos decorativos de fundo */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-red-100/10 via-transparent to-transparent rounded-full transform translate-x-48 -translate-y-48"></div>
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-red-100/10 via-transparent to-transparent rounded-full transform -translate-x-32 translate-y-32"></div>
+
+      <Tabs defaultValue="calendar" className="space-y-8 relative z-10">
+        <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-white via-red-50/50 to-white border-2 border-red-200/50 shadow-2xl rounded-2xl p-2">
           <TabsTrigger 
             value="calendar" 
-            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white transition-all duration-300 rounded-lg font-bold"
+            className="flex items-center gap-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white transition-all duration-300 rounded-xl font-bold text-lg py-3"
           >
-            <CalendarIcon className="h-4 w-4" />
+            <CalendarIcon className="h-5 w-5" />
             Calendário de Agendamentos
           </TabsTrigger>
           <TabsTrigger 
             value="beds" 
-            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white transition-all duration-300 rounded-lg font-bold"
+            className="flex items-center gap-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white transition-all duration-300 rounded-xl font-bold text-lg py-3"
           >
-            <Bed className="h-4 w-4" />
+            <Bed className="h-5 w-5" />
             Gestão de Macas
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="calendar" className="space-y-6">
+        <TabsContent value="calendar" className="space-y-8">
           {/* Enhanced Statistics Cards with Real Financial Integration */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="shadow-2xl bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white border-red-400 hover:shadow-red-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <Card className="shadow-2xl bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white border-red-400 hover:shadow-red-500/25 transition-all duration-500 transform hover:scale-105 group relative overflow-hidden rounded-2xl">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-bold">Agendamentos Hoje</CardTitle>
-                <CalendarIcon className="h-5 w-5 text-red-200" />
+                <CalendarIcon className="h-6 w-6 text-red-200" />
               </CardHeader>
               <CardContent className="relative z-10">
-                <div className="text-3xl font-black">
+                <div className="text-4xl font-black mb-2">
                   {appointments.filter(apt => 
                     apt.date === format(new Date(), 'yyyy-MM-dd')
                   ).length}
                 </div>
-                <p className="text-xs text-red-200 font-medium flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
+                <p className="text-sm text-red-200 font-medium flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
                   Sessões programadas
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="shadow-2xl bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white border-green-400 hover:shadow-green-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+            <Card className="shadow-2xl bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white border-green-400 hover:shadow-green-500/25 transition-all duration-500 transform hover:scale-105 group relative overflow-hidden rounded-2xl">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-bold">Receita Hoje</CardTitle>
-                <DollarSign className="h-5 w-5 text-green-200" />
+                <DollarSign className="h-6 w-6 text-green-200" />
               </CardHeader>
               <CardContent className="relative z-10">
-                <div className="text-3xl font-black">
+                <div className="text-4xl font-black mb-2">
                   R$ {todayRevenue.toFixed(2)}
                 </div>
-                <p className="text-xs text-green-200 font-medium flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
+                <p className="text-sm text-green-200 font-medium flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
                   Agendamentos concluídos
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="shadow-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white border-blue-400 hover:shadow-blue-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+            <Card className="shadow-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white border-blue-400 hover:shadow-blue-500/25 transition-all duration-500 transform hover:scale-105 group relative overflow-hidden rounded-2xl">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-bold">Macas Ativas</CardTitle>
-                <Bed className="h-5 w-5 text-blue-200" />
+                <Bed className="h-6 w-6 text-blue-200" />
               </CardHeader>
               <CardContent className="relative z-10">
-                <div className="text-3xl font-black text-white">
+                <div className="text-4xl font-black text-white mb-2">
                   {beds.filter(bed => bed.isActive).length}
                 </div>
-                <p className="text-xs text-blue-200 font-medium flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
+                <p className="text-sm text-blue-200 font-medium flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
                   Disponíveis para uso
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="shadow-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 text-white border-purple-400 hover:shadow-purple-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+            <Card className="shadow-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 text-white border-purple-400 hover:shadow-purple-500/25 transition-all duration-500 transform hover:scale-105 group relative overflow-hidden rounded-2xl">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-bold">Confirmados</CardTitle>
-                <Clock className="h-5 w-5 text-purple-200" />
+                <Clock className="h-6 w-6 text-purple-200" />
               </CardHeader>
               <CardContent className="relative z-10">
-                <div className="text-3xl font-black">
+                <div className="text-4xl font-black mb-2">
                   {appointments.filter(apt => apt.status === 'confirmed').length}
                 </div>
-                <p className="text-xs text-purple-200 font-medium flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
+                <p className="text-sm text-purple-200 font-medium flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
                   Agendamentos confirmados
                 </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Alerta de Conflito Aprimorado */}
-          {conflictWarning && (
-            <Card className="border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-orange-100 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <CardContent className="flex items-center gap-3 p-4">
-                <AlertCircle className="h-5 w-5 text-orange-600 animate-pulse" />
-                <p className="text-sm text-orange-800 font-medium flex-1">{conflictWarning}</p>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setConflictWarning(null)}
-                  className="ml-auto hover:bg-orange-200 text-orange-600"
-                >
-                  ×
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Enhanced Filters and Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between">
-            <div className="flex gap-3">
+          <div className="flex flex-col xl:flex-row gap-6 justify-between items-start xl:items-center">
+            <div className="flex flex-wrap gap-4">
               <Select value={selectedArtist} onValueChange={setSelectedArtist}>
-                <SelectTrigger className="w-[200px] border-2 border-red-200 focus:border-red-500 shadow-lg bg-white hover:bg-red-50 transition-all duration-300">
-                  <Filter className="h-4 w-4 mr-2 text-red-600" />
+                <SelectTrigger className="w-[220px] h-12 border-2 border-red-200 focus:border-red-500 shadow-xl bg-white/90 hover:bg-red-50 transition-all duration-300 rounded-xl backdrop-blur-sm">
+                  <Filter className="h-5 w-5 mr-2 text-red-600" />
                   <SelectValue placeholder="Filtrar por artista" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-xl">
+                <SelectContent className="border-2 border-red-200 shadow-2xl rounded-xl">
                   {artists.map((artist) => (
-                    <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50">
-                      {artist.name}
+                    <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                      <span className="font-semibold">{artist.name}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
               <Select value={selectedBed} onValueChange={setSelectedBed}>
-                <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg bg-white hover:bg-red-50 transition-all duration-300">
-                  <Bed className="h-4 w-4 mr-2 text-red-600" />
+                <SelectTrigger className="w-[200px] h-12 border-2 border-red-200 focus:border-red-500 shadow-xl bg-white/90 hover:bg-red-50 transition-all duration-300 rounded-xl backdrop-blur-sm">
+                  <Bed className="h-5 w-5 mr-2 text-red-600" />
                   <SelectValue placeholder="Filtrar por maca" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-xl">
-                  <SelectItem value="all" className="hover:bg-red-50">Todas as Macas</SelectItem>
-                  <SelectItem value="none" className="hover:bg-red-50">Sem Maca Específica</SelectItem>
+                <SelectContent className="border-2 border-red-200 shadow-2xl rounded-xl">
+                  <SelectItem value="all" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                    <span className="font-semibold">Todas as Macas</span>
+                  </SelectItem>
+                  <SelectItem value="none" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                    <span className="font-semibold">Sem Maca Específica</span>
+                  </SelectItem>
                   {beds.filter(bed => bed.isActive).map((bed) => (
-                    <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50">
-                      {bed.name}
+                    <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                      <span className="font-semibold">{bed.name}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg bg-white hover:bg-red-50 transition-all duration-300">
+                <SelectTrigger className="w-[200px] h-12 border-2 border-red-200 focus:border-red-500 shadow-xl bg-white/90 hover:bg-red-50 transition-all duration-300 rounded-xl backdrop-blur-sm">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-red-200 shadow-xl">
-                  <SelectItem value="all" className="hover:bg-red-50">Todos os Status</SelectItem>
-                  <SelectItem value="scheduled" className="hover:bg-red-50">Agendado</SelectItem>
-                  <SelectItem value="confirmed" className="hover:bg-red-50">Confirmado</SelectItem>
-                  <SelectItem value="in_progress" className="hover:bg-red-50">Em Andamento</SelectItem>
-                  <SelectItem value="completed" className="hover:bg-red-50">Concluído</SelectItem>
-                  <SelectItem value="cancelled" className="hover:bg-red-50">Cancelado</SelectItem>
-                  <SelectItem value="no_show" className="hover:bg-red-50">Não Compareceu</SelectItem>
+                <SelectContent className="border-2 border-red-200 shadow-2xl rounded-xl">
+                  <SelectItem value="all" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                    <span className="font-semibold">Todos os Status</span>
+                  </SelectItem>
+                  <SelectItem value="scheduled" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                    <span className="font-semibold">Agendado</span>
+                  </SelectItem>
+                  <SelectItem value="confirmed" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                    <span className="font-semibold">Confirmado</span>
+                  </SelectItem>
+                  <SelectItem value="in_progress" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                    <span className="font-semibold">Em Andamento</span>
+                  </SelectItem>
+                  <SelectItem value="completed" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                    <span className="font-semibold">Concluído</span>
+                  </SelectItem>
+                  <SelectItem value="cancelled" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                    <span className="font-semibold">Cancelado</span>
+                  </SelectItem>
+                  <SelectItem value="no_show" className="hover:bg-red-50 focus:bg-red-100 p-4 rounded-lg">
+                    <span className="font-semibold">Não Compareceu</span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-4">
               <Dialog open={isQuickAddOpen} onOpenChange={setIsQuickAddOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="border-2 border-blue-400 text-blue-600 hover:bg-blue-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <Plus className="h-4 w-4 mr-2" />
+                  <Button variant="outline" className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 rounded-xl h-12 px-6">
+                    <Plus className="h-5 w-5 mr-2" />
                     Agendamento Rápido
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 shadow-2xl">
-                  <DialogHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white p-4 -m-6 mb-4 rounded-t-lg">
-                    <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                      <Plus className="h-5 w-5" />
+                <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-blue-50/30 to-white border-2 border-blue-200/50 shadow-2xl rounded-2xl">
+                  <DialogHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 -m-6 mb-6 rounded-t-2xl">
+                    <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+                      <Plus className="h-6 w-6" />
                       Agendamento Rápido
                     </DialogTitle>
-                    <DialogDescription className="text-red-100">
+                    <DialogDescription className="text-blue-100 font-medium">
                       Crie um agendamento rapidamente
                     </DialogDescription>
                   </DialogHeader>
@@ -575,22 +585,22 @@ const Appointments = () => {
 
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-red-500">
-                    <Plus className="h-4 w-4 mr-2" />
+                  <Button className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-2xl hover:shadow-red-500/25 transition-all duration-500 transform hover:scale-105 border-2 border-red-500 rounded-xl h-12 px-8">
+                    <Plus className="h-5 w-5 mr-2" />
                     Novo Agendamento
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 shadow-2xl">
-                  <DialogHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 -m-6 mb-6 rounded-t-lg">
-                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                      <CalendarIcon className="h-6 w-6" />
+                <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white via-red-50/30 to-white border-2 border-red-200/50 shadow-2xl rounded-2xl">
+                  <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-8 -m-6 mb-8 rounded-t-2xl">
+                    <DialogTitle className="text-3xl font-black flex items-center gap-3">
+                      <CalendarIcon className="h-8 w-8" />
                       Criar Novo Agendamento
                     </DialogTitle>
-                    <DialogDescription className="text-red-100 font-medium">
+                    <DialogDescription className="text-red-100 font-semibold text-lg">
                       Agende uma nova sessão para um cliente
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="px-2">
+                  <div className="px-4">
                     <AppointmentForm 
                       selectedSlot={selectedSlot}
                       clients={clients}
@@ -606,34 +616,34 @@ const Appointments = () => {
             </div>
           </div>
 
-          {/* Enhanced Calendar with Dynamic Navigation and Day Focus */}
-          <Card className="shadow-2xl bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-red-100/30 rounded-full transform translate-x-16 -translate-y-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-100/20 rounded-full transform -translate-x-12 translate-y-12"></div>
+          {/* Enhanced Calendar with Modern View Selector */}
+          <Card className="shadow-2xl bg-gradient-to-br from-white via-red-50/20 to-white border-2 border-red-200/50 hover:shadow-3xl transition-all duration-500 relative overflow-hidden rounded-2xl">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-red-100/20 rounded-full transform translate-x-32 -translate-y-32"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-100/15 rounded-full transform -translate-x-24 translate-y-24"></div>
             
-            <CardHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-t-lg relative z-10">
+            <CardHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-t-2xl relative z-10">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-6">
                   {isDayViewFocused && (
                     <Button
                       onClick={handleBackToMonth}
                       variant="ghost"
                       size="sm"
-                      className="text-white hover:bg-red-700 transition-all duration-300 border border-red-500"
+                      className="text-white hover:bg-red-700/50 transition-all duration-300 border-2 border-red-500 rounded-xl"
                     >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      <ArrowLeft className="h-5 w-5 mr-2" />
                       Voltar ao Mês
                     </Button>
                   )}
                   <div>
-                    <CardTitle className="text-2xl font-black flex items-center gap-2">
-                      <CalendarIcon className="h-6 w-6" />
+                    <CardTitle className="text-3xl font-black flex items-center gap-3">
+                      <CalendarIcon className="h-8 w-8" />
                       {isDayViewFocused ? 
                         `Detalhes do Dia - ${format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}` :
                         'Calendário de Agendamentos'
                       }
                     </CardTitle>
-                    <CardDescription className="text-red-100 font-medium">
+                    <CardDescription className="text-red-100 font-semibold text-lg">
                       {isDayViewFocused ? 
                         'Gestão detalhada de agendamentos por hora' :
                         'Clique em um dia para visualização detalhada'
@@ -642,8 +652,8 @@ const Appointments = () => {
                   </div>
                 </div>
                 
-                {/* Enhanced View Selector */}
-                <div className="flex items-center gap-2 bg-red-800/30 rounded-lg p-1">
+                {/* Enhanced View Selector with High Contrast */}
+                <div className="flex items-center gap-2 bg-red-800/40 rounded-2xl p-2 backdrop-blur-sm">
                   {[
                     { key: 'month', label: 'Mês', icon: CalendarIcon },
                     { key: 'week', label: 'Semana', icon: CalendarIcon },
@@ -656,22 +666,22 @@ const Appointments = () => {
                       variant="ghost"
                       size="sm"
                       className={`
-                        px-3 py-1.5 text-xs font-bold transition-all duration-300 rounded-md
+                        px-4 py-2 text-sm font-bold transition-all duration-300 rounded-xl
                         ${view === key 
-                          ? 'bg-white text-red-700 shadow-lg transform scale-105' 
-                          : 'text-red-200 hover:text-white hover:bg-red-700/50'
+                          ? 'bg-white text-red-700 shadow-2xl transform scale-110 border-2 border-red-300' 
+                          : 'text-red-200 hover:text-white hover:bg-red-700/50 border-2 border-transparent hover:border-red-400'
                         }
                       `}
                     >
-                      <Icon className="h-3 w-3 mr-1" />
+                      <Icon className="h-4 w-4 mr-2" />
                       {label}
                     </Button>
                   ))}
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6 relative z-10">
-              <div className="h-[600px] bg-white rounded-lg shadow-inner border-2 border-gray-100">
+            <CardContent className="p-8 relative z-10">
+              <div className="h-[700px] bg-white/90 rounded-2xl shadow-inner border-2 border-gray-100/50 backdrop-blur-sm">
                 <Calendar
                   localizer={localizer}
                   events={calendarEvents}
@@ -692,9 +702,9 @@ const Appointments = () => {
                     style: {
                       backgroundColor: getStatusColor(event.resource.appointment.status),
                       borderColor: getStatusColor(event.resource.appointment.status),
-                      borderWidth: '2px',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                      borderWidth: '3px',
+                      borderRadius: '12px',
+                      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15)',
                       color: 'white',
                       fontWeight: 'bold',
                     }
@@ -722,7 +732,7 @@ const Appointments = () => {
 
           {/* Enhanced Appointment Edit Modal */}
           <AppointmentEditModal
-            appointment={selectedAppointment!}
+            appointment={selectedAppointment}
             client={clients.find(c => c.id === selectedAppointment?.client_id)}
             isOpen={isEditModalOpen}
             onClose={() => {
