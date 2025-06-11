@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +53,11 @@ const AppointmentCard = ({ appointment, client, onClose, onUpdate }: Appointment
       updateStatusMutation.mutate(newStatus);
     }
     setIsEditing(false);
+  };
+
+  // Fixed: Create a proper handler function for the Select component
+  const handleStatusChange = (value: string) => {
+    setNewStatus(value as Appointment['status']);
   };
 
   const getStatusConfig = (status: string) => {
@@ -269,7 +273,7 @@ const AppointmentCard = ({ appointment, client, onClose, onUpdate }: Appointment
               </Button>
             ) : (
               <div className="flex gap-2">
-                <Select value={newStatus} onValueChange={setNewStatus}>
+                <Select value={newStatus} onValueChange={handleStatusChange}>
                   <SelectTrigger className="w-40">
                     <SelectValue />
                   </SelectTrigger>
