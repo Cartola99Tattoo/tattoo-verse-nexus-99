@@ -1,0 +1,258 @@
+
+/* React Big Calendar Custom Styles - 99Tattoo Theme */
+
+/* Calendar Container */
+.rbc-calendar {
+  @apply bg-white rounded-xl shadow-2xl border-2 border-red-200;
+  min-height: 600px;
+  font-family: inherit;
+}
+
+/* Calendar Header */
+.rbc-header {
+  @apply bg-gradient-to-r from-red-600 to-red-700 text-white font-bold text-sm;
+  padding: 12px 8px;
+  border-bottom: 2px solid #dc2626;
+}
+
+.rbc-header + .rbc-header {
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Calendar Navigation */
+.rbc-toolbar {
+  @apply bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-t-xl border-b-2 border-red-200;
+  margin-bottom: 0;
+}
+
+.rbc-toolbar button {
+  @apply bg-white border-2 border-red-300 text-red-700 font-semibold px-4 py-2 rounded-lg;
+  transition: all 0.3s ease;
+}
+
+.rbc-toolbar button:hover {
+  @apply bg-red-50 border-red-400 shadow-lg transform scale-105;
+}
+
+.rbc-toolbar button.rbc-active {
+  @apply bg-red-600 text-white border-red-700 shadow-xl;
+}
+
+.rbc-toolbar-label {
+  @apply text-red-800 font-black text-xl;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Time Slots */
+.rbc-time-view {
+  border: none;
+}
+
+.rbc-time-header {
+  @apply border-b-2 border-red-200;
+}
+
+.rbc-time-content {
+  border-top: none;
+}
+
+.rbc-timeslot-group {
+  @apply border-b border-red-100;
+}
+
+.rbc-time-slot {
+  @apply border-r border-red-100;
+}
+
+.rbc-time-slot:hover {
+  @apply bg-red-50;
+}
+
+/* Time Labels */
+.rbc-time-header-gutter,
+.rbc-time-gutter {
+  @apply bg-gradient-to-b from-red-50 to-red-100 border-r-2 border-red-200;
+}
+
+.rbc-time-header-cell {
+  @apply text-red-700 font-semibold text-center;
+  padding: 8px;
+}
+
+.rbc-label {
+  @apply text-red-600 font-medium text-xs;
+  padding: 4px 8px;
+}
+
+/* Event Styles */
+.rbc-event {
+  @apply bg-gradient-to-br from-red-600 to-red-700 border-2 border-red-500 text-white rounded-lg shadow-lg;
+  font-size: 11px;
+  padding: 4px 6px;
+  transition: all 0.3s ease;
+}
+
+.rbc-event:hover {
+  @apply shadow-xl transform scale-105;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+.rbc-event.rbc-selected {
+  @apply bg-gradient-to-br from-red-700 to-red-800 border-red-600;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+}
+
+.rbc-event-label {
+  @apply font-bold text-white;
+}
+
+.rbc-event-content {
+  @apply text-red-100;
+}
+
+/* Day/Week/Month Views */
+.rbc-month-view {
+  @apply border border-red-200 rounded-lg;
+}
+
+.rbc-month-row {
+  @apply border-b border-red-100;
+}
+
+.rbc-month-row:last-child {
+  border-bottom: none;
+}
+
+.rbc-date-cell {
+  @apply text-red-700 font-semibold;
+  padding: 8px;
+}
+
+.rbc-date-cell.rbc-off-range {
+  @apply text-red-300;
+}
+
+.rbc-date-cell.rbc-now {
+  @apply bg-red-100 font-black;
+}
+
+.rbc-day-bg {
+  @apply hover:bg-red-50;
+  transition: background-color 0.2s ease;
+}
+
+.rbc-today {
+  @apply bg-gradient-to-br from-red-100 to-red-200;
+}
+
+/* Agenda View */
+.rbc-agenda-view {
+  @apply border border-red-200 rounded-lg;
+}
+
+.rbc-agenda-view table {
+  width: 100%;
+}
+
+.rbc-agenda-table {
+  @apply border-collapse;
+}
+
+.rbc-agenda-table thead th {
+  @apply bg-gradient-to-r from-red-600 to-red-700 text-white font-bold p-3 border-b-2 border-red-800;
+}
+
+.rbc-agenda-table tbody tr {
+  @apply border-b border-red-100 hover:bg-red-50;
+  transition: background-color 0.2s ease;
+}
+
+.rbc-agenda-table tbody td {
+  @apply p-3 text-red-700;
+}
+
+.rbc-agenda-event-cell {
+  @apply font-semibold;
+}
+
+.rbc-agenda-date-cell {
+  @apply text-red-600 font-bold;
+}
+
+.rbc-agenda-time-cell {
+  @apply text-red-500 font-medium;
+}
+
+/* Current Time Indicator */
+.rbc-current-time-indicator {
+  @apply bg-red-600;
+  height: 2px;
+  z-index: 10;
+}
+
+.rbc-current-time-indicator::before {
+  content: '';
+  @apply bg-red-600 rounded-full;
+  width: 8px;
+  height: 8px;
+  position: absolute;
+  left: -4px;
+  top: -3px;
+}
+
+/* Selection */
+.rbc-slot-selection {
+  @apply bg-red-200;
+  border: 2px solid #dc2626;
+  opacity: 0.8;
+}
+
+/* Popup */
+.rbc-overlay {
+  @apply bg-white border-2 border-red-300 rounded-lg shadow-2xl;
+  z-index: 1000;
+}
+
+.rbc-overlay-header {
+  @apply bg-gradient-to-r from-red-600 to-red-700 text-white p-3 rounded-t-lg font-bold;
+}
+
+/* More Link */
+.rbc-show-more {
+  @apply text-red-600 font-semibold hover:text-red-800 hover:underline;
+  cursor: pointer;
+}
+
+/* Drag and Drop */
+.rbc-addons-dnd .rbc-addons-dnd-row-body {
+  position: relative;
+}
+
+.rbc-addons-dnd .rbc-addons-dnd-drag-preview {
+  @apply bg-red-600 text-white rounded-lg shadow-xl;
+  opacity: 0.8;
+  transform: rotate(5deg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .rbc-toolbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .rbc-toolbar button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .rbc-event {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+  
+  .rbc-header {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+}
