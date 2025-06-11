@@ -346,393 +346,392 @@ const Appointments = () => {
     setView(newView);
   };
 
+  const customStyles = `
+    .shadow-3xl {
+      box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+    
+    .shadow-red-glow {
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .shadow-blue-glow {
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .shadow-green-glow {
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .shadow-purple-glow {
+      box-shadow: 0 0 30px rgba(147, 51, 234, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+  `;
+
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-gray-50 via-red-50/30 to-white min-h-screen">
-      <Tabs defaultValue="calendar" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-white to-gray-50 border-2 border-red-200 shadow-xl rounded-xl">
-          <TabsTrigger 
-            value="calendar" 
-            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white transition-all duration-300 rounded-lg font-bold"
-          >
-            <CalendarIcon className="h-4 w-4" />
-            Calendário de Agendamentos
-          </TabsTrigger>
-          <TabsTrigger 
-            value="beds" 
-            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white transition-all duration-300 rounded-lg font-bold"
-          >
-            <Bed className="h-4 w-4" />
-            Gestão de Macas
-          </TabsTrigger>
-        </TabsList>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: customStyles }} />
+      <div className="p-6 space-y-6 bg-gradient-to-br from-gray-50 via-red-50/30 to-white min-h-screen">
+        <Tabs defaultValue="calendar" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-white to-gray-50 border-2 border-red-200 shadow-xl rounded-xl">
+            <TabsTrigger 
+              value="calendar" 
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white transition-all duration-300 rounded-lg font-bold"
+            >
+              <CalendarIcon className="h-4 w-4" />
+              Calendário de Agendamentos
+            </TabsTrigger>
+            <TabsTrigger 
+              value="beds" 
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white transition-all duration-300 rounded-lg font-bold"
+            >
+              <Bed className="h-4 w-4" />
+              Gestão de Macas
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="calendar" className="space-y-6">
-          {/* Enhanced Statistics Cards with Financial Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="shadow-2xl bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white border-red-400 hover:shadow-red-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-bold">Agendamentos Hoje</CardTitle>
-                <CalendarIcon className="h-5 w-5 text-red-200" />
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-black">
-                  {appointments.filter(apt => 
-                    apt.date === format(new Date(), 'yyyy-MM-dd')
-                  ).length}
-                </div>
-                <p className="text-xs text-red-200 font-medium flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
-                  Sessões programadas
-                </p>
-              </CardContent>
-            </Card>
+          <TabsContent value="calendar" className="space-y-6">
+            {/* Enhanced Statistics Cards with Financial Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="shadow-2xl bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white border-red-400 hover:shadow-red-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                  <CardTitle className="text-sm font-bold">Agendamentos Hoje</CardTitle>
+                  <CalendarIcon className="h-5 w-5 text-red-200" />
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="text-3xl font-black">
+                    {appointments.filter(apt => 
+                      apt.date === format(new Date(), 'yyyy-MM-dd')
+                    ).length}
+                  </div>
+                  <p className="text-xs text-red-200 font-medium flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    Sessões programadas
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card className="shadow-2xl bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white border-green-400 hover:shadow-green-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-bold">Receita Hoje</CardTitle>
-                <DollarSign className="h-5 w-5 text-green-200" />
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-black">
-                  R$ {appointments
-                    .filter(apt => apt.date === format(new Date(), 'yyyy-MM-dd') && apt.status === 'completed')
-                    .reduce((total, apt) => total + (apt.price || 0), 0)
-                    .toFixed(2)}
-                </div>
-                <p className="text-xs text-green-200 font-medium flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
-                  Agendamentos concluídos
-                </p>
-              </CardContent>
-            </Card>
+              <Card className="shadow-2xl bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white border-green-400 hover:shadow-green-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                  <CardTitle className="text-sm font-bold">Receita Hoje</CardTitle>
+                  <DollarSign className="h-5 w-5 text-green-200" />
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="text-3xl font-black">
+                    R$ {appointments
+                      .filter(apt => apt.date === format(new Date(), 'yyyy-MM-dd') && apt.status === 'completed')
+                      .reduce((total, apt) => total + (apt.price || 0), 0)
+                      .toFixed(2)}
+                  </div>
+                  <p className="text-xs text-green-200 font-medium flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    Agendamentos concluídos
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card className="shadow-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white border-blue-400 hover:shadow-blue-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-bold">Macas Ativas</CardTitle>
-                <Bed className="h-5 w-5 text-blue-200" />
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-black text-white">
-                  {beds.filter(bed => bed.isActive).length}
-                </div>
-                <p className="text-xs text-blue-200 font-medium flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
-                  Disponíveis para uso
-                </p>
-              </CardContent>
-            </Card>
+              <Card className="shadow-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white border-blue-400 hover:shadow-blue-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                  <CardTitle className="text-sm font-bold">Macas Ativas</CardTitle>
+                  <Bed className="h-5 w-5 text-blue-200" />
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="text-3xl font-black text-white">
+                    {beds.filter(bed => bed.isActive).length}
+                  </div>
+                  <p className="text-xs text-blue-200 font-medium flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    Disponíveis para uso
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card className="shadow-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 text-white border-purple-400 hover:shadow-purple-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-bold">Confirmados</CardTitle>
-                <Clock className="h-5 w-5 text-purple-200" />
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-black">
-                  {appointments.filter(apt => apt.status === 'confirmed').length}
-                </div>
-                <p className="text-xs text-purple-200 font-medium flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
-                  Agendamentos confirmados
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Alerta de Conflito Aprimorado */}
-          {conflictWarning && (
-            <Card className="border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-orange-100 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <CardContent className="flex items-center gap-3 p-4">
-                <AlertCircle className="h-5 w-5 text-orange-600 animate-pulse" />
-                <p className="text-sm text-orange-800 font-medium flex-1">{conflictWarning}</p>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setConflictWarning(null)}
-                  className="ml-auto hover:bg-orange-200 text-orange-600"
-                >
-                  ×
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Enhanced Filters and Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between">
-            <div className="flex gap-3">
-              <Select value={selectedArtist} onValueChange={setSelectedArtist}>
-                <SelectTrigger className="w-[200px] border-2 border-red-200 focus:border-red-500 shadow-lg">
-                  <Filter className="h-4 w-4 mr-2 text-red-600" />
-                  <SelectValue placeholder="Filtrar por artista" />
-                </SelectTrigger>
-                <SelectContent>
-                  {artists.map((artist) => (
-                    <SelectItem key={artist.id} value={artist.id}>
-                      {artist.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={selectedBed} onValueChange={setSelectedBed}>
-                <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg">
-                  <Bed className="h-4 w-4 mr-2 text-red-600" />
-                  <SelectValue placeholder="Filtrar por maca" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as Macas</SelectItem>
-                  <SelectItem value="none">Sem Maca Específica</SelectItem>
-                  {beds.filter(bed => bed.isActive).map((bed) => (
-                    <SelectItem key={bed.id} value={bed.id}>
-                      {bed.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Status</SelectItem>
-                  <SelectItem value="scheduled">Agendado</SelectItem>
-                  <SelectItem value="confirmed">Confirmado</SelectItem>
-                  <SelectItem value="in_progress">Em Andamento</SelectItem>
-                  <SelectItem value="completed">Concluído</SelectItem>
-                  <SelectItem value="cancelled">Cancelado</SelectItem>
-                  <SelectItem value="no_show">Não Compareceu</SelectItem>
-                </SelectContent>
-              </Select>
+              <Card className="shadow-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 text-white border-purple-400 hover:shadow-purple-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                  <CardTitle className="text-sm font-bold">Confirmados</CardTitle>
+                  <Clock className="h-5 w-5 text-purple-200" />
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="text-3xl font-black">
+                    {appointments.filter(apt => apt.status === 'confirmed').length}
+                  </div>
+                  <p className="text-xs text-purple-200 font-medium flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    Agendamentos confirmados
+                  </p>
+                </CardContent>
+              </Card>
             </div>
-            
-            <div className="flex gap-3">
-              <Dialog open={isQuickAddOpen} onOpenChange={setIsQuickAddOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="border-2 border-blue-400 text-blue-600 hover:bg-blue-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Agendamento Rápido
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Agendamento Rápido</DialogTitle>
-                    <DialogDescription>
-                      Crie um agendamento rapidamente
-                    </DialogDescription>
-                  </DialogHeader>
-                  <QuickAppointmentForm 
-                    selectedSlot={selectedSlot}
-                    clients={clients}
-                    onSuccess={() => {
-                      setIsQuickAddOpen(false);
-                      setSelectedSlot(null);
-                      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-                    }}
-                    onConflict={(message) => setConflictWarning(message)}
-                    checkConflicts={checkConflicts}
-                  />
-                </DialogContent>
-              </Dialog>
 
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-red-500">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Novo Agendamento
+            {/* Alerta de Conflito Aprimorado */}
+            {conflictWarning && (
+              <Card className="border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-orange-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <CardContent className="flex items-center gap-3 p-4">
+                  <AlertCircle className="h-5 w-5 text-orange-600 animate-pulse" />
+                  <p className="text-sm text-orange-800 font-medium flex-1">{conflictWarning}</p>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setConflictWarning(null)}
+                    className="ml-auto hover:bg-orange-200 text-orange-600"
+                  >
+                    ×
                   </Button>
-                </DialogTrigger>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Enhanced Filters and Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+              <div className="flex gap-3">
+                <Select value={selectedArtist} onValueChange={setSelectedArtist}>
+                  <SelectTrigger className="w-[200px] border-2 border-red-200 focus:border-red-500 shadow-lg">
+                    <Filter className="h-4 w-4 mr-2 text-red-600" />
+                    <SelectValue placeholder="Filtrar por artista" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {artists.map((artist) => (
+                      <SelectItem key={artist.id} value={artist.id}>
+                        {artist.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={selectedBed} onValueChange={setSelectedBed}>
+                  <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg">
+                    <Bed className="h-4 w-4 mr-2 text-red-600" />
+                    <SelectValue placeholder="Filtrar por maca" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as Macas</SelectItem>
+                    <SelectItem value="none">Sem Maca Específica</SelectItem>
+                    {beds.filter(bed => bed.isActive).map((bed) => (
+                      <SelectItem key={bed.id} value={bed.id}>
+                        {bed.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Status</SelectItem>
+                    <SelectItem value="scheduled">Agendado</SelectItem>
+                    <SelectItem value="confirmed">Confirmado</SelectItem>
+                    <SelectItem value="in_progress">Em Andamento</SelectItem>
+                    <SelectItem value="completed">Concluído</SelectItem>
+                    <SelectItem value="cancelled">Cancelado</SelectItem>
+                    <SelectItem value="no_show">Não Compareceu</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex gap-3">
+                <Dialog open={isQuickAddOpen} onOpenChange={setIsQuickAddOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="border-2 border-blue-400 text-blue-600 hover:bg-blue-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Agendamento Rápido
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Agendamento Rápido</DialogTitle>
+                      <DialogDescription>
+                        Crie um agendamento rapidamente
+                      </DialogDescription>
+                    </DialogHeader>
+                    <QuickAppointmentForm 
+                      selectedSlot={selectedSlot}
+                      clients={clients}
+                      onSuccess={() => {
+                        setIsQuickAddOpen(false);
+                        setSelectedSlot(null);
+                        queryClient.invalidateQueries({ queryKey: ['appointments'] });
+                      }}
+                      onConflict={(message) => setConflictWarning(message)}
+                      checkConflicts={checkConflicts}
+                    />
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-red-500">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Novo Agendamento
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Criar Novo Agendamento</DialogTitle>
+                      <DialogDescription>
+                        Agende uma nova sessão para um cliente
+                      </DialogDescription>
+                    </DialogHeader>
+                    <AppointmentForm 
+                      selectedSlot={selectedSlot}
+                      clients={clients}
+                      onSuccess={() => {
+                        setIsCreateDialogOpen(false);
+                        setSelectedSlot(null);
+                        queryClient.invalidateQueries({ queryKey: ['appointments'] });
+                      }}
+                    />
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+
+            {/* Enhanced Calendar with Fixed View Selection Contrast */}
+            <Card className="shadow-2xl bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-100/30 rounded-full transform translate-x-16 -translate-y-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-100/20 rounded-full transform -translate-x-12 translate-y-12"></div>
+              
+              <CardHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-t-lg relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-2xl font-black flex items-center gap-2">
+                      <CalendarIcon className="h-6 w-6" />
+                      Calendário de Agendamentos
+                    </CardTitle>
+                    <CardDescription className="text-red-100 font-medium">
+                      Visualize e gerencie todos os agendamentos com estilo
+                    </CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={view === 'day' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleViewChange('day')}
+                      className={view === 'day' 
+                        ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
+                        : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
+                      }
+                    >
+                      Dia
+                    </Button>
+                    <Button
+                      variant={view === 'week' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleViewChange('week')}
+                      className={view === 'week' 
+                        ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
+                        : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
+                      }
+                    >
+                      Semana
+                    </Button>
+                    <Button
+                      variant={view === 'month' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleViewChange('month')}
+                      className={view === 'month' 
+                        ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
+                        : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
+                      }
+                    >
+                      Mês
+                    </Button>
+                    <Button
+                      variant={view === 'agenda' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleViewChange('agenda')}
+                      className={view === 'agenda' 
+                        ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
+                        : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
+                      }
+                    >
+                      Agenda
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 relative z-10">
+                <div className="h-[600px] bg-white rounded-lg shadow-inner border-2 border-gray-100">
+                  <Calendar
+                    localizer={localizer}
+                    events={calendarEvents}
+                    startAccessor="start"
+                    endAccessor="end"
+                    style={{ height: '100%' }}
+                    view={view}
+                    onView={handleViewChange}
+                    date={selectedDate}
+                    onNavigate={setSelectedDate}
+                    onSelectSlot={handleSelectSlot}
+                    onSelectEvent={handleSelectEvent}
+                    selectable
+                    popup
+                    messages={messages}
+                    eventPropGetter={(event) => ({
+                      style: {
+                        backgroundColor: getStatusColor(event.resource.appointment.status),
+                        borderColor: getStatusColor(event.resource.appointment.status),
+                        borderWidth: '2px',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                      }
+                    })}
+                    components={{
+                      event: EventComponent,
+                    }}
+                    min={new Date(0, 0, 0, 8, 0, 0)}
+                    max={new Date(0, 0, 0, 20, 0, 0)}
+                    step={30}
+                    timeslots={2}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Enhanced Appointment Details Modal */}
+            {selectedAppointment && (
+              <Dialog 
+                open={!!selectedAppointment} 
+                onOpenChange={() => setSelectedAppointment(null)}
+              >
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle>Criar Novo Agendamento</DialogTitle>
+                    <DialogTitle>Detalhes do Agendamento</DialogTitle>
                     <DialogDescription>
-                      Agende uma nova sessão para um cliente
+                      Visualizar e editar informações do agendamento
                     </DialogDescription>
                   </DialogHeader>
-                  <AppointmentForm 
-                    selectedSlot={selectedSlot}
-                    clients={clients}
-                    onSuccess={() => {
-                      setIsCreateDialogOpen(false);
-                      setSelectedSlot(null);
+                  <AppointmentCard 
+                    appointment={selectedAppointment}
+                    client={clients.find(c => c.id === selectedAppointment.client_id)}
+                    onClose={() => setSelectedAppointment(null)}
+                    onUpdate={() => {
                       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+                      setSelectedAppointment(null);
                     }}
                   />
                 </DialogContent>
               </Dialog>
-            </div>
-          </div>
+            )}
+          </TabsContent>
 
-          {/* Enhanced Calendar with Fixed View Selection Contrast */}
-          <Card className="shadow-2xl bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-red-100/30 rounded-full transform translate-x-16 -translate-y-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-100/20 rounded-full transform -translate-x-12 translate-y-12"></div>
-            
-            <CardHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-t-lg relative z-10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-2xl font-black flex items-center gap-2">
-                    <CalendarIcon className="h-6 w-6" />
-                    Calendário de Agendamentos
-                  </CardTitle>
-                  <CardDescription className="text-red-100 font-medium">
-                    Visualize e gerencie todos os agendamentos com estilo
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant={view === 'day' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleViewChange('day')}
-                    className={view === 'day' 
-                      ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
-                      : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
-                    }
-                  >
-                    Dia
-                  </Button>
-                  <Button
-                    variant={view === 'week' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleViewChange('week')}
-                    className={view === 'week' 
-                      ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
-                      : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
-                    }
-                  >
-                    Semana
-                  </Button>
-                  <Button
-                    variant={view === 'month' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleViewChange('month')}
-                    className={view === 'month' 
-                      ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
-                      : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
-                    }
-                  >
-                    Mês
-                  </Button>
-                  <Button
-                    variant={view === 'agenda' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleViewChange('agenda')}
-                    className={view === 'agenda' 
-                      ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
-                      : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
-                    }
-                  >
-                    Agenda
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6 relative z-10">
-              <div className="h-[600px] bg-white rounded-lg shadow-inner border-2 border-gray-100">
-                <Calendar
-                  localizer={localizer}
-                  events={calendarEvents}
-                  startAccessor="start"
-                  endAccessor="end"
-                  style={{ height: '100%' }}
-                  view={view}
-                  onView={handleViewChange}
-                  date={selectedDate}
-                  onNavigate={setSelectedDate}
-                  onSelectSlot={handleSelectSlot}
-                  onSelectEvent={handleSelectEvent}
-                  selectable
-                  popup
-                  messages={messages}
-                  eventPropGetter={(event) => ({
-                    style: {
-                      backgroundColor: getStatusColor(event.resource.appointment.status),
-                      borderColor: getStatusColor(event.resource.appointment.status),
-                      borderWidth: '2px',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                    }
-                  })}
-                  components={{
-                    event: EventComponent,
-                  }}
-                  min={new Date(0, 0, 0, 8, 0, 0)}
-                  max={new Date(0, 0, 0, 20, 0, 0)}
-                  step={30}
-                  timeslots={2}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Enhanced Appointment Details Modal */}
-          {selectedAppointment && (
-            <Dialog 
-              open={!!selectedAppointment} 
-              onOpenChange={() => setSelectedAppointment(null)}
-            >
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Detalhes do Agendamento</DialogTitle>
-                  <DialogDescription>
-                    Visualizar e editar informações do agendamento
-                  </DialogDescription>
-                </DialogHeader>
-                <AppointmentCard 
-                  appointment={selectedAppointment}
-                  client={clients.find(c => c.id === selectedAppointment.client_id)}
-                  onClose={() => setSelectedAppointment(null)}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({ queryKey: ['appointments'] });
-                    setSelectedAppointment(null);
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
-          )}
-        </TabsContent>
-
-        <TabsContent value="beds">
-          <BedManagement 
-            beds={beds}
-            onAddBed={(bedData) => addBedMutation.mutate(bedData)}
-            onUpdateBed={(bedId, updates) => updateBedMutation.mutate({ bedId, updates })}
-            onDeleteBed={(bedId) => deleteBedMutation.mutate(bedId)}
-          />
-        </TabsContent>
-      </Tabs>
-
-      <style>
-        {`
-          .shadow-3xl {
-            box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
-          }
-          
-          .shadow-red-glow {
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
-          }
-          
-          .shadow-blue-glow {
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
-          }
-          
-          .shadow-green-glow {
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
-          }
-          
-          .shadow-purple-glow {
-            box-shadow: 0 0 30px rgba(147, 51, 234, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
-          }
-        `}
-      </style>
-    </div>
+          <TabsContent value="beds">
+            <BedManagement 
+              beds={beds}
+              onAddBed={(bedData) => addBedMutation.mutate(bedData)}
+              onUpdateBed={(bedId, updates) => updateBedMutation.mutate({ bedId, updates })}
+              onDeleteBed={(bedId) => deleteBedMutation.mutate(bedId)}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
   );
 };
 
 export default Appointments;
-
-</edits_to_apply>

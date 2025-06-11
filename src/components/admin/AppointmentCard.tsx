@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -160,11 +161,14 @@ const AppointmentCard = ({ appointment, client, onClose, onUpdate }: Appointment
   return (
     <Card 
       className={`border-l-4 ${statusConfig.border} ${statusConfig.bg} shadow-2xl hover:shadow-3xl transition-all duration-500 backdrop-blur-sm relative overflow-hidden group ${
-        isDragging ? 'scale-105 rotate-1 z-50 shadow-red-glow' : ''
+        isDragging ? 'scale-105 rotate-1 z-50' : ''
       }`}
       draggable
       onDragStart={() => setIsDragging(true)}
       onDragEnd={() => setIsDragging(false)}
+      style={{
+        boxShadow: isDragging ? '0 0 30px rgba(239, 68, 68, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15)' : undefined
+      }}
     >
       {/* Efeito de brilho animado */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 pointer-events-none"></div>
@@ -424,18 +428,8 @@ const AppointmentCard = ({ appointment, client, onClose, onUpdate }: Appointment
           )}
         </div>
       </CardContent>
-
-      <style>
-        {`
-          .shadow-3xl {
-            box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
-          }
-        `}
-      </style>
     </Card>
   );
 };
 
 export default AppointmentCard;
-
-</edits_to_apply>
