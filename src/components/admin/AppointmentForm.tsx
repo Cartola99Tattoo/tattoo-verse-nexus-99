@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -641,5 +642,3 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 };
 
 export default AppointmentForm;
-
-</edits_to_apply>
