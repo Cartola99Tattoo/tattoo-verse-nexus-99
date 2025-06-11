@@ -194,8 +194,16 @@ class MockClientService implements IClientService {
     return this.fetchClients(options);
   }
 
-  // Existing client methods
-  async fetchClients(options?: { limit?: number; search?: string }): Promise<Client[]> {
+  // Missing methods from CRUDOperations interface
+  async fetchAll(options?: any): Promise<Client[]> {
+    return this.fetchClients(options);
+  }
+
+  async fetchById(id: string): Promise<Client | null> {
+    return this.fetchClientById(id);
+  }
+
+  async fetchClients(options?: { limit?: number; search?: string; status?: string; temperature?: string; limit?: number; offset?: number }): Promise<Client[]> {
     console.log('Using mock client service');
     await new Promise(resolve => setTimeout(resolve, 100));
     
@@ -265,7 +273,6 @@ class MockClientService implements IClientService {
     }
   }
 
-  // Appointment methods
   async fetchUpcomingAppointments(limit: number = 50): Promise<Appointment[]> {
     await new Promise(resolve => setTimeout(resolve, 100));
     
