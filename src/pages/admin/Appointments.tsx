@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -39,10 +38,10 @@ const Appointments = () => {
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
-  // Fixed: Use the correct method name from IClientService
+  // Fixed: Use the correct method name that exists in the service
   const { data: appointments = [], isLoading: appointmentsLoading } = useQuery({
     queryKey: ['appointments'],
-    queryFn: () => clientService.getAppointments(),
+    queryFn: () => clientService.fetchUpcomingAppointments(),
   });
 
   const { data: clients = [] } = useQuery({
