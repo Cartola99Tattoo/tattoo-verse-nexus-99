@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,7 +11,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Search, Bed, DollarSign, Clock, User, AlertTriangle, CheckCircle, Sparkles } from "lucide-react";
+import { CalendarIcon, Search, Bed, DollarSign, Clock, User, AlertTriangle, CheckCircle, Sparkles, Upload, X, Image } from "lucide-react";
 import { Client } from "@/services/interfaces/IClientService";
 import { getClientService, getBedService } from "@/services/serviceFactory";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -44,6 +43,9 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
   const [clientSearch, setClientSearch] = useState("");
   const [conflictCheck, setConflictCheck] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const clientService = getClientService();
   const bedService = getBedService();
@@ -72,42 +74,58 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 
   const watchedFields = watch(['artist_id', 'bed_id', 'date', 'time', 'duration_minutes']);
 
-  // Validação em tempo real para conflitos
+  // Validação otimizada com debounce adequado
   useEffect(() => {
     const validateConflicts = async () => {
       const [artist_id, bed_id, date, time, duration_minutes] = watchedFields;
       
+      // Limpar timeout anterior
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+      }
+      
       if (artist_id && date && time && duration_minutes) {
         setIsValidating(true);
-        try {
-          // Simular verificação de conflitos
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          const endTime = format(
-            new Date(new Date(`${date}T${time}`).getTime() + duration_minutes * 60000), 
-            'HH:mm'
-          );
-          
-          // Verificar disponibilidade da maca se selecionada
-          if (bed_id && bed_id !== "none") {
-            const isAvailable = await bedService.checkBedAvailability(bed_id, date, time, endTime);
-            if (!isAvailable) {
-              setConflictCheck('Maca não disponível no horário selecionado');
-              setIsValidating(false);
-              return;
+        setConflictCheck(null);
+        
+        validationTimeoutRef.current = setTimeout(async () => {
+          try {
+            const endTime = format(
+              new Date(new Date(`${date}T${time}`).getTime() + duration_minutes * 60000), 
+              'HH:mm'
+            );
+            
+            // Verificar disponibilidade da maca se selecionada
+            if (bed_id && bed_id !== "none") {
+              const isAvailable = await bedService.checkBedAvailability(bed_id, date, time, endTime);
+              if (!isAvailable) {
+                setConflictCheck('Maca não disponível no horário selecionado');
+                setIsValidating(false);
+                return;
+              }
             }
+            
+            setConflictCheck(null);
+            setIsValidating(false);
+          } catch (error) {
+            setConflictCheck('Erro ao verificar disponibilidade');
+            setIsValidating(false);
           }
-          
-          setConflictCheck(null);
-        } catch (error) {
-          setConflictCheck('Erro ao verificar disponibilidade');
-        }
+        }, 800); // Debounce de 800ms para evitar validações excessivas
+      } else {
         setIsValidating(false);
+        setConflictCheck(null);
       }
     };
 
-    const timeoutId = setTimeout(validateConflicts, 500);
-    return () => clearTimeout(timeoutId);
+    validateConflicts();
+
+    // Cleanup function
+    return () => {
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+      }
+    };
   }, [watchedFields, bedService]);
 
   const createAppointmentMutation = useMutation({
@@ -130,6 +148,14 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         }
       }
 
+      // Simular armazenamento de fotos
+      const photoReferences = uploadedFiles.map(file => ({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: URL.createObjectURL(file) // Em produção seria uma URL real
+      }));
+
       const appointmentData = {
         client_id: data.client_id,
         artist_id: data.artist_id,
@@ -143,14 +169,16 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
         estimated_price: data.estimated_price || 0,
         notes: data.notes || '',
         price: data.estimated_price || 0,
+        photo_references: photoReferences, // Incluir fotos de referência
       };
       return clientService.createAppointment(appointmentData);
     },
     onSuccess: () => {
       toast({
         title: "✨ Agendamento criado com sucesso!",
-        description: "O agendamento foi criado e aparecerá no calendário.",
+        description: `O agendamento foi criado e aparecerá no calendário.${uploadedFiles.length > 0 ? ` ${uploadedFiles.length} foto(s) de referência anexada(s).` : ''}`,
       });
+      setUploadedFiles([]);
       onSuccess();
     },
     onError: (error: any) => {
@@ -172,6 +200,29 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
       return;
     }
     createAppointmentMutation.mutate(data);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const validFiles = files.filter(file => {
+      const isValidType = file.type.startsWith('image/');
+      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
+      return isValidType && isValidSize;
+    });
+
+    if (validFiles.length !== files.length) {
+      toast({
+        title: "Alguns arquivos não foram aceitos",
+        description: "Apenas imagens de até 10MB são permitidas.",
+        variant: "destructive",
+      });
+    }
+
+    setUploadedFiles(prev => [...prev, ...validFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const filteredClients = clients.filter(client =>
@@ -202,11 +253,11 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/20 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
       
       <div className="relative z-10 p-8">
-        {/* Indicador de validação em tempo real */}
-        {(isValidating || conflictCheck) && (
-          <div className={`mb-6 p-4 rounded-xl border-2 transition-all duration-500 transform ${
+        {/* Indicador de validação otimizado */}
+        {(isValidating || conflictCheck !== null) && (
+          <div className={`mb-6 p-4 rounded-xl border-2 transition-all duration-300 ${
             isValidating 
-              ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-300 animate-pulse' 
+              ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-300' 
               : conflictCheck 
                 ? 'bg-gradient-to-r from-red-50 to-red-100 border-red-300 shadow-lg' 
                 : 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-lg'
@@ -219,7 +270,7 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
                 </>
               ) : conflictCheck ? (
                 <>
-                  <AlertTriangle className="h-5 w-5 text-red-600 animate-bounce" />
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
                   <span className="text-red-800 font-semibold">{conflictCheck}</span>
                 </>
               ) : (
@@ -486,6 +537,61 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
             </div>
           </div>
 
+          {/* Upload de Fotos de Referência */}
+          <div className="space-y-4">
+            <Label className="text-sm font-bold text-red-700 flex items-center gap-2">
+              <Image className="h-5 w-5" />
+              Fotos de Referência
+            </Label>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-red-200 rounded-xl p-6 text-center bg-red-50/30 hover:bg-red-50/50 transition-all duration-300">
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-red-300 text-red-700 hover:bg-red-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+                >
+                  <Upload className="h-5 w-5 mr-2" />
+                  Escolher Fotos
+                </Button>
+                <p className="text-sm text-gray-600 mt-2">JPG, PNG até 10MB cada</p>
+              </div>
+              
+              {/* Preview das fotos selecionadas */}
+              {uploadedFiles.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {uploadedFiles.map((file, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Referência ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg border-2 border-red-200 shadow-lg"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                        className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                      <p className="text-xs text-gray-600 mt-1 truncate">{file.name}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Descrição do Serviço */}
           <div className="space-y-4">
             <Label htmlFor="service_description" className="text-sm font-bold text-red-700">Descrição do Serviço</Label>
@@ -535,3 +641,5 @@ const AppointmentForm = ({ selectedSlot, clients, onSuccess }: AppointmentFormPr
 };
 
 export default AppointmentForm;
+
+</edits_to_apply>
