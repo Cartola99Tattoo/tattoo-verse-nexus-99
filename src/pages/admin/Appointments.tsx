@@ -104,28 +104,28 @@ const Appointments = () => {
       ['1', '2', '3'][index] === appointment.artist_id
     );
 
+    // Extrair apenas o primeiro nome do cliente
+    const firstName = client?.name?.split(' ')[0] || 'Cliente';
+    const artistFirstName = artist?.split(' ')[0] || 'Artista';
+
     return (
-      <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-1 rounded-md shadow-lg border border-red-300 hover:shadow-xl transition-all duration-300 cursor-pointer group overflow-hidden">
+      <div className="appointment-card bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white rounded-lg shadow-lg border border-red-400 hover:shadow-xl transition-all duration-300 cursor-pointer group overflow-hidden h-full">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-        <div className="relative z-10">
-          <div className="text-xs font-bold truncate flex items-center gap-1">
-            <Users className="h-3 w-3 flex-shrink-0" />
-            {client?.name || 'Cliente'}
-          </div>
-          <div className="text-xs opacity-90 truncate flex items-center gap-1">
-            <Clock className="h-3 w-3 flex-shrink-0" />
-            {appointment.time} ({appointment.duration_minutes}min)
+        <div className="relative z-10 p-2 h-full flex flex-col justify-between">
+          <div className="space-y-1">
+            <div className="text-xs font-bold truncate flex items-center gap-1">
+              <Users className="h-3 w-3 flex-shrink-0" />
+              {firstName}
+            </div>
+            <div className="text-xs opacity-90 truncate flex items-center gap-1">
+              <Clock className="h-3 w-3 flex-shrink-0" />
+              {appointment.time}
+            </div>
           </div>
           <div className="text-xs opacity-80 truncate flex items-center gap-1">
             <Sparkles className="h-3 w-3 flex-shrink-0" />
-            {artist || 'Artista'}
+            {artistFirstName}
           </div>
-          {appointment.bed_id && (
-            <div className="text-xs opacity-70 truncate flex items-center gap-1">
-              <MapPin className="h-3 w-3 flex-shrink-0" />
-              Maca
-            </div>
-          )}
         </div>
       </div>
     );
@@ -213,13 +213,13 @@ const Appointments = () => {
               components={{
                 event: EventComponent,
               }}
-              className="rounded-lg overflow-hidden calendar-99tattoo"
+              className="rounded-lg overflow-hidden calendar-99tattoo-enhanced"
               eventPropGetter={(event) => ({
                 className: cn(
-                  "transition-all duration-300 hover:shadow-lg",
-                  event.resource.status === 'confirmed' && "bg-green-600",
-                  event.resource.status === 'cancelled' && "bg-gray-500",
-                  event.resource.status === 'completed' && "bg-emerald-600"
+                  "transition-all duration-300 hover:shadow-lg appointment-event-card",
+                  event.resource.status === 'confirmed' && "appointment-confirmed",
+                  event.resource.status === 'cancelled' && "appointment-cancelled",
+                  event.resource.status === 'completed' && "appointment-completed"
                 ),
               })}
               dayPropGetter={(date) => ({
@@ -228,6 +228,18 @@ const Appointments = () => {
                   format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && "bg-red-100/30"
                 ),
               })}
+              formats={{
+                dayFormat: (date, culture, localizer) =>
+                  localizer?.format(date, 'dd', culture) || '',
+                dayHeaderFormat: (date, culture, localizer) =>
+                  localizer?.format(date, 'EEEE', culture) || '',
+                monthHeaderFormat: (date, culture, localizer) =>
+                  localizer?.format(date, 'MMMM yyyy', culture) || '',
+              }}
+              step={30}
+              timeslots={2}
+              min={new Date(2024, 0, 1, 8, 0)}
+              max={new Date(2024, 0, 1, 20, 0)}
             />
           </div>
         </div>
