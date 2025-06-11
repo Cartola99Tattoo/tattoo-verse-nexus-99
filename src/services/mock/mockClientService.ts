@@ -203,7 +203,7 @@ class MockClientService implements IClientService {
     return this.fetchClientById(id);
   }
 
-  async fetchClients(options?: { limit?: number; search?: string; status?: string; temperature?: string; limit?: number; offset?: number }): Promise<Client[]> {
+  async fetchClients(options?: { search?: string; status?: string; temperature?: string; limit?: number; offset?: number }): Promise<Client[]> {
     console.log('Using mock client service');
     await new Promise(resolve => setTimeout(resolve, 100));
     
