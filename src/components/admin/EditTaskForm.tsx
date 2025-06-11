@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -325,5 +326,3 @@ const EditTaskForm = ({ task, project, stages, onTaskUpdated, onCancel }: EditTa
 };
 
 export default EditTaskForm;
-
-</edits_to_apply>
