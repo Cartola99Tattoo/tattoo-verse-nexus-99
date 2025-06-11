@@ -48,10 +48,12 @@ export interface Appointment {
   time: string;
   duration_minutes: number;
   service_type: 'tattoo' | 'piercing' | 'consultation';
+  service_description?: string; // Added field
   status: 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
   notes?: string;
   bed_id?: string;
   price?: number; // Added financial integration
+  estimated_price?: number; // Added field
   created_at: string;
   updated_at: string;
 }

@@ -1,7 +1,7 @@
-
 import { BaseService, ServiceError } from '../base/BaseService';
 import { IAppointmentService, AppointmentConflict, AppointmentFilters } from '../interfaces/IAppointmentService';
 import { Appointment } from '../interfaces/IClientService';
+import { format } from 'date-fns';
 
 export class SupabaseAppointmentService extends BaseService implements IAppointmentService {
   // Mock data for demonstration
