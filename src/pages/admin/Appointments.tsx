@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import { getClientService, getBedService } from "@/services/serviceFactory";
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Filter, Calendar as CalendarIcon, Clock, User, Eye, Phone, Mail, UserPlus, AlertCircle, Bed, Settings } from "lucide-react";
+import { Plus, Filter, Calendar as CalendarIcon, Clock, User, Eye, Phone, Mail, UserPlus, AlertCircle, Bed, Settings, Sparkles, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Appointment, Client } from "@/services/interfaces/IClientService";
 import { Bed as BedType } from "@/services/interfaces/IBedService";
@@ -54,30 +55,25 @@ const Appointments = () => {
     queryFn: () => clientService.fetchUpcomingAppointments(100),
   });
 
-  // Buscar clientes para referência
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
     queryFn: () => clientService.fetchClients({ limit: 1000 }),
   });
 
-  // Buscar macas
   const { data: beds = [] } = useQuery({
     queryKey: ['beds'],
     queryFn: () => bedService.fetchBeds(),
   });
 
-  // Função para verificar conflitos de agendamento
   const checkConflicts = (newAppointment: { artist_id: string; bed_id?: string; date: string; time: string; duration_minutes: number }) => {
     const newStart = new Date(`${newAppointment.date}T${newAppointment.time}`);
     const newEnd = new Date(newStart.getTime() + newAppointment.duration_minutes * 60000);
 
     const conflicts = appointments.filter(apt => {
-      // Verificar conflito de artista
       const artistConflict = apt.artist_id === newAppointment.artist_id && 
         apt.date === newAppointment.date &&
         apt.status !== 'cancelled';
 
-      // Verificar conflito de maca se especificada
       const bedConflict = newAppointment.bed_id && apt.bed_id === newAppointment.bed_id &&
         apt.date === newAppointment.date &&
         apt.status !== 'cancelled';
@@ -93,7 +89,6 @@ const Appointments = () => {
     return conflicts;
   };
 
-  // Mutations para gestão de macas
   const addBedMutation = useMutation({
     mutationFn: (bedData: Omit<BedType, 'id' | 'created_at' | 'updated_at'>) =>
       bedService.createBed(bedData),
@@ -129,7 +124,6 @@ const Appointments = () => {
     }
   });
 
-  // Atualizar status do agendamento
   const updateStatusMutation = useMutation({
     mutationFn: ({ appointmentId, status }: { appointmentId: string; status: Appointment['status'] }) =>
       clientService.updateAppointmentStatus(appointmentId, status),
@@ -205,9 +199,10 @@ const Appointments = () => {
     const { appointment, client, bed } = event.resource;
     
     return (
-      <div className="text-xs p-1 rounded group relative">
-        <div className="font-medium truncate">{client?.name}</div>
-        <div className="text-xs opacity-80 flex items-center gap-1">
+      <div className="text-xs p-2 rounded-lg group relative bg-gradient-to-br from-red-500 to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-red-400">
+        <div className="font-bold truncate text-white">{client?.name}</div>
+        <div className="text-xs opacity-90 flex items-center gap-1 text-red-100">
+          <span>{appointment.service_type === 'tattoo' ? '🎨' : appointment.service_type === 'piercing' ? '💎' : '💬'}</span>
           <span>{appointment.service_type}</span>
           {bed && (
             <>
@@ -218,12 +213,11 @@ const Appointments = () => {
           )}
         </div>
         
-        {/* Ações rápidas - aparecem no hover */}
-        <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-lg rounded p-1 flex gap-1 z-10">
+        <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-xl rounded-lg p-1 flex gap-1 z-10 border border-gray-200">
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0"
+            className="h-6 w-6 p-0 hover:bg-red-50"
             onClick={(e) => {
               e.stopPropagation();
               if (client?.phone) {
@@ -232,12 +226,12 @@ const Appointments = () => {
             }}
             title="Ligar para cliente"
           >
-            <Phone className="h-3 w-3" />
+            <Phone className="h-3 w-3 text-red-600" />
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0"
+            className="h-6 w-6 p-0 hover:bg-red-50"
             onClick={(e) => {
               e.stopPropagation();
               if (client?.email) {
@@ -246,19 +240,19 @@ const Appointments = () => {
             }}
             title="Enviar e-mail"
           >
-            <Mail className="h-3 w-3" />
+            <Mail className="h-3 w-3 text-red-600" />
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0"
+            className="h-6 w-6 p-0 hover:bg-red-50"
             onClick={(e) => {
               e.stopPropagation();
               window.open(`/admin/clients/${client?.id}`, '_blank');
             }}
             title="Ver perfil do cliente"
           >
-            <UserPlus className="h-3 w-3" />
+            <UserPlus className="h-3 w-3 text-red-600" />
           </Button>
         </div>
       </div>
@@ -280,7 +274,6 @@ const Appointments = () => {
     noEventsInRange: 'Não há agendamentos neste período.',
   };
 
-  // Lista de artistas fictícia - em produção viria do banco
   const artists = [
     { id: 'all', name: 'Todos os Artistas' },
     { id: '1', name: 'João Silva' },
@@ -293,88 +286,108 @@ const Appointments = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-gradient-to-br from-gray-50 via-red-50/30 to-white min-h-screen">
       <Tabs defaultValue="calendar" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="calendar">Calendário</TabsTrigger>
-          <TabsTrigger value="beds">Gestão de Macas</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-white to-gray-50 border-2 border-red-200 shadow-xl rounded-xl">
+          <TabsTrigger 
+            value="calendar" 
+            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white transition-all duration-300 rounded-lg font-bold"
+          >
+            <CalendarIcon className="h-4 w-4" />
+            Calendário de Agendamentos
+          </TabsTrigger>
+          <TabsTrigger 
+            value="beds" 
+            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white transition-all duration-300 rounded-lg font-bold"
+          >
+            <Bed className="h-4 w-4" />
+            Gestão de Macas
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="calendar" className="space-y-6">
-          {/* Cards de Estatísticas */}
+          {/* Cards de Estatísticas Aprimorados */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Agendamentos Hoje</CardTitle>
-                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+            <Card className="shadow-2xl bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white border-red-400 hover:shadow-red-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                <CardTitle className="text-sm font-bold">Agendamentos Hoje</CardTitle>
+                <CalendarIcon className="h-5 w-5 text-red-200" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
+              <CardContent className="relative z-10">
+                <div className="text-3xl font-black">
                   {appointments.filter(apt => 
                     apt.date === format(new Date(), 'yyyy-MM-dd')
                   ).length}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-red-200 font-medium flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
                   Sessões programadas
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Macas Ativas</CardTitle>
-                <Bed className="h-4 w-4 text-blue-600" />
+            <Card className="shadow-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white border-blue-400 hover:shadow-blue-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                <CardTitle className="text-sm font-bold">Macas Ativas</CardTitle>
+                <Bed className="h-5 w-5 text-blue-200" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">
+              <CardContent className="relative z-10">
+                <div className="text-3xl font-black text-white">
                   {beds.filter(bed => bed.isActive).length}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-blue-200 font-medium flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
                   Disponíveis para uso
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Confirmados</CardTitle>
-                <Clock className="h-4 w-4 text-green-600" />
+            <Card className="shadow-2xl bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white border-green-400 hover:shadow-green-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                <CardTitle className="text-sm font-bold">Confirmados</CardTitle>
+                <Clock className="h-5 w-5 text-green-200" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
+              <CardContent className="relative z-10">
+                <div className="text-3xl font-black">
                   {appointments.filter(apt => apt.status === 'confirmed').length}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-green-200 font-medium flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
                   Agendamentos confirmados
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Taxa de Comparecimento</CardTitle>
-                <User className="h-4 w-4 text-blue-600" />
+            <Card className="shadow-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 text-white border-purple-400 hover:shadow-purple-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                <CardTitle className="text-sm font-bold">Taxa de Comparecimento</CardTitle>
+                <TrendingUp className="h-5 w-5 text-purple-200" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">94%</div>
-                <p className="text-xs text-muted-foreground">
+              <CardContent className="relative z-10">
+                <div className="text-3xl font-black">94%</div>
+                <p className="text-xs text-purple-200 font-medium flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
                   Últimos 30 dias
                 </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Alerta de Conflito */}
+          {/* Alerta de Conflito Aprimorado */}
           {conflictWarning && (
-            <Card className="border-orange-200 bg-orange-50">
-              <CardContent className="flex items-center gap-2 p-4">
-                <AlertCircle className="h-4 w-4 text-orange-600" />
-                <p className="text-sm text-orange-800">{conflictWarning}</p>
+            <Card className="border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-orange-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardContent className="flex items-center gap-3 p-4">
+                <AlertCircle className="h-5 w-5 text-orange-600 animate-pulse" />
+                <p className="text-sm text-orange-800 font-medium flex-1">{conflictWarning}</p>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setConflictWarning(null)}
-                  className="ml-auto"
+                  className="ml-auto hover:bg-orange-200 text-orange-600"
                 >
                   ×
                 </Button>
@@ -382,12 +395,12 @@ const Appointments = () => {
             </Card>
           )}
 
-          {/* Filtros e Controles */}
+          {/* Filtros e Controles Aprimorados */}
           <div className="flex flex-col sm:flex-row gap-4 justify-between">
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Select value={selectedArtist} onValueChange={setSelectedArtist}>
-                <SelectTrigger className="w-[200px]">
-                  <Filter className="h-4 w-4 mr-2" />
+                <SelectTrigger className="w-[200px] border-2 border-red-200 focus:border-red-500 shadow-lg">
+                  <Filter className="h-4 w-4 mr-2 text-red-600" />
                   <SelectValue placeholder="Filtrar por artista" />
                 </SelectTrigger>
                 <SelectContent>
@@ -400,8 +413,8 @@ const Appointments = () => {
               </Select>
 
               <Select value={selectedBed} onValueChange={setSelectedBed}>
-                <SelectTrigger className="w-[180px]">
-                  <Bed className="h-4 w-4 mr-2" />
+                <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg">
+                  <Bed className="h-4 w-4 mr-2 text-red-600" />
                   <SelectValue placeholder="Filtrar por maca" />
                 </SelectTrigger>
                 <SelectContent>
@@ -416,7 +429,7 @@ const Appointments = () => {
               </Select>
 
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[180px] border-2 border-red-200 focus:border-red-500 shadow-lg">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -431,11 +444,10 @@ const Appointments = () => {
               </Select>
             </div>
             
-            <div className="flex gap-2">
-              {/* Agendamento Rápido */}
+            <div className="flex gap-3">
               <Dialog open={isQuickAddOpen} onOpenChange={setIsQuickAddOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                  <Button variant="outline" className="border-2 border-blue-400 text-blue-600 hover:bg-blue-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                     <Plus className="h-4 w-4 mr-2" />
                     Agendamento Rápido
                   </Button>
@@ -463,7 +475,7 @@ const Appointments = () => {
 
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                  <Button className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-red-500">
                     <Plus className="h-4 w-4 mr-2" />
                     Novo Agendamento
                   </Button>
@@ -489,14 +501,20 @@ const Appointments = () => {
             </div>
           </div>
 
-          {/* Calendário */}
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+          {/* Calendário Aprimorado */}
+          <Card className="shadow-2xl bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-100/30 rounded-full transform translate-x-16 -translate-y-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-100/20 rounded-full transform -translate-x-12 translate-y-12"></div>
+            
+            <CardHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-t-lg relative z-10">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-gray-800">Calendário de Agendamentos</CardTitle>
-                  <CardDescription>
-                    Visualize e gerencie todos os agendamentos
+                  <CardTitle className="text-2xl font-black flex items-center gap-2">
+                    <CalendarIcon className="h-6 w-6" />
+                    Calendário de Agendamentos
+                  </CardTitle>
+                  <CardDescription className="text-red-100 font-medium">
+                    Visualize e gerencie todos os agendamentos com estilo
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
@@ -504,6 +522,7 @@ const Appointments = () => {
                     variant={view === 'day' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleViewChange('day')}
+                    className={view === 'day' ? 'bg-white text-red-600' : 'border-white text-white hover:bg-white/10'}
                   >
                     Dia
                   </Button>
@@ -511,6 +530,7 @@ const Appointments = () => {
                     variant={view === 'week' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleViewChange('week')}
+                    className={view === 'week' ? 'bg-white text-red-600' : 'border-white text-white hover:bg-white/10'}
                   >
                     Semana
                   </Button>
@@ -518,6 +538,7 @@ const Appointments = () => {
                     variant={view === 'month' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleViewChange('month')}
+                    className={view === 'month' ? 'bg-white text-red-600' : 'border-white text-white hover:bg-white/10'}
                   >
                     Mês
                   </Button>
@@ -525,14 +546,15 @@ const Appointments = () => {
                     variant={view === 'agenda' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleViewChange('agenda')}
+                    className={view === 'agenda' ? 'bg-white text-red-600' : 'border-white text-white hover:bg-white/10'}
                   >
                     Agenda
                   </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="h-[600px]">
+            <CardContent className="p-6 relative z-10">
+              <div className="h-[600px] bg-white rounded-lg shadow-inner border-2 border-gray-100">
                 <Calendar
                   localizer={localizer}
                   events={calendarEvents}
@@ -552,13 +574,16 @@ const Appointments = () => {
                     style: {
                       backgroundColor: getStatusColor(event.resource.appointment.status),
                       borderColor: getStatusColor(event.resource.appointment.status),
+                      borderWidth: '2px',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                     }
                   })}
                   components={{
                     event: EventComponent,
                   }}
-                  min={new Date(0, 0, 0, 8, 0, 0)} // 8:00 AM
-                  max={new Date(0, 0, 0, 20, 0, 0)} // 8:00 PM
+                  min={new Date(0, 0, 0, 8, 0, 0)}
+                  max={new Date(0, 0, 0, 20, 0, 0)}
                   step={30}
                   timeslots={2}
                 />
@@ -602,6 +627,30 @@ const Appointments = () => {
           />
         </TabsContent>
       </Tabs>
+
+      <style>
+        {`
+          .shadow-3xl {
+            box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
+          }
+          
+          .shadow-red-glow {
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
+          }
+          
+          .shadow-blue-glow {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
+          }
+          
+          .shadow-green-glow {
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
+          }
+          
+          .shadow-purple-glow {
+            box-shadow: 0 0 30px rgba(147, 51, 234, 0.4), 0 8px 25px rgba(0, 0, 0, 0.15);
+          }
+        `}
+      </style>
     </div>
   );
 };
