@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,7 @@ const EditTaskForm = ({ task, project, stages, onTaskUpdated, onCancel }: EditTa
     title: task.title,
     description: task.description || '',
     status: task.status,
-    priority: task.priority as const,
+    priority: task.priority,
     assignedTo: task.assignedTo || '',
     dueDate: task.dueDate || '',
     estimatedHours: task.estimatedHours?.toString() || '',
@@ -186,7 +185,7 @@ const EditTaskForm = ({ task, project, stages, onTaskUpdated, onCancel }: EditTa
 
                 <div className="space-y-3">
                   <Label className="text-sm font-semibold text-gray-700">Prioridade</Label>
-                  <Select value={formData.priority} onValueChange={(value: any) => setFormData({...formData, priority: value})}>
+                  <Select value={formData.priority} onValueChange={(value) => setFormData({...formData, priority: value})}>
                     <SelectTrigger className="border-red-200 focus:border-red-400 bg-white shadow-sm">
                       <SelectValue />
                     </SelectTrigger>
