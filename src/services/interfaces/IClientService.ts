@@ -1,3 +1,4 @@
+
 import { CRUDOperations } from '../base/BaseService';
 
 export interface Client {
@@ -29,6 +30,30 @@ export interface Client {
   origin?: string; // Origem do lead
 }
 
+export interface CreateClientData {
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  birth_date?: string;
+  status: 'new' | 'active' | 'inactive' | 'interested' | 'pending' | 'completed' | 'returning' | 'vip';
+  tags?: string[];
+  notes?: string;
+  total_spent: number;
+  total_orders: number;
+  preferred_artist_id?: string;
+  preferred_style?: string;
+  temperature?: 'hot' | 'warm' | 'cold';
+  temperature_score?: number;
+  next_appointment_date?: string;
+  next_appointment_artist?: string;
+  appointment_status?: 'scheduled' | 'confirmed' | 'cancelled';
+  lead_score?: number;
+  last_activity?: string;
+  qualified_interests?: string[];
+  origin?: string;
+}
+
 export interface PageVisit {
   id: string;
   client_id?: string;
@@ -56,6 +81,21 @@ export interface Appointment {
   estimated_price?: number; // Added field
   created_at: string;
   updated_at: string;
+}
+
+export interface CreateAppointmentData {
+  client_id: string;
+  artist_id: string;
+  date: string;
+  time: string;
+  duration_minutes: number;
+  service_type: 'tattoo' | 'piercing' | 'consultation';
+  service_description?: string;
+  status: 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  notes?: string;
+  bed_id?: string;
+  price?: number;
+  estimated_price?: number;
 }
 
 export interface ClientInteraction {
@@ -100,7 +140,7 @@ export interface IClientService extends CRUDOperations<Client> {
   // Existing methods
   fetchClients(options?: { search?: string; status?: string; temperature?: string; limit?: number; offset?: number }): Promise<Client[]>;
   fetchClientById(id: string): Promise<Client | null>;
-  createClient(clientData: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'total_spent' | 'total_orders'>): Promise<Client>;
+  createClient(clientData: CreateClientData): Promise<Client>;
   updateClient(id: string, clientData: Partial<Client>): Promise<Client>;
   deleteClient(id: string): Promise<void>;
   
@@ -112,7 +152,7 @@ export interface IClientService extends CRUDOperations<Client> {
   fetchClientPurchaseHistory(clientId: string): Promise<any[]>;
   fetchClientAppointments(clientId: string): Promise<Appointment[]>;
   fetchUpcomingAppointments(limit?: number): Promise<Appointment[]>;
-  createAppointment(appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at'>): Promise<Appointment>;
+  createAppointment(appointmentData: CreateAppointmentData): Promise<Appointment>;
   updateAppointmentStatus(id: string, status: Appointment['status']): Promise<void>;
   fetchKanbanStages(): Promise<KanbanStage[]>;
   createKanbanStage(stageData: Omit<KanbanStage, 'id' | 'created_at' | 'updated_at'>): Promise<KanbanStage>;

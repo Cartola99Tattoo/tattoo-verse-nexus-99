@@ -16,17 +16,17 @@ class MockClientService {
       id: `client-${index + 1}`,
       name: faker.person.fullName(),
       email: faker.internet.email(),
-      phone: faker.phone.number('(##) #####-####'),
+      phone: faker.phone.number(),
       birth_date: format(faker.date.birthdate({ min: 18, max: 65, mode: 'age' }), 'yyyy-MM-dd'),
-      address: {
-        street: faker.location.streetAddress(),
-        city: faker.location.city(),
-        state: faker.location.state(),
-        zip_code: faker.location.zipCode(),
-      },
+      status: faker.helpers.arrayElement(['new', 'active', 'inactive', 'interested', 'pending', 'completed', 'returning', 'vip'] as const),
+      total_spent: faker.number.float({ min: 0, max: 5000, fractionDigits: 2 }),
+      total_orders: faker.number.int({ min: 0, max: 20 }),
+      address: faker.location.streetAddress(),
+      tags: faker.helpers.arrayElements(['VIP', 'Primeira Vez', 'Retorno', 'Indicação'], { min: 0, max: 2 }),
+      notes: faker.helpers.maybe(() => faker.lorem.sentence(), { probability: 0.3 }) || '',
       emergency_contact: {
         name: faker.person.fullName(),
-        phone: faker.phone.number('(##) #####-####'),
+        phone: faker.phone.number(),
         relationship: faker.helpers.arrayElement(['Mãe', 'Pai', 'Cônjuge', 'Irmão/Irmã', 'Amigo(a)']),
       },
       medical_info: {
@@ -45,6 +45,14 @@ class MockClientService {
         appointment_reminders: faker.datatype.boolean(),
         marketing_emails: faker.datatype.boolean(),
       },
+      temperature: faker.helpers.arrayElement(['hot', 'warm', 'cold'] as const),
+      temperature_score: faker.number.int({ min: 0, max: 100 }),
+      preferred_artist_id: faker.helpers.arrayElement(['1', '2', '3']),
+      preferred_style: faker.helpers.arrayElement(['Realismo', 'Old School', 'Blackwork', 'Aquarela', 'Minimalista']),
+      lead_score: faker.number.int({ min: 0, max: 100 }),
+      last_activity: faker.date.recent().toISOString(),
+      qualified_interests: faker.helpers.arrayElements(['Tatuagem', 'Piercing', 'Consulta'], { min: 1, max: 3 }),
+      origin: faker.helpers.arrayElement(['Instagram', 'Facebook', 'Indicação', 'Google', 'Site']),
       created_at: faker.date.past().toISOString(),
       updated_at: faker.date.recent().toISOString(),
     }));
@@ -275,4 +283,5 @@ class MockClientService {
   }
 }
 
+export const mockClientService = new MockClientService();
 export default MockClientService;
