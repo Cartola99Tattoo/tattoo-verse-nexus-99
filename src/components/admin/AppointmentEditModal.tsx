@@ -43,11 +43,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
   const [conflictCheck, setConflictCheck] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
 
-  // Early return if appointment is null
-  if (!appointment) {
-    return null;
-  }
-
+  // All hooks must be called before any early returns
   const { data: beds = [] } = useQuery({
     queryKey: ['beds'],
     queryFn: () => bedService.fetchBeds(),
@@ -123,7 +119,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
         bed_id: data.bed_id === "none" ? undefined : data.bed_id,
         price: data.estimated_price || 0,
       };
-      return clientService.updateAppointment(appointment.id, updateData);
+      return clientService.updateAppointment(appointment!.id, updateData);
     },
     onSuccess: () => {
       toast({
@@ -142,6 +138,11 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
       });
     },
   });
+
+  // Now we can safely return early after all hooks are called
+  if (!appointment) {
+    return null;
+  }
 
   const onSubmit = (data: EditAppointmentFormData) => {
     if (conflictCheck) {
