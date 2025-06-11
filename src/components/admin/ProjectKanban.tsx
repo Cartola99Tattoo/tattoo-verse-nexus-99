@@ -10,6 +10,7 @@ import { getProjectService } from "@/services/serviceFactory";
 import { IProject, IProjectTask, IKanbanStage, IProjectSmartGoal } from "@/services/interfaces/IProjectService";
 import ProjectKanbanColumn from "@/components/admin/ProjectKanbanColumn";
 import CreateTaskForm from "@/components/admin/CreateTaskForm";
+import EditTaskForm from "@/components/admin/EditTaskForm";
 import ProjectKanbanSettings from "@/components/admin/ProjectKanbanSettings";
 import EnhancedSmartGoalsDashboard from "@/components/admin/EnhancedSmartGoalsDashboard";
 import IntegratedProjectOverview from "@/components/admin/IntegratedProjectOverview";
@@ -21,6 +22,9 @@ interface ProjectKanbanProps {
 
 const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
   const [showCreateTask, setShowCreateTask] = useState(false);
+  const [showEditTask, setShowEditTask] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<IProjectTask | null>(null);
+  const [initialStage, setInitialStage] = useState<string>('');
   const [showSettings, setShowSettings] = useState(false);
   const [filter, setFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<string>('kanban');
@@ -94,6 +98,13 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
 
   const handleTaskCreated = () => {
     setShowCreateTask(false);
+    setInitialStage('');
+    refreshTasks();
+  };
+
+  const handleTaskUpdated = () => {
+    setShowEditTask(false);
+    setSelectedTask(null);
     refreshTasks();
   };
 
@@ -104,6 +115,16 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
     } catch (error) {
       console.error('Error updating task:', error);
     }
+  };
+
+  const handleAddTask = (stageId: string) => {
+    setInitialStage(stageId);
+    setShowCreateTask(true);
+  };
+
+  const handleEditTask = (task: IProjectTask) => {
+    setSelectedTask(task);
+    setShowEditTask(true);
   };
 
   const handleSettingsClose = () => {
@@ -154,7 +175,26 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
         project={project}
         stages={currentStages || []}
         onTaskCreated={handleTaskCreated}
-        onCancel={() => setShowCreateTask(false)}
+        onCancel={() => {
+          setShowCreateTask(false);
+          setInitialStage('');
+        }}
+        initialStage={initialStage}
+      />
+    );
+  }
+
+  if (showEditTask && selectedTask) {
+    return (
+      <EditTaskForm
+        task={selectedTask}
+        project={project}
+        stages={currentStages || []}
+        onTaskUpdated={handleTaskUpdated}
+        onCancel={() => {
+          setShowEditTask(false);
+          setSelectedTask(null);
+        }}
       />
     );
   }
@@ -229,17 +269,6 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
         </TabsContent>
 
         <TabsContent value="kanban" className="mt-6">
-          {/* Botão para Adicionar Nova Tarefa - Posicionado estrategicamente */}
-          <div className="mb-6 flex justify-center">
-            <Button 
-              onClick={() => setShowCreateTask(true)} 
-              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-8 py-3 text-lg font-semibold"
-            >
-              <Plus className="h-5 w-5 mr-3" />
-              Adicionar Nova Tarefa
-            </Button>
-          </div>
-
           {/* Filtros */}
           <div className="flex gap-4 mb-6 justify-center">
             <Button
@@ -296,6 +325,8 @@ const ProjectKanban = ({ project, onBack }: ProjectKanbanProps) => {
                       tasks={filteredTasks.filter(task => task.status === stage.id)}
                       onTaskUpdate={handleTaskUpdate}
                       onTaskRefresh={refreshTasks}
+                      onAddTask={handleAddTask}
+                      onEditTask={handleEditTask}
                       count={filteredTasks.filter(task => task.status === stage.id).length}
                     />
                   </div>

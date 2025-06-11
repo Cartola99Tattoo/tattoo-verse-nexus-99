@@ -2,6 +2,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { IProjectTask, IKanbanStage } from "@/services/interfaces/IProjectService";
 import ProjectTaskCard from "./ProjectTaskCard";
 
@@ -11,6 +13,8 @@ interface ProjectKanbanColumnProps {
   tasks: IProjectTask[];
   onTaskUpdate: (taskId: string, newStatus: string) => Promise<void>;
   onTaskRefresh: () => void;
+  onAddTask: (stageId: string) => void;
+  onEditTask: (task: IProjectTask) => void;
   count: number;
 }
 
@@ -20,6 +24,8 @@ const ProjectKanbanColumn = ({
   tasks, 
   onTaskUpdate,
   onTaskRefresh, 
+  onAddTask,
+  onEditTask,
   count 
 }: ProjectKanbanColumnProps) => {
   const handleDragOver = (e: React.DragEvent) => {
@@ -60,6 +66,17 @@ const ProjectKanbanColumn = ({
     }
   };
 
+  const getAddButtonColor = (status: string) => {
+    switch (status) {
+      case 'ideas': return 'bg-purple-600 hover:bg-purple-700 border-purple-300';
+      case 'todo': return 'bg-red-600 hover:bg-red-700 border-red-300';
+      case 'in_progress': return 'bg-orange-600 hover:bg-orange-700 border-orange-300';
+      case 'review': return 'bg-yellow-600 hover:bg-yellow-700 border-yellow-300';
+      case 'completed': return 'bg-green-600 hover:bg-green-700 border-green-300';
+      default: return 'bg-gray-600 hover:bg-gray-700 border-gray-300';
+    }
+  };
+
   return (
     <div 
       className="flex-shrink-0 w-80 min-w-[320px] transition-all duration-300"
@@ -76,7 +93,7 @@ const ProjectKanbanColumn = ({
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 max-h-[calc(100vh-250px)] overflow-y-auto p-6 custom-scrollbar">
+        <CardContent className="space-y-4 max-h-[calc(100vh-320px)] overflow-y-auto p-6 custom-scrollbar">
           {tasks.length === 0 ? (
             <div className="text-center text-gray-500 text-sm py-12 border-2 border-dashed border-gray-300 rounded-xl bg-gradient-to-br from-gray-50 to-white hover:border-red-300 hover:bg-red-50 transition-all duration-300">
               <div className="text-gray-400 text-xs mb-3 font-medium">✨ Arraste tarefas aqui ✨</div>
@@ -96,10 +113,24 @@ const ProjectKanbanColumn = ({
                   task={task} 
                   onTaskUpdate={onTaskUpdate}
                   onTaskRefresh={onTaskRefresh}
+                  onEditTask={onEditTask}
                 />
               </div>
             ))
           )}
+          
+          {/* Botão de Adição Rápida */}
+          <div className="pt-4 border-t border-gray-200">
+            <Button
+              onClick={() => onAddTask(status)}
+              variant="outline"
+              className={`w-full ${getAddButtonColor(status)} text-white border-2 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl`}
+              size="sm"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Tarefa
+            </Button>
+          </div>
         </CardContent>
       </Card>
       

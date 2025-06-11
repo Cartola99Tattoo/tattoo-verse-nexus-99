@@ -12,6 +12,7 @@ interface ProjectTaskCardProps {
   task: IProjectTask;
   onTaskUpdate: (taskId: string, newStatus: string) => Promise<void>;
   onTaskRefresh: () => void;
+  onEditTask: (task: IProjectTask) => void;
 }
 
 const priorityColors: { [key: string]: { bg: string; border: string; text: string } } = {
@@ -36,7 +37,7 @@ const smartCriteriaLabels: { [key in SmartCriteria]: string } = {
   time_bound: 'Temporal',
 };
 
-const ProjectTaskCard = ({ task, onTaskUpdate, onTaskRefresh }: ProjectTaskCardProps) => {
+const ProjectTaskCard = ({ task, onTaskUpdate, onTaskRefresh, onEditTask }: ProjectTaskCardProps) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -46,6 +47,10 @@ const ProjectTaskCard = ({ task, onTaskUpdate, onTaskRefresh }: ProjectTaskCardP
 
   const handleDragEnd = () => {
     setIsDragging(false);
+  };
+
+  const handleEdit = () => {
+    onEditTask(task);
   };
 
   const getSmartGoalInfo = () => {
@@ -102,7 +107,7 @@ const ProjectTaskCard = ({ task, onTaskUpdate, onTaskRefresh }: ProjectTaskCardP
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => console.log('Edit task')} className="hover:bg-red-50">
+            <DropdownMenuItem onClick={handleEdit} className="hover:bg-red-50">
               <Edit className="h-4 w-4 mr-2" />
               <span>Editar</span>
             </DropdownMenuItem>
