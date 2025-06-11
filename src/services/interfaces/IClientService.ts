@@ -1,4 +1,3 @@
-
 import { CRUDOperations } from '../base/BaseService';
 
 export interface Client {
@@ -39,8 +38,8 @@ export interface CreateClientData {
   status: 'new' | 'active' | 'inactive' | 'interested' | 'pending' | 'completed' | 'returning' | 'vip';
   tags?: string[];
   notes?: string;
-  total_spent: number;
-  total_orders: number;
+  total_spent?: number; // Made optional with default 0
+  total_orders?: number; // Made optional with default 0
   preferred_artist_id?: string;
   preferred_style?: string;
   temperature?: 'hot' | 'warm' | 'cold';

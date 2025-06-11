@@ -1,10 +1,12 @@
 import { faker } from '@faker-js/faker';
-import { Client, CreateClientData, Appointment, CreateAppointmentData } from '../interfaces/IClientService';
+import { Client, CreateClientData, Appointment, CreateAppointmentData, ClientStats, ClientInteraction, KanbanStage, PageVisit, IClientService } from '../interfaces/IClientService';
 import { addDays, format, addHours, subDays } from 'date-fns';
 
-class MockClientService {
+class MockClientService implements IClientService {
   private clients: Client[] = [];
   private appointments: Appointment[] = [];
+  private interactions: ClientInteraction[] = [];
+  private kanbanStages: KanbanStage[] = [];
 
   constructor() {
     this.initializeMockData();
@@ -59,6 +61,14 @@ class MockClientService {
 
     // Gerar agendamentos variados para demonstrar robustez do calendário
     this.appointments = this.generateVariousAppointments();
+
+    // Initialize kanban stages
+    this.kanbanStages = [
+      { id: '1', name: 'Novos Leads', status_key: 'new', order: 1, color: '#3b82f6', active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: '2', name: 'Interessados', status_key: 'interested', order: 2, color: '#f59e0b', active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: '3', name: 'Ativos', status_key: 'active', order: 3, color: '#10b981', active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: '4', name: 'VIP', status_key: 'vip', order: 4, color: '#8b5cf6', active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+    ];
   }
 
   private generateVariousAppointments(): Appointment[] {
@@ -163,6 +173,28 @@ class MockClientService {
     }
   }
 
+  // Base CRUD methods
+  async create(data: CreateClientData): Promise<Client> {
+    return this.createClient(data);
+  }
+
+  async read(id: string): Promise<Client | null> {
+    return this.fetchClientById(id);
+  }
+
+  async update(id: string, data: Partial<Client>): Promise<Client> {
+    return this.updateClient(id, data);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.deleteClient(id);
+  }
+
+  async list(options?: any): Promise<Client[]> {
+    return this.fetchClients(options);
+  }
+
+  // Existing client methods
   async fetchClients(options?: { limit?: number; search?: string }): Promise<Client[]> {
     console.log('Using mock client service');
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -195,6 +227,8 @@ class MockClientService {
     const newClient: Client = {
       id: `client-${Date.now()}`,
       ...clientData,
+      total_spent: clientData.total_spent || 0,
+      total_orders: clientData.total_orders || 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -220,15 +254,18 @@ class MockClientService {
     return this.clients[clientIndex];
   }
 
-  async deleteClient(id: string): Promise<boolean> {
+  async deleteClient(id: string): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 200));
     
     const initialLength = this.clients.length;
     this.clients = this.clients.filter(c => c.id !== id);
     
-    return this.clients.length < initialLength;
+    if (this.clients.length === initialLength) {
+      throw new Error('Cliente não encontrado');
+    }
   }
 
+  // Appointment methods
   async fetchUpcomingAppointments(limit: number = 50): Promise<Appointment[]> {
     await new Promise(resolve => setTimeout(resolve, 100));
     
@@ -269,17 +306,145 @@ class MockClientService {
     return this.appointments[appointmentIndex];
   }
 
-  async updateAppointmentStatus(id: string, status: Appointment['status']): Promise<Appointment> {
-    return this.updateAppointment(id, { status });
+  async updateAppointmentStatus(id: string, status: Appointment['status']): Promise<void> {
+    await this.updateAppointment(id, { status });
   }
 
-  async deleteAppointment(id: string): Promise<boolean> {
+  async deleteAppointment(id: string): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 200));
     
     const initialLength = this.appointments.length;
     this.appointments = this.appointments.filter(a => a.id !== id);
     
-    return this.appointments.length < initialLength;
+    if (this.appointments.length === initialLength) {
+      throw new Error('Agendamento não encontrado');
+    }
+  }
+
+  async fetchClientAppointments(clientId: string): Promise<Appointment[]> {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return this.appointments.filter(appointment => appointment.client_id === clientId);
+  }
+
+  async fetchAppointmentsByClient(clientId: string): Promise<Appointment[]> {
+    return this.fetchClientAppointments(clientId);
+  }
+
+  // Client stats and extended methods
+  async fetchClientStats(): Promise<ClientStats> {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    const totalClients = this.clients.length;
+    const activeClients = this.clients.filter(c => c.status === 'active').length;
+    const vipClients = this.clients.filter(c => c.status === 'vip').length;
+    const hotClients = this.clients.filter(c => c.temperature === 'hot').length;
+    const warmClients = this.clients.filter(c => c.temperature === 'warm').length;
+    const coldClients = this.clients.filter(c => c.temperature === 'cold').length;
+    
+    return {
+      total_clients: totalClients,
+      new_clients_this_month: Math.floor(totalClients * 0.1),
+      active_clients: activeClients,
+      vip_clients: vipClients,
+      hot_clients: hotClients,
+      warm_clients: warmClients,
+      cold_clients: coldClients,
+      average_order_value: 350.50,
+      client_retention_rate: 85.5,
+      conversion_rate: 68.2,
+      average_conversion_time: 15.5,
+      scheduled_appointments: this.appointments.filter(a => a.status === 'scheduled').length,
+      confirmed_appointments: this.appointments.filter(a => a.status === 'confirmed').length,
+    };
+  }
+
+  async updateClientTemperature(id: string, temperature: 'hot' | 'warm' | 'cold', score?: number): Promise<Client> {
+    return this.updateClient(id, { temperature, temperature_score: score });
+  }
+
+  async fetchClientInteractions(clientId: string): Promise<ClientInteraction[]> {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return this.interactions.filter(interaction => interaction.client_id === clientId);
+  }
+
+  async createClientInteraction(interactionData: Omit<ClientInteraction, 'id' | 'created_at'>): Promise<ClientInteraction> {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    const newInteraction: ClientInteraction = {
+      id: `interaction-${Date.now()}`,
+      ...interactionData,
+      created_at: new Date().toISOString(),
+    };
+    
+    this.interactions.push(newInteraction);
+    return newInteraction;
+  }
+
+  async fetchClientPurchaseHistory(clientId: string): Promise<any[]> {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return []; // Mock empty purchase history
+  }
+
+  // Kanban methods
+  async fetchKanbanStages(): Promise<KanbanStage[]> {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return this.kanbanStages;
+  }
+
+  async createKanbanStage(stageData: Omit<KanbanStage, 'id' | 'created_at' | 'updated_at'>): Promise<KanbanStage> {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    const newStage: KanbanStage = {
+      id: `stage-${Date.now()}`,
+      ...stageData,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    
+    this.kanbanStages.push(newStage);
+    return newStage;
+  }
+
+  async updateKanbanStage(id: string, stageData: Partial<KanbanStage>): Promise<KanbanStage> {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    const stageIndex = this.kanbanStages.findIndex(s => s.id === id);
+    if (stageIndex === -1) {
+      throw new Error('Stage não encontrado');
+    }
+    
+    this.kanbanStages[stageIndex] = {
+      ...this.kanbanStages[stageIndex],
+      ...stageData,
+      updated_at: new Date().toISOString(),
+    };
+    
+    return this.kanbanStages[stageIndex];
+  }
+
+  async deleteKanbanStage(id: string): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    const initialLength = this.kanbanStages.length;
+    this.kanbanStages = this.kanbanStages.filter(s => s.id !== id);
+    
+    if (this.kanbanStages.length === initialLength) {
+      throw new Error('Stage não encontrado');
+    }
+  }
+
+  // Lead qualification methods
+  async fetchClientPageVisits(clientId: string): Promise<PageVisit[]> {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return []; // Mock empty page visits
+  }
+
+  async updateLeadScore(clientId: string, score: number): Promise<void> {
+    await this.updateClient(clientId, { lead_score: score });
+  }
+
+  async updateQualifiedInterests(clientId: string, interests: string[]): Promise<void> {
+    await this.updateClient(clientId, { qualified_interests: interests });
   }
 }
 
