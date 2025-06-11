@@ -151,7 +151,7 @@
 }
 
 .rbc-time-header {
-  @apply border-b-3 border-red-300;
+  @apply border-b-2 border-red-300;
   background: linear-gradient(to bottom, #fef2f2, #fee2e2);
 }
 
@@ -179,7 +179,7 @@
 /* Enhanced Time Labels */
 .rbc-time-header-gutter,
 .rbc-time-gutter {
-  @apply bg-gradient-to-b from-red-100 via-red-50 to-red-100 border-r-3 border-red-300;
+  @apply bg-gradient-to-b from-red-100 via-red-50 to-red-100 border-r-2 border-red-300;
   box-shadow: inset -2px 0 4px rgba(220, 38, 38, 0.1);
 }
 
@@ -264,7 +264,7 @@
 }
 
 .rbc-agenda-table thead th {
-  @apply bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white font-black p-4 border-b-3 border-red-900;
+  @apply bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white font-black p-4 border-b-2 border-red-900;
   box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
 }
 
