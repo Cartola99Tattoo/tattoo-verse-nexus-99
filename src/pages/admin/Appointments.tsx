@@ -233,19 +233,14 @@ const Appointments = () => {
         </div>
       </div>
 
-      {/* Modal Criar Agendamento - CORRIGIDO */}
-      <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-        <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-white border-2 border-red-200 shadow-2xl rounded-2xl p-0">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Criar Novo Agendamento</DialogTitle>
-          </DialogHeader>
-          <AppointmentForm
-            selectedSlot={selectedSlot}
-            clients={clients}
-            onSuccess={handleFormSuccess}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Modal Criar Agendamento */}
+      {showCreateForm && (
+        <AppointmentForm
+          selectedSlot={selectedSlot}
+          clients={clients}
+          onSuccess={handleFormSuccess}
+        />
+      )}
 
       {/* Modal Editar Agendamento */}
       <AppointmentEditModal

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Clock, User, Bed, Save, X, Phone, Mail, UserPlus, Upload, Printer, Edit, AlertTriangle, CheckCircle, Sparkles, DollarSign } from "lucide-react";
+import { CalendarIcon, Clock, User, Bed, Save, X, Phone, Mail, UserPlus, Upload, Printer, Edit, AlertTriangle, CheckCircle, Sparkles, DollarSign, Image } from "lucide-react";
 import { Client, Appointment } from "@/services/interfaces/IClientService";
 import { getClientService, getBedService } from "@/services/serviceFactory";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +24,7 @@ const editAppointmentSchema = z.object({
   bed_id: z.string().optional(),
   estimated_price: z.number().optional(),
   notes: z.string().optional(),
+  service_description: z.string().optional(),
 });
 
 type EditAppointmentFormData = z.infer<typeof editAppointmentSchema>;
@@ -42,6 +43,8 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
   const bedService = getBedService();
   const [validationState, setValidationState] = useState<'idle' | 'checking' | 'available' | 'conflict'>('idle');
   const [conflictMessage, setConflictMessage] = useState<string>("");
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: beds = [] } = useQuery({
     queryKey: ['beds'],
@@ -71,6 +74,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
         bed_id: appointment.bed_id || "none",
         estimated_price: appointment.estimated_price || 0,
         notes: appointment.notes || "",
+        service_description: appointment.service_description || "",
       });
     }
   }, [appointment, isOpen, reset]);
@@ -82,7 +86,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
       if (artist_id && date && time && duration_minutes && appointment) {
         setValidationState('checking');
         try {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 500));
           
           const endTime = format(
             new Date(new Date(`${date}T${time}`).getTime() + duration_minutes * 60000), 
@@ -110,7 +114,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
       }
     };
 
-    const timeoutId = setTimeout(validateConflicts, 1200);
+    const timeoutId = setTimeout(validateConflicts, 600);
     return () => clearTimeout(timeoutId);
   }, [watchedFields, bedService, appointment]);
 
@@ -140,6 +144,47 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
       });
     },
   });
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const validFiles = files.filter(file => {
+      const isValidType = file.type.startsWith('image/');
+      const isValidSize = file.size <= 10 * 1024 * 1024;
+      return isValidType && isValidSize;
+    });
+
+    if (validFiles.length !== files.length) {
+      toast({
+        title: "Alguns arquivos não foram aceitos",
+        description: "Apenas imagens de até 10MB são permitidas.",
+        variant: "destructive",
+      });
+    }
+
+    setUploadedFiles(prev => [...prev, ...validFiles]);
+    toast({
+      title: "✅ Fotos adicionadas",
+      description: `${validFiles.length} foto(s) de referência adicionada(s) com sucesso.`,
+    });
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddPhotos = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePrintForm = () => {
+    toast({
+      title: "✅ Ficha de anamnese",
+      description: "Preparando ficha para impressão...",
+    });
+    setTimeout(() => {
+      window.print();
+    }, 1000);
+  };
 
   if (!appointment) {
     return null;
@@ -184,7 +229,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-white border-2 border-red-200/50 shadow-2xl rounded-2xl relative fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+      <DialogContent className="fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 max-w-6xl w-full max-h-[95vh] overflow-y-auto bg-white border-2 border-red-200/50 shadow-2xl rounded-2xl">
         {/* Elementos decorativos */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
@@ -263,9 +308,9 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
 
           {/* Indicador de validação */}
           {validationState !== 'idle' && (
-            <div className={`p-4 rounded-xl border-2 transition-all duration-500 transform shadow-lg ${
+            <div className={`p-4 rounded-xl border-2 transition-all duration-300 shadow-lg ${
               validationState === 'checking' 
-                ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-300 animate-pulse' 
+                ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-300' 
                 : validationState === 'conflict' 
                   ? 'bg-gradient-to-r from-red-50 to-red-100 border-red-300' 
                   : 'bg-gradient-to-r from-green-50 to-green-100 border-green-300'
@@ -278,7 +323,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   </>
                 ) : validationState === 'conflict' ? (
                   <>
-                    <AlertTriangle className="h-5 w-5 text-red-600 animate-bounce" />
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
                     <span className="text-red-800 font-bold">{conflictMessage}</span>
                   </>
                 ) : (
@@ -363,7 +408,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg">
                     <SelectValue placeholder="Selecione um artista" />
                   </SelectTrigger>
-                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg bg-white z-50">
+                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg bg-white z-[60]">
                     {artists.map((artist) => (
                       <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                         <span className="font-bold">{artist.name}</span>
@@ -389,7 +434,7 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
                   <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 bg-white rounded-lg">
                     <SelectValue placeholder="Selecione a maca" />
                   </SelectTrigger>
-                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg bg-white z-50">
+                  <SelectContent className="border-2 border-red-200 shadow-xl rounded-lg bg-white z-[60]">
                     <SelectItem value="none" className="hover:bg-red-50 focus:bg-red-100 p-3 rounded-md">
                       <span className="font-bold text-gray-600">Nenhuma maca específica</span>
                     </SelectItem>
@@ -422,6 +467,17 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
               </div>
             </div>
 
+            {/* Descrição do Serviço */}
+            <div className="space-y-3">
+              <Label htmlFor="service_description" className="text-sm font-bold text-red-700">Descrição do Serviço</Label>
+              <textarea
+                {...register('service_description')}
+                placeholder="Descreva a tatuagem, localização, tamanho, estilo, etc..."
+                className="w-full min-h-24 p-4 border-2 border-red-200 focus:border-red-500 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 resize-none bg-white"
+                rows={4}
+              />
+            </div>
+
             {/* Observações */}
             <div className="space-y-3">
               <Label htmlFor="notes" className="text-sm font-bold text-red-700">Observações</Label>
@@ -433,37 +489,71 @@ const AppointmentEditModal = ({ appointment, client, isOpen, onClose, onUpdate }
               />
             </div>
 
-            {/* Ações Adicionais */}
-            <div className="flex flex-wrap gap-3 p-6 bg-gradient-to-r from-red-50/80 via-white/90 to-red-50/80 rounded-xl border-2 border-red-100/50 shadow-lg">
-              <Button
-                type="button"
-                onClick={() => {
-                  toast({
-                    title: "Upload simulado",
-                    description: "Funcionalidade de upload de fotos em desenvolvimento.",
-                  });
-                }}
-                variant="outline"
-                className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 rounded-lg px-4 py-2 h-auto font-bold"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Adicionar Fotos
-              </Button>
-              
-              <Button
-                type="button"
-                onClick={() => {
-                  toast({
-                    title: "Impressão simulada",
-                    description: "Gerando ficha de anamnese para impressão...",
-                  });
-                }}
-                variant="outline"
-                className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 rounded-lg px-4 py-2 h-auto font-bold"
-              >
-                <Printer className="h-4 w-4 mr-2" />
-                Imprimir Ficha
-              </Button>
+            {/* Upload de Fotos */}
+            <div className="space-y-4 bg-gradient-to-r from-red-50/80 via-white/90 to-red-50/80 rounded-xl p-6 border-2 border-red-100/50 shadow-lg">
+              <Label className="text-sm font-bold text-red-700 flex items-center gap-2">
+                <Image className="h-4 w-4" />
+                Fotos de Referência da Tatuagem
+              </Label>
+              <div className="space-y-3">
+                <div className="border-2 border-dashed border-red-200 rounded-lg p-6 text-center bg-red-50/30 hover:bg-red-50/50 transition-all duration-300">
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleAddPhotos}
+                    className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 rounded-lg px-6 py-3 h-auto font-bold"
+                  >
+                    <Upload className="h-5 w-5 mr-2" />
+                    Adicionar Fotos
+                  </Button>
+                  <p className="text-xs text-gray-600 mt-3 font-medium">JPG, PNG até 10MB cada</p>
+                </div>
+                
+                {uploadedFiles.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Referência ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg border-2 border-red-200 shadow-md group-hover:shadow-lg transition-all duration-300"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-full shadow-lg"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                        <p className="text-xs text-gray-600 mt-1 truncate font-medium">{file.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Botões de Ação Adicionais */}
+              <div className="flex flex-wrap gap-3 pt-4 border-t border-red-200">
+                <Button
+                  type="button"
+                  onClick={handlePrintForm}
+                  variant="outline"
+                  className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 rounded-lg px-4 py-2 h-auto font-bold"
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  Imprimir Ficha
+                </Button>
+              </div>
             </div>
 
             {/* Botões de Ação */}
