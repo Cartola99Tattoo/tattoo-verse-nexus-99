@@ -35,7 +35,13 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
         updated_at: new Date().toISOString(),
       };
 
-      console.log('SupabaseAppointmentService: Creating appointment', newAppointment);
+      console.log('SupabaseAppointmentService: Creating appointment with financial data', newAppointment);
+      
+      // Log financial integration
+      if (appointmentData.price) {
+        console.log(`Financial Integration: Appointment created with value R$ ${appointmentData.price}`);
+      }
+      
       return newAppointment;
     } catch (error) {
       this.handleError(error, 'criar agendamento');
@@ -154,6 +160,11 @@ export class SupabaseAppointmentService extends BaseService implements IAppointm
     try {
       await this.simulateDelay(500);
       console.log('SupabaseAppointmentService: Updating appointment status', id, status);
+      
+      // Simulate financial integration for completed appointments
+      if (status === 'completed') {
+        console.log(`Financial Integration: Appointment ${id} marked as completed - check for revenue recording`);
+      }
       
       // Mock implementation
     } catch (error) {

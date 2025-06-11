@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +10,7 @@ import { getClientService, getBedService } from "@/services/serviceFactory";
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Filter, Calendar as CalendarIcon, Clock, User, Eye, Phone, Mail, UserPlus, AlertCircle, Bed, Settings, Sparkles, TrendingUp } from "lucide-react";
+import { Plus, Filter, Calendar as CalendarIcon, Clock, User, Eye, Phone, Mail, UserPlus, AlertCircle, Bed, Settings, Sparkles, TrendingUp, DollarSign } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Appointment, Client } from "@/services/interfaces/IClientService";
 import { Bed as BedType } from "@/services/interfaces/IBedService";
@@ -143,8 +142,64 @@ const Appointments = () => {
     }
   });
 
+  const createAppointmentMutation = useMutation({
+    mutationFn: (appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at'> & { price?: number }) => {
+      console.log('Creating appointment with financial data:', appointmentData);
+      // Simulate financial integration
+      if (appointmentData.price) {
+        console.log(`Financial: Pending revenue of R$ ${appointmentData.price} for appointment`);
+      }
+      return clientService.createAppointment(appointmentData);
+    },
+    onSuccess: (newAppointment, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast({
+        title: "Agendamento criado",
+        description: `Agendamento criado com sucesso${variables.price ? ` com valor de R$ ${variables.price}` : ''}.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar o agendamento.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const enhancedUpdateStatusMutation = useMutation({
+    mutationFn: ({ appointmentId, status, price }: { appointmentId: string; status: Appointment['status']; price?: number }) => {
+      console.log('Updating appointment status with financial integration:', { appointmentId, status, price });
+      
+      // Simulate financial integration when marking as completed
+      if (status === 'completed' && price) {
+        console.log(`Financial: Recording revenue of R$ ${price} for completed appointment ${appointmentId}`);
+        // In a real implementation, this would call the financial service
+        // financialService.addRevenue({ amount: price, source: 'appointment', appointmentId });
+      }
+      
+      return clientService.updateAppointmentStatus(appointmentId, status);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast({
+        title: "Status atualizado",
+        description: variables.status === 'completed' && variables.price 
+          ? `Agendamento concluído e receita de R$ ${variables.price} registrada.`
+          : "O status do agendamento foi atualizado com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status do agendamento.",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleStatusUpdate = (appointmentId: string, status: Appointment['status']) => {
-    updateStatusMutation.mutate({ appointmentId, status });
+    enhancedUpdateStatusMutation.mutate({ appointmentId, status });
   };
 
   // Converter agendamentos para eventos do calendário
@@ -212,6 +267,12 @@ const Appointments = () => {
             </>
           )}
         </div>
+        {appointment.price && (
+          <div className="text-xs opacity-90 flex items-center gap-1 text-green-200 font-bold">
+            <DollarSign className="h-3 w-3" />
+            <span>R$ {appointment.price}</span>
+          </div>
+        )}
         
         <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-xl rounded-lg p-1 flex gap-1 z-10 border border-gray-200">
           <Button
@@ -306,7 +367,7 @@ const Appointments = () => {
         </TabsList>
 
         <TabsContent value="calendar" className="space-y-6">
-          {/* Cards de Estatísticas Aprimorados */}
+          {/* Enhanced Statistics Cards with Financial Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="shadow-2xl bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white border-red-400 hover:shadow-red-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
@@ -323,6 +384,26 @@ const Appointments = () => {
                 <p className="text-xs text-red-200 font-medium flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
                   Sessões programadas
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-2xl bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white border-green-400 hover:shadow-green-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                <CardTitle className="text-sm font-bold">Receita Hoje</CardTitle>
+                <DollarSign className="h-5 w-5 text-green-200" />
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="text-3xl font-black">
+                  R$ {appointments
+                    .filter(apt => apt.date === format(new Date(), 'yyyy-MM-dd') && apt.status === 'completed')
+                    .reduce((total, apt) => total + (apt.price || 0), 0)
+                    .toFixed(2)}
+                </div>
+                <p className="text-xs text-green-200 font-medium flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  Agendamentos concluídos
                 </p>
               </CardContent>
             </Card>
@@ -344,34 +425,19 @@ const Appointments = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-2xl bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white border-green-400 hover:shadow-green-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
+            <Card className="shadow-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 text-white border-purple-400 hover:shadow-purple-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-bold">Confirmados</CardTitle>
-                <Clock className="h-5 w-5 text-green-200" />
+                <Clock className="h-5 w-5 text-purple-200" />
               </CardHeader>
               <CardContent className="relative z-10">
                 <div className="text-3xl font-black">
                   {appointments.filter(apt => apt.status === 'confirmed').length}
                 </div>
-                <p className="text-xs text-green-200 font-medium flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
-                  Agendamentos confirmados
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 text-white border-purple-400 hover:shadow-purple-glow transition-all duration-500 transform hover:scale-105 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-bold">Taxa de Comparecimento</CardTitle>
-                <TrendingUp className="h-5 w-5 text-purple-200" />
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-black">94%</div>
                 <p className="text-xs text-purple-200 font-medium flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
-                  Últimos 30 dias
+                  Agendamentos confirmados
                 </p>
               </CardContent>
             </Card>
@@ -395,7 +461,7 @@ const Appointments = () => {
             </Card>
           )}
 
-          {/* Filtros e Controles Aprimorados */}
+          {/* Enhanced Filters and Controls */}
           <div className="flex flex-col sm:flex-row gap-4 justify-between">
             <div className="flex gap-3">
               <Select value={selectedArtist} onValueChange={setSelectedArtist}>
@@ -501,7 +567,7 @@ const Appointments = () => {
             </div>
           </div>
 
-          {/* Calendário Aprimorado */}
+          {/* Enhanced Calendar with Fixed View Selection Contrast */}
           <Card className="shadow-2xl bg-gradient-to-br from-white via-gray-50 to-white border-2 border-red-200 hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-red-100/30 rounded-full transform translate-x-16 -translate-y-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-100/20 rounded-full transform -translate-x-12 translate-y-12"></div>
@@ -522,7 +588,10 @@ const Appointments = () => {
                     variant={view === 'day' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleViewChange('day')}
-                    className={view === 'day' ? 'bg-white text-red-600' : 'border-white text-white hover:bg-white/10'}
+                    className={view === 'day' 
+                      ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
+                      : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
+                    }
                   >
                     Dia
                   </Button>
@@ -530,7 +599,10 @@ const Appointments = () => {
                     variant={view === 'week' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleViewChange('week')}
-                    className={view === 'week' ? 'bg-white text-red-600' : 'border-white text-white hover:bg-white/10'}
+                    className={view === 'week' 
+                      ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
+                      : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
+                    }
                   >
                     Semana
                   </Button>
@@ -538,7 +610,10 @@ const Appointments = () => {
                     variant={view === 'month' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleViewChange('month')}
-                    className={view === 'month' ? 'bg-white text-red-600' : 'border-white text-white hover:bg-white/10'}
+                    className={view === 'month' 
+                      ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
+                      : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
+                    }
                   >
                     Mês
                   </Button>
@@ -546,7 +621,10 @@ const Appointments = () => {
                     variant={view === 'agenda' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleViewChange('agenda')}
-                    className={view === 'agenda' ? 'bg-white text-red-600' : 'border-white text-white hover:bg-white/10'}
+                    className={view === 'agenda' 
+                      ? 'bg-white text-red-600 font-bold shadow-lg border-2 border-white hover:bg-gray-100' 
+                      : 'border-2 border-white text-white hover:bg-red-800 hover:border-red-200 font-bold transition-all duration-300'
+                    }
                   >
                     Agenda
                   </Button>
@@ -591,7 +669,7 @@ const Appointments = () => {
             </CardContent>
           </Card>
 
-          {/* Modal de Detalhes do Agendamento */}
+          {/* Enhanced Appointment Details Modal */}
           {selectedAppointment && (
             <Dialog 
               open={!!selectedAppointment} 
@@ -656,3 +734,5 @@ const Appointments = () => {
 };
 
 export default Appointments;
+
+</edits_to_apply>

@@ -1,4 +1,3 @@
-
 import { CRUDOperations } from '../base/BaseService';
 
 export interface Client {
@@ -45,15 +44,14 @@ export interface Appointment {
   id: string;
   client_id: string;
   artist_id: string;
-  bed_id?: string;
   date: string;
   time: string;
   duration_minutes: number;
   service_type: 'tattoo' | 'piercing' | 'consultation';
-  service_description?: string;
-  estimated_price?: number;
   status: 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
   notes?: string;
+  bed_id?: string;
+  price?: number; // Added financial integration
   created_at: string;
   updated_at: string;
 }

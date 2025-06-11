@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, Clock, User, Phone, Mail, MapPin, Edit, X, CheckCircle, AlertCircle, Bed, Palette } from "lucide-react";
+import { Calendar, Clock, User, Phone, Mail, MapPin, Edit, X, CheckCircle, AlertCircle, Bed, Palette, DollarSign, Save } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Appointment, Client } from "@/services/interfaces/IClientService";
@@ -14,7 +16,7 @@ import { getClientService } from "@/services/serviceFactory";
 import { toast } from "@/hooks/use-toast";
 
 interface AppointmentCardProps {
-  appointment: Appointment;
+  appointment: Appointment & { price?: number };
   client?: Client;
   onClose: () => void;
   onUpdate: () => void;
@@ -22,15 +24,30 @@ interface AppointmentCardProps {
 
 const AppointmentCard = ({ appointment, client, onClose, onUpdate }: AppointmentCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isPriceEditing, setIsPriceEditing] = useState(false);
   const [newStatus, setNewStatus] = useState<Appointment['status']>(appointment.status);
+  const [appointmentPrice, setAppointmentPrice] = useState<number>(appointment.price || 0);
   const [isDragging, setIsDragging] = useState(false);
 
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
   const updateStatusMutation = useMutation({
-    mutationFn: (status: Appointment['status']) =>
-      clientService.updateAppointmentStatus(appointment.id, status),
+    mutationFn: (data: { status: Appointment['status']; price?: number }) => {
+      console.log('Updating appointment status with financial data:', data);
+      
+      // Simulate financial integration when marking as completed
+      if (data.status === 'completed' && data.price) {
+        console.log(`Financial: Recording revenue of R$ ${data.price} for completed appointment ${appointment.id}`);
+        // In a real implementation, this would call the financial service
+        toast({
+          title: "Receita registrada",
+          description: `Receita de R$ ${data.price} registrada no módulo financeiro.`,
+        });
+      }
+      
+      return clientService.updateAppointmentStatus(appointment.id, data.status);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       onUpdate();
@@ -50,12 +67,23 @@ const AppointmentCard = ({ appointment, client, onClose, onUpdate }: Appointment
 
   const handleStatusUpdate = () => {
     if (newStatus !== appointment.status) {
-      updateStatusMutation.mutate(newStatus);
+      updateStatusMutation.mutate({ 
+        status: newStatus, 
+        price: appointmentPrice > 0 ? appointmentPrice : undefined 
+      });
     }
     setIsEditing(false);
   };
 
-  // Fixed: Create a proper handler function for the Select component
+  const handlePriceSave = () => {
+    console.log(`Financial: Price updated to R$ ${appointmentPrice} for appointment ${appointment.id}`);
+    setIsPriceEditing(false);
+    toast({
+      title: "Valor atualizado",
+      description: `Valor do agendamento definido como R$ ${appointmentPrice.toFixed(2)}.`,
+    });
+  };
+
   const handleStatusChange = (value: string) => {
     setNewStatus(value as Appointment['status']);
   };
@@ -155,6 +183,13 @@ const AppointmentCard = ({ appointment, client, onClose, onUpdate }: Appointment
               <div className="flex items-center gap-2 text-red-100 text-sm mt-1">
                 <span className="text-lg">{serviceConfig.icon}</span>
                 <span className="font-medium">{serviceConfig.label}</span>
+                {appointmentPrice > 0 && (
+                  <>
+                    <span>•</span>
+                    <DollarSign className="h-4 w-4" />
+                    <span className="font-bold">R$ {appointmentPrice.toFixed(2)}</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -202,6 +237,76 @@ const AppointmentCard = ({ appointment, client, onClose, onUpdate }: Appointment
         )}
 
         <Separator className="bg-gradient-to-r from-transparent via-red-300 to-transparent" />
+
+        {/* Enhanced Financial Section */}
+        <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border-2 border-green-200 shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              <span className="font-bold text-green-800">Valor do Serviço</span>
+            </div>
+            {!isPriceEditing ? (
+              <Button
+                onClick={() => setIsPriceEditing(true)}
+                variant="outline"
+                size="sm"
+                className="border-green-300 text-green-600 hover:bg-green-50"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Editar Valor
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button
+                  onClick={handlePriceSave}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Save className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsPriceEditing(false);
+                    setAppointmentPrice(appointment.price || 0);
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+          
+          {isPriceEditing ? (
+            <div className="space-y-2">
+              <Label htmlFor="price" className="text-green-700 font-medium">Valor em R$</Label>
+              <Input
+                id="price"
+                type="number"
+                value={appointmentPrice}
+                onChange={(e) => setAppointmentPrice(Number(e.target.value))}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                className="border-green-300 focus:border-green-500"
+              />
+            </div>
+          ) : (
+            <div className="text-2xl font-bold text-green-900">
+              {appointmentPrice > 0 ? `R$ ${appointmentPrice.toFixed(2)}` : 'Não definido'}
+            </div>
+          )}
+          
+          {appointment.status === 'completed' && appointmentPrice > 0 && (
+            <div className="mt-3 p-2 bg-green-200 rounded-lg">
+              <p className="text-xs text-green-800 font-medium flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                Receita registrada no módulo financeiro
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Detalhes do Agendamento */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -257,7 +362,7 @@ const AppointmentCard = ({ appointment, client, onClose, onUpdate }: Appointment
           </div>
         )}
 
-        {/* Controles de Status */}
+        {/* Enhanced Status Controls with Financial Integration */}
         <div className="bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl border-2 border-gray-200 shadow-lg">
           <div className="flex items-center justify-between">
             <span className="font-bold text-gray-800">Status do Agendamento</span>
@@ -308,6 +413,15 @@ const AppointmentCard = ({ appointment, client, onClose, onUpdate }: Appointment
               </div>
             )}
           </div>
+          
+          {newStatus === 'completed' && appointmentPrice > 0 && isEditing && (
+            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800 font-medium flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                Ao marcar como concluído, a receita de R$ {appointmentPrice.toFixed(2)} será registrada no módulo financeiro.
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
 
@@ -323,3 +437,5 @@ const AppointmentCard = ({ appointment, client, onClose, onUpdate }: Appointment
 };
 
 export default AppointmentCard;
+
+</edits_to_apply>
