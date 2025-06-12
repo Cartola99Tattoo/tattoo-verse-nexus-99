@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -219,78 +220,96 @@ const Clients = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden">
+    <div className="p-4 lg:p-6 space-y-6 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden">
       {/* Elementos decorativos de fundo */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
+      <div className="absolute top-0 right-0 w-32 lg:w-64 h-32 lg:h-64 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-16 lg:translate-x-32 -translate-y-16 lg:-translate-y-32"></div>
+      <div className="absolute bottom-0 left-0 w-24 lg:w-48 h-24 lg:h-48 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-12 lg:-translate-x-24 translate-y-12 lg:translate-y-24"></div>
 
       <div className="relative z-10">
+        {/* Header com Botão Novo Cliente Reposicionado */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="tattoo" 
+                  size="default"
+                  className="shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Cliente
+                </Button>
+              </DialogTrigger>
+            </Dialog>
+            <h1 className="text-2xl lg:text-3xl font-black text-red-800">Gerenciar Clientes</h1>
+          </div>
+        </div>
+
         {/* Cards de Estatísticas CRM/Clientes Unificados */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 animate-fade-in">
-            {/* Cards de Estatísticas CRM/Clientes Unificados */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4 animate-fade-in mb-6">
             <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-red-800">Total</CardTitle>
-                <Users className="h-4 w-4 text-red-600" />
+                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Total</CardTitle>
+                <Users className="h-3 w-3 lg:h-4 lg:w-4 text-red-600" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-900">{stats.total_clients}</div>
+              <CardContent className="p-3 lg:p-6 pt-0">
+                <div className="text-lg lg:text-2xl font-bold text-red-900">{stats.total_clients}</div>
                 <p className="text-xs text-red-600">Clientes</p>
               </CardContent>
             </Card>
 
             <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-red-800">Novos Leads</CardTitle>
-                <Target className="h-4 w-4 text-red-600" />
+                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Novos Leads</CardTitle>
+                <Target className="h-3 w-3 lg:h-4 lg:w-4 text-red-600" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">{stats.new_clients_this_month || 0}</div>
+              <CardContent className="p-3 lg:p-6 pt-0">
+                <div className="text-lg lg:text-2xl font-bold text-red-600">{stats.new_clients_this_month || 0}</div>
                 <p className="text-xs text-gray-600">Este mês</p>
               </CardContent>
             </Card>
 
             <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-red-800">Conversão</CardTitle>
-                <TrendingUp className="h-4 w-4 text-green-600" />
+                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Conversão</CardTitle>
+                <TrendingUp className="h-3 w-3 lg:h-4 lg:w-4 text-green-600" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">{stats.conversion_rate || 0}%</div>
+              <CardContent className="p-3 lg:p-6 pt-0">
+                <div className="text-lg lg:text-2xl font-bold text-green-600">{stats.conversion_rate || 0}%</div>
                 <p className="text-xs text-gray-600">Taxa</p>
               </CardContent>
             </Card>
 
             <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-red-800">Quentes</CardTitle>
-                <div className="h-4 w-4 bg-gradient-to-r from-red-500 to-red-600 rounded-full" />
+                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Quentes</CardTitle>
+                <div className="h-3 w-3 lg:h-4 lg:w-4 bg-gradient-to-r from-red-500 to-red-600 rounded-full" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">{stats.hot_clients || 0}</div>
+              <CardContent className="p-3 lg:p-6 pt-0">
+                <div className="text-lg lg:text-2xl font-bold text-red-600">{stats.hot_clients || 0}</div>
                 <p className="text-xs text-gray-600">Alta prioridade</p>
               </CardContent>
             </Card>
 
             <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-red-800">Tempo Médio</CardTitle>
-                <Clock className="h-4 w-4 text-blue-600" />
+                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Tempo Médio</CardTitle>
+                <Clock className="h-3 w-3 lg:h-4 lg:w-4 text-blue-600" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">{stats.average_conversion_time || 0}d</div>
+              <CardContent className="p-3 lg:p-6 pt-0">
+                <div className="text-lg lg:text-2xl font-bold text-blue-600">{stats.average_conversion_time || 0}d</div>
                 <p className="text-xs text-gray-600">Conversão</p>
               </CardContent>
             </Card>
 
             <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-red-800">Ticket Médio</CardTitle>
-                <Users className="h-4 w-4 text-gray-600" />
+                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Ticket Médio</CardTitle>
+                <Users className="h-3 w-3 lg:h-4 lg:w-4 text-gray-600" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900">{formatCurrency(stats.average_order_value || 0)}</div>
+              <CardContent className="p-3 lg:p-6 pt-0">
+                <div className="text-lg lg:text-2xl font-bold text-gray-900">{formatCurrency(stats.average_order_value || 0)}</div>
                 <p className="text-xs text-gray-600">Por cliente</p>
               </CardContent>
             </Card>
@@ -299,13 +318,13 @@ const Clients = () => {
 
         {/* Ações em Massa */}
         {selectedClients.length > 0 && (
-          <Card variant="tattooRed">
+          <Card variant="tattooRed" className="mb-6">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                 <span className="text-sm font-medium text-red-800">
                   {selectedClients.length} cliente(s) selecionado(s)
                 </span>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Select onValueChange={(value) => handleBulkAction('status', value)}>
                     <SelectTrigger className="w-[140px] h-8">
                       <Move className="h-3 w-3 mr-1" />
@@ -346,9 +365,9 @@ const Clients = () => {
         )}
 
         {/* Filtros e Controles Expandidos com melhor styling */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between bg-white p-4 rounded-lg shadow-lg border border-red-200 animate-fade-in">
-          <div className="flex gap-2 flex-1">
-            <div className="relative flex-1 max-w-md">
+        <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-lg border border-red-200 animate-fade-in mb-6">
+          <div className="flex flex-col lg:flex-row gap-4 flex-1">
+            <div className="relative flex-1 max-w-full lg:max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Buscar por nome, email ou telefone..."
@@ -358,53 +377,55 @@ const Clients = () => {
               />
             </div>
             
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px] border-red-200 focus:border-red-600">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Status</SelectItem>
-                <SelectItem value="new">Novo Lead</SelectItem>
-                <SelectItem value="interested">Interessado</SelectItem>
-                <SelectItem value="pending">Agendamento Pendente</SelectItem>
-                <SelectItem value="completed">Tatuagem Concluída</SelectItem>
-                <SelectItem value="returning">Retorno Esperado</SelectItem>
-                <SelectItem value="vip">VIP</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-wrap gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full lg:w-[180px] border-red-200 focus:border-red-600">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Status</SelectItem>
+                  <SelectItem value="new">Novo Lead</SelectItem>
+                  <SelectItem value="interested">Interessado</SelectItem>
+                  <SelectItem value="pending">Agendamento Pendente</SelectItem>
+                  <SelectItem value="completed">Tatuagem Concluída</SelectItem>
+                  <SelectItem value="returning">Retorno Esperado</SelectItem>
+                  <SelectItem value="vip">VIP</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select value={temperatureFilter} onValueChange={setTemperatureFilter}>
-              <SelectTrigger className="w-[140px] border-red-200 focus:border-red-600">
-                <SelectValue placeholder="Temperatura" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="hot">🔥 Quente</SelectItem>
-                <SelectItem value="warm">🔶 Morno</SelectItem>
-                <SelectItem value="cold">❄️ Frio</SelectItem>
-              </SelectContent>
-            </Select>
+              <Select value={temperatureFilter} onValueChange={setTemperatureFilter}>
+                <SelectTrigger className="w-full lg:w-[140px] border-red-200 focus:border-red-600">
+                  <SelectValue placeholder="Temperatura" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="hot">🔥 Quente</SelectItem>
+                  <SelectItem value="warm">🔶 Morno</SelectItem>
+                  <SelectItem value="cold">❄️ Frio</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select value={originFilter} onValueChange={setOriginFilter}>
-              <SelectTrigger className="w-[160px] border-red-200 focus:border-red-600">
-                <SelectValue placeholder="Origem" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as Origens</SelectItem>
-                <SelectItem value="landing_events">Landing Eventos</SelectItem>
-                <SelectItem value="contact_form">Formulário Contato</SelectItem>
-                <SelectItem value="consultation">Consultoria</SelectItem>
-                <SelectItem value="shop">Loja</SelectItem>
-                <SelectItem value="referral">Indicação</SelectItem>
-                <SelectItem value="social_media">Redes Sociais</SelectItem>
-                <SelectItem value="manual">Manual</SelectItem>
-              </SelectContent>
-            </Select>
+              <Select value={originFilter} onValueChange={setOriginFilter}>
+                <SelectTrigger className="w-full lg:w-[160px] border-red-200 focus:border-red-600">
+                  <SelectValue placeholder="Origem" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as Origens</SelectItem>
+                  <SelectItem value="landing_events">Landing Eventos</SelectItem>
+                  <SelectItem value="contact_form">Formulário Contato</SelectItem>
+                  <SelectItem value="consultation">Consultoria</SelectItem>
+                  <SelectItem value="shop">Loja</SelectItem>
+                  <SelectItem value="referral">Indicação</SelectItem>
+                  <SelectItem value="social_media">Redes Sociais</SelectItem>
+                  <SelectItem value="manual">Manual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
-          <div className="flex gap-2">
-            <div className="flex border border-red-200 rounded-lg">
+          <div className="flex flex-col lg:flex-row gap-2 justify-between">
+            <div className="flex border border-red-200 rounded-lg w-fit">
               <Button
                 variant={viewMode === "kanban" ? "tattoo" : "ghost"}
                 size="sm"
@@ -433,43 +454,8 @@ const Clients = () => {
                     Configurar Estágios
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl">
-                  <DialogHeader>
-                    <DialogTitle>Configurações do Kanban</DialogTitle>
-                    <DialogDescription>
-                      Configure os estágios e suas propriedades no painel Kanban
-                    </DialogDescription>
-                  </DialogHeader>
-                  <KanbanSettings 
-                    onClose={() => setIsSettingsDialogOpen(false)}
-                  />
-                </DialogContent>
               </Dialog>
             )}
-
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="tattoo" size="default">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Lead/Cliente
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Cadastrar Novo Lead/Cliente</DialogTitle>
-                  <DialogDescription>
-                    Adicione um novo lead ou cliente ao sistema
-                  </DialogDescription>
-                </DialogHeader>
-                <CRMLeadForm 
-                  onSuccess={() => {
-                    setIsCreateDialogOpen(false);
-                    queryClient.invalidateQueries({ queryKey: ['clients'] });
-                    queryClient.invalidateQueries({ queryKey: ['client-stats'] });
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
           </div>
         </div>
 
@@ -492,107 +478,109 @@ const Clients = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-red-50">
-                      <TableHead className="w-[50px]">
-                        <Checkbox
-                          checked={selectedClients.length === clients.length && clients.length > 0}
-                          onCheckedChange={handleSelectAll}
-                        />
-                      </TableHead>
-                      <TableHead className="text-red-800 font-bold">Cliente</TableHead>
-                      <TableHead className="text-red-800 font-bold">Contato</TableHead>
-                      <TableHead className="text-red-800 font-bold">Status</TableHead>
-                      <TableHead className="text-red-800 font-bold">Fidelidade</TableHead>
-                      <TableHead className="text-red-800 font-bold">Origem</TableHead>
-                      <TableHead className="text-red-800 font-bold">Total Gasto</TableHead>
-                      <TableHead className="text-red-800 font-bold text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockClientsForLoyalty.map((client) => (
-                      <TableRow 
-                        key={client.id} 
-                        className="hover:bg-red-50 transition-colors duration-200 group"
-                      >
-                        <TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-red-50">
+                        <TableHead className="w-[50px]">
                           <Checkbox
-                            checked={selectedClients.includes(client.id)}
-                            onCheckedChange={(checked) => handleClientSelection(client.id, checked as boolean)}
+                            checked={selectedClients.length === clients.length && clients.length > 0}
+                            onCheckedChange={handleSelectAll}
                           />
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium text-red-900 group-hover:text-red-700">{client.name}</div>
-                            <div className="text-sm text-gray-500">{formatDate(client.created_at)}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-1 text-sm">
-                              <Mail className="h-3 w-3 text-red-500" />
-                              <span>{client.email}</span>
-                            </div>
-                            {client.phone && (
-                              <div className="flex items-center space-x-1 text-sm">
-                                <Phone className="h-3 w-3 text-red-500" />
-                                <span>{client.phone}</span>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            {getStatusBadge(client.status)}
-                            {getTemperatureBadge(client.temperature)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <Badge variant="tattoo" className="animate-pulse">
-                              <Crown className="h-3 w-3 mr-1" />
-                              {client.loyaltyLevel}
-                            </Badge>
-                            <div className="text-xs text-gray-600">{client.loyaltyPoints} pts</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {getOriginBadge(client.origin)}
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium text-green-600">{formatCurrency(client.total_spent)}</div>
-                            <div className="text-sm text-gray-500">{client.total_orders} pedidos</div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="tattooOutline"
-                            size="sm"
-                            onClick={() => handleViewClient(client.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:scale-105"
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Ver Ficha 360°
-                          </Button>
-                        </TableCell>
+                        </TableHead>
+                        <TableHead className="text-red-800 font-bold">Cliente</TableHead>
+                        <TableHead className="text-red-800 font-bold">Contato</TableHead>
+                        <TableHead className="text-red-800 font-bold">Status</TableHead>
+                        <TableHead className="text-red-800 font-bold">Fidelidade</TableHead>
+                        <TableHead className="text-red-800 font-bold">Origem</TableHead>
+                        <TableHead className="text-red-800 font-bold">Total Gasto</TableHead>
+                        <TableHead className="text-red-800 font-bold text-right">Ações</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {mockClientsForLoyalty.map((client) => (
+                        <TableRow 
+                          key={client.id} 
+                          className="hover:bg-red-50 transition-colors duration-200 group"
+                        >
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedClients.includes(client.id)}
+                              onCheckedChange={(checked) => handleClientSelection(client.id, checked as boolean)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium text-red-900 group-hover:text-red-700">{client.name}</div>
+                              <div className="text-sm text-gray-500">{formatDate(client.created_at)}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="flex items-center space-x-1 text-sm">
+                                <Mail className="h-3 w-3 text-red-500" />
+                                <span className="truncate">{client.email}</span>
+                              </div>
+                              {client.phone && (
+                                <div className="flex items-center space-x-1 text-sm">
+                                  <Phone className="h-3 w-3 text-red-500" />
+                                  <span>{client.phone}</span>
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {getStatusBadge(client.status)}
+                              {getTemperatureBadge(client.temperature)}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <Badge variant="tattoo" className="animate-pulse">
+                                <Crown className="h-3 w-3 mr-1" />
+                                {client.loyaltyLevel}
+                              </Badge>
+                              <div className="text-xs text-gray-600">{client.loyaltyPoints} pts</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {getOriginBadge(client.origin)}
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium text-green-600">{formatCurrency(client.total_spent)}</div>
+                              <div className="text-sm text-gray-500">{client.total_orders} pedidos</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="tattooOutline"
+                              size="sm"
+                              onClick={() => handleViewClient(client.id)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:scale-105"
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Ver Ficha 360°
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           )}
         </div>
       </div>
 
-      {/* Modal Criar Cliente/Lead */}
+      {/* Modal Criar Cliente/Lead - Responsivo */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-2xl bg-gradient-to-br from-white to-red-50 border-red-200">
-          <DialogHeader>
-            <DialogTitle className="text-red-800">Cadastrar Novo Lead/Cliente</DialogTitle>
-            <DialogDescription className="text-red-600">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-auto bg-gradient-to-br from-white to-red-50 border-red-200">
+          <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-lg -mx-6 -mt-6 mb-6">
+            <DialogTitle className="text-xl font-black">Cadastrar Novo Lead/Cliente</DialogTitle>
+            <DialogDescription className="text-red-100">
               Adicione um novo lead ou cliente ao sistema
             </DialogDescription>
           </DialogHeader>
@@ -608,7 +596,7 @@ const Clients = () => {
 
       {/* Modal Configurações Kanban */}
       <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
-        <DialogContent className="max-w-4xl bg-gradient-to-br from-white to-red-50 border-red-200">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-auto bg-gradient-to-br from-white to-red-50 border-red-200">
           <DialogHeader>
             <DialogTitle className="text-red-800">Configurações do Kanban</DialogTitle>
             <DialogDescription className="text-red-600">
