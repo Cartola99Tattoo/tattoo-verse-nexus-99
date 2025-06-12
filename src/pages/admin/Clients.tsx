@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +20,7 @@ import CRMLeadForm from "@/components/admin/CRMLeadForm";
 import ClientsKanban from "@/components/admin/ClientsKanban";
 import KanbanSettings from "@/components/admin/KanbanSettings";
 import CRMClientDetail from "@/components/admin/CRMClientDetail";
+import AppointmentForm from "@/components/admin/AppointmentForm";
 import { Client } from "@/services/interfaces/IClientService";
 
 const Clients = () => {
@@ -33,7 +33,9 @@ const Clients = () => {
   const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-  
+  const [showAppointmentForm, setShowAppointmentForm] = useState(false);
+  const [appointmentClientData, setAppointmentClientData] = useState<{ id: string; name: string } | null>(null);
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const clientService = getClientService();
@@ -190,323 +192,330 @@ const Clients = () => {
     );
   };
 
+  // Mock clients data for loyalty integration demonstration
+  const mockClientsForLoyalty = clients.map(client => ({
+    ...client,
+    loyaltyPoints: Math.floor(Math.random() * 2000),
+    loyaltyLevel: ['Bronze', 'Prata', 'Ouro', 'Platina'][Math.floor(Math.random() * 4)],
+  }));
+
+  const handleOpenAppointmentForm = (clientId: string, clientName: string) => {
+    setAppointmentClientData({ id: clientId, name: clientName });
+    setSelectedClientId(null); // Close client detail modal
+    setShowAppointmentForm(true);
+  };
+
+  const handleCloseAppointmentForm = () => {
+    setShowAppointmentForm(false);
+    setAppointmentClientData(null);
+  };
+
+  const handleAppointmentSuccess = () => {
+    handleCloseAppointmentForm();
+    toast({
+      title: "✨ Agendamento criado!",
+      description: "O agendamento foi criado com sucesso a partir da ficha do cliente.",
+    });
+  };
+
   return (
-    <div className="p-6 space-y-6">
-      {/* Cards de Estatísticas CRM/Clientes Unificados */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-          <Card variant="tattoo">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total</CardTitle>
-              <Users className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{stats.total_clients}</div>
-              <p className="text-xs text-gray-600">Clientes</p>
-            </CardContent>
-          </Card>
+    <div className="p-6 space-y-6 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden">
+      {/* Elementos decorativos de fundo */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
 
-          <Card variant="tattoo">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Novos Leads</CardTitle>
-              <Target className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.new_clients_this_month || 0}</div>
-              <p className="text-xs text-gray-600">Este mês</p>
-            </CardContent>
-          </Card>
+      <div className="relative z-10">
+        {/* Cards de Estatísticas CRM/Clientes Unificados */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 animate-fade-in">
+            {/* Cards de Estatísticas CRM/Clientes Unificados */}
+            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-red-800">Total</CardTitle>
+                <Users className="h-4 w-4 text-red-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-900">{stats.total_clients}</div>
+                <p className="text-xs text-red-600">Clientes</p>
+              </CardContent>
+            </Card>
 
-          <Card variant="tattoo">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Conversão</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.conversion_rate || 0}%</div>
-              <p className="text-xs text-gray-600">Taxa</p>
-            </CardContent>
-          </Card>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-red-800">Novos Leads</CardTitle>
+                <Target className="h-4 w-4 text-red-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">{stats.new_clients_this_month || 0}</div>
+                <p className="text-xs text-gray-600">Este mês</p>
+              </CardContent>
+            </Card>
 
-          <Card variant="tattoo">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Quentes</CardTitle>
-              <div className="h-4 w-4 bg-gradient-to-r from-red-500 to-red-600 rounded-full" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.hot_clients || 0}</div>
-              <p className="text-xs text-gray-600">Alta prioridade</p>
-            </CardContent>
-          </Card>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-red-800">Conversão</CardTitle>
+                <TrendingUp className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{stats.conversion_rate || 0}%</div>
+                <p className="text-xs text-gray-600">Taxa</p>
+              </CardContent>
+            </Card>
 
-          <Card variant="tattoo">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tempo Médio</CardTitle>
-              <Clock className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{stats.average_conversion_time || 0}d</div>
-              <p className="text-xs text-gray-600">Conversão</p>
-            </CardContent>
-          </Card>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-red-800">Quentes</CardTitle>
+                <div className="h-4 w-4 bg-gradient-to-r from-red-500 to-red-600 rounded-full" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">{stats.hot_clients || 0}</div>
+                <p className="text-xs text-gray-600">Alta prioridade</p>
+              </CardContent>
+            </Card>
 
-          <Card variant="tattoo">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
-              <Users className="h-4 w-4 text-gray-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{formatCurrency(stats.average_order_value || 0)}</div>
-              <p className="text-xs text-gray-600">Por cliente</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-red-800">Tempo Médio</CardTitle>
+                <Clock className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{stats.average_conversion_time || 0}d</div>
+                <p className="text-xs text-gray-600">Conversão</p>
+              </CardContent>
+            </Card>
 
-      {/* Ações em Massa */}
-      {selectedClients.length > 0 && (
-        <Card variant="tattooRed">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-red-800">
-                {selectedClients.length} cliente(s) selecionado(s)
-              </span>
-              <div className="flex gap-2">
-                <Select onValueChange={(value) => handleBulkAction('status', value)}>
-                  <SelectTrigger className="w-[140px] h-8">
-                    <Move className="h-3 w-3 mr-1" />
-                    <SelectValue placeholder="Mover para" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="interested">Interessado</SelectItem>
-                    <SelectItem value="pending">Pendente</SelectItem>
-                    <SelectItem value="completed">Concluído</SelectItem>
-                    <SelectItem value="returning">Retorno</SelectItem>
-                    <SelectItem value="vip">VIP</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Select onValueChange={(value) => handleBulkAction('temperature', value)}>
-                  <SelectTrigger className="w-[140px] h-8">
-                    <Tag className="h-3 w-3 mr-1" />
-                    <SelectValue placeholder="Temperatura" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hot">🔥 Quente</SelectItem>
-                    <SelectItem value="warm">🔶 Morno</SelectItem>
-                    <SelectItem value="cold">❄️ Frio</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setSelectedClients([])}
-                >
-                  Limpar
-                </Button>
+            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-red-800">Ticket Médio</CardTitle>
+                <Users className="h-4 w-4 text-gray-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-900">{formatCurrency(stats.average_order_value || 0)}</div>
+                <p className="text-xs text-gray-600">Por cliente</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Ações em Massa */}
+        {selectedClients.length > 0 && (
+          <Card variant="tattooRed">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-red-800">
+                  {selectedClients.length} cliente(s) selecionado(s)
+                </span>
+                <div className="flex gap-2">
+                  <Select onValueChange={(value) => handleBulkAction('status', value)}>
+                    <SelectTrigger className="w-[140px] h-8">
+                      <Move className="h-3 w-3 mr-1" />
+                      <SelectValue placeholder="Mover para" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="interested">Interessado</SelectItem>
+                      <SelectItem value="pending">Pendente</SelectItem>
+                      <SelectItem value="completed">Concluído</SelectItem>
+                      <SelectItem value="returning">Retorno</SelectItem>
+                      <SelectItem value="vip">VIP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select onValueChange={(value) => handleBulkAction('temperature', value)}>
+                    <SelectTrigger className="w-[140px] h-8">
+                      <Tag className="h-3 w-3 mr-1" />
+                      <SelectValue placeholder="Temperatura" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hot">🔥 Quente</SelectItem>
+                      <SelectItem value="warm">🔶 Morno</SelectItem>
+                      <SelectItem value="cold">❄️ Frio</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setSelectedClients([])}
+                  >
+                    Limpar
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Filtros e Controles Expandidos */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="flex gap-2 flex-1">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Buscar por nome, email ou telefone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-red-200 focus:border-red-600"
-            />
+        {/* Filtros e Controles Expandidos com melhor styling */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-between bg-white p-4 rounded-lg shadow-lg border border-red-200 animate-fade-in">
+          <div className="flex gap-2 flex-1">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Buscar por nome, email ou telefone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-red-200 focus:border-red-600"
+              />
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px] border-red-200 focus:border-red-600">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Status</SelectItem>
+                <SelectItem value="new">Novo Lead</SelectItem>
+                <SelectItem value="interested">Interessado</SelectItem>
+                <SelectItem value="pending">Agendamento Pendente</SelectItem>
+                <SelectItem value="completed">Tatuagem Concluída</SelectItem>
+                <SelectItem value="returning">Retorno Esperado</SelectItem>
+                <SelectItem value="vip">VIP</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={temperatureFilter} onValueChange={setTemperatureFilter}>
+              <SelectTrigger className="w-[140px] border-red-200 focus:border-red-600">
+                <SelectValue placeholder="Temperatura" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="hot">🔥 Quente</SelectItem>
+                <SelectItem value="warm">🔶 Morno</SelectItem>
+                <SelectItem value="cold">❄️ Frio</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={originFilter} onValueChange={setOriginFilter}>
+              <SelectTrigger className="w-[160px] border-red-200 focus:border-red-600">
+                <SelectValue placeholder="Origem" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as Origens</SelectItem>
+                <SelectItem value="landing_events">Landing Eventos</SelectItem>
+                <SelectItem value="contact_form">Formulário Contato</SelectItem>
+                <SelectItem value="consultation">Consultoria</SelectItem>
+                <SelectItem value="shop">Loja</SelectItem>
+                <SelectItem value="referral">Indicação</SelectItem>
+                <SelectItem value="social_media">Redes Sociais</SelectItem>
+                <SelectItem value="manual">Manual</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px] border-red-200 focus:border-red-600">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="new">Novo Lead</SelectItem>
-              <SelectItem value="interested">Interessado</SelectItem>
-              <SelectItem value="pending">Agendamento Pendente</SelectItem>
-              <SelectItem value="completed">Tatuagem Concluída</SelectItem>
-              <SelectItem value="returning">Retorno Esperado</SelectItem>
-              <SelectItem value="vip">VIP</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <div className="flex border border-red-200 rounded-lg">
+              <Button
+                variant={viewMode === "kanban" ? "tattoo" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("kanban")}
+                className="rounded-r-none"
+              >
+                <LayoutGrid className="h-4 w-4 mr-1" />
+                Kanban
+              </Button>
+              <Button
+                variant={viewMode === "table" ? "tattoo" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+                className="rounded-l-none"
+              >
+                <List className="h-4 w-4 mr-1" />
+                Tabela
+              </Button>
+            </div>
 
-          <Select value={temperatureFilter} onValueChange={setTemperatureFilter}>
-            <SelectTrigger className="w-[140px] border-red-200 focus:border-red-600">
-              <SelectValue placeholder="Temperatura" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas</SelectItem>
-              <SelectItem value="hot">🔥 Quente</SelectItem>
-              <SelectItem value="warm">🔶 Morno</SelectItem>
-              <SelectItem value="cold">❄️ Frio</SelectItem>
-            </SelectContent>
-          </Select>
+            {viewMode === "kanban" && (
+              <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="tattooOutline" size="sm">
+                    <Settings className="h-4 w-4 mr-1" />
+                    Configurar Estágios
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle>Configurações do Kanban</DialogTitle>
+                    <DialogDescription>
+                      Configure os estágios e suas propriedades no painel Kanban
+                    </DialogDescription>
+                  </DialogHeader>
+                  <KanbanSettings 
+                    onClose={() => setIsSettingsDialogOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
 
-          <Select value={originFilter} onValueChange={setOriginFilter}>
-            <SelectTrigger className="w-[160px] border-red-200 focus:border-red-600">
-              <SelectValue placeholder="Origem" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as Origens</SelectItem>
-              <SelectItem value="landing_events">Landing Eventos</SelectItem>
-              <SelectItem value="contact_form">Formulário Contato</SelectItem>
-              <SelectItem value="consultation">Consultoria</SelectItem>
-              <SelectItem value="shop">Loja</SelectItem>
-              <SelectItem value="referral">Indicação</SelectItem>
-              <SelectItem value="social_media">Redes Sociais</SelectItem>
-              <SelectItem value="manual">Manual</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="flex gap-2">
-          <div className="flex border border-red-200 rounded-lg">
-            <Button
-              variant={viewMode === "kanban" ? "tattoo" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("kanban")}
-              className="rounded-r-none"
-            >
-              <LayoutGrid className="h-4 w-4 mr-1" />
-              Kanban
-            </Button>
-            <Button
-              variant={viewMode === "table" ? "tattoo" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("table")}
-              className="rounded-l-none"
-            >
-              <List className="h-4 w-4 mr-1" />
-              Tabela
-            </Button>
-          </div>
-
-          {viewMode === "kanban" && (
-            <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="tattooOutline" size="sm">
-                  <Settings className="h-4 w-4 mr-1" />
-                  Configurar Estágios
+                <Button variant="tattoo" size="default">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Lead/Cliente
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl">
+              <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                  <DialogTitle>Configurações do Kanban</DialogTitle>
+                  <DialogTitle>Cadastrar Novo Lead/Cliente</DialogTitle>
                   <DialogDescription>
-                    Configure os estágios e suas propriedades no painel Kanban
+                    Adicione um novo lead ou cliente ao sistema
                   </DialogDescription>
                 </DialogHeader>
-                <KanbanSettings 
-                  onClose={() => setIsSettingsDialogOpen(false)}
+                <CRMLeadForm 
+                  onSuccess={() => {
+                    setIsCreateDialogOpen(false);
+                    queryClient.invalidateQueries({ queryKey: ['clients'] });
+                    queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+                  }}
                 />
               </DialogContent>
             </Dialog>
-          )}
-
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="tattoo" size="default">
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Lead/Cliente
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Cadastrar Novo Lead/Cliente</DialogTitle>
-                <DialogDescription>
-                  Adicione um novo lead ou cliente ao sistema
-                </DialogDescription>
-              </DialogHeader>
-              <CRMLeadForm 
-                onSuccess={() => {
-                  setIsCreateDialogOpen(false);
-                  queryClient.invalidateQueries({ queryKey: ['clients'] });
-                  queryClient.invalidateQueries({ queryKey: ['client-stats'] });
-                }}
-              />
-            </DialogContent>
-          </Dialog>
+          </div>
         </div>
-      </div>
 
-      {/* Conteúdo Principal */}
-      {viewMode === "kanban" ? (
-        <div className="bg-white rounded-lg shadow-lg">
-          {clientsLoading ? (
-            <div className="text-center py-8">Carregando clientes...</div>
-          ) : (
+        {/* Conteúdo Principal */}
+        <div className="animate-fade-in">
+          {viewMode === "kanban" ? (
             <ClientsKanban 
-              clients={clients} 
-              onViewClient={handleViewClient}
+              clients={mockClientsForLoyalty}
+              onClientSelect={handleViewClient}
+              searchTerm={searchTerm}
+              statusFilter={statusFilter}
+              temperatureFilter={temperatureFilter}
             />
-          )}
-        </div>
-      ) : (
-        <Card variant="tattoo">
-          <CardHeader variant="gradient">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-gray-800">Gestão Centralizada de Clientes</CardTitle>
-                <CardDescription>
-                  Visualize e gerencie todos os leads e clientes do estúdio
+          ) : (
+            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-red-100 to-red-200 rounded-t-lg">
+                <CardTitle className="text-red-800">Lista de Clientes</CardTitle>
+                <CardDescription className="text-red-600">
+                  Gerencie todos os clientes e leads do sistema
                 </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  checked={selectedClients.length === clients.length && clients.length > 0}
-                  onCheckedChange={handleSelectAll}
-                />
-                <span className="text-sm text-gray-600">Selecionar todos</span>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={selectedClients.length === clients.length && clients.length > 0}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </TableHead>
-                    <TableHead>Cliente/Lead</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Temperatura</TableHead>
-                    <TableHead>Origem</TableHead>
-                    <TableHead>Total Gasto</TableHead>
-                    <TableHead>Interesse</TableHead>
-                    <TableHead>Último Contato</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {clientsLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={9} className="text-center">
-                        Carregando clientes...
-                      </TableCell>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-red-50">
+                      <TableHead className="w-[50px]">
+                        <Checkbox
+                          checked={selectedClients.length === clients.length && clients.length > 0}
+                          onCheckedChange={handleSelectAll}
+                        />
+                      </TableHead>
+                      <TableHead className="text-red-800 font-bold">Cliente</TableHead>
+                      <TableHead className="text-red-800 font-bold">Contato</TableHead>
+                      <TableHead className="text-red-800 font-bold">Status</TableHead>
+                      <TableHead className="text-red-800 font-bold">Fidelidade</TableHead>
+                      <TableHead className="text-red-800 font-bold">Origem</TableHead>
+                      <TableHead className="text-red-800 font-bold">Total Gasto</TableHead>
+                      <TableHead className="text-red-800 font-bold text-right">Ações</TableHead>
                     </TableRow>
-                  ) : clients.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={9} className="text-center">
-                        Nenhum cliente encontrado
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    clients.map((client) => (
-                      <TableRow key={client.id} className="hover:bg-red-50">
+                  </TableHeader>
+                  <TableBody>
+                    {mockClientsForLoyalty.map((client) => (
+                      <TableRow 
+                        key={client.id} 
+                        className="hover:bg-red-50 transition-colors duration-200 group"
+                      >
                         <TableCell>
                           <Checkbox
                             checked={selectedClients.includes(client.id)}
@@ -515,80 +524,119 @@ const Clients = () => {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{client.name}</div>
-                            <div className="text-sm text-gray-500">{client.email}</div>
+                            <div className="font-medium text-red-900 group-hover:text-red-700">{client.name}</div>
+                            <div className="text-sm text-gray-500">{formatDate(client.created_at)}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div className="flex items-center space-x-1 text-sm">
+                              <Mail className="h-3 w-3 text-red-500" />
+                              <span>{client.email}</span>
+                            </div>
                             {client.phone && (
-                              <div className="text-sm text-gray-500">{client.phone}</div>
+                              <div className="flex items-center space-x-1 text-sm">
+                                <Phone className="h-3 w-3 text-red-500" />
+                                <span>{client.phone}</span>
+                              </div>
                             )}
                           </div>
                         </TableCell>
                         <TableCell>
-                          {getStatusBadge(client.status)}
-                        </TableCell>
-                        <TableCell>
-                          {getTemperatureBadge(client.temperature)}
-                        </TableCell>
-                        <TableCell>
-                          {getOriginBadge('landing_events')}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {formatCurrency(client.total_spent)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            {client.preferred_style || 'Eventos customizados'}
+                          <div className="space-y-1">
+                            {getStatusBadge(client.status)}
+                            {getTemperatureBadge(client.temperature)}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm">
-                            {formatDate(client.updated_at)}
+                          <div className="space-y-1">
+                            <Badge variant="tattoo" className="animate-pulse">
+                              <Crown className="h-3 w-3 mr-1" />
+                              {client.loyaltyLevel}
+                            </Badge>
+                            <div className="text-xs text-gray-600">{client.loyaltyPoints} pts</div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-1">
-                            <Button 
-                              variant="tattooOutline" 
-                              size="sm"
-                              onClick={() => handleViewClient(client.id)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              Ver
-                            </Button>
-                            {client.phone && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => window.open(`https://wa.me/${client.phone?.replace(/\D/g, '')}`)}
-                              >
-                                <MessageSquare className="h-4 w-4" />
-                              </Button>
-                            )}
-                            {client.email && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => window.open(`mailto:${client.email}`)}
-                              >
-                                <Mail className="h-4 w-4" />
-                              </Button>
-                            )}
+                          {getOriginBadge(client.origin)}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-green-600">{formatCurrency(client.total_spent)}</div>
+                            <div className="text-sm text-gray-500">{client.total_orders} pedidos</div>
                           </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="tattooOutline"
+                            size="sm"
+                            onClick={() => handleViewClient(client.id)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:scale-105"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver Ficha 360°
+                          </Button>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
 
-      {/* Modal de Detalhes do Cliente 360° */}
+      {/* Modal Criar Cliente/Lead */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-2xl bg-gradient-to-br from-white to-red-50 border-red-200">
+          <DialogHeader>
+            <DialogTitle className="text-red-800">Cadastrar Novo Lead/Cliente</DialogTitle>
+            <DialogDescription className="text-red-600">
+              Adicione um novo lead ou cliente ao sistema
+            </DialogDescription>
+          </DialogHeader>
+          <CRMLeadForm 
+            onSuccess={() => {
+              setIsCreateDialogOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['clients'] });
+              queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Configurações Kanban */}
+      <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
+        <DialogContent className="max-w-4xl bg-gradient-to-br from-white to-red-50 border-red-200">
+          <DialogHeader>
+            <DialogTitle className="text-red-800">Configurações do Kanban</DialogTitle>
+            <DialogDescription className="text-red-600">
+              Configure os estágios e suas propriedades no painel Kanban
+            </DialogDescription>
+          </DialogHeader>
+          <KanbanSettings 
+            onClose={() => setIsSettingsDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Ficha 360° do Cliente */}
       {selectedClientId && (
         <CRMClientDetail 
           clientId={selectedClientId}
           onClose={() => setSelectedClientId(null)}
+          onOpenAppointmentForm={handleOpenAppointmentForm}
+        />
+      )}
+
+      {/* Modal Criar Agendamento (do cliente) */}
+      {showAppointmentForm && appointmentClientData && (
+        <AppointmentForm
+          prefilledClientData={appointmentClientData}
+          clients={clients}
+          onSuccess={handleAppointmentSuccess}
+          onClose={handleCloseAppointmentForm}
         />
       )}
     </div>
