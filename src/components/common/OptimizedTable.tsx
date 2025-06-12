@@ -25,7 +25,7 @@ interface OptimizedTableProps<T> {
 /**
  * Tabela otimizada com memoização e identidade visual 99Tattoo
  */
-export const OptimizedTable = memo(<T,>({ 
+function OptimizedTableComponent<T>({ 
   data, 
   columns, 
   onRowSelect,
@@ -34,7 +34,7 @@ export const OptimizedTable = memo(<T,>({
   onItemSelect,
   getItemId,
   loading = false
-}: OptimizedTableProps<T>) => {
+}: OptimizedTableProps<T>) {
   const allSelected = useMemo(() => 
     selectedItems.length === data.length && data.length > 0, 
     [selectedItems.length, data.length]
@@ -112,7 +112,10 @@ export const OptimizedTable = memo(<T,>({
       </Table>
     </div>
   );
-}) as <T>(props: OptimizedTableProps<T>) => JSX.Element;
+}
+
+// Create the memoized version with proper typing
+export const OptimizedTable = memo(OptimizedTableComponent) as typeof OptimizedTableComponent;
 
 OptimizedTable.displayName = 'OptimizedTable';
 
