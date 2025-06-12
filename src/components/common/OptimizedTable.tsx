@@ -114,9 +114,13 @@ function OptimizedTableComponent<T>({
   );
 }
 
-// Create the memoized version with proper typing
-export const OptimizedTable = memo(OptimizedTableComponent) as typeof OptimizedTableComponent;
+// Create the memoized version with proper typing and displayName
+const MemoizedTable = memo(OptimizedTableComponent) as typeof OptimizedTableComponent & {
+  displayName?: string;
+};
 
-OptimizedTable.displayName = 'OptimizedTable';
+MemoizedTable.displayName = 'OptimizedTable';
+
+export const OptimizedTable = MemoizedTable;
 
 export default OptimizedTable;
