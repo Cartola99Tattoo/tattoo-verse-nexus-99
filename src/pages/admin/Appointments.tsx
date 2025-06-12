@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -38,10 +37,13 @@ const mockAppointments: Appointment[] = [
     date: '2024-12-12',
     time: '09:00',
     duration_minutes: 120,
+    service_type: 'tattoo',
     status: 'confirmed',
     service_description: 'Tatuagem dragão no braço',
     notes: 'Cliente regular',
     estimated_price: 300,
+    created_at: '2024-12-10T10:00:00Z',
+    updated_at: '2024-12-10T10:00:00Z',
   },
   {
     id: '2',
@@ -51,10 +53,13 @@ const mockAppointments: Appointment[] = [
     date: '2024-12-12',
     time: '10:30',
     duration_minutes: 90,
+    service_type: 'tattoo',
     status: 'scheduled',
     service_description: 'Rosa no ombro',
     notes: 'Primeira sessão',
     estimated_price: 200,
+    created_at: '2024-12-09T15:30:00Z',
+    updated_at: '2024-12-09T15:30:00Z',
   },
   {
     id: '3',
@@ -64,10 +69,13 @@ const mockAppointments: Appointment[] = [
     date: '2024-12-12',
     time: '14:00',
     duration_minutes: 180,
+    service_type: 'tattoo',
     status: 'confirmed',
     service_description: 'Mandala nas costas',
     notes: 'Sessão longa',
     estimated_price: 500,
+    created_at: '2024-12-08T12:00:00Z',
+    updated_at: '2024-12-08T12:00:00Z',
   },
   {
     id: '4',
@@ -77,10 +85,13 @@ const mockAppointments: Appointment[] = [
     date: '2024-12-13',
     time: '11:00',
     duration_minutes: 60,
+    service_type: 'tattoo',
     status: 'scheduled',
     service_description: 'Retoque em tatuagem',
     notes: 'Cliente antigo',
     estimated_price: 100,
+    created_at: '2024-12-11T09:00:00Z',
+    updated_at: '2024-12-11T09:00:00Z',
   },
   {
     id: '5',
@@ -90,10 +101,13 @@ const mockAppointments: Appointment[] = [
     date: '2024-12-13',
     time: '15:30',
     duration_minutes: 150,
+    service_type: 'tattoo',
     status: 'confirmed',
     service_description: 'Tatuagem tribal',
     notes: 'Design personalizado',
     estimated_price: 400,
+    created_at: '2024-12-07T14:20:00Z',
+    updated_at: '2024-12-07T14:20:00Z',
   },
   {
     id: '6',
@@ -103,10 +117,13 @@ const mockAppointments: Appointment[] = [
     date: '2024-12-14',
     time: '09:30',
     duration_minutes: 240,
+    service_type: 'tattoo',
     status: 'confirmed',
     service_description: 'Sleeve completa',
     notes: 'Sessão 2 de 4',
     estimated_price: 800,
+    created_at: '2024-12-06T16:45:00Z',
+    updated_at: '2024-12-06T16:45:00Z',
   },
   {
     id: '7',
@@ -116,20 +133,83 @@ const mockAppointments: Appointment[] = [
     date: '2024-12-14',
     time: '16:00',
     duration_minutes: 90,
+    service_type: 'tattoo',
     status: 'scheduled',
     service_description: 'Borboleta colorida',
     notes: 'Primeira tatuagem',
     estimated_price: 250,
+    created_at: '2024-12-10T11:30:00Z',
+    updated_at: '2024-12-10T11:30:00Z',
   },
 ];
 
 const mockClients: Client[] = [
-  { id: '1', name: 'Ana Silva', email: 'ana@email.com', phone: '(11) 99999-1111' },
-  { id: '2', name: 'Bruno Costa', email: 'bruno@email.com', phone: '(11) 99999-2222' },
-  { id: '3', name: 'Carla Santos', email: 'carla@email.com', phone: '(11) 99999-3333' },
-  { id: '4', name: 'Diego Ferreira', email: 'diego@email.com', phone: '(11) 99999-4444' },
-  { id: '5', name: 'Elena Rodrigues', email: 'elena@email.com', phone: '(11) 99999-5555' },
-  { id: '6', name: 'Felipe Oliveira', email: 'felipe@email.com', phone: '(11) 99999-6666' },
+  { 
+    id: '1', 
+    name: 'Ana Silva', 
+    email: 'ana@email.com', 
+    phone: '(11) 99999-1111',
+    status: 'active',
+    created_at: '2024-01-15T10:00:00Z',
+    updated_at: '2024-12-10T10:00:00Z',
+    total_spent: 1100,
+    total_orders: 3
+  },
+  { 
+    id: '2', 
+    name: 'Bruno Costa', 
+    email: 'bruno@email.com', 
+    phone: '(11) 99999-2222',
+    status: 'active',
+    created_at: '2024-02-20T14:30:00Z',
+    updated_at: '2024-12-09T15:30:00Z',
+    total_spent: 200,
+    total_orders: 1
+  },
+  { 
+    id: '3', 
+    name: 'Carla Santos', 
+    email: 'carla@email.com', 
+    phone: '(11) 99999-3333',
+    status: 'vip',
+    created_at: '2023-11-05T09:15:00Z',
+    updated_at: '2024-12-08T12:00:00Z',
+    total_spent: 2500,
+    total_orders: 5
+  },
+  { 
+    id: '4', 
+    name: 'Diego Ferreira', 
+    email: 'diego@email.com', 
+    phone: '(11) 99999-4444',
+    status: 'returning',
+    created_at: '2023-08-12T16:20:00Z',
+    updated_at: '2024-12-11T09:00:00Z',
+    total_spent: 800,
+    total_orders: 4
+  },
+  { 
+    id: '5', 
+    name: 'Elena Rodrigues', 
+    email: 'elena@email.com', 
+    phone: '(11) 99999-5555',
+    status: 'active',
+    created_at: '2024-03-08T11:45:00Z',
+    updated_at: '2024-12-07T14:20:00Z',
+    total_spent: 400,
+    total_orders: 1
+  },
+  { 
+    id: '6', 
+    name: 'Felipe Oliveira', 
+    email: 'felipe@email.com', 
+    phone: '(11) 99999-6666',
+    status: 'new',
+    created_at: '2024-12-10T11:30:00Z',
+    updated_at: '2024-12-10T11:30:00Z',
+    total_spent: 0,
+    total_orders: 0
+  },
 ];
 
 const Appointments = () => {
