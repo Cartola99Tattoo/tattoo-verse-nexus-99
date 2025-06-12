@@ -1,13 +1,10 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getClientService } from "@/services/serviceFactory";
@@ -24,7 +21,15 @@ import CRMClientDetail from "@/components/admin/CRMClientDetail";
 import AppointmentForm from "@/components/admin/AppointmentForm";
 import { Client } from "@/services/interfaces/IClientService";
 
-const Clients = () => {
+// Componentes otimizados
+import OptimizedCard from "@/components/common/OptimizedCard";
+import OptimizedButton from "@/components/common/OptimizedButton";
+import OptimizedTable from "@/components/common/OptimizedTable";
+import LazyModal from "@/components/common/LazyModal";
+import useOptimizedClientQuery from "@/hooks/useOptimizedClientQuery";
+import usePerformanceOptimization from "@/hooks/usePerformanceOptimization";
+
+const Clients = React.memo(() => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [temperatureFilter, setTemperatureFilter] = useState<string>("all");
@@ -40,85 +45,97 @@ const Clients = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const clientService = getClientService();
+  const { debounce, safeAsync } = usePerformanceOptimization();
 
-  // Buscar estatísticas unificadas
+  // Query otimizada para estatísticas
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['client-stats'],
     queryFn: () => clientService.fetchClientStats(),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Buscar clientes com filtros expandidos
-  const { data: clients = [], isLoading: clientsLoading } = useQuery({
-    queryKey: ['clients', searchTerm, statusFilter, temperatureFilter, originFilter],
-    queryFn: () => clientService.fetchClients({
-      search: searchTerm || undefined,
-      status: statusFilter === 'all' ? undefined : statusFilter,
-      temperature: temperatureFilter === 'all' ? undefined : temperatureFilter,
-      limit: 100
-    }),
-  });
+  // Query otimizada para clientes
+  const clientQueryOptions = useMemo(() => ({
+    search: searchTerm || undefined,
+    status: statusFilter === 'all' ? undefined : statusFilter,
+    temperature: temperatureFilter === 'all' ? undefined : temperatureFilter,
+    limit: 100
+  }), [searchTerm, statusFilter, temperatureFilter]);
 
-  // Mutação para ações em massa
+  const { data: clients = [], isLoading: clientsLoading } = useOptimizedClientQuery(clientQueryOptions);
+
+  // Debounced search
+  const debouncedSetSearchTerm = useMemo(
+    () => debounce((value: string) => setSearchTerm(value), 300),
+    [debounce]
+  );
+
+  // Mutação otimizada para ações em massa
   const bulkUpdateMutation = useMutation({
     mutationFn: async ({ clientIds, action, value }: { 
       clientIds: string[]; 
       action: 'status' | 'temperature' | 'tag'; 
       value: string 
     }) => {
-      const promises = clientIds.map(id => {
-        if (action === 'status') {
-          return clientService.updateClient(id, { status: value as any });
-        } else if (action === 'temperature') {
-          return clientService.updateClientTemperature(id, value as any);
-        }
-        return Promise.resolve();
+      return safeAsync(async () => {
+        const promises = clientIds.map(id => {
+          if (action === 'status') {
+            return clientService.updateClient(id, { status: value as any });
+          } else if (action === 'temperature') {
+            return clientService.updateClientTemperature(id, value as any);
+          }
+          return Promise.resolve();
+        });
+        return Promise.all(promises);
       });
-      return Promise.all(promises);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       queryClient.invalidateQueries({ queryKey: ['client-stats'] });
       setSelectedClients([]);
       toast({
-        title: "Ação executada",
+        title: "✨ Ação executada",
         description: "A ação em massa foi executada com sucesso.",
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: "❌ Erro",
         description: "Não foi possível executar a ação em massa.",
         variant: "destructive"
       });
     }
   });
 
-  const handleBulkAction = (action: 'status' | 'temperature' | 'tag', value: string) => {
+  // Callbacks memoizados
+  const handleBulkAction = useCallback((action: 'status' | 'temperature' | 'tag', value: string) => {
     if (selectedClients.length === 0) return;
     bulkUpdateMutation.mutate({ clientIds: selectedClients, action, value });
-  };
+  }, [selectedClients, bulkUpdateMutation]);
 
-  const handleClientSelection = (clientId: string, checked: boolean) => {
+  const handleClientSelection = useCallback((clientId: string, checked: boolean) => {
     if (checked) {
       setSelectedClients(prev => [...prev, clientId]);
     } else {
       setSelectedClients(prev => prev.filter(id => id !== clientId));
     }
-  };
+  }, []);
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
       setSelectedClients(clients.map(c => c.id));
     } else {
       setSelectedClients([]);
     }
-  };
+  }, [clients]);
 
-  const handleViewClient = (clientId: string) => {
+  const handleViewClient = useCallback((clientId: string) => {
     setSelectedClientId(clientId);
-  };
+  }, []);
 
-  const getStatusBadge = (status: string) => {
+  // Badges memoizados para melhor performance
+  const getStatusBadge = useCallback((status: string) => {
     const variants = {
       new: { variant: "tattooInfo", icon: Users },
       active: { variant: "tattooSuccess", icon: UserCheck },
@@ -150,9 +167,9 @@ const Clients = () => {
         {labels[status as keyof typeof labels] || status}
       </Badge>
     );
-  };
+  }, []);
 
-  const getTemperatureBadge = (temperature?: string) => {
+  const getTemperatureBadge = useCallback((temperature?: string) => {
     if (!temperature) return null;
 
     const variants = {
@@ -169,9 +186,9 @@ const Clients = () => {
         {variant.label}
       </Badge>
     );
-  };
+  }, []);
 
-  const getOriginBadge = (origin?: string) => {
+  const getOriginBadge = useCallback((origin?: string) => {
     if (!origin) return <Badge variant="secondary">Manual</Badge>;
 
     const origins = {
@@ -191,188 +208,222 @@ const Clients = () => {
         {originData.label}
       </Badge>
     );
-  };
+  }, []);
 
   // Mock clients data for loyalty integration demonstration
-  const mockClientsForLoyalty = clients.map(client => ({
-    ...client,
-    loyaltyPoints: Math.floor(Math.random() * 2000),
-    loyaltyLevel: ['Bronze', 'Prata', 'Ouro', 'Platina'][Math.floor(Math.random() * 4)],
-  }));
+  const mockClientsForLoyalty = useMemo(() => 
+    clients.map(client => ({
+      ...client,
+      loyaltyPoints: Math.floor(Math.random() * 2000),
+      loyaltyLevel: ['Bronze', 'Prata', 'Ouro', 'Platina'][Math.floor(Math.random() * 4)],
+    })), [clients]
+  );
 
-  const handleOpenAppointmentForm = (clientId: string, clientName: string) => {
+  // Colunas da tabela memoizadas
+  const tableColumns = useMemo(() => [
+    {
+      key: 'name',
+      label: 'Cliente',
+      render: (client: any) => (
+        <div>
+          <div className="font-medium text-red-900">{client.name}</div>
+          <div className="text-sm text-gray-500">{formatDate(client.created_at)}</div>
+        </div>
+      )
+    },
+    {
+      key: 'contact',
+      label: 'Contato',
+      render: (client: any) => (
+        <div className="space-y-1">
+          <div className="flex items-center space-x-1 text-sm">
+            <Mail className="h-3 w-3 text-red-500" />
+            <span className="truncate">{client.email}</span>
+          </div>
+          {client.phone && (
+            <div className="flex items-center space-x-1 text-sm">
+              <Phone className="h-3 w-3 text-red-500" />
+              <span>{client.phone}</span>
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (client: any) => (
+        <div className="space-y-1">
+          {getStatusBadge(client.status)}
+          {getTemperatureBadge(client.temperature)}
+        </div>
+      )
+    },
+    {
+      key: 'loyalty',
+      label: 'Fidelidade',
+      render: (client: any) => (
+        <div className="space-y-1">
+          <Badge variant="tattoo" className="animate-pulse">
+            <Crown className="h-3 w-3 mr-1" />
+            {client.loyaltyLevel}
+          </Badge>
+          <div className="text-xs text-gray-600">{client.loyaltyPoints} pts</div>
+        </div>
+      )
+    },
+    {
+      key: 'origin',
+      label: 'Origem',
+      render: (client: any) => getOriginBadge(client.origin)
+    },
+    {
+      key: 'total',
+      label: 'Total Gasto',
+      render: (client: any) => (
+        <div>
+          <div className="font-medium text-green-600">{formatCurrency(client.total_spent)}</div>
+          <div className="text-sm text-gray-500">{client.total_orders} pedidos</div>
+        </div>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Ações',
+      render: (client: any) => (
+        <OptimizedButton
+          variant="tattooOutline"
+          size="sm"
+          onClick={() => handleViewClient(client.id)}
+        >
+          <Eye className="h-4 w-4 mr-1" />
+          Ver Ficha 360°
+        </OptimizedButton>
+      )
+    }
+  ], [getStatusBadge, getTemperatureBadge, getOriginBadge, handleViewClient]);
+
+  const handleOpenAppointmentForm = useCallback((clientId: string, clientName: string) => {
     setAppointmentClientData({ id: clientId, name: clientName });
-    setSelectedClientId(null); // Close client detail modal
+    setSelectedClientId(null);
     setShowAppointmentForm(true);
-  };
+  }, []);
 
-  const handleCloseAppointmentForm = () => {
+  const handleCloseAppointmentForm = useCallback(() => {
     setShowAppointmentForm(false);
     setAppointmentClientData(null);
-  };
+  }, []);
 
-  const handleAppointmentSuccess = () => {
+  const handleAppointmentSuccess = useCallback(() => {
     handleCloseAppointmentForm();
     toast({
       title: "✨ Agendamento criado!",
       description: "O agendamento foi criado com sucesso a partir da ficha do cliente.",
     });
-  };
+  }, [handleCloseAppointmentForm]);
 
   return (
     <div className="p-4 lg:p-6 space-y-6 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden">
-      {/* Elementos decorativos de fundo */}
-      <div className="absolute top-0 right-0 w-32 lg:w-64 h-32 lg:h-64 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-16 lg:translate-x-32 -translate-y-16 lg:-translate-y-32"></div>
-      <div className="absolute bottom-0 left-0 w-24 lg:w-48 h-24 lg:h-48 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-12 lg:-translate-x-24 translate-y-12 lg:translate-y-24"></div>
+      {/* Elementos decorativos de fundo - otimizados */}
+      <div className="absolute top-0 right-0 w-32 lg:w-64 h-32 lg:h-64 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-16 lg:translate-x-32 -translate-y-16 lg:-translate-y-32 will-change-transform"></div>
+      <div className="absolute bottom-0 left-0 w-24 lg:w-48 h-24 lg:h-48 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-12 lg:-translate-x-24 translate-y-12 lg:translate-y-24 will-change-transform"></div>
 
       <div className="relative z-10">
-        {/* Header com Botão Novo Cliente Reposicionado */}
+        {/* Header otimizado */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
           <div className="flex items-center gap-4">
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="tattoo" 
-                  size="default"
-                  className="shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Cliente
-                </Button>
-              </DialogTrigger>
-            </Dialog>
+            <OptimizedButton 
+              variant="tattoo" 
+              size="default"
+              onClick={() => setIsCreateDialogOpen(true)}
+              icon={<Plus className="h-4 w-4" />}
+            >
+              Novo Cliente
+            </OptimizedButton>
             <h1 className="text-2xl lg:text-3xl font-black text-red-800">Gerenciar Clientes</h1>
           </div>
         </div>
 
-        {/* Cards de Estatísticas CRM/Clientes Unificados */}
+        {/* Cards de Estatísticas otimizados */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4 animate-fade-in mb-6">
-            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Total</CardTitle>
-                <Users className="h-3 w-3 lg:h-4 lg:w-4 text-red-600" />
-              </CardHeader>
-              <CardContent className="p-3 lg:p-6 pt-0">
-                <div className="text-lg lg:text-2xl font-bold text-red-900">{stats.total_clients}</div>
-                <p className="text-xs text-red-600">Clientes</p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Novos Leads</CardTitle>
-                <Target className="h-3 w-3 lg:h-4 lg:w-4 text-red-600" />
-              </CardHeader>
-              <CardContent className="p-3 lg:p-6 pt-0">
-                <div className="text-lg lg:text-2xl font-bold text-red-600">{stats.new_clients_this_month || 0}</div>
-                <p className="text-xs text-gray-600">Este mês</p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Conversão</CardTitle>
-                <TrendingUp className="h-3 w-3 lg:h-4 lg:w-4 text-green-600" />
-              </CardHeader>
-              <CardContent className="p-3 lg:p-6 pt-0">
-                <div className="text-lg lg:text-2xl font-bold text-green-600">{stats.conversion_rate || 0}%</div>
-                <p className="text-xs text-gray-600">Taxa</p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Quentes</CardTitle>
-                <div className="h-3 w-3 lg:h-4 lg:w-4 bg-gradient-to-r from-red-500 to-red-600 rounded-full" />
-              </CardHeader>
-              <CardContent className="p-3 lg:p-6 pt-0">
-                <div className="text-lg lg:text-2xl font-bold text-red-600">{stats.hot_clients || 0}</div>
-                <p className="text-xs text-gray-600">Alta prioridade</p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Tempo Médio</CardTitle>
-                <Clock className="h-3 w-3 lg:h-4 lg:w-4 text-blue-600" />
-              </CardHeader>
-              <CardContent className="p-3 lg:p-6 pt-0">
-                <div className="text-lg lg:text-2xl font-bold text-blue-600">{stats.average_conversion_time || 0}d</div>
-                <p className="text-xs text-gray-600">Conversão</p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs lg:text-sm font-medium text-red-800">Ticket Médio</CardTitle>
-                <Users className="h-3 w-3 lg:h-4 lg:w-4 text-gray-600" />
-              </CardHeader>
-              <CardContent className="p-3 lg:p-6 pt-0">
-                <div className="text-lg lg:text-2xl font-bold text-gray-900">{formatCurrency(stats.average_order_value || 0)}</div>
-                <p className="text-xs text-gray-600">Por cliente</p>
-              </CardContent>
-            </Card>
+            {[
+              { title: "Total", value: stats.total_clients, icon: Users, color: "text-red-900", description: "Clientes" },
+              { title: "Novos Leads", value: stats.new_clients_this_month || 0, icon: Target, color: "text-red-600", description: "Este mês" },
+              { title: "Conversão", value: `${stats.conversion_rate || 0}%`, icon: TrendingUp, color: "text-green-600", description: "Taxa" },
+              { title: "Quentes", value: stats.hot_clients || 0, icon: null, color: "text-red-600", description: "Alta prioridade" },
+              { title: "Tempo Médio", value: `${stats.average_conversion_time || 0}d`, icon: Clock, color: "text-blue-600", description: "Conversão" },
+              { title: "Ticket Médio", value: formatCurrency(stats.average_order_value || 0), icon: Users, color: "text-gray-900", description: "Por cliente" }
+            ].map((stat, index) => (
+              <OptimizedCard key={index} loading={statsLoading}>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-red-800">{stat.title}</p>
+                    <p className={`text-lg font-bold ${stat.color}`}>{stat.value}</p>
+                    <p className="text-xs text-gray-600">{stat.description}</p>
+                  </div>
+                  {stat.icon && <stat.icon className="h-4 w-4 text-red-600" />}
+                  {!stat.icon && index === 3 && <div className="h-4 w-4 bg-gradient-to-r from-red-500 to-red-600 rounded-full" />}
+                </div>
+              </OptimizedCard>
+            ))}
           </div>
         )}
 
-        {/* Ações em Massa */}
+        {/* Ações em massa otimizadas */}
         {selectedClients.length > 0 && (
-          <Card variant="tattooRed" className="mb-6">
-            <CardContent className="p-4">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                <span className="text-sm font-medium text-red-800">
-                  {selectedClients.length} cliente(s) selecionado(s)
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  <Select onValueChange={(value) => handleBulkAction('status', value)}>
-                    <SelectTrigger className="w-[140px] h-8">
-                      <Move className="h-3 w-3 mr-1" />
-                      <SelectValue placeholder="Mover para" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="interested">Interessado</SelectItem>
-                      <SelectItem value="pending">Pendente</SelectItem>
-                      <SelectItem value="completed">Concluído</SelectItem>
-                      <SelectItem value="returning">Retorno</SelectItem>
-                      <SelectItem value="vip">VIP</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Select onValueChange={(value) => handleBulkAction('temperature', value)}>
-                    <SelectTrigger className="w-[140px] h-8">
-                      <Tag className="h-3 w-3 mr-1" />
-                      <SelectValue placeholder="Temperatura" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hot">🔥 Quente</SelectItem>
-                      <SelectItem value="warm">🔶 Morno</SelectItem>
-                      <SelectItem value="cold">❄️ Frio</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setSelectedClients([])}
-                  >
-                    Limpar
-                  </Button>
-                </div>
+          <OptimizedCard variant="tattooRed" className="mb-6">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+              <span className="text-sm font-medium text-red-800">
+                {selectedClients.length} cliente(s) selecionado(s)
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <Select onValueChange={(value) => handleBulkAction('status', value)}>
+                  <SelectTrigger className="w-[140px] h-8">
+                    <Move className="h-3 w-3 mr-1" />
+                    <SelectValue placeholder="Mover para" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="interested">Interessado</SelectItem>
+                    <SelectItem value="pending">Pendente</SelectItem>
+                    <SelectItem value="completed">Concluído</SelectItem>
+                    <SelectItem value="returning">Retorno</SelectItem>
+                    <SelectItem value="vip">VIP</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select onValueChange={(value) => handleBulkAction('temperature', value)}>
+                  <SelectTrigger className="w-[140px] h-8">
+                    <Tag className="h-3 w-3 mr-1" />
+                    <SelectValue placeholder="Temperatura" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hot">🔥 Quente</SelectItem>
+                    <SelectItem value="warm">🔶 Morno</SelectItem>
+                    <SelectItem value="cold">❄️ Frio</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <OptimizedButton 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setSelectedClients([])}
+                >
+                  Limpar
+                </OptimizedButton>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </OptimizedCard>
         )}
 
-        {/* Filtros e Controles Expandidos com melhor styling */}
-        <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-lg border border-red-200 animate-fade-in mb-6">
+        {/* Filtros otimizados */}
+        <OptimizedCard className="mb-6">
           <div className="flex flex-col lg:flex-row gap-4 flex-1">
             <div className="relative flex-1 max-w-full lg:max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Buscar por nome, email ou telefone..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => debouncedSetSearchTerm(e.target.value)}
                 className="pl-10 border-red-200 focus:border-red-600"
               />
             </div>
@@ -424,42 +475,42 @@ const Clients = () => {
             </div>
           </div>
           
-          <div className="flex flex-col lg:flex-row gap-2 justify-between">
+          <div className="flex flex-col lg:flex-row gap-2 justify-between mt-4">
             <div className="flex border border-red-200 rounded-lg w-fit">
-              <Button
+              <OptimizedButton
                 variant={viewMode === "kanban" ? "tattoo" : "ghost"}
                 size="sm"
                 onClick={() => setViewMode("kanban")}
                 className="rounded-r-none"
+                icon={<LayoutGrid className="h-4 w-4" />}
               >
-                <LayoutGrid className="h-4 w-4 mr-1" />
                 Kanban
-              </Button>
-              <Button
+              </OptimizedButton>
+              <OptimizedButton
                 variant={viewMode === "table" ? "tattoo" : "ghost"}
                 size="sm"
                 onClick={() => setViewMode("table")}
                 className="rounded-l-none"
+                icon={<List className="h-4 w-4" />}
               >
-                <List className="h-4 w-4 mr-1" />
                 Tabela
-              </Button>
+              </OptimizedButton>
             </div>
 
             {viewMode === "kanban" && (
-              <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="tattooOutline" size="sm">
-                    <Settings className="h-4 w-4 mr-1" />
-                    Configurar Estágios
-                  </Button>
-                </DialogTrigger>
-              </Dialog>
+              <OptimizedButton 
+                variant="tattooOutline" 
+                size="sm"
+                onClick={() => setIsSettingsDialogOpen(true)}
+                icon={<Settings className="h-4 w-4" />}
+              >
+                Configurar Estágios
+              </OptimizedButton>
             )}
           </div>
-        </div>
+        </OptimizedCard>
 
-        {/* Conteúdo Principal */}
+        {/* Conteúdo Principal otimizado */}
         <div className="animate-fade-in">
           {viewMode === "kanban" ? (
             <ClientsKanban 
@@ -470,146 +521,47 @@ const Clients = () => {
               temperatureFilter={temperatureFilter}
             />
           ) : (
-            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="bg-gradient-to-r from-red-100 to-red-200 rounded-t-lg">
-                <CardTitle className="text-red-800">Lista de Clientes</CardTitle>
-                <CardDescription className="text-red-600">
-                  Gerencie todos os clientes e leads do sistema
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-red-50">
-                        <TableHead className="w-[50px]">
-                          <Checkbox
-                            checked={selectedClients.length === clients.length && clients.length > 0}
-                            onCheckedChange={handleSelectAll}
-                          />
-                        </TableHead>
-                        <TableHead className="text-red-800 font-bold">Cliente</TableHead>
-                        <TableHead className="text-red-800 font-bold">Contato</TableHead>
-                        <TableHead className="text-red-800 font-bold">Status</TableHead>
-                        <TableHead className="text-red-800 font-bold">Fidelidade</TableHead>
-                        <TableHead className="text-red-800 font-bold">Origem</TableHead>
-                        <TableHead className="text-red-800 font-bold">Total Gasto</TableHead>
-                        <TableHead className="text-red-800 font-bold text-right">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mockClientsForLoyalty.map((client) => (
-                        <TableRow 
-                          key={client.id} 
-                          className="hover:bg-red-50 transition-colors duration-200 group"
-                        >
-                          <TableCell>
-                            <Checkbox
-                              checked={selectedClients.includes(client.id)}
-                              onCheckedChange={(checked) => handleClientSelection(client.id, checked as boolean)}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium text-red-900 group-hover:text-red-700">{client.name}</div>
-                              <div className="text-sm text-gray-500">{formatDate(client.created_at)}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <div className="flex items-center space-x-1 text-sm">
-                                <Mail className="h-3 w-3 text-red-500" />
-                                <span className="truncate">{client.email}</span>
-                              </div>
-                              {client.phone && (
-                                <div className="flex items-center space-x-1 text-sm">
-                                  <Phone className="h-3 w-3 text-red-500" />
-                                  <span>{client.phone}</span>
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {getStatusBadge(client.status)}
-                              {getTemperatureBadge(client.temperature)}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <Badge variant="tattoo" className="animate-pulse">
-                                <Crown className="h-3 w-3 mr-1" />
-                                {client.loyaltyLevel}
-                              </Badge>
-                              <div className="text-xs text-gray-600">{client.loyaltyPoints} pts</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {getOriginBadge(client.origin)}
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium text-green-600">{formatCurrency(client.total_spent)}</div>
-                              <div className="text-sm text-gray-500">{client.total_orders} pedidos</div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="tattooOutline"
-                              size="sm"
-                              onClick={() => handleViewClient(client.id)}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:scale-105"
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              Ver Ficha 360°
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
+            <OptimizedCard>
+              <OptimizedTable
+                data={mockClientsForLoyalty}
+                columns={tableColumns}
+                onRowSelect={handleViewClient}
+                selectedItems={selectedClients}
+                onSelectAll={handleSelectAll}
+                onItemSelect={handleClientSelection}
+                getItemId={(client) => client.id}
+                loading={clientsLoading}
+              />
+            </OptimizedCard>
           )}
         </div>
       </div>
 
-      {/* Modal Criar Cliente/Lead - Responsivo */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-auto bg-gradient-to-br from-white to-red-50 border-red-200">
-          <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-lg -mx-6 -mt-6 mb-6">
-            <DialogTitle className="text-xl font-black">Cadastrar Novo Lead/Cliente</DialogTitle>
-            <DialogDescription className="text-red-100">
-              Adicione um novo lead ou cliente ao sistema
-            </DialogDescription>
-          </DialogHeader>
-          <CRMLeadForm 
-            onSuccess={() => {
-              setIsCreateDialogOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['clients'] });
-              queryClient.invalidateQueries({ queryKey: ['client-stats'] });
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Modals otimizados com lazy loading */}
+      <LazyModal
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        title="Cadastrar Novo Lead/Cliente"
+      >
+        <CRMLeadForm 
+          onSuccess={() => {
+            setIsCreateDialogOpen(false);
+            queryClient.invalidateQueries({ queryKey: ['clients'] });
+            queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+          }}
+        />
+      </LazyModal>
 
-      {/* Modal Configurações Kanban */}
-      <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-auto bg-gradient-to-br from-white to-red-50 border-red-200">
-          <DialogHeader>
-            <DialogTitle className="text-red-800">Configurações do Kanban</DialogTitle>
-            <DialogDescription className="text-red-600">
-              Configure os estágios e suas propriedades no painel Kanban
-            </DialogDescription>
-          </DialogHeader>
-          <KanbanSettings 
-            onClose={() => setIsSettingsDialogOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      <LazyModal
+        isOpen={isSettingsDialogOpen}
+        onClose={() => setIsSettingsDialogOpen(false)}
+        title="Configurações do Kanban"
+      >
+        <KanbanSettings 
+          onClose={() => setIsSettingsDialogOpen(false)}
+        />
+      </LazyModal>
 
-      {/* Modal Ficha 360° do Cliente */}
       {selectedClientId && (
         <CRMClientDetail 
           clientId={selectedClientId}
@@ -618,7 +570,6 @@ const Clients = () => {
         />
       )}
 
-      {/* Modal Criar Agendamento (do cliente) */}
       {showAppointmentForm && appointmentClientData && (
         <AppointmentForm
           prefilledClientData={appointmentClientData}
@@ -629,6 +580,8 @@ const Clients = () => {
       )}
     </div>
   );
-};
+});
+
+Clients.displayName = 'Clients';
 
 export default Clients;
