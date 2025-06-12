@@ -150,7 +150,7 @@ const Appointments = () => {
 
   if (appointmentsLoading) {
     return (
-      <div className="p-6 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen">
+      <div className="p-3 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
         </div>
@@ -159,46 +159,46 @@ const Appointments = () => {
   }
 
   return (
-    <div className="p-6 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden">
-      {/* Elementos decorativos de fundo */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-48 -translate-y-48"></div>
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-32 translate-y-32"></div>
+    <div className="p-3 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden">
+      {/* Elementos decorativos de fundo - reduzidos */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/15 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/10 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
 
       <div className="relative z-10">
-        {/* Cabeçalho Compacto */}
-        <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-2xl shadow-2xl mb-4 relative overflow-hidden">
+        {/* Cabeçalho Ultra Compacto */}
+        <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-3 rounded-xl shadow-xl mb-2 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] animate-pulse"></div>
-          <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
-            <div>
-              <h1 className="text-2xl font-black mb-1 flex items-center gap-2">
-                <CalendarIcon className="h-6 w-6" />
-                Calendário de Agendamentos
-              </h1>
-              <p className="text-red-100 font-semibold text-sm">Gerencie todos os agendamentos do estúdio</p>
+          <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2">
+            <div className="flex items-center gap-3">
+              <CalendarIcon className="h-5 w-5" />
+              <div>
+                <h1 className="text-lg font-black">Calendário de Agendamentos</h1>
+                <p className="text-red-100 font-medium text-xs">Gerencie todos os agendamentos do estúdio</p>
+              </div>
             </div>
             
             <Button
               onClick={() => setShowCreateForm(true)}
-              className="bg-white text-red-700 hover:bg-red-50 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 px-6 py-2 h-auto rounded-xl font-bold relative overflow-hidden group"
+              className="bg-white text-red-700 hover:bg-red-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-4 py-1.5 h-auto rounded-lg font-bold text-sm relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-100/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1" />
               Novo Agendamento
             </Button>
           </div>
         </div>
 
-        {/* Calendário Principal Unificado */}
-        <div className="bg-white rounded-2xl shadow-2xl border-2 border-red-100/50 backdrop-blur-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-50/30 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
+        {/* Calendário Principal Maximizado */}
+        <div className="bg-white rounded-xl shadow-xl border border-red-100/50 backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-red-50/20 via-transparent to-transparent rounded-full transform translate-x-24 -translate-y-24"></div>
           
-          <div className="relative z-10 p-4">
+          <div className="relative z-10 p-2">
             <Calendar
               localizer={localizer}
               events={calendarEvents}
               startAccessor="start"
               endAccessor="end"
-              style={{ height: 750 }}
+              style={{ height: 'calc(100vh - 140px)' }}
               onSelectSlot={handleSelectSlot}
               onSelectEvent={handleSelectEvent}
               selectable
@@ -212,7 +212,7 @@ const Appointments = () => {
               components={{
                 event: EventComponent,
               }}
-              className="rounded-lg overflow-hidden calendar-99tattoo-unified"
+              className="rounded-lg overflow-hidden calendar-99tattoo-maximized"
               eventPropGetter={(event) => ({
                 className: cn(
                   "transition-all duration-300 hover:shadow-xl appointment-event-enhanced",
