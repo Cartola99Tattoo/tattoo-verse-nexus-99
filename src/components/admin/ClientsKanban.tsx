@@ -9,9 +9,12 @@ import { toast } from "@/hooks/use-toast";
 interface ClientsKanbanProps {
   clients: Client[];
   onViewClient: (clientId: string) => void;
+  searchTerm?: string;
+  statusFilter?: string;
+  temperatureFilter?: string;
 }
 
-const ClientsKanban = ({ clients, onViewClient }: ClientsKanbanProps) => {
+const ClientsKanban = ({ clients, onViewClient, searchTerm, statusFilter, temperatureFilter }: ClientsKanbanProps) => {
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
