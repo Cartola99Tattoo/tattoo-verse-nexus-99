@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -259,7 +258,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
                 <SelectContent>
                   {beds.map((bed) => (
                     <SelectItem key={bed.id} value={bed.id}>
-                      {bed.name} - {bed.location}
+                      {bed.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -478,7 +478,7 @@ const Clients = () => {
           {viewMode === "kanban" ? (
             <ClientsKanban 
               clients={mockClientsForLoyalty}
-              onClientSelect={handleViewClient}
+              onViewClient={handleViewClient}
               searchTerm={searchTerm}
               statusFilter={statusFilter}
               temperatureFilter={temperatureFilter}
