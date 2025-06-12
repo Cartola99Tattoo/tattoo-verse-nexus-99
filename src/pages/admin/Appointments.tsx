@@ -5,7 +5,7 @@ import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles, Expand, Minimize } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AppointmentForm from "@/components/admin/AppointmentForm";
 import AppointmentEditModal from "@/components/admin/AppointmentEditModal";
@@ -28,6 +28,110 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
+// Mock data para demonstração de um estúdio movimentado
+const mockAppointments: Appointment[] = [
+  {
+    id: '1',
+    client_id: '1',
+    artist_id: '1',
+    bed_id: '1',
+    date: '2024-12-12',
+    time: '09:00',
+    duration_minutes: 120,
+    status: 'confirmed',
+    service_description: 'Tatuagem dragão no braço',
+    notes: 'Cliente regular',
+    estimated_price: 300,
+  },
+  {
+    id: '2',
+    client_id: '2',
+    artist_id: '2',
+    bed_id: '2',
+    date: '2024-12-12',
+    time: '10:30',
+    duration_minutes: 90,
+    status: 'scheduled',
+    service_description: 'Rosa no ombro',
+    notes: 'Primeira sessão',
+    estimated_price: 200,
+  },
+  {
+    id: '3',
+    client_id: '3',
+    artist_id: '1',
+    bed_id: '1',
+    date: '2024-12-12',
+    time: '14:00',
+    duration_minutes: 180,
+    status: 'confirmed',
+    service_description: 'Mandala nas costas',
+    notes: 'Sessão longa',
+    estimated_price: 500,
+  },
+  {
+    id: '4',
+    client_id: '4',
+    artist_id: '3',
+    bed_id: '3',
+    date: '2024-12-13',
+    time: '11:00',
+    duration_minutes: 60,
+    status: 'scheduled',
+    service_description: 'Retoque em tatuagem',
+    notes: 'Cliente antigo',
+    estimated_price: 100,
+  },
+  {
+    id: '5',
+    client_id: '5',
+    artist_id: '2',
+    bed_id: '2',
+    date: '2024-12-13',
+    time: '15:30',
+    duration_minutes: 150,
+    status: 'confirmed',
+    service_description: 'Tatuagem tribal',
+    notes: 'Design personalizado',
+    estimated_price: 400,
+  },
+  {
+    id: '6',
+    client_id: '1',
+    artist_id: '1',
+    bed_id: '1',
+    date: '2024-12-14',
+    time: '09:30',
+    duration_minutes: 240,
+    status: 'confirmed',
+    service_description: 'Sleeve completa',
+    notes: 'Sessão 2 de 4',
+    estimated_price: 800,
+  },
+  {
+    id: '7',
+    client_id: '6',
+    artist_id: '3',
+    bed_id: '3',
+    date: '2024-12-14',
+    time: '16:00',
+    duration_minutes: 90,
+    status: 'scheduled',
+    service_description: 'Borboleta colorida',
+    notes: 'Primeira tatuagem',
+    estimated_price: 250,
+  },
+];
+
+const mockClients: Client[] = [
+  { id: '1', name: 'Ana Silva', email: 'ana@email.com', phone: '(11) 99999-1111' },
+  { id: '2', name: 'Bruno Costa', email: 'bruno@email.com', phone: '(11) 99999-2222' },
+  { id: '3', name: 'Carla Santos', email: 'carla@email.com', phone: '(11) 99999-3333' },
+  { id: '4', name: 'Diego Ferreira', email: 'diego@email.com', phone: '(11) 99999-4444' },
+  { id: '5', name: 'Elena Rodrigues', email: 'elena@email.com', phone: '(11) 99999-5555' },
+  { id: '6', name: 'Felipe Oliveira', email: 'felipe@email.com', phone: '(11) 99999-6666' },
+];
+
 const Appointments = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Appointment | null>(null);
@@ -35,19 +139,14 @@ const Appointments = () => {
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState<View>('month');
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
-  const { data: appointments = [], isLoading: appointmentsLoading } = useQuery({
-    queryKey: ['appointments'],
-    queryFn: () => clientService.fetchUpcomingAppointments(),
-  });
-
-  const { data: clients = [] } = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => clientService.fetchClients(),
-  });
+  // Usar dados mock para demonstração
+  const appointments = mockAppointments;
+  const clients = mockClients;
 
   const calendarEvents = appointments.map(appointment => ({
     ...appointment,
@@ -97,6 +196,10 @@ const Appointments = () => {
     setCurrentView(view);
   }, []);
 
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
   const EventComponent = ({ event }: { event: any }) => {
     const appointment = event.resource;
     const client = clients.find(c => c.id === appointment.client_id);
@@ -108,22 +211,22 @@ const Appointments = () => {
     const artistFirstName = artist?.split(' ')[0] || 'Artista';
 
     return (
-      <div className="appointment-card bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white rounded-lg shadow-lg border-2 border-red-400 hover:shadow-2xl transition-all duration-300 cursor-pointer group overflow-hidden h-full">
+      <div className="appointment-card-compact bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white rounded-md shadow-lg border border-red-400 hover:shadow-xl transition-all duration-300 cursor-pointer group overflow-hidden h-full">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-        <div className="relative z-10 p-2 h-full flex flex-col justify-between">
-          <div className="space-y-1">
-            <div className="text-xs font-bold truncate flex items-center gap-1">
-              <Users className="h-3 w-3 flex-shrink-0" />
-              {firstName}
+        <div className="relative z-10 p-1.5 h-full flex flex-col justify-between text-xs">
+          <div className="space-y-0.5">
+            <div className="font-bold truncate flex items-center gap-1">
+              <Users className="h-2.5 w-2.5 flex-shrink-0" />
+              <span className="text-xs">{firstName}</span>
             </div>
-            <div className="text-xs opacity-90 truncate flex items-center gap-1">
-              <Clock className="h-3 w-3 flex-shrink-0" />
-              {appointment.time}
+            <div className="opacity-90 truncate flex items-center gap-1">
+              <Clock className="h-2.5 w-2.5 flex-shrink-0" />
+              <span className="text-xs">{appointment.time}</span>
             </div>
           </div>
-          <div className="text-xs opacity-80 truncate flex items-center gap-1">
-            <Sparkles className="h-3 w-3 flex-shrink-0" />
-            {artistFirstName}
+          <div className="opacity-80 truncate flex items-center gap-1">
+            <Sparkles className="h-2.5 w-2.5 flex-shrink-0" />
+            <span className="text-xs">{artistFirstName}</span>
           </div>
         </div>
       </div>
@@ -148,57 +251,76 @@ const Appointments = () => {
     work_week: 'Semana de trabalho',
   };
 
-  if (appointmentsLoading) {
-    return (
-      <div className="p-3 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
-        </div>
-      </div>
-    );
-  }
+  const containerClass = isFullscreen 
+    ? "fixed inset-0 z-50 bg-gradient-to-br from-red-50 via-white to-red-50 overflow-hidden"
+    : "p-2 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden";
+
+  const calendarHeight = isFullscreen 
+    ? 'calc(100vh - 80px)'
+    : 'calc(100vh - 120px)';
 
   return (
-    <div className="p-3 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden">
-      {/* Elementos decorativos de fundo - reduzidos */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/15 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/10 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
+    <div className={containerClass}>
+      {/* Elementos decorativos de fundo - mais sutis no modo tela cheia */}
+      {!isFullscreen && (
+        <>
+          <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-red-100/10 via-transparent to-transparent rounded-full transform translate-x-24 -translate-y-24"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-red-100/8 via-transparent to-transparent rounded-full transform -translate-x-16 translate-y-16"></div>
+        </>
+      )}
 
       <div className="relative z-10">
         {/* Cabeçalho Ultra Compacto */}
-        <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-3 rounded-xl shadow-xl mb-2 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-2 rounded-lg shadow-lg mb-1.5 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] animate-pulse"></div>
           <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2">
-            <div className="flex items-center gap-3">
-              <CalendarIcon className="h-5 w-5" />
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4" />
               <div>
-                <h1 className="text-lg font-black">Calendário de Agendamentos</h1>
+                <h1 className="text-base font-black">Calendário de Agendamentos</h1>
                 <p className="text-red-100 font-medium text-xs">Gerencie todos os agendamentos do estúdio</p>
               </div>
             </div>
             
-            <Button
-              onClick={() => setShowCreateForm(true)}
-              className="bg-white text-red-700 hover:bg-red-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-4 py-1.5 h-auto rounded-lg font-bold text-sm relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-100/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <Plus className="h-4 w-4 mr-1" />
-              Novo Agendamento
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={toggleFullscreen}
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 px-3 py-1.5 h-auto rounded-md font-bold text-xs"
+              >
+                {isFullscreen ? (
+                  <>
+                    <Minimize className="h-3 w-3 mr-1" />
+                    Sair Tela Cheia
+                  </>
+                ) : (
+                  <>
+                    <Expand className="h-3 w-3 mr-1" />
+                    Tela Cheia
+                  </>
+                )}
+              </Button>
+              
+              <Button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-white text-red-700 hover:bg-red-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-3 py-1.5 h-auto rounded-md font-bold text-xs"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Novo Agendamento
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Calendário Principal Maximizado */}
-        <div className="bg-white rounded-xl shadow-xl border border-red-100/50 backdrop-blur-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-red-50/20 via-transparent to-transparent rounded-full transform translate-x-24 -translate-y-24"></div>
-          
-          <div className="relative z-10 p-2">
+        <div className="bg-white rounded-lg shadow-lg border border-red-100/50 backdrop-blur-sm relative overflow-hidden">
+          <div className="relative z-10 p-1">
             <Calendar
               localizer={localizer}
               events={calendarEvents}
               startAccessor="start"
               endAccessor="end"
-              style={{ height: 'calc(100vh - 140px)' }}
+              style={{ height: calendarHeight }}
               onSelectSlot={handleSelectSlot}
               onSelectEvent={handleSelectEvent}
               selectable
@@ -212,7 +334,10 @@ const Appointments = () => {
               components={{
                 event: EventComponent,
               }}
-              className="rounded-lg overflow-hidden calendar-99tattoo-maximized"
+              className={cn(
+                "rounded-lg overflow-hidden",
+                isFullscreen ? "calendar-99tattoo-fullscreen" : "calendar-99tattoo-maximized"
+              )}
               eventPropGetter={(event) => ({
                 className: cn(
                   "transition-all duration-300 hover:shadow-xl appointment-event-enhanced",
