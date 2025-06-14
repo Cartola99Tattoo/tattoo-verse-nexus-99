@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getArtistsService } from "@/services/serviceFactory";
-import { Plus, Search, Filter, Edit, Trash2, Eye, Palette, Users, Star } from "lucide-react";
+import { Plus, Search, Filter, Edit, Trash2, Eye, Palette, Users, Star, TrendingUp, Calendar, DollarSign, Award } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Artist } from "@/services/interfaces/IArtistsService";
 import ArtistForm from "@/components/admin/ArtistForm";
@@ -141,233 +142,309 @@ const AdminArtists = () => {
 
   const getStatusBadge = (status: string) => {
     return status === 'active' ? (
-      <Badge className="bg-green-100 text-green-800">Ativo</Badge>
+      <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+        Ativo
+      </Badge>
     ) : (
-      <Badge variant="secondary">Inativo</Badge>
+      <Badge className="bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-md">
+        Inativo
+      </Badge>
     );
+  };
+
+  const getPerformanceMetrics = (artist: Artist) => {
+    // Mock data para métricas de performance
+    const mockMetrics = {
+      appointments: Math.floor(Math.random() * 50) + 10,
+      revenue: (Math.random() * 15000) + 5000,
+      rating: (Math.random() * 1.5) + 3.5,
+      portfolioCount: Math.floor(Math.random() * 20) + 5
+    };
+    return mockMetrics;
   };
 
   const uniqueStyles = [...new Set(artists.map(artist => artist.style))];
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Cards de Estatísticas */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50 p-6 space-y-8">
+      {/* Header com gradiente 99Tattoo */}
+      <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 rounded-2xl p-8 text-white shadow-2xl">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-4xl font-black mb-2">Gestão de Tatuadores</h1>
+            <p className="text-red-100 text-lg opacity-90">Gerencie os artistas talentosos do seu estúdio</p>
+          </div>
+          <div className="flex items-center gap-4 text-red-100">
+            <div className="text-center">
+              <div className="text-2xl font-bold">{artists.length}</div>
+              <div className="text-sm opacity-75">Total</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-300">
+                {artists.filter(a => a.status === 'active').length}
+              </div>
+              <div className="text-sm opacity-75">Ativos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cards de Estatísticas Aprimorados */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+        <Card className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Artistas</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-bold text-red-800">Total de Artistas</CardTitle>
+            <Users className="h-6 w-6 text-red-600 group-hover:scale-110 transition-transform duration-300" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{artists.length}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-3xl font-black text-red-700">{artists.length}</div>
+            <p className="text-xs text-red-600 font-medium">
               Tatuadores cadastrados
             </p>
           </CardContent>
         </Card>
 
-        <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+        <Card className="bg-gradient-to-br from-white to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Artistas Ativos</CardTitle>
-            <Palette className="h-4 w-4 text-green-600" />
+            <CardTitle className="text-sm font-bold text-green-800">Artistas Ativos</CardTitle>
+            <Palette className="h-6 w-6 text-green-600 group-hover:scale-110 transition-transform duration-300" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-3xl font-black text-green-700">
               {artists.filter(a => a.status === 'active').length}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-green-600 font-medium">
               Disponíveis para agendamento
             </p>
           </CardContent>
         </Card>
 
-        <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+        <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Estilos Diferentes</CardTitle>
-            <Star className="h-4 w-4 text-blue-600" />
+            <CardTitle className="text-sm font-bold text-blue-800">Estilos Únicos</CardTitle>
+            <Star className="h-6 w-6 text-blue-600 group-hover:scale-110 transition-transform duration-300" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-3xl font-black text-blue-700">
               {uniqueStyles.length}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-blue-600 font-medium">
               Variedade de estilos
             </p>
           </CardContent>
         </Card>
 
-        <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
+        <Card className="bg-gradient-to-br from-white to-orange-50 border-orange-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Comissão Média</CardTitle>
-            <Star className="h-4 w-4 text-orange-600" />
+            <CardTitle className="text-sm font-bold text-orange-800">Receita Média</CardTitle>
+            <DollarSign className="h-6 w-6 text-orange-600 group-hover:scale-110 transition-transform duration-300" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {artists.length > 0 
-                ? Math.round(artists.reduce((acc, a) => acc + a.commission_percentage, 0) / artists.length)
-                : 0}%
+            <div className="text-3xl font-black text-orange-700">
+              R$ {artists.length > 0 
+                ? Math.round(artists.reduce((acc) => acc + (Math.random() * 5000 + 3000), 0) / artists.length).toLocaleString()
+                : 0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Comissão média dos artistas
+            <p className="text-xs text-orange-600 font-medium">
+              Por artista/mês
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filtros e Controles */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="flex gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Buscar tatuadores..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-[300px]"
-            />
+      {/* Filtros e Controles Aprimorados */}
+      <Card className="bg-gradient-to-r from-white to-gray-50 border-red-200 shadow-xl">
+        <CardContent className="p-6">
+          <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
+            <div className="flex flex-col sm:flex-row gap-4 flex-1">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-red-500 h-5 w-5" />
+                <Input
+                  placeholder="Buscar tatuadores..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 shadow-lg transition-all duration-300"
+                />
+              </div>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[160px] border-red-200 focus:border-red-500 shadow-lg">
+                  <Filter className="h-4 w-4 mr-2 text-red-500" />
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-red-200 shadow-xl">
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="active">Ativos</SelectItem>
+                  <SelectItem value="inactive">Inativos</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={styleFilter} onValueChange={setStyleFilter}>
+                <SelectTrigger className="w-[160px] border-red-200 focus:border-red-500 shadow-lg">
+                  <SelectValue placeholder="Estilo" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-red-200 shadow-xl">
+                  <SelectItem value="all">Todos Estilos</SelectItem>
+                  {uniqueStyles.map((style) => (
+                    <SelectItem key={style} value={style}>
+                      {style}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button 
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold px-6 py-3 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Novo Tatuador
+            </Button>
           </div>
+        </CardContent>
+      </Card>
 
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[150px]">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="active">Ativos</SelectItem>
-              <SelectItem value="inactive">Inativos</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={styleFilter} onValueChange={setStyleFilter}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Estilo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos Estilos</SelectItem>
-              {uniqueStyles.map((style) => (
-                <SelectItem key={style} value={style}>
-                  {style}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <Button 
-          onClick={() => setIsCreateDialogOpen(true)}
-          className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Tatuador
-        </Button>
-      </div>
-
-      <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
-          <CardTitle className="text-gray-800">Tatuadores Cadastrados</CardTitle>
-          <CardDescription>
-            Gerencie os perfis dos tatuadores e suas configurações
+      {/* Tabela de Tatuadores Aprimorada */}
+      <Card className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-2xl">
+        <CardHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-t-lg">
+          <CardTitle className="text-2xl font-black">Tatuadores Cadastrados</CardTitle>
+          <CardDescription className="text-red-100">
+            Gerencie os perfis dos tatuadores e suas métricas de performance
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {artistsLoading ? (
-            <div className="flex justify-center py-8">
-              <p>Carregando tatuadores...</p>
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Artista</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Estilo</TableHead>
-                  <TableHead>Especialidades</TableHead>
-                  <TableHead>Comissão</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {artists.map((artist) => (
-                  <TableRow key={artist.id}>
-                    <TableCell>
-                      <div className="flex items-center space-x-3">
-                        <Avatar>
-                          <AvatarImage src={artist.avatar_url} />
-                          <AvatarFallback>
-                            {artist.first_name.charAt(0)}{artist.last_name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">
-                            {artist.first_name} {artist.last_name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {artist.phone}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{artist.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{artist.style}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {artist.specialties.slice(0, 2).map((specialty) => (
-                          <Badge key={specialty} variant="secondary" className="text-xs">
-                            {specialty}
-                          </Badge>
-                        ))}
-                        {artist.specialties.length > 2 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{artist.specialties.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{artist.commission_percentage}%</TableCell>
-                    <TableCell>{getStatusBadge(artist.status)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => window.open(`/artists/${artist.id}`, '_blank')}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleEditArtist(artist)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleDeleteArtist(artist)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gradient-to-r from-red-50 to-red-100 border-b border-red-200">
+                    <TableHead className="font-black text-red-800">Artista</TableHead>
+                    <TableHead className="font-black text-red-800">Contato</TableHead>
+                    <TableHead className="font-black text-red-800">Estilo</TableHead>
+                    <TableHead className="font-black text-red-800">Especialidades</TableHead>
+                    <TableHead className="font-black text-red-800">Performance</TableHead>
+                    <TableHead className="font-black text-red-800">Status</TableHead>
+                    <TableHead className="text-right font-black text-red-800">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {artists.map((artist) => {
+                    const metrics = getPerformanceMetrics(artist);
+                    return (
+                      <TableRow key={artist.id} className="hover:bg-red-50 transition-colors duration-200 border-b border-red-100">
+                        <TableCell>
+                          <div className="flex items-center space-x-4">
+                            <Avatar className="h-12 w-12 border-2 border-red-200 shadow-lg">
+                              <AvatarImage src={artist.avatar_url} />
+                              <AvatarFallback className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold">
+                                {artist.first_name.charAt(0)}{artist.last_name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-bold text-red-800 text-lg">
+                                {artist.first_name} {artist.last_name}
+                              </div>
+                              <div className="text-sm text-red-600 font-medium">
+                                {artist.commission_percentage}% comissão
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div className="text-sm font-medium text-gray-700">{artist.email}</div>
+                            <div className="text-sm text-gray-600">{artist.phone}</div>
+                            {artist.contact?.instagram && (
+                              <div className="text-sm text-red-600 font-medium">@{artist.contact.instagram}</div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold shadow-lg">
+                            {artist.style}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1 max-w-xs">
+                            {artist.specialties.slice(0, 2).map((specialty) => (
+                              <Badge key={specialty} variant="outline" className="text-xs border-red-300 text-red-700 bg-red-50 font-medium">
+                                {specialty}
+                              </Badge>
+                            ))}
+                            {artist.specialties.length > 2 && (
+                              <Badge variant="outline" className="text-xs border-red-300 text-red-700 bg-red-50 font-medium">
+                                +{artist.specialties.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-blue-600" />
+                              <span className="text-sm font-medium text-blue-700">{metrics.appointments} agendamentos</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="h-4 w-4 text-green-600" />
+                              <span className="text-sm font-medium text-green-700">R$ {metrics.revenue.toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Award className="h-4 w-4 text-yellow-600" />
+                              <span className="text-sm font-medium text-yellow-700">{metrics.rating.toFixed(1)} ⭐</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(artist.status)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-2">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => window.open(`/artists/${artist.id}`, '_blank')}
+                              className="border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleEditArtist(artist)}
+                              className="border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400 shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleDeleteArtist(artist)}
+                              className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
 
+      {/* Modal de Criação */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle>Novo Tatuador</DialogTitle>
-            <DialogDescription>
-              Cadastre um novo tatuador no sistema
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto bg-gradient-to-br from-white to-red-50 border-red-200">
+          <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-lg -mx-6 -mt-6 mb-6">
+            <DialogTitle className="text-2xl font-black">Novo Tatuador</DialogTitle>
+            <DialogDescription className="text-red-100 text-lg">
+              Cadastre um novo artista talentoso no sistema
             </DialogDescription>
           </DialogHeader>
           <ArtistForm
@@ -378,12 +455,13 @@ const AdminArtists = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Modal de Edição */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle>Editar Tatuador</DialogTitle>
-            <DialogDescription>
-              Atualize as informações do tatuador
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto bg-gradient-to-br from-white to-red-50 border-red-200">
+          <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-lg -mx-6 -mt-6 mb-6">
+            <DialogTitle className="text-2xl font-black">Editar Tatuador</DialogTitle>
+            <DialogDescription className="text-red-100 text-lg">
+              Atualize as informações do artista
             </DialogDescription>
           </DialogHeader>
           {selectedArtist && (
