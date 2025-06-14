@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Edit, Save, X, ArrowRight, PenTool, BookOpen } from 'lucide-react';
+import { FileText, Edit, Save, X, ArrowRight, PenTool, BookOpen, Sparkles, CheckCircle2 } from 'lucide-react';
 import { ContentIdea, CreateContentIdeaData } from '@/types/contentIdea';
 import { Persona } from '@/types/persona';
 
@@ -51,6 +51,8 @@ const ContentIdeaDetailModal = ({
 
   const canTransformToArticle = ['Em Produção', 'Em Revisão', 'Fazendo Imagens/Gráficos'].includes(idea.status);
   const hasDraftContent = formData.draftTitle || formData.draftSummary || formData.draftContent;
+  const draftCompleteness = [formData.draftTitle, formData.draftSummary, formData.draftContent].filter(Boolean).length;
+  const isDraftWellDeveloped = draftCompleteness >= 2; // Pelo menos título e um dos outros campos
 
   const getPersonaNames = (personaIds: string[]) => {
     return personaIds.map(id => {
@@ -61,12 +63,12 @@ const ContentIdeaDetailModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white to-red-50 border-2 border-red-200 shadow-2xl">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white to-red-50 border-2 border-red-200 shadow-2xl">
         <DialogHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white p-6 -m-6 mb-6 rounded-t-lg shadow-lg">
           <DialogTitle className="flex items-center justify-between text-2xl font-black">
             <div className="flex items-center gap-3">
               <FileText className="h-7 w-7" />
-              {isEditing ? 'Editando Card de Conteúdo' : 'Detalhes do Card de Conteúdo'}
+              {isEditing ? 'Editando Rascunho de Conteúdo' : 'Rascunho de Conteúdo Detalhado'}
             </div>
             <div className="flex gap-2">
               {!isEditing && (
@@ -179,114 +181,148 @@ const ContentIdeaDetailModal = ({
             </Card>
           </div>
 
-          {/* Coluna Direita - Rascunho do Artigo */}
+          {/* Coluna Direita - ÁREA DE DESENVOLVIMENTO DO RASCUNHO */}
           <div className="space-y-6">
             <Card className="bg-white border-2 border-green-200 shadow-xl">
               <CardHeader className="bg-gradient-to-r from-green-600 to-green-800 text-white rounded-t-lg p-4">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <PenTool className="h-5 w-5" />
-                  Rascunho do Artigo
+                <CardTitle className="flex items-center justify-between text-lg">
+                  <div className="flex items-center gap-2">
+                    <PenTool className="h-5 w-5" />
+                    Desenvolvimento do Rascunho
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    <span className="text-sm font-bold">{draftCompleteness}/3</span>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
-                <div>
-                  <Label className="text-green-700 font-bold text-sm mb-2 block">
-                    Rascunho de Título *
-                  </Label>
-                  {isEditing ? (
-                    <Input
-                      value={formData.draftTitle}
-                      onChange={(e) => setFormData(prev => ({ ...prev, draftTitle: e.target.value }))}
-                      placeholder="Digite o título provisório do artigo..."
-                      className="border-green-200 focus:border-green-500 shadow-sm"
-                    />
-                  ) : (
-                    <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200">
-                      <p className="text-gray-800 font-semibold">
-                        {idea.draftTitle || 'Não definido'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="text-green-700 font-bold text-sm mb-2 block">
-                    Resumo do Artigo (Rascunho)
-                  </Label>
-                  {isEditing ? (
-                    <Textarea
-                      value={formData.draftSummary}
-                      onChange={(e) => setFormData(prev => ({ ...prev, draftSummary: e.target.value }))}
-                      placeholder="Escreva uma breve sinopse do conteúdo..."
-                      className="border-green-200 focus:border-green-500 shadow-sm"
-                      rows={4}
-                    />
-                  ) : (
-                    <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 min-h-[100px]">
-                      <p className="text-gray-700 whitespace-pre-wrap">
-                        {idea.draftSummary || 'Não definido'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="text-green-700 font-bold text-sm mb-2 block">
-                    Conteúdo do Artigo (Rascunho)
-                  </Label>
-                  {isEditing ? (
-                    <Textarea
-                      value={formData.draftContent}
-                      onChange={(e) => setFormData(prev => ({ ...prev, draftContent: e.target.value }))}
-                      placeholder="Escreva o rascunho completo do artigo ou partes significativas dele..."
-                      className="border-green-200 focus:border-green-500 shadow-sm resize-y"
-                      rows={12}
-                    />
-                  ) : (
-                    <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 max-h-80 overflow-y-auto">
-                      <p className="text-gray-700 whitespace-pre-wrap">
-                        {idea.draftContent || 'Nenhum conteúdo rascunho ainda'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Indicador de Progresso do Rascunho */}
-                <div className="bg-gradient-to-r from-green-100 to-green-200 p-4 rounded-lg border border-green-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-bold text-green-800">Progresso do Rascunho</span>
-                    <span className="text-sm font-bold text-green-700">
-                      {[formData.draftTitle, formData.draftSummary, formData.draftContent].filter(Boolean).length}/3
+                {/* Indicador de Progresso do Rascunho DESTACADO */}
+                <div className="bg-gradient-to-r from-green-100 to-green-200 p-4 rounded-lg border-2 border-green-300 shadow-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-lg font-black text-green-800 flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5" />
+                      Progresso do Rascunho
+                    </span>
+                    <span className="text-lg font-black text-green-700 bg-white px-3 py-1 rounded-full shadow-md">
+                      {draftCompleteness}/3 Completo
                     </span>
                   </div>
-                  <div className="w-full bg-green-200 rounded-full h-2">
+                  <div className="w-full bg-green-200 rounded-full h-3 shadow-inner">
                     <div 
-                      className="bg-gradient-to-r from-green-500 to-green-700 h-2 rounded-full transition-all duration-300"
+                      className="bg-gradient-to-r from-green-500 to-green-700 h-3 rounded-full transition-all duration-500 shadow-lg"
                       style={{ 
-                        width: `${([formData.draftTitle, formData.draftSummary, formData.draftContent].filter(Boolean).length / 3) * 100}%` 
+                        width: `${(draftCompleteness / 3) * 100}%` 
                       }}
                     ></div>
                   </div>
-                  <p className="text-xs text-green-600 mt-1">
-                    {hasDraftContent ? 'Rascunho em desenvolvimento' : 'Comece desenvolvendo seu rascunho'}
+                  <div className="flex gap-2 mt-3">
+                    {[
+                      { field: 'draftTitle', label: 'Título' },
+                      { field: 'draftSummary', label: 'Resumo' },
+                      { field: 'draftContent', label: 'Conteúdo' }
+                    ].map((item, i) => (
+                      <div
+                        key={i}
+                        className={`flex-1 text-center py-2 px-3 rounded-lg text-xs font-bold border-2 transition-all duration-300 ${
+                          formData[item.field as keyof typeof formData] 
+                            ? 'bg-green-600 text-white border-green-700 shadow-lg' 
+                            : 'bg-white text-green-600 border-green-300'
+                        }`}
+                      >
+                        {item.label}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-sm text-green-700 mt-2 text-center font-medium">
+                    {isDraftWellDeveloped ? '🎉 Rascunho bem desenvolvido - Pronto para transformar!' : '✍️ Continue desenvolvendo seu rascunho'}
                   </p>
+                </div>
+
+                {/* CAMPOS DE RASCUNHO EXPANDIDOS E DETALHADOS */}
+                <div className="space-y-6">
+                  <div>
+                    <Label className="text-green-700 font-bold text-lg mb-3 block flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Rascunho de Título *
+                    </Label>
+                    {isEditing ? (
+                      <Input
+                        value={formData.draftTitle}
+                        onChange={(e) => setFormData(prev => ({ ...prev, draftTitle: e.target.value }))}
+                        placeholder="Digite o título provisório do artigo..."
+                        className="border-green-200 focus:border-green-500 shadow-sm text-lg py-3"
+                      />
+                    ) : (
+                      <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 min-h-[60px] flex items-center">
+                        <p className="text-gray-800 font-semibold text-lg">
+                          {idea.draftTitle || 'Título não definido - clique em "Editar" para adicionar'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label className="text-green-700 font-bold text-lg mb-3 block flex items-center gap-2">
+                      <BookOpen className="h-5 w-5" />
+                      Resumo do Artigo (Rascunho)
+                    </Label>
+                    {isEditing ? (
+                      <Textarea
+                        value={formData.draftSummary}
+                        onChange={(e) => setFormData(prev => ({ ...prev, draftSummary: e.target.value }))}
+                        placeholder="Escreva uma breve sinopse do conteúdo que será abordado no artigo..."
+                        className="border-green-200 focus:border-green-500 shadow-sm resize-y"
+                        rows={5}
+                      />
+                    ) : (
+                      <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 min-h-[120px]">
+                        <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {idea.draftSummary || 'Resumo não definido - clique em "Editar" para adicionar uma sinopse do artigo'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label className="text-green-700 font-bold text-lg mb-3 block flex items-center gap-2">
+                      <PenTool className="h-5 w-5" />
+                      Conteúdo do Artigo (Rascunho Completo)
+                    </Label>
+                    {isEditing ? (
+                      <Textarea
+                        value={formData.draftContent}
+                        onChange={(e) => setFormData(prev => ({ ...prev, draftContent: e.target.value }))}
+                        placeholder="Escreva o rascunho completo do artigo ou partes significativas dele. Você pode usar este espaço para desenvolver o conteúdo principal, estruturar ideias, adicionar tópicos importantes, etc..."
+                        className="border-green-200 focus:border-green-500 shadow-sm resize-y"
+                        rows={16}
+                      />
+                    ) : (
+                      <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 max-h-96 overflow-y-auto">
+                        <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {idea.draftContent || 'Conteúdo não desenvolvido - clique em "Editar" para começar a escrever o rascunho do artigo'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Botões de Ação */}
-        <div className="flex justify-between items-center pt-8 border-t-2 border-red-200 bg-gradient-to-r from-red-50 to-red-100 p-6 -m-6 mt-6 rounded-b-lg">
-          <div className="flex gap-3">
-            {isEditing ? (
-              <>
+        {/* ÁREA DE AÇÃO PRINCIPAL */}
+        <div className="border-t-4 border-red-200 bg-gradient-to-r from-red-50 to-red-100 p-8 -m-6 mt-8 rounded-b-lg">
+          {isEditing ? (
+            /* Modo de Edição */
+            <div className="flex justify-between items-center">
+              <div className="flex gap-4">
                 <Button
                   onClick={handleSave}
-                  className="bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white shadow-lg font-bold"
+                  className="bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white shadow-xl font-black text-lg px-8 py-3"
                 >
-                  <Save className="h-4 w-4 mr-2" />
-                  Salvar Alterações
+                  <Save className="h-5 w-5 mr-2" />
+                  Salvar Rascunho
                 </Button>
                 <Button
                   onClick={() => setIsEditing(false)}
@@ -295,30 +331,44 @@ const ContentIdeaDetailModal = ({
                 >
                   Cancelar
                 </Button>
-              </>
-            ) : (
-              <>
-                {canTransformToArticle && hasDraftContent && (
+              </div>
+            </div>
+          ) : (
+            /* Modo de Visualização */
+            <div className="flex justify-between items-center">
+              <div className="flex gap-4">
+                {/* BOTÃO PRINCIPAL: TRANSFORMAR EM ARTIGO */}
+                {isDraftWellDeveloped && (
                   <Button
                     onClick={() => onTransformToArticle(idea)}
-                    className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-xl font-black text-lg px-8 py-3 transform hover:scale-105 transition-all duration-300"
+                    className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-2xl font-black text-xl px-12 py-4 transform hover:scale-105 transition-all duration-300 border-2 border-red-400/50"
                   >
-                    <ArrowRight className="h-5 w-5 mr-3" />
-                    Transformar em Artigo
+                    <ArrowRight className="h-6 w-6 mr-3 animate-pulse" />
+                    Transformar em Artigo Final
+                    <Sparkles className="h-6 w-6 ml-3" />
                   </Button>
                 )}
-              </>
-            )}
-          </div>
-          
-          {!isEditing && (
-            <div className="text-right">
-              <p className="text-sm text-gray-600 mb-1">
-                Criado em: {new Date(idea.created_at).toLocaleDateString('pt-BR')}
-              </p>
-              <p className="text-sm text-gray-600">
-                Atualizado em: {new Date(idea.updated_at).toLocaleDateString('pt-BR')}
-              </p>
+                
+                {/* Mensagem motivacional se rascunho não estiver desenvolvido */}
+                {!isDraftWellDeveloped && (
+                  <div className="bg-yellow-100 border-2 border-yellow-300 rounded-lg p-4 flex items-center gap-3">
+                    <PenTool className="h-6 w-6 text-yellow-600" />
+                    <div>
+                      <p className="font-bold text-yellow-800 text-lg">Desenvolva mais o rascunho</p>
+                      <p className="text-yellow-700">Adicione pelo menos o título e mais um campo para transformar em artigo</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="text-right">
+                <p className="text-sm text-gray-600 mb-1">
+                  Criado em: {new Date(idea.created_at).toLocaleDateString('pt-BR')}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Atualizado em: {new Date(idea.updated_at).toLocaleDateString('pt-BR')}
+                </p>
+              </div>
             </div>
           )}
         </div>
