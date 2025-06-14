@@ -137,9 +137,16 @@ const ContentProductionKanban = ({ ideas: initialIdeas, onIdeaStatusUpdate }: Co
   };
 
   return (
-    <div className="bg-gradient-to-b from-black to-red-900/20 min-h-screen p-1">
-      <div className="flex gap-6 overflow-x-auto pb-4">
+    <div className="bg-gradient-to-br from-black via-red-900/20 to-black min-h-screen p-1 relative overflow-hidden">
+      {/* Background pattern for 99Tattoo identity */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-red-900/10 to-black opacity-90"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-transparent to-transparent"></div>
+      
+      <div className="relative flex gap-6 overflow-x-auto pb-4 min-h-screen">
+        {/* Guide Column - Always first */}
         <KanbanGuideColumn />
+        
+        {/* Main Kanban Area */}
         <div className="flex-1">
           <DndContext
             sensors={sensors}
@@ -159,7 +166,7 @@ const ContentProductionKanban = ({ ideas: initialIdeas, onIdeaStatusUpdate }: Co
             </div>
             <DragOverlay>
               {activeIdea ? (
-                <div className="rotate-6 scale-110 opacity-90">
+                <div className="rotate-3 scale-110 opacity-95 transform transition-all duration-300 shadow-2xl shadow-red-500/50">
                   <ContentKanbanCard idea={activeIdea} />
                 </div>
               ) : null}

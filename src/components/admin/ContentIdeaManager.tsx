@@ -41,13 +41,13 @@ const ContentIdeaManager = ({ personas, ideas, onIdeaCreate, onIdeaUpdate }: Con
       onIdeaUpdate(editingIdea, data);
       toast({
         title: "Sucesso!",
-        description: "Ideia de conteúdo atualizada com sucesso!"
+        description: "Ideia de conteúdo atualizada com sucesso! Ela aparecerá no Kanban de Produção."
       });
     } else {
       onIdeaCreate(data);
       toast({
         title: "Sucesso!",
-        description: "Ideia de conteúdo criada com sucesso!"
+        description: "Ideia de conteúdo criada com sucesso! Vá para a aba 'Produção' para acompanhar o desenvolvimento."
       });
     }
     setEditingIdea(null);
@@ -97,14 +97,21 @@ const ContentIdeaManager = ({ personas, ideas, onIdeaCreate, onIdeaUpdate }: Con
               <Lightbulb className="h-6 w-6" />
               Ideias de Conteúdo
             </CardTitle>
-            <Button
-              onClick={() => setShowForm(true)}
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white/10 hover:border-white/50"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Ideia
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setShowForm(true)}
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 shadow-lg backdrop-blur-sm"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Ideia
+              </Button>
+              <div className="bg-white/20 px-3 py-2 rounded-lg backdrop-blur-sm">
+                <span className="text-sm font-medium text-white">
+                  💡 Ideias criadas aqui aparecerão no Kanban de Produção
+                </span>
+              </div>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-6">
@@ -129,6 +136,38 @@ const ContentIdeaManager = ({ personas, ideas, onIdeaCreate, onIdeaUpdate }: Con
           </div>
         </CardContent>
       </Card>
+
+      {/* Quick Actions */}
+      {ideas.length > 0 && (
+        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-lg">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Target className="h-5 w-5 text-red-600" />
+                <span className="font-medium text-red-800">Ações Rápidas:</span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                  onClick={() => setStatusFilter('Ideia')}
+                >
+                  Ver Novas Ideias ({ideas.filter(i => i.status === 'Ideia').length})
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                  onClick={() => setStatusFilter('Em Produção')}
+                >
+                  Em Produção ({ideas.filter(i => i.status === 'Em Produção').length})
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Overview */}
       {ideas.length > 0 && (
@@ -263,6 +302,8 @@ const ContentIdeaManager = ({ personas, ideas, onIdeaCreate, onIdeaUpdate }: Con
               <h3 className="text-xl font-bold text-red-600 mb-2">Nenhuma Ideia Cadastrada</h3>
               <p className="text-gray-600 mb-6">
                 Comece criando suas primeiras ideias de conteúdo para alimentar sua estratégia de marketing.
+                <br />
+                <strong className="text-red-600">Dica:</strong> As ideias criadas aqui aparecerão automaticamente no Kanban de Produção!
               </p>
               <Button
                 onClick={() => setShowForm(true)}
