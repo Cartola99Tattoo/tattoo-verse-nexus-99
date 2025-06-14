@@ -184,14 +184,28 @@ const ArtistForm = ({ artist, onSave, onCancel }: ArtistFormProps) => {
               <CardTitle className="tattoo-title-red">Dados Pessoais</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Upload de Foto */}
+              {/* Upload de Foto - Fixed props */}
               <div className="space-y-2">
                 <Label>Foto de Perfil</Label>
-                <ImageUploadField
-                  currentImage={formData.avatar_url}
-                  onImageSelect={(url) => handleInputChange("avatar_url", url)}
-                  variant="avatar"
-                />
+                <div className="flex items-center gap-4">
+                  <div className="h-20 w-20 border-2 border-red-200 rounded-full overflow-hidden bg-gray-100">
+                    {formData.avatar_url ? (
+                      <img src={formData.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Camera className="h-8 w-8 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      placeholder="URL da imagem"
+                      value={formData.avatar_url || ""}
+                      onChange={(e) => handleInputChange("avatar_url", e.target.value)}
+                      className="tattoo-input-enhanced"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -310,7 +324,7 @@ const ArtistForm = ({ artist, onSave, onCancel }: ArtistFormProps) => {
             </CardContent>
           </Card>
 
-          {/* Local de Atendimento */}
+          {/* Local de Atendimento - Fixed props */}
           <Card variant="tattooRed" className="tattoo-card-enhanced">
             <CardHeader variant="red">
               <CardTitle className="tattoo-title-red flex items-center gap-2">
@@ -320,8 +334,8 @@ const ArtistForm = ({ artist, onSave, onCancel }: ArtistFormProps) => {
             </CardHeader>
             <CardContent>
               <LocationManager
-                currentLocations={locations}
-                onUpdate={setLocations}
+                locations={locations}
+                onLocationsUpdate={setLocations}
               />
             </CardContent>
           </Card>
