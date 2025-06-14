@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ const ContentIdeaDetailModal = ({
   onTransformToArticle 
 }: ContentIdeaDetailModalProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isDraftEditing, setIsDraftEditing] = useState(false);
   const [formData, setFormData] = useState({
     theme: idea.theme,
     format: idea.format,
@@ -44,9 +45,24 @@ const ContentIdeaDetailModal = ({
     draftContent: idea.draftContent || ''
   });
 
+  // Auto-save draft after 2 seconds of inactivity
+  useEffect(() => {
+    if (isDraftEditing) {
+      const timer = setTimeout(() => {
+        handleSaveDraft();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [formData.draftTitle, formData.draftSummary, formData.draftContent, isDraftEditing]);
+
   const handleSave = () => {
     onUpdate(idea, formData);
     setIsEditing(false);
+  };
+
+  const handleSaveDraft = () => {
+    console.log('Auto-salvando rascunho...');
+    onUpdate(idea, formData);
   };
 
   const handleTransform = () => {
@@ -64,6 +80,11 @@ const ContentIdeaDetailModal = ({
       const persona = personas.find(p => p.id === id);
       return persona ? persona.name : id;
     }).join(', ');
+  };
+
+  const handleDraftFieldChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (!isDraftEditing) setIsDraftEditing(true);
   };
 
   return (
@@ -155,7 +176,6 @@ const ContentIdeaDetailModal = ({
                   <p className="text-gray-700 bg-gray-50 p-3 rounded-lg border">{idea.focusKeyword}</p>
                 </div>
 
-                {/* Campos editáveis sempre na esquerda */}
                 <div>
                   <Label className="text-red-700 font-bold">Relevância para Personas</Label>
                   {isEditing ? (
@@ -245,7 +265,7 @@ const ContentIdeaDetailModal = ({
                   </p>
                 </div>
 
-                {/* CAMPOS DE RASCUNHO FUNCIONAIS */}
+                {/* CAMPOS DE RASCUNHO EDITÁVEIS */}
                 <div className="space-y-6">
                   <div>
                     <Label className="text-green-700 font-bold text-lg mb-3 block flex items-center gap-2">
@@ -254,13 +274,15 @@ const ContentIdeaDetailModal = ({
                     </Label>
                     <Input
                       value={formData.draftTitle}
-                      onChange={(e) => setFormData(prev => ({ ...prev, draftTitle: e.target.value }))}
+                      onChange={(e) => handleDraftFieldChange('draftTitle', e.target.value)}
                       placeholder="Digite o título provisório do artigo..."
                       className="border-green-200 focus:border-green-500 shadow-sm text-lg py-3"
-                      disabled={!isEditing}
                     />
-                    {!isEditing && !formData.draftTitle && (
-                      <p className="text-sm text-gray-500 mt-1 italic">Clique em "Editar" para adicionar o título</p>
+                    {isDraftEditing && (
+                      <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                        <Save className="h-3 w-3" />
+                        Salvando automaticamente...
+                      </p>
                     )}
                   </div>
 
@@ -271,15 +293,11 @@ const ContentIdeaDetailModal = ({
                     </Label>
                     <Textarea
                       value={formData.draftSummary}
-                      onChange={(e) => setFormData(prev => ({ ...prev, draftSummary: e.target.value }))}
+                      onChange={(e) => handleDraftFieldChange('draftSummary', e.target.value)}
                       placeholder="Escreva uma breve sinopse do conteúdo que será abordado no artigo..."
                       className="border-green-200 focus:border-green-500 shadow-sm resize-y"
                       rows={5}
-                      disabled={!isEditing}
                     />
-                    {!isEditing && !formData.draftSummary && (
-                      <p className="text-sm text-gray-500 mt-1 italic">Clique em "Editar" para adicionar o resumo</p>
-                    )}
                   </div>
 
                   <div>
@@ -289,15 +307,11 @@ const ContentIdeaDetailModal = ({
                     </Label>
                     <Textarea
                       value={formData.draftContent}
-                      onChange={(e) => setFormData(prev => ({ ...prev, draftContent: e.target.value }))}
+                      onChange={(e) => handleDraftFieldChange('draftContent', e.target.value)}
                       placeholder="Escreva o rascunho completo do artigo ou partes significativas dele. Você pode usar este espaço para desenvolver o conteúdo principal, estruturar ideias, adicionar tópicos importantes, etc..."
                       className="border-green-200 focus:border-green-500 shadow-sm resize-y"
                       rows={16}
-                      disabled={!isEditing}
                     />
-                    {!isEditing && !formData.draftContent && (
-                      <p className="text-sm text-gray-500 mt-1 italic">Clique em "Editar" para desenvolver o conteúdo</p>
-                    )}
                   </div>
                 </div>
               </CardContent>
@@ -316,7 +330,7 @@ const ContentIdeaDetailModal = ({
                   className="bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white shadow-xl font-black text-lg px-8 py-3"
                 >
                   <Save className="h-5 w-5 mr-2" />
-                  Salvar Rascunho
+                  Salvar Alterações
                 </Button>
                 <Button
                   onClick={() => setIsEditing(false)}

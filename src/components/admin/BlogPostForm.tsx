@@ -323,6 +323,123 @@ const BlogPostForm = ({ post, categories, personas = [], initialData, onSave, on
 
         {/* Sidebar - Configurações e Metadados */}
         <div className="space-y-8">
+          {/* CARD DE ESTRATÉGIA DE CONTEÚDO - DESTACADO E VISUAL COM MAIS DESTAQUE */}
+          <Card className="bg-white border-4 border-blue-300 shadow-2xl shadow-blue-500/30 ring-4 ring-blue-200/50">
+            <CardHeader className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white rounded-t-lg p-6">
+              <CardTitle className="flex items-center justify-between text-xl font-black">
+                <div className="flex items-center gap-3">
+                  <Target className="h-6 w-6" />
+                  Tags Estratégicas para Análise
+                </div>
+                <div className="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-sm font-black animate-pulse">
+                  IMPORTANTE!
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              {/* Seção de Personas - MELHORADA */}
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl border-4 border-blue-300 shadow-lg">
+                <Label className="text-blue-800 font-black text-lg mb-4 flex items-center gap-3 block">
+                  <Users className="h-6 w-6" />
+                  Personas Alvo
+                  <Badge className="bg-blue-600 text-white animate-bounce">Para Análise</Badge>
+                </Label>
+                
+                <div className="space-y-3 max-h-48 overflow-y-auto bg-white p-4 rounded-lg border-4 border-blue-200 shadow-inner">
+                  {personas.length > 0 ? (
+                    personas.map((persona) => (
+                      <div key={persona.id} className="flex items-center space-x-3 p-3 hover:bg-blue-50 rounded-lg transition-colors border-2 border-transparent hover:border-blue-300">
+                        <Checkbox
+                          id={`persona-${persona.id}`}
+                          checked={formData.focusPersonas.includes(persona.id)}
+                          onCheckedChange={() => togglePersona(persona.id)}
+                          className="border-blue-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5"
+                        />
+                        <Label
+                          htmlFor={`persona-${persona.id}`}
+                          className="text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-800 cursor-pointer flex-1"
+                        >
+                          {persona.name}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-blue-600 text-sm italic text-center py-4">Nenhuma persona disponível</p>
+                  )}
+                </div>
+                
+                {formData.focusPersonas.length > 0 && (
+                  <div className="mt-4 bg-white p-4 rounded-lg border-4 border-blue-200 shadow-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                      <p className="text-sm text-blue-700 font-black">Personas Selecionadas:</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.focusPersonas.map(personaId => {
+                        const persona = personas.find(p => p.id === personaId);
+                        return (
+                          <Badge key={personaId} className="bg-blue-600 text-white border-2 border-blue-400 shadow-md font-bold">
+                            {persona?.name || personaId}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Seção de Jornada de Compra - MELHORADA */}
+              <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl border-4 border-purple-300 shadow-lg">
+                <Label className="text-purple-800 font-black text-lg mb-4 flex items-center gap-3 block">
+                  <Target className="h-6 w-6" />
+                  Etapa da Jornada de Compra
+                  <Badge className="bg-purple-600 text-white animate-bounce">Para Análise</Badge>
+                </Label>
+                
+                <select
+                  value={formData.purchaseStage}
+                  onChange={(e) => setFormData(prev => ({ ...prev, purchaseStage: e.target.value }))}
+                  className="w-full px-4 py-4 border-4 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none shadow-lg bg-white text-purple-800 font-bold text-lg"
+                >
+                  <option value="">Selecione uma etapa</option>
+                  {purchaseStages.map((stage) => (
+                    <option key={stage} value={stage}>
+                      {stage}
+                    </option>
+                  ))}
+                </select>
+                
+                {formData.purchaseStage && (
+                  <div className="mt-4 bg-white p-4 rounded-lg border-4 border-purple-200 shadow-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CheckCircle2 className="h-5 w-5 text-purple-600" />
+                      <p className="text-sm text-purple-700 font-black">Etapa Selecionada:</p>
+                    </div>
+                    <Badge className="bg-purple-600 text-white border-2 border-purple-400 shadow-md font-bold text-lg px-4 py-2">
+                      {formData.purchaseStage}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+
+              {/* Resumo das Tags Estratégicas - DESTACADO */}
+              {(formData.focusPersonas.length > 0 || formData.purchaseStage) && (
+                <div className="bg-gradient-to-r from-green-100 to-green-200 p-6 rounded-lg border-4 border-green-300 shadow-2xl">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle2 className="h-6 w-6 text-green-600" />
+                    <p className="font-black text-green-800 text-lg">Tags Estratégicas Configuradas</p>
+                  </div>
+                  <p className="text-sm text-green-700 font-bold">
+                    🎯 Este artigo será rastreado para análise de performance com as personas e etapas selecionadas.
+                  </p>
+                  <div className="mt-3 bg-green-600 text-white p-2 rounded-lg text-center font-black">
+                    ✅ PRONTO PARA ANÁLISE ESTRATÉGICA!
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Card de Publicação */}
           <Card className="bg-white border-2 border-red-200 shadow-2xl shadow-red-500/20">
             <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg p-4">
@@ -373,118 +490,6 @@ const BlogPostForm = ({ post, categories, personas = [], initialData, onSave, on
                   ))}
                 </select>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* CARD DE ESTRATÉGIA DE CONTEÚDO - DESTACADO E VISUAL */}
-          <Card className="bg-white border-4 border-blue-300 shadow-2xl shadow-blue-500/30">
-            <CardHeader className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white rounded-t-lg p-6">
-              <CardTitle className="flex items-center justify-between text-xl font-black">
-                <div className="flex items-center gap-3">
-                  <Target className="h-6 w-6" />
-                  Tags Estratégicas para Análise
-                </div>
-                <Sparkles className="h-6 w-6 animate-pulse" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              {/* Seção de Personas */}
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-300 shadow-lg">
-                <Label className="text-blue-800 font-black text-lg mb-4 flex items-center gap-3 block">
-                  <Users className="h-6 w-6" />
-                  Personas Alvo
-                  <Badge className="bg-blue-600 text-white">Para Análise</Badge>
-                </Label>
-                
-                <div className="space-y-3 max-h-48 overflow-y-auto bg-white p-4 rounded-lg border-2 border-blue-200">
-                  {personas.length > 0 ? (
-                    personas.map((persona) => (
-                      <div key={persona.id} className="flex items-center space-x-3 p-2 hover:bg-blue-50 rounded-lg transition-colors">
-                        <Checkbox
-                          id={`persona-${persona.id}`}
-                          checked={formData.focusPersonas.includes(persona.id)}
-                          onCheckedChange={() => togglePersona(persona.id)}
-                          className="border-blue-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                        />
-                        <Label
-                          htmlFor={`persona-${persona.id}`}
-                          className="text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-800 cursor-pointer"
-                        >
-                          {persona.name}
-                        </Label>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-blue-600 text-sm italic text-center py-4">Nenhuma persona disponível</p>
-                  )}
-                </div>
-                
-                {formData.focusPersonas.length > 0 && (
-                  <div className="mt-4 bg-white p-3 rounded-lg border-2 border-blue-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="h-4 w-4 text-blue-600" />
-                      <p className="text-sm text-blue-700 font-bold">Personas Selecionadas:</p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {formData.focusPersonas.map(personaId => {
-                        const persona = personas.find(p => p.id === personaId);
-                        return (
-                          <Badge key={personaId} className="bg-blue-600 text-white border border-blue-400 shadow-md">
-                            {persona?.name || personaId}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Seção de Jornada de Compra */}
-              <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl border-2 border-purple-300 shadow-lg">
-                <Label className="text-purple-800 font-black text-lg mb-4 flex items-center gap-3 block">
-                  <Target className="h-6 w-6" />
-                  Etapa da Jornada de Compra
-                  <Badge className="bg-purple-600 text-white">Para Análise</Badge>
-                </Label>
-                
-                <select
-                  value={formData.purchaseStage}
-                  onChange={(e) => setFormData(prev => ({ ...prev, purchaseStage: e.target.value }))}
-                  className="w-full px-4 py-4 border-2 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none shadow-lg bg-white text-purple-800 font-bold"
-                >
-                  <option value="">Selecione uma etapa</option>
-                  {purchaseStages.map((stage) => (
-                    <option key={stage} value={stage}>
-                      {stage}
-                    </option>
-                  ))}
-                </select>
-                
-                {formData.purchaseStage && (
-                  <div className="mt-4 bg-white p-3 rounded-lg border-2 border-purple-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="h-4 w-4 text-purple-600" />
-                      <p className="text-sm text-purple-700 font-bold">Etapa Selecionada:</p>
-                    </div>
-                    <Badge className="bg-purple-600 text-white border border-purple-400 shadow-md">
-                      {formData.purchaseStage}
-                    </Badge>
-                  </div>
-                )}
-              </div>
-
-              {/* Resumo das Tags Estratégicas */}
-              {(formData.focusPersonas.length > 0 || formData.purchaseStage) && (
-                <div className="bg-gradient-to-r from-green-100 to-green-200 p-4 rounded-lg border-2 border-green-300">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <p className="font-bold text-green-800">Tags Estratégicas Configuradas</p>
-                  </div>
-                  <p className="text-sm text-green-700">
-                    Este artigo será rastreado para análise de performance com as personas e etapas selecionadas.
-                  </p>
-                </div>
-              )}
             </CardContent>
           </Card>
 

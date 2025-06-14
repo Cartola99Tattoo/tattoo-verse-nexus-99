@@ -4,7 +4,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { GripVertical, User, Target, Tag, Calendar, PenTool, CheckCircle2, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { GripVertical, User, Target, Tag, Calendar, PenTool, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react';
 import { ContentIdea } from '@/types/contentIdea';
 import { Persona } from '@/types/persona';
 import ContentIdeaDetailModal from './ContentIdeaDetailModal';
@@ -80,6 +81,13 @@ const ContentKanbanCard = ({ idea, personas = [], onUpdate, onTransformToArticle
   const draftCompleteness = [idea.draftTitle, idea.draftSummary, idea.draftContent].filter(Boolean).length;
   const isDraftWellDeveloped = draftCompleteness >= 2;
 
+  const handleQuickTransform = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onTransformToArticle && isDraftWellDeveloped) {
+      onTransformToArticle(idea);
+    }
+  };
+
   return (
     <>
       <div ref={setNodeRef} style={style} className="transform transition-all duration-300 hover:z-10">
@@ -152,11 +160,21 @@ const ContentKanbanCard = ({ idea, personas = [], onUpdate, onTransformToArticle
                           ))}
                         </div>
                         
-                        {/* Indicador de "Pronto para Transformar" */}
+                        {/* Indicador de "Pronto para Transformar" com botão */}
                         {isDraftWellDeveloped && (
-                          <div className="flex items-center gap-2 mt-2 bg-green-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                            <Sparkles className="h-3 w-3" />
-                            <span>Pronto para Artigo!</span>
+                          <div className="mt-3 space-y-2">
+                            <div className="flex items-center gap-2 bg-green-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                              <Sparkles className="h-3 w-3" />
+                              <span>Pronto para Artigo!</span>
+                            </div>
+                            <Button
+                              onClick={handleQuickTransform}
+                              size="sm"
+                              className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold text-xs py-2 shadow-lg transform hover:scale-105 transition-all duration-300"
+                            >
+                              <ArrowRight className="h-3 w-3 mr-1" />
+                              Transformar em Artigo
+                            </Button>
                           </div>
                         )}
                       </div>
