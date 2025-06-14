@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,6 @@ interface ContentIdeaManagerProps {
 }
 
 const ContentIdeaManager = ({ personas, ideas, onIdeaCreate, onIdeaUpdate }: ContentIdeaManagerProps) => {
-  const [ideas, setIdeas] = useState<ContentIdea[]>(ideas);
   const [showForm, setShowForm] = useState(false);
   const [editingIdea, setEditingIdea] = useState<ContentIdea | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
