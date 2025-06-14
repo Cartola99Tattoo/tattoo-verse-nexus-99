@@ -1,4 +1,3 @@
-
 /**
  * Artist interface
  */
@@ -41,23 +40,49 @@ export interface Artist {
  */
 export interface PortfolioItem {
   id: string;
-  artist_id: string;
+  artist_id?: string;
   image_url: string;
+  title: string;
+  description: string;
+  style: string;
+  category: string;
+  completion_date: string;
+  client_name?: string;
+  session_duration?: string;
+  caption?: string;
+  is_featured?: boolean;
+  order_index?: number;
+  created_at?: string;
+}
+
+/**
+ * Pricing item interface
+ */
+export interface PricingItem {
+  id: string;
+  category: string;
+  min_price: number;
+  max_price?: number;
   description?: string;
-  caption?: string; // New field for image captions
-  category?: string;
-  is_featured: boolean;
-  order_index: number; // New field for image ordering
-  created_at: string;
+  estimated_hours?: number;
 }
 
 /**
  * Artist pricing configuration
  */
 export interface ArtistPricing {
+  base_price_per_hour?: number;
   minimum_session_price?: number;
   hourly_rate?: number;
-  services: PricingService[];
+  pricing_items?: PricingItem[];
+  additional_costs?: {
+    consultation: number;
+    design: number;
+    touch_up: number;
+  };
+  payment_methods?: string[];
+  pricing_notes?: string;
+  services?: PricingService[];
 }
 
 /**
@@ -88,7 +113,8 @@ export interface WeeklySchedule {
  * Day schedule
  */
 export interface DaySchedule {
-  is_working: boolean;
+  is_available?: boolean;
+  is_working?: boolean;
   start_time?: string; // Format: "HH:mm"
   end_time?: string;   // Format: "HH:mm"
   break_start?: string;
@@ -100,12 +126,12 @@ export interface DaySchedule {
  */
 export interface UnavailablePeriod {
   id: string;
-  artist_id: string;
+  artist_id?: string;
   start_date: string;
   end_date: string;
   reason: string;
-  type: 'vacation' | 'sick_leave' | 'workshop' | 'personal' | 'other';
-  created_at: string;
+  type?: 'vacation' | 'sick_leave' | 'workshop' | 'personal' | 'other';
+  created_at?: string;
 }
 
 /**

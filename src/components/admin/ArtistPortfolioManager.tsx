@@ -9,18 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Image, Plus, Edit, Trash2, X, Upload, Eye } from 'lucide-react';
-
-export interface PortfolioItem {
-  id: string;
-  image_url: string;
-  title: string;
-  description: string;
-  style: string;
-  category: string;
-  completion_date: string;
-  client_name?: string;
-  session_duration?: string;
-}
+import { PortfolioItem } from '@/services/interfaces/IArtistsService';
 
 interface ArtistPortfolioManagerProps {
   portfolioItems: PortfolioItem[];
@@ -61,7 +50,14 @@ const ArtistPortfolioManager = ({ portfolioItems, onItemsChange, maxItems = 20 }
 
     const newItem: PortfolioItem = {
       id: editingItem?.id || Date.now().toString(),
-      ...formData
+      title: formData.title,
+      description: formData.description,
+      style: formData.style,
+      category: formData.category,
+      completion_date: formData.completion_date,
+      image_url: formData.image_url,
+      client_name: formData.client_name || undefined,
+      session_duration: formData.session_duration || undefined
     };
 
     if (editingItem) {
@@ -89,7 +85,16 @@ const ArtistPortfolioManager = ({ portfolioItems, onItemsChange, maxItems = 20 }
   };
 
   const handleEdit = (item: PortfolioItem) => {
-    setFormData(item);
+    setFormData({
+      image_url: item.image_url,
+      title: item.title,
+      description: item.description,
+      style: item.style,
+      category: item.category,
+      completion_date: item.completion_date,
+      client_name: item.client_name || '',
+      session_duration: item.session_duration || ''
+    });
     setEditingItem(item);
     setIsDialogOpen(true);
   };

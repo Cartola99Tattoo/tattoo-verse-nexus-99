@@ -65,7 +65,7 @@ const commonSpecialties = [
 
 const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFormProps) => {
   const [newSpecialty, setNewSpecialty] = useState("");
-  const [portfolioItems, setPortfolioItems] = useState(artist?.portfolio || []);
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>(artist?.portfolio || []);
   const [pricing, setPricing] = useState<ArtistPricing | undefined>(artist?.pricing);
   const [schedule, setSchedule] = useState<WeeklySchedule | undefined>(artist?.work_schedule);
   const [unavailablePeriods, setUnavailablePeriods] = useState<UnavailablePeriod[]>(artist?.unavailable_periods || []);
@@ -141,6 +141,10 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
       addSpecialty(newSpecialty.trim());
       setNewSpecialty("");
     }
+  };
+
+  const handlePortfolioChange = (items: PortfolioItem[]) => {
+    setPortfolioItems(items);
   };
 
   return (
@@ -503,7 +507,7 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
             <TabsContent value="portfolio">
               <ArtistPortfolioManager
                 portfolioItems={portfolioItems}
-                onItemsChange={setPortfolioItems}
+                onItemsChange={handlePortfolioChange}
                 maxItems={12}
               />
             </TabsContent>
