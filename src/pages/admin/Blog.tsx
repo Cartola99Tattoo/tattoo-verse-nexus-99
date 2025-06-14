@@ -13,6 +13,7 @@ import BlogPostForm from "@/components/admin/BlogPostForm";
 import BlogCategoryManager from "@/components/admin/BlogCategoryManager";
 import PersonaManager from "@/components/admin/PersonaManager";
 import JourneyManager from "@/components/admin/JourneyManager";
+import ContentIdeaManager from "@/components/admin/ContentIdeaManager";
 
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -284,23 +285,7 @@ const Blog = () => {
         </TabsContent>
 
         <TabsContent value="ideas">
-          <div className="space-y-6">
-            <Card variant="tattooRed" className="tattoo-card-enhanced">
-              <CardHeader variant="red">
-                <CardTitle className="tattoo-title-red flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5" />
-                  Ideias de Conteúdo
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Lightbulb className="h-12 w-12 mx-auto text-red-300 mb-4" />
-                  <p>Banco de Ideias em desenvolvimento...</p>
-                  <p className="text-sm mt-2">Em breve você poderá gerenciar suas ideias de conteúdo de forma estratégica aqui.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <ContentIdeaManager personas={personas || []} />
         </TabsContent>
 
         <TabsContent value="production">
