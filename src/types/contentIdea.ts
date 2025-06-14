@@ -7,7 +7,7 @@ export interface ContentIdea {
   focusPersonas: string[]; // Array of persona IDs
   personaRelevance: string;
   focusKeyword: string;
-  status: 'Ideia' | 'Planejado' | 'Em Produção' | 'Em Revisão' | 'Publicado' | 'Arquivado';
+  status: 'Ideia' | 'Planejado' | 'Em Produção' | 'Em Revisão' | 'Fazendo Imagens/Gráficos' | 'Conteúdo Agendado' | 'Publicado' | 'Promover/Distribuir' | 'Arquivado';
   notes: string;
   ideaCreator: string;
   created_at: string;
@@ -21,7 +21,7 @@ export interface CreateContentIdeaData {
   focusPersonas: string[];
   personaRelevance: string;
   focusKeyword: string;
-  status: 'Ideia' | 'Planejado' | 'Em Produção' | 'Em Revisão' | 'Publicado' | 'Arquivado';
+  status: 'Ideia' | 'Planejado' | 'Em Produção' | 'Em Revisão' | 'Fazendo Imagens/Gráficos' | 'Conteúdo Agendado' | 'Publicado' | 'Promover/Distribuir' | 'Arquivado';
   notes: string;
   ideaCreator: string;
 }

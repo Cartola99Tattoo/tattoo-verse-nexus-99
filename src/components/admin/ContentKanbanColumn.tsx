@@ -16,21 +16,21 @@ const ContentKanbanColumn = ({ id, title, ideas }: ContentKanbanColumnProps) => 
   const { setNodeRef } = useDroppable({ id });
 
   return (
-    <div className="w-[300px] flex-shrink-0">
-      <Card className="h-full bg-black/80 border-t-4 border-red-600 rounded-lg shadow-2xl backdrop-blur-sm">
-        <CardHeader className="p-4 border-b border-white/10">
-          <CardTitle className="text-white font-bold flex justify-between items-center text-base">
-            <span>{title}</span>
-            <span className="text-sm font-normal text-gray-400 bg-gray-800 px-2 py-0.5 rounded-full">{ideas.length}</span>
+    <div className="w-[320px] flex-shrink-0">
+      <Card className="h-full bg-gradient-to-b from-black via-gray-900 to-black border-t-4 border-red-600 rounded-xl shadow-2xl shadow-red-500/10 backdrop-blur-sm">
+        <CardHeader className="p-4 border-b border-red-800/50">
+          <CardTitle className="text-white font-black flex justify-between items-center text-lg tracking-wider">
+            <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">{title}</span>
+            <span className="text-base font-bold text-red-400 bg-red-900/50 px-3 py-1 rounded-full">{ideas.length}</span>
           </CardTitle>
         </CardHeader>
-        <CardContent ref={setNodeRef} className="p-4 h-[calc(100vh-280px)] overflow-y-auto">
+        <CardContent ref={setNodeRef} className="p-2 sm:p-4 h-[calc(100vh-280px)] overflow-y-auto">
           <SortableContext id={id} items={ideas} strategy={verticalListSortingStrategy}>
             {ideas.length > 0 ? (
               ideas.map(idea => <ContentKanbanCard key={idea.id} idea={idea} />)
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500">
-                <p className="text-sm">Arraste as ideias aqui</p>
+                <p className="text-sm italic">Arraste as ideias para esta coluna</p>
               </div>
             )}
           </SortableContext>

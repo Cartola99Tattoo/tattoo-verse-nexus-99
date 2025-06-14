@@ -22,10 +22,13 @@ const ContentKanbanCard = ({ idea }: ContentKanbanCardProps) => {
   } = useSortable({ id: idea.id });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 100 : 'auto',
+    boxShadow: isDragging ? '0 25px 50px -12px rgba(239, 68, 68, 0.25)' : 'none',
+    transform: isDragging
+      ? `${CSS.Transform.toString(transform)} scale(1.05)`
+      : CSS.Transform.toString(transform),
   };
 
   const getFormatColor = (format: string) => {
@@ -43,13 +46,13 @@ const ContentKanbanCard = ({ idea }: ContentKanbanCardProps) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <div ref={setNodeRef} style={style} className="transform transition-transform duration-300">
       <Card
         {...attributes}
-        className="mb-4 bg-gradient-to-br from-gray-800 via-gray-900 to-black border border-red-800/50 shadow-lg hover:shadow-red-500/20 hover:border-red-700 transition-all duration-300 group"
+        className="mb-4 bg-gradient-to-br from-gray-800 via-gray-900 to-black border border-red-800/50 shadow-lg hover:shadow-red-500/20 hover:border-red-600 transition-all duration-300 group hover:scale-[1.03] hover:-translate-y-1"
       >
         <CardContent className="p-3 text-white relative">
-          <button {...listeners} className="absolute top-2 right-2 p-1 text-gray-500 hover:text-white cursor-grab active:cursor-grabbing">
+          <button {...listeners} className="absolute top-2 right-2 p-1 text-gray-500 hover:text-white cursor-grab active:cursor-grabbing transition-colors duration-200">
             <GripVertical className="h-5 w-5" />
           </button>
           <p className="font-bold text-base mb-2 pr-8 line-clamp-2">{idea.theme}</p>

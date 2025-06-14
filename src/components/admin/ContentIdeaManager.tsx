@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -196,7 +195,10 @@ const ContentIdeaManager = ({ personas, ideas, onIdeaCreate, onIdeaUpdate }: Con
                   <SelectItem value="Planejado">Planejado</SelectItem>
                   <SelectItem value="Em Produção">Em Produção</SelectItem>
                   <SelectItem value="Em Revisão">Em Revisão</SelectItem>
+                  <SelectItem value="Fazendo Imagens/Gráficos">Fazendo Imagens/Gráficos</SelectItem>
+                  <SelectItem value="Conteúdo Agendado">Conteúdo Agendado</SelectItem>
                   <SelectItem value="Publicado">Publicado</SelectItem>
+                  <SelectItem value="Promover/Distribuir">Promover/Distribuir</SelectItem>
                   <SelectItem value="Arquivado">Arquivado</SelectItem>
                 </SelectContent>
               </Select>

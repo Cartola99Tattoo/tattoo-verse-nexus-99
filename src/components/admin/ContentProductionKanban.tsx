@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -9,6 +8,7 @@ import ContentKanbanCard from './ContentKanbanCard';
 
 interface ContentProductionKanbanProps {
   ideas: ContentIdea[];
+  onIdeaStatusUpdate: (ideaId: string, newStatus: ContentIdea['status']) => void;
 }
 
 const KANBAN_COLUMNS = [
@@ -26,7 +26,7 @@ type IdeaColumns = {
   [key: string]: ContentIdea[];
 };
 
-const ContentProductionKanban = ({ ideas: initialIdeas }: ContentProductionKanbanProps) => {
+const ContentProductionKanban = ({ ideas: initialIdeas, onIdeaStatusUpdate }: ContentProductionKanbanProps) => {
   const [columns, setColumns] = useState<IdeaColumns>({});
   const [activeIdea, setActiveIdea] = useState<ContentIdea | null>(null);
 
@@ -36,7 +36,10 @@ const ContentProductionKanban = ({ ideas: initialIdeas }: ContentProductionKanba
       'Planejado': 'Pesquisando',
       'Em Produção': 'Escrevendo',
       'Em Revisão': 'Editando',
+      'Fazendo Imagens/Gráficos': 'Fazendo Imagens/Gráficos',
+      'Conteúdo Agendado': 'Conteúdo Agendado',
       'Publicado': 'Conteúdo Publicado',
+      'Promover/Distribuir': 'Promover/Distribuir',
     };
 
     const initialColumns: IdeaColumns = KANBAN_COLUMNS.reduce((acc, col) => ({ ...acc, [col]: [] }), {});
@@ -49,6 +52,11 @@ const ContentProductionKanban = ({ ideas: initialIdeas }: ContentProductionKanba
         initialColumns['Ideias de Artigos'].push(idea);
       }
     });
+
+    // Sort ideas within columns by update time to keep order consistent
+    for (const col in initialColumns) {
+      initialColumns[col].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+    }
 
     setColumns(initialColumns);
   }, [initialIdeas]);
@@ -84,15 +92,21 @@ const ContentProductionKanban = ({ ideas: initialIdeas }: ContentProductionKanba
     const activeColumn = findColumn(activeId);
     const overColumn = findColumn(overId) || (KANBAN_COLUMNS.includes(overId) ? overId : null);
 
-    if (!activeColumn || !overColumn || activeColumn === overColumn) {
-      // Handle reordering within the same column
-      if (activeColumn && activeId !== overId) {
+    if (!activeColumn || !overColumn) {
+      return;
+    }
+
+    // Handle reordering within the same column
+    if (activeColumn === overColumn) {
+      if (activeId !== overId) {
         setColumns(prev => {
           const newColumns = { ...prev };
           const ideasInColumn = newColumns[activeColumn];
           const oldIndex = ideasInColumn.findIndex(i => i.id === activeId);
           const newIndex = ideasInColumn.findIndex(i => i.id === overId);
-          newColumns[activeColumn] = arrayMove(ideasInColumn, oldIndex, newIndex);
+          if (oldIndex !== -1 && newIndex !== -1) {
+            newColumns[activeColumn] = arrayMove(ideasInColumn, oldIndex, newIndex);
+          }
           return newColumns;
         });
       }
@@ -100,25 +114,21 @@ const ContentProductionKanban = ({ ideas: initialIdeas }: ContentProductionKanba
     }
 
     // Handle moving to a different column
-    setColumns(prev => {
-      const activeItems = [...prev[activeColumn]];
-      const overItems = [...prev[overColumn]];
-
-      const activeIndex = activeItems.findIndex(i => i.id === activeId);
-      const [movedItem] = activeItems.splice(activeIndex, 1);
-      
-      const overIndex = overItems.findIndex(i => i.id === overId);
-      
-      // If dropping on an item, insert before it. Otherwise, at the end.
-      const newIndex = overIndex >= 0 ? overIndex : overItems.length;
-      overItems.splice(newIndex, 0, movedItem);
-
-      return {
-        ...prev,
-        [activeColumn]: activeItems,
-        [overColumn]: overItems,
-      };
-    });
+    const columnToStatusMap: { [key: string]: ContentIdea['status'] | undefined } = {
+        'Ideias de Artigos': 'Ideia',
+        'Pesquisando': 'Planejado',
+        'Escrevendo': 'Em Produção',
+        'Editando': 'Em Revisão',
+        'Fazendo Imagens/Gráficos': 'Fazendo Imagens/Gráficos',
+        'Conteúdo Agendado': 'Conteúdo Agendado',
+        'Conteúdo Publicado': 'Publicado',
+        'Promover/Distribuir': 'Promover/Distribuir',
+    };
+    
+    const newStatus = columnToStatusMap[overColumn];
+    if (newStatus) {
+      onIdeaStatusUpdate(activeId, newStatus);
+    }
   };
 
   return (

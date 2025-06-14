@@ -70,6 +70,16 @@ const Blog = () => {
     ));
   };
 
+  const handleIdeaStatusUpdate = (ideaId: string, newStatus: ContentIdea['status']) => {
+    setIdeas(prev => prev.map(idea => 
+      idea.id === ideaId ? { ...idea, status: newStatus, updated_at: new Date().toISOString() } : idea
+    ));
+    toast({
+      title: "Status Atualizado!",
+      description: `A ideia foi movida para "${newStatus}".`
+    });
+  };
+
   const handleDeletePost = async (postId: string) => {
     if (!blogService.deleteBlogPost) {
       toast({
@@ -318,7 +328,7 @@ const Blog = () => {
         </TabsContent>
 
         <TabsContent value="production">
-          <ContentProductionKanban ideas={ideas} />
+          <ContentProductionKanban ideas={ideas} onIdeaStatusUpdate={handleIdeaStatusUpdate} />
         </TabsContent>
       </Tabs>
     </div>
