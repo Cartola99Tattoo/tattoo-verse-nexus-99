@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { BlogQueryParams } from "@/services/interfaces/IBlogService";
 import { toast } from "@/hooks/use-toast";
 import BlogPostForm from "@/components/admin/BlogPostForm";
 import BlogCategoryManager from "@/components/admin/BlogCategoryManager";
+import PersonaManager from "@/components/admin/PersonaManager";
 
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -270,23 +270,7 @@ const Blog = () => {
         </TabsContent>
 
         <TabsContent value="personas">
-          <div className="space-y-6">
-            <Card variant="tattooRed" className="tattoo-card-enhanced">
-              <CardHeader variant="red">
-                <CardTitle className="tattoo-title-red flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Gestão de Personas
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Users className="h-12 w-12 mx-auto text-red-300 mb-4" />
-                  <p>Seção de Personas em desenvolvimento...</p>
-                  <p className="text-sm mt-2">Em breve você poderá gerenciar as personas do seu público-alvo aqui.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <PersonaManager />
         </TabsContent>
 
         <TabsContent value="journey">
