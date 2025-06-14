@@ -42,7 +42,7 @@ const AdminArtists = () => {
   // Filtrar por localização no frontend (simulado)
   const filteredArtists = artists.filter(artist => {
     if (locationFilter === 'all') return true;
-    const artistLocations = (artist as any)?.locations || [];
+    const artistLocations = artist?.locations || [];
     return artistLocations.some((location: string) => 
       location.toLowerCase().includes(locationFilter.toLowerCase())
     );
@@ -136,11 +136,11 @@ const AdminArtists = () => {
     }
   };
 
-  const handleCreateSubmit = async (data: any) => {
+  const handleCreateSave = async (data: any) => {
     await createArtistMutation.mutateAsync(data);
   };
 
-  const handleUpdateSubmit = async (data: any) => {
+  const handleUpdateSave = async (data: any) => {
     if (selectedArtist) {
       await updateArtistMutation.mutateAsync({ 
         id: selectedArtist.id, 
@@ -174,7 +174,7 @@ const AdminArtists = () => {
 
   const uniqueStyles = [...new Set(artists.map(artist => artist.style))];
   const uniqueLocations = [...new Set(
-    artists.flatMap(artist => (artist as any)?.locations || [])
+    artists.flatMap(artist => artist?.locations || [])
   )];
 
   return (
@@ -361,7 +361,7 @@ const AdminArtists = () => {
                 <TableBody>
                   {filteredArtists.map((artist) => {
                     const metrics = getPerformanceMetrics(artist);
-                    const artistLocations = (artist as any)?.locations || [];
+                    const artistLocations = artist?.locations || [];
                     return (
                       <TableRow key={artist.id} className="hover:bg-red-50 transition-colors duration-200 border-b border-red-100">
                         <TableCell>
@@ -490,9 +490,8 @@ const AdminArtists = () => {
             </DialogDescription>
           </DialogHeader>
           <ArtistForm
-            onSubmit={handleCreateSubmit}
+            onSave={handleCreateSave}
             onCancel={() => setIsCreateDialogOpen(false)}
-            isLoading={createArtistMutation.isPending}
           />
         </DialogContent>
       </Dialog>
@@ -509,12 +508,11 @@ const AdminArtists = () => {
           {selectedArtist && (
             <ArtistForm
               artist={selectedArtist}
-              onSubmit={handleUpdateSubmit}
+              onSave={handleUpdateSave}
               onCancel={() => {
                 setIsEditDialogOpen(false);
                 setSelectedArtist(null);
               }}
-              isLoading={updateArtistMutation.isPending}
             />
           )}
         </DialogContent>

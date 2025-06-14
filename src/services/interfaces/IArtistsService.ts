@@ -1,3 +1,4 @@
+
 /**
  * Artist interface
  */
@@ -30,6 +31,9 @@ export interface Artist {
   pricing?: ArtistPricing;
   work_schedule?: WeeklySchedule;
   unavailable_periods?: UnavailablePeriod[];
+  locations?: string[];
+  documents?: any[];
+  permissions?: any;
   
   created_at?: string;
   updated_at?: string;

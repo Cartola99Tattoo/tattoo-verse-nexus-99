@@ -66,6 +66,8 @@ const ArtistForm = ({ artist, onSave, onCancel }: ArtistFormProps) => {
     },
     work_schedule: artist?.work_schedule || {},
     unavailable_periods: artist?.unavailable_periods || [],
+    documents: artist?.documents || [],
+    permissions: artist?.permissions || {},
   });
 
   const [locations, setLocations] = useState<string[]>(artist?.locations || []);
@@ -187,7 +189,7 @@ const ArtistForm = ({ artist, onSave, onCancel }: ArtistFormProps) => {
                 <Label>Foto de Perfil</Label>
                 <ImageUploadField
                   currentImage={formData.avatar_url}
-                  onImageSelect={(url) => handleInputChange("avatar_url", url)}
+                  onImageChange={(url) => handleInputChange("avatar_url", url)}
                   variant="avatar"
                 />
               </div>
@@ -448,15 +450,15 @@ const ArtistForm = ({ artist, onSave, onCancel }: ArtistFormProps) => {
 
         <TabsContent value="portfolio">
           <ArtistPortfolioManager
-            portfolio={portfolio}
-            onPortfolioUpdate={handlePortfolioUpdate}
+            items={portfolio}
+            onUpdate={handlePortfolioUpdate}
           />
         </TabsContent>
 
         <TabsContent value="pricing">
           <ArtistPricingManager
             pricing={formData.pricing}
-            onPricingUpdate={handlePricingUpdate}
+            onUpdate={handlePricingUpdate}
           />
         </TabsContent>
 
@@ -464,15 +466,15 @@ const ArtistForm = ({ artist, onSave, onCancel }: ArtistFormProps) => {
           <ArtistScheduleManager
             schedule={formData.work_schedule}
             unavailablePeriods={formData.unavailable_periods || []}
-            onScheduleUpdate={handleScheduleUpdate}
-            onUnavailablePeriodsUpdate={handleUnavailablePeriodsUpdate}
+            onUpdate={handleScheduleUpdate}
+            onPeriodsUpdate={handleUnavailablePeriodsUpdate}
           />
         </TabsContent>
 
         <TabsContent value="documents">
           <ArtistDocumentsManager
             documents={formData.documents || []}
-            onDocumentsUpdate={handleDocumentsUpdate}
+            onUpdate={handleDocumentsUpdate}
           />
         </TabsContent>
 
@@ -480,7 +482,7 @@ const ArtistForm = ({ artist, onSave, onCancel }: ArtistFormProps) => {
           <div className="space-y-6">
             <ArtistPermissionsManager
               permissions={formData.permissions}
-              onPermissionsUpdate={handlePermissionsUpdate}
+              onUpdate={handlePermissionsUpdate}
             />
           </div>
         </TabsContent>
