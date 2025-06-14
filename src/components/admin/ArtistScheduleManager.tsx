@@ -26,6 +26,12 @@ const daysOfWeek = [
   { key: 'sunday', label: 'Domingo' }
 ];
 
+const defaultDaySchedule = {
+  is_available: false,
+  start_time: '09:00',
+  end_time: '18:00'
+};
+
 const ArtistScheduleManager = ({ 
   schedule, 
   unavailablePeriods, 
@@ -38,14 +44,15 @@ const ArtistScheduleManager = ({
     reason: ''
   });
 
-  const currentSchedule = schedule || {
-    monday: { is_available: false, start_time: '09:00', end_time: '18:00' },
-    tuesday: { is_available: false, start_time: '09:00', end_time: '18:00' },
-    wednesday: { is_available: false, start_time: '09:00', end_time: '18:00' },
-    thursday: { is_available: false, start_time: '09:00', end_time: '18:00' },
-    friday: { is_available: false, start_time: '09:00', end_time: '18:00' },
-    saturday: { is_available: false, start_time: '09:00', end_time: '18:00' },
-    sunday: { is_available: false, start_time: '09:00', end_time: '18:00' }
+  // Ensure all days have proper default values
+  const currentSchedule = {
+    monday: schedule?.monday || defaultDaySchedule,
+    tuesday: schedule?.tuesday || defaultDaySchedule,
+    wednesday: schedule?.wednesday || defaultDaySchedule,
+    thursday: schedule?.thursday || defaultDaySchedule,
+    friday: schedule?.friday || defaultDaySchedule,
+    saturday: schedule?.saturday || defaultDaySchedule,
+    sunday: schedule?.sunday || defaultDaySchedule
   };
 
   const handleDayChange = (day: string, field: string, value: string | boolean) => {
@@ -77,7 +84,10 @@ const ArtistScheduleManager = ({
   };
 
   const getActiveDaysCount = () => {
-    return daysOfWeek.filter(day => currentSchedule[day.key as keyof WeeklySchedule].is_available).length;
+    return daysOfWeek.filter(day => {
+      const daySchedule = currentSchedule[day.key as keyof WeeklySchedule];
+      return daySchedule && daySchedule.is_available;
+    }).length;
   };
 
   return (
@@ -112,29 +122,29 @@ const ArtistScheduleManager = ({
                 <div
                   key={day.key}
                   className={`p-4 rounded-lg border-2 transition-all duration-300 ${
-                    daySchedule.is_available
+                    daySchedule?.is_available
                       ? 'bg-gradient-to-r from-green-50 to-green-100 border-green-300 shadow-lg'
                       : 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <Label className={`font-bold text-lg ${daySchedule.is_available ? 'text-green-800' : 'text-gray-600'}`}>
+                    <Label className={`font-bold text-lg ${daySchedule?.is_available ? 'text-green-800' : 'text-gray-600'}`}>
                       {day.label}
                     </Label>
                     <Switch
-                      checked={daySchedule.is_available}
+                      checked={daySchedule?.is_available || false}
                       onCheckedChange={(checked) => handleDayChange(day.key, 'is_available', checked)}
                       className="data-[state=checked]:bg-green-600"
                     />
                   </div>
                   
-                  {daySchedule.is_available && (
+                  {daySchedule?.is_available && (
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label className="text-green-700 font-medium text-sm">Início</Label>
                         <Input
                           type="time"
-                          value={daySchedule.start_time}
+                          value={daySchedule?.start_time || '09:00'}
                           onChange={(e) => handleDayChange(day.key, 'start_time', e.target.value)}
                           className="border-green-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
                         />
@@ -143,7 +153,7 @@ const ArtistScheduleManager = ({
                         <Label className="text-green-700 font-medium text-sm">Fim</Label>
                         <Input
                           type="time"
-                          value={daySchedule.end_time}
+                          value={daySchedule?.end_time || '18:00'}
                           onChange={(e) => handleDayChange(day.key, 'end_time', e.target.value)}
                           className="border-green-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
                         />
