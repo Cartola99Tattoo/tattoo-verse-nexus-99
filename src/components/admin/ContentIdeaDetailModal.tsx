@@ -49,10 +49,15 @@ const ContentIdeaDetailModal = ({
     setIsEditing(false);
   };
 
-  const canTransformToArticle = ['Em Produção', 'Em Revisão', 'Fazendo Imagens/Gráficos'].includes(idea.status);
+  const handleTransform = () => {
+    // Salvar antes de transformar
+    onUpdate(idea, formData);
+    onTransformToArticle(idea);
+  };
+
   const hasDraftContent = formData.draftTitle || formData.draftSummary || formData.draftContent;
   const draftCompleteness = [formData.draftTitle, formData.draftSummary, formData.draftContent].filter(Boolean).length;
-  const isDraftWellDeveloped = draftCompleteness >= 2; // Pelo menos título e um dos outros campos
+  const isDraftWellDeveloped = draftCompleteness >= 2;
 
   const getPersonaNames = (personaIds: string[]) => {
     return personaIds.map(id => {
@@ -150,6 +155,7 @@ const ContentIdeaDetailModal = ({
                   <p className="text-gray-700 bg-gray-50 p-3 rounded-lg border">{idea.focusKeyword}</p>
                 </div>
 
+                {/* Campos editáveis sempre na esquerda */}
                 <div>
                   <Label className="text-red-700 font-bold">Relevância para Personas</Label>
                   {isEditing ? (
@@ -197,7 +203,7 @@ const ContentIdeaDetailModal = ({
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
-                {/* Indicador de Progresso do Rascunho DESTACADO */}
+                {/* Indicador de Progresso do Rascunho */}
                 <div className="bg-gradient-to-r from-green-100 to-green-200 p-4 rounded-lg border-2 border-green-300 shadow-lg">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-lg font-black text-green-800 flex items-center gap-2">
@@ -239,26 +245,22 @@ const ContentIdeaDetailModal = ({
                   </p>
                 </div>
 
-                {/* CAMPOS DE RASCUNHO EXPANDIDOS E DETALHADOS */}
+                {/* CAMPOS DE RASCUNHO FUNCIONAIS */}
                 <div className="space-y-6">
                   <div>
                     <Label className="text-green-700 font-bold text-lg mb-3 block flex items-center gap-2">
                       <FileText className="h-5 w-5" />
                       Rascunho de Título *
                     </Label>
-                    {isEditing ? (
-                      <Input
-                        value={formData.draftTitle}
-                        onChange={(e) => setFormData(prev => ({ ...prev, draftTitle: e.target.value }))}
-                        placeholder="Digite o título provisório do artigo..."
-                        className="border-green-200 focus:border-green-500 shadow-sm text-lg py-3"
-                      />
-                    ) : (
-                      <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 min-h-[60px] flex items-center">
-                        <p className="text-gray-800 font-semibold text-lg">
-                          {idea.draftTitle || 'Título não definido - clique em "Editar" para adicionar'}
-                        </p>
-                      </div>
+                    <Input
+                      value={formData.draftTitle}
+                      onChange={(e) => setFormData(prev => ({ ...prev, draftTitle: e.target.value }))}
+                      placeholder="Digite o título provisório do artigo..."
+                      className="border-green-200 focus:border-green-500 shadow-sm text-lg py-3"
+                      disabled={!isEditing}
+                    />
+                    {!isEditing && !formData.draftTitle && (
+                      <p className="text-sm text-gray-500 mt-1 italic">Clique em "Editar" para adicionar o título</p>
                     )}
                   </div>
 
@@ -267,20 +269,16 @@ const ContentIdeaDetailModal = ({
                       <BookOpen className="h-5 w-5" />
                       Resumo do Artigo (Rascunho)
                     </Label>
-                    {isEditing ? (
-                      <Textarea
-                        value={formData.draftSummary}
-                        onChange={(e) => setFormData(prev => ({ ...prev, draftSummary: e.target.value }))}
-                        placeholder="Escreva uma breve sinopse do conteúdo que será abordado no artigo..."
-                        className="border-green-200 focus:border-green-500 shadow-sm resize-y"
-                        rows={5}
-                      />
-                    ) : (
-                      <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 min-h-[120px]">
-                        <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                          {idea.draftSummary || 'Resumo não definido - clique em "Editar" para adicionar uma sinopse do artigo'}
-                        </p>
-                      </div>
+                    <Textarea
+                      value={formData.draftSummary}
+                      onChange={(e) => setFormData(prev => ({ ...prev, draftSummary: e.target.value }))}
+                      placeholder="Escreva uma breve sinopse do conteúdo que será abordado no artigo..."
+                      className="border-green-200 focus:border-green-500 shadow-sm resize-y"
+                      rows={5}
+                      disabled={!isEditing}
+                    />
+                    {!isEditing && !formData.draftSummary && (
+                      <p className="text-sm text-gray-500 mt-1 italic">Clique em "Editar" para adicionar o resumo</p>
                     )}
                   </div>
 
@@ -289,20 +287,16 @@ const ContentIdeaDetailModal = ({
                       <PenTool className="h-5 w-5" />
                       Conteúdo do Artigo (Rascunho Completo)
                     </Label>
-                    {isEditing ? (
-                      <Textarea
-                        value={formData.draftContent}
-                        onChange={(e) => setFormData(prev => ({ ...prev, draftContent: e.target.value }))}
-                        placeholder="Escreva o rascunho completo do artigo ou partes significativas dele. Você pode usar este espaço para desenvolver o conteúdo principal, estruturar ideias, adicionar tópicos importantes, etc..."
-                        className="border-green-200 focus:border-green-500 shadow-sm resize-y"
-                        rows={16}
-                      />
-                    ) : (
-                      <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 max-h-96 overflow-y-auto">
-                        <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                          {idea.draftContent || 'Conteúdo não desenvolvido - clique em "Editar" para começar a escrever o rascunho do artigo'}
-                        </p>
-                      </div>
+                    <Textarea
+                      value={formData.draftContent}
+                      onChange={(e) => setFormData(prev => ({ ...prev, draftContent: e.target.value }))}
+                      placeholder="Escreva o rascunho completo do artigo ou partes significativas dele. Você pode usar este espaço para desenvolver o conteúdo principal, estruturar ideias, adicionar tópicos importantes, etc..."
+                      className="border-green-200 focus:border-green-500 shadow-sm resize-y"
+                      rows={16}
+                      disabled={!isEditing}
+                    />
+                    {!isEditing && !formData.draftContent && (
+                      <p className="text-sm text-gray-500 mt-1 italic">Clique em "Editar" para desenvolver o conteúdo</p>
                     )}
                   </div>
                 </div>
@@ -340,7 +334,7 @@ const ContentIdeaDetailModal = ({
                 {/* BOTÃO PRINCIPAL: TRANSFORMAR EM ARTIGO */}
                 {isDraftWellDeveloped && (
                   <Button
-                    onClick={() => onTransformToArticle(idea)}
+                    onClick={handleTransform}
                     className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white shadow-2xl font-black text-xl px-12 py-4 transform hover:scale-105 transition-all duration-300 border-2 border-red-400/50"
                   >
                     <ArrowRight className="h-6 w-6 mr-3 animate-pulse" />

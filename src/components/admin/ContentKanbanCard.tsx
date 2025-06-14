@@ -111,7 +111,6 @@ const ContentKanbanCard = ({ idea, personas = [], onUpdate, onTransformToArticle
                   {/* INDICADOR DE RASCUNHO MELHORADO E MAIS VISUAL */}
                   {hasDraftContent && (
                     <div className="mt-3 space-y-2">
-                      {/* Barra de Progresso Visual */}
                       <div className="bg-gradient-to-r from-green-100 to-green-200 p-3 rounded-lg border-2 border-green-300 shadow-md">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">

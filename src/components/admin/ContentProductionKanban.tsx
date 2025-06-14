@@ -183,10 +183,12 @@ const ContentProductionKanban = ({
   };
 
   const handleTransformToArticle = (idea: ContentIdea) => {
+    console.log('Transformando em artigo:', idea);
     setTransformingIdea(idea);
   };
 
   const handleArticleSaved = () => {
+    console.log('Artigo salvo, voltando ao Kanban');
     setTransformingIdea(null);
     // Optionally update the idea status to 'Publicado'
     if (transformingIdea) {
@@ -194,6 +196,7 @@ const ContentProductionKanban = ({
     }
   };
 
+  // Se estiver transformando uma ideia em artigo, mostrar o formulário de artigo
   if (transformingIdea) {
     return (
       <div className="bg-gradient-to-br from-white to-red-50 min-h-screen">
