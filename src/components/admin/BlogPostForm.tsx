@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Save, Eye, X, Users, Target } from "lucide-react";
+import { ArrowLeft, Save, Eye, X, Users, Target, FileText, Image, Tags, Search } from "lucide-react";
 import { getBlogService } from "@/services/serviceFactory";
 import { BlogCategory, CreateBlogPostData, UpdateBlogPostData } from "@/services/interfaces/IBlogService";
 import { toast } from "@/hooks/use-toast";
@@ -205,110 +206,137 @@ const BlogPostForm = ({ post, categories, personas = [], initialData, onSave, on
   const selectedCategory = categories.find(cat => cat.id === formData.category_id);
 
   return (
-    <div className="space-y-6 bg-gradient-to-br from-white to-red-50 min-h-screen p-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            onClick={onCancel}
-            className="border-red-300 text-red-600 hover:bg-red-50"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
-          </Button>
-          <h1 className="text-3xl font-bold text-red-800">
-            {post ? 'Editar Artigo' : 'Novo Artigo'}
-          </h1>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowPreview(true)}
-            disabled={!formData.title || !formData.content}
-            className="border-red-600 text-red-600 hover:bg-red-50"
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Pré-visualizar
-          </Button>
-          <Button 
-            onClick={handleSave} 
-            disabled={isLoading}
-            className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {isLoading ? 'Salvando...' : 'Salvar'}
-          </Button>
+    <div className="min-h-screen bg-gradient-to-br from-white via-red-50 to-red-100 p-6">
+      {/* Header com Identidade Visual 99Tattoo */}
+      <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-xl shadow-2xl mb-8">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              onClick={onCancel}
+              className="border-white/30 text-white hover:bg-white/10 shadow-lg backdrop-blur-sm"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+            <div>
+              <h1 className="text-3xl font-black text-white drop-shadow-lg">
+                {post ? 'Editar Artigo' : 'Novo Artigo'}
+              </h1>
+              {initialData && (
+                <p className="text-red-100 mt-1 font-medium">
+                  Criado a partir de rascunho do Kanban
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowPreview(true)}
+              disabled={!formData.title || !formData.content}
+              className="border-white/30 text-white hover:bg-white/10 shadow-lg backdrop-blur-sm"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Pré-visualizar
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              disabled={isLoading}
+              className="bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white shadow-xl font-bold transform hover:scale-105 transition-all duration-300"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {isLoading ? 'Salvando...' : 'Salvar Artigo'}
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="bg-white border-2 border-red-200 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
-              <CardTitle>Conteúdo do Artigo</CardTitle>
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Coluna Principal - Conteúdo do Artigo */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Card de Conteúdo Principal */}
+          <Card className="bg-white border-2 border-red-200 shadow-2xl shadow-red-500/20 hover:shadow-red-500/30 transition-all duration-300">
+            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg p-6">
+              <CardTitle className="flex items-center gap-3 text-xl font-black">
+                <FileText className="h-6 w-6" />
+                Conteúdo do Artigo
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 p-6">
+            <CardContent className="p-8 space-y-6">
               <div>
-                <Label htmlFor="title" className="text-red-700 font-bold">Título *</Label>
+                <Label htmlFor="title" className="text-red-700 font-bold text-lg mb-3 block">
+                  Título do Artigo *
+                </Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   placeholder="Digite o título do artigo..."
-                  className="border-red-200 focus:border-red-500"
+                  className="border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 text-lg p-4 shadow-lg"
                 />
               </div>
 
               <div>
-                <Label htmlFor="slug" className="text-red-700 font-bold">URL Amigável (Slug)</Label>
+                <Label htmlFor="slug" className="text-red-700 font-bold mb-3 block">
+                  URL Amigável (Slug)
+                </Label>
                 <Input
                   id="slug"
                   value={formData.slug}
                   onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                   placeholder="meu-artigo-sobre-tatuagem"
-                  className="border-red-200 focus:border-red-500"
+                  className="border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 shadow-lg"
                 />
               </div>
 
               <div>
-                <Label htmlFor="excerpt" className="text-red-700 font-bold">Resumo</Label>
+                <Label htmlFor="excerpt" className="text-red-700 font-bold mb-3 block">
+                  Resumo do Artigo
+                </Label>
                 <Textarea
                   id="excerpt"
                   value={formData.excerpt}
                   onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
                   placeholder="Breve descrição do artigo..."
-                  rows={3}
-                  className="border-red-200 focus:border-red-500"
+                  rows={4}
+                  className="border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 shadow-lg resize-none"
                 />
               </div>
 
               <div>
-                <Label className="text-red-700 font-bold">Conteúdo *</Label>
-                <EnhancedRichTextEditor
-                  value={formData.content}
-                  onChange={(content) => setFormData(prev => ({ ...prev, content }))}
-                />
+                <Label className="text-red-700 font-bold text-lg mb-3 block">
+                  Conteúdo do Artigo *
+                </Label>
+                <div className="border-2 border-red-200 rounded-lg shadow-lg overflow-hidden">
+                  <EnhancedRichTextEditor
+                    value={formData.content}
+                    onChange={(content) => setFormData(prev => ({ ...prev, content }))}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Publicação */}
-          <Card className="bg-white border-2 border-red-200 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
-              <CardTitle>Publicação</CardTitle>
+        {/* Sidebar - Configurações e Metadados */}
+        <div className="space-y-8">
+          {/* Card de Publicação */}
+          <Card className="bg-white border-2 border-red-200 shadow-2xl shadow-red-500/20">
+            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg p-4">
+              <CardTitle className="flex items-center gap-2">
+                <Save className="h-5 w-5" />
+                Publicação
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 p-6">
+            <CardContent className="p-6 space-y-4">
               <div>
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status" className="text-red-700 font-bold mb-2 block">Status</Label>
                 <select
                   id="status"
                   value={formData.status}
                   onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
-                  className="w-full px-3 py-2 border border-red-200 rounded-md focus:border-red-500 focus:outline-none"
+                  className="w-full px-4 py-3 border-2 border-red-200 rounded-lg focus:border-red-500 focus:outline-none shadow-lg bg-white"
                 >
                   <option value="draft">Rascunho</option>
                   <option value="published">Publicado</option>
@@ -317,23 +345,23 @@ const BlogPostForm = ({ post, categories, personas = [], initialData, onSave, on
               </div>
 
               <div>
-                <Label htmlFor="published_at">Data de Publicação</Label>
+                <Label htmlFor="published_at" className="text-red-700 font-bold mb-2 block">Data de Publicação</Label>
                 <Input
                   id="published_at"
                   type="date"
                   value={formData.published_at}
                   onChange={(e) => setFormData(prev => ({ ...prev, published_at: e.target.value }))}
-                  className="border-red-200 focus:border-red-500"
+                  className="border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 shadow-lg"
                 />
               </div>
 
               <div>
-                <Label htmlFor="category">Categoria</Label>
+                <Label htmlFor="category" className="text-red-700 font-bold mb-2 block">Categoria</Label>
                 <select
                   id="category"
                   value={formData.category_id}
                   onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
-                  className="w-full px-3 py-2 border border-red-200 rounded-md focus:border-red-500 focus:outline-none"
+                  className="w-full px-4 py-3 border-2 border-red-200 rounded-lg focus:border-red-500 focus:outline-none shadow-lg bg-white"
                 >
                   <option value="">Selecione uma categoria</option>
                   {categories.map((category) => (
@@ -346,46 +374,67 @@ const BlogPostForm = ({ post, categories, personas = [], initialData, onSave, on
             </CardContent>
           </Card>
 
-          {/* Estratégia de Conteúdo */}
-          <Card className="bg-white border-2 border-red-200 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
+          {/* Card de Estratégia de Conteúdo - Tags para Análise */}
+          <Card className="bg-white border-2 border-blue-200 shadow-2xl shadow-blue-500/20">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-t-lg p-4">
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
                 Estratégia de Conteúdo
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 p-6">
+            <CardContent className="p-6 space-y-6">
               <div>
-                <Label className="text-red-700 font-bold flex items-center gap-2 mb-3">
-                  <Users className="h-4 w-4" />
-                  Personas Foco
+                <Label className="text-blue-700 font-bold text-lg mb-4 flex items-center gap-2 block">
+                  <Users className="h-5 w-5" />
+                  Personas Foco (Tags para Análise)
                 </Label>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {personas.map((persona) => (
-                    <div key={persona.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`persona-${persona.id}`}
-                        checked={formData.focusPersonas.includes(persona.id)}
-                        onCheckedChange={() => togglePersona(persona.id)}
-                        className="border-red-300 data-[state=checked]:bg-red-600"
-                      />
-                      <Label
-                        htmlFor={`persona-${persona.id}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        {persona.name}
-                      </Label>
-                    </div>
-                  ))}
+                <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 space-y-3 max-h-40 overflow-y-auto">
+                  {personas.length > 0 ? (
+                    personas.map((persona) => (
+                      <div key={persona.id} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={`persona-${persona.id}`}
+                          checked={formData.focusPersonas.includes(persona.id)}
+                          onCheckedChange={() => togglePersona(persona.id)}
+                          className="border-blue-300 data-[state=checked]:bg-blue-600"
+                        />
+                        <Label
+                          htmlFor={`persona-${persona.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-800"
+                        >
+                          {persona.name}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-blue-600 text-sm italic">Nenhuma persona disponível</p>
+                  )}
                 </div>
+                {formData.focusPersonas.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-sm text-blue-600 font-medium">Personas selecionadas:</p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {formData.focusPersonas.map(personaId => {
+                        const persona = personas.find(p => p.id === personaId);
+                        return (
+                          <Badge key={personaId} className="bg-blue-100 text-blue-800 border border-blue-300">
+                            {persona?.name || personaId}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
-                <Label className="text-red-700 font-bold">Etapa da Jornada de Compra</Label>
+                <Label className="text-blue-700 font-bold text-lg mb-3 block">
+                  Etapa da Jornada de Compra (Tag para Análise)
+                </Label>
                 <select
                   value={formData.purchaseStage}
                   onChange={(e) => setFormData(prev => ({ ...prev, purchaseStage: e.target.value }))}
-                  className="w-full px-3 py-2 border border-red-200 rounded-md focus:border-red-500 focus:outline-none mt-2"
+                  className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg focus:border-blue-500 focus:outline-none shadow-lg bg-blue-50"
                 >
                   <option value="">Selecione uma etapa</option>
                   {purchaseStages.map((stage) => (
@@ -394,27 +443,37 @@ const BlogPostForm = ({ post, categories, personas = [], initialData, onSave, on
                     </option>
                   ))}
                 </select>
+                {formData.purchaseStage && (
+                  <div className="mt-3">
+                    <Badge className="bg-blue-100 text-blue-800 border border-blue-300">
+                      {formData.purchaseStage}
+                    </Badge>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Imagem Destacada */}
-          <Card className="bg-white border-2 border-red-200 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
-              <CardTitle>Imagem Destacada</CardTitle>
+          {/* Card de Imagem Destacada */}
+          <Card className="bg-white border-2 border-purple-200 shadow-2xl shadow-purple-500/20">
+            <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-t-lg p-4">
+              <CardTitle className="flex items-center gap-2">
+                <Image className="h-5 w-5" />
+                Imagem Destacada
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 p-6">
+            <CardContent className="p-6 space-y-4">
               {formData.cover_image && (
                 <div className="relative">
                   <img
                     src={formData.cover_image}
                     alt="Imagem destacada"
-                    className="w-full h-32 object-cover rounded"
+                    className="w-full h-32 object-cover rounded-lg shadow-lg border-2 border-purple-200"
                   />
                   <Button
                     variant="outline"
                     size="sm"
-                    className="absolute top-2 right-2"
+                    className="absolute top-2 right-2 bg-white/90 hover:bg-white"
                     onClick={() => setFormData(prev => ({ ...prev, cover_image: '' }))}
                   >
                     <X className="h-4 w-4" />
@@ -432,7 +491,7 @@ const BlogPostForm = ({ post, categories, personas = [], initialData, onSave, on
                       setFormData(prev => ({ ...prev, cover_image: imageUrl }));
                     }
                   }}
-                  className="border-red-200 focus:border-red-500"
+                  className="border-purple-200 focus:border-purple-500 shadow-lg"
                 />
               </div>
               <div>
@@ -440,37 +499,40 @@ const BlogPostForm = ({ post, categories, personas = [], initialData, onSave, on
                   value={formData.cover_image}
                   onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))}
                   placeholder="Ou cole a URL da imagem..."
-                  className="border-red-200 focus:border-red-500"
+                  className="border-purple-200 focus:border-purple-500 shadow-lg"
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Tags */}
-          <Card className="bg-white border-2 border-red-200 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
-              <CardTitle>Tags</CardTitle>
+          {/* Card de Tags */}
+          <Card className="bg-white border-2 border-green-200 shadow-2xl shadow-green-500/20">
+            <CardHeader className="bg-gradient-to-r from-green-600 to-green-800 text-white rounded-t-lg p-4">
+              <CardTitle className="flex items-center gap-2">
+                <Tags className="h-5 w-5" />
+                Tags do Artigo
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 p-6">
+            <CardContent className="p-6 space-y-4">
               <div className="flex gap-2">
                 <Input
                   value={currentTag}
                   onChange={(e) => setCurrentTag(e.target.value)}
                   placeholder="Nova tag..."
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                  className="border-red-200 focus:border-red-500"
+                  className="border-green-200 focus:border-green-500 shadow-lg"
                 />
                 <Button 
                   onClick={addTag} 
                   disabled={!currentTag.trim()}
-                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg"
+                  className="bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white shadow-lg"
                 >
                   +
                 </Button>
               </div>
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-2">
                 {formData.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="cursor-pointer bg-red-100 text-red-800">
+                  <Badge key={tag} variant="secondary" className="cursor-pointer bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors">
                     {tag}
                     <X
                       className="h-3 w-3 ml-1"
@@ -482,41 +544,44 @@ const BlogPostForm = ({ post, categories, personas = [], initialData, onSave, on
             </CardContent>
           </Card>
 
-          {/* SEO */}
-          <Card className="bg-white border-2 border-red-200 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
-              <CardTitle>SEO</CardTitle>
+          {/* Card de SEO */}
+          <Card className="bg-white border-2 border-orange-200 shadow-2xl shadow-orange-500/20">
+            <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-800 text-white rounded-t-lg p-4">
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5" />
+                SEO
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 p-6">
+            <CardContent className="p-6 space-y-4">
               <div>
-                <Label htmlFor="meta_title">Meta Título</Label>
+                <Label htmlFor="meta_title" className="text-orange-700 font-bold mb-2 block">Meta Título</Label>
                 <Input
                   id="meta_title"
                   value={formData.meta_title}
                   onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
                   placeholder="Título para SEO..."
-                  className="border-red-200 focus:border-red-500"
+                  className="border-orange-200 focus:border-orange-500 shadow-lg"
                 />
               </div>
               <div>
-                <Label htmlFor="meta_description">Meta Descrição</Label>
+                <Label htmlFor="meta_description" className="text-orange-700 font-bold mb-2 block">Meta Descrição</Label>
                 <Textarea
                   id="meta_description"
                   value={formData.meta_description}
                   onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
                   placeholder="Descrição para SEO..."
                   rows={3}
-                  className="border-red-200 focus:border-red-500"
+                  className="border-orange-200 focus:border-orange-500 shadow-lg resize-none"
                 />
               </div>
               <div>
-                <Label htmlFor="meta_keywords">Palavras-chave</Label>
+                <Label htmlFor="meta_keywords" className="text-orange-700 font-bold mb-2 block">Palavras-chave</Label>
                 <Input
                   id="meta_keywords"
                   value={formData.meta_keywords}
                   onChange={(e) => setFormData(prev => ({ ...prev, meta_keywords: e.target.value }))}
                   placeholder="palavra1, palavra2, palavra3..."
-                  className="border-red-200 focus:border-red-500"
+                  className="border-orange-200 focus:border-orange-500 shadow-lg"
                 />
               </div>
             </CardContent>

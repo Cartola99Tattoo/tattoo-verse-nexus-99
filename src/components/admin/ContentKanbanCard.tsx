@@ -4,7 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { GripVertical, User, Target, Tag, Calendar, Lightbulb, FileText } from 'lucide-react';
+import { GripVertical, User, Target, Tag, Calendar, Lightbulb, FileText, Edit, PenTool } from 'lucide-react';
 import { ContentIdea } from '@/types/contentIdea';
 import { Persona } from '@/types/persona';
 import ContentIdeaDetailModal from './ContentIdeaDetailModal';
@@ -77,6 +77,7 @@ const ContentKanbanCard = ({ idea, personas = [], onUpdate, onTransformToArticle
   };
 
   const hasDraftContent = idea.draftTitle || idea.draftSummary || idea.draftContent;
+  const draftCompleteness = [idea.draftTitle, idea.draftSummary, idea.draftContent].filter(Boolean).length;
 
   return (
     <>
@@ -105,10 +106,24 @@ const ContentKanbanCard = ({ idea, personas = [], onUpdate, onTransformToArticle
                   <h3 className="font-bold text-lg line-clamp-2 text-red-800 group-hover:text-red-900 transition-colors">
                     {idea.theme}
                   </h3>
+                  
+                  {/* Indicador de Rascunho Aprimorado */}
                   {hasDraftContent && (
-                    <div className="flex items-center gap-1 mt-1">
-                      <FileText className="h-3 w-3 text-green-600" />
-                      <span className="text-xs text-green-600 font-medium">Rascunho disponível</span>
+                    <div className="flex items-center justify-between mt-2 p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-lg border border-green-300">
+                      <div className="flex items-center gap-2">
+                        <PenTool className="h-4 w-4 text-green-600" />
+                        <span className="text-xs font-bold text-green-700">Rascunho {draftCompleteness}/3</span>
+                      </div>
+                      <div className="flex gap-1">
+                        {[...Array(3)].map((_, i) => (
+                          <div
+                            key={i}
+                            className={`w-2 h-2 rounded-full ${
+                              i < draftCompleteness ? 'bg-green-600' : 'bg-green-300'
+                            }`}
+                          />
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
