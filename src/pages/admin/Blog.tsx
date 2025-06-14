@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import BlogPostForm from "@/components/admin/BlogPostForm";
 import BlogCategoryManager from "@/components/admin/BlogCategoryManager";
 import PersonaManager from "@/components/admin/PersonaManager";
+import JourneyManager from "@/components/admin/JourneyManager";
 
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,6 +37,11 @@ const Blog = () => {
 
   const { data: categories } = useDataQuery(
     () => blogService.fetchBlogCategories(),
+    []
+  );
+
+  const { data: personas } = useDataQuery(
+    () => Promise.resolve([]), // Mock - in real app this would fetch personas
     []
   );
 
@@ -274,23 +280,7 @@ const Blog = () => {
         </TabsContent>
 
         <TabsContent value="journey">
-          <div className="space-y-6">
-            <Card variant="tattooRed" className="tattoo-card-enhanced">
-              <CardHeader variant="red">
-                <CardTitle className="tattoo-title-red flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Jornada de Compra
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Target className="h-12 w-12 mx-auto text-red-300 mb-4" />
-                  <p>Jornada de Compra em desenvolvimento...</p>
-                  <p className="text-sm mt-2">Em breve você poderá mapear a jornada completa dos seus clientes aqui.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <JourneyManager personas={personas || []} />
         </TabsContent>
 
         <TabsContent value="ideas">
