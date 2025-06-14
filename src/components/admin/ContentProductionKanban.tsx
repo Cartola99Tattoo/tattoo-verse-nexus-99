@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -62,7 +63,11 @@ const ContentProductionKanban = ({ ideas: initialIdeas, onIdeaStatusUpdate }: Co
   }, [initialIdeas]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -132,29 +137,35 @@ const ContentProductionKanban = ({ ideas: initialIdeas, onIdeaStatusUpdate }: Co
   };
 
   return (
-    <div className="flex gap-6 p-1">
-      <KanbanGuideColumn />
-      <div className="flex-1 overflow-x-auto">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="flex gap-6">
-            {KANBAN_COLUMNS.map(columnName => (
-              <ContentKanbanColumn
-                key={columnName}
-                id={columnName}
-                title={columnName}
-                ideas={columns[columnName] || []}
-              />
-            ))}
-          </div>
-          <DragOverlay>
-            {activeIdea ? <ContentKanbanCard idea={activeIdea} /> : null}
-          </DragOverlay>
-        </DndContext>
+    <div className="bg-gradient-to-b from-black to-red-900/20 min-h-screen p-1">
+      <div className="flex gap-6 overflow-x-auto pb-4">
+        <KanbanGuideColumn />
+        <div className="flex-1">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="flex gap-6 pb-4">
+              {KANBAN_COLUMNS.map(columnName => (
+                <ContentKanbanColumn
+                  key={columnName}
+                  id={columnName}
+                  title={columnName}
+                  ideas={columns[columnName] || []}
+                />
+              ))}
+            </div>
+            <DragOverlay>
+              {activeIdea ? (
+                <div className="rotate-6 scale-110 opacity-90">
+                  <ContentKanbanCard idea={activeIdea} />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </div>
       </div>
     </div>
   );
