@@ -3,17 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
-import { Plus, Lightbulb } from 'lucide-react';
+import { Plus, Lightbulb, ArrowRight } from 'lucide-react';
 import { ContentIdea, CreateContentIdeaData } from '@/types/contentIdea';
 import { Persona } from '@/types/persona';
 import KanbanGuideColumn from './KanbanGuideColumn';
 import ContentKanbanColumn from './ContentKanbanColumn';
 import ContentKanbanCard from './ContentKanbanCard';
 import ContentIdeaForm from './ContentIdeaForm';
+import BlogPostForm from './BlogPostForm';
+import { BlogCategory } from '@/services/interfaces/IBlogService';
 
 interface ContentProductionKanbanProps {
   ideas: ContentIdea[];
   personas: Persona[];
+  categories?: BlogCategory[];
   onIdeaStatusUpdate: (ideaId: string, newStatus: ContentIdea['status']) => void;
   onIdeaCreate: (data: CreateContentIdeaData) => void;
   onIdeaUpdate: (idea: ContentIdea, data: CreateContentIdeaData) => void;
@@ -21,7 +24,7 @@ interface ContentProductionKanbanProps {
 
 const KANBAN_COLUMNS = [
   "Ideias de Artigos",
-  "Pesquisando",
+  "Pesquisando", 
   "Escrevendo",
   "Editando",
   "Fazendo Imagens/Gráficos",
@@ -37,6 +40,7 @@ type IdeaColumns = {
 const ContentProductionKanban = ({ 
   ideas: initialIdeas, 
   personas,
+  categories = [],
   onIdeaStatusUpdate, 
   onIdeaCreate,
   onIdeaUpdate 
@@ -45,6 +49,7 @@ const ContentProductionKanban = ({
   const [activeIdea, setActiveIdea] = useState<ContentIdea | null>(null);
   const [showQuickAddForm, setShowQuickAddForm] = useState(false);
   const [targetColumn, setTargetColumn] = useState<string>('Ideias de Artigos');
+  const [transformingIdea, setTransformingIdea] = useState<ContentIdea | null>(null);
 
   useEffect(() => {
     const statusToColumnMap: { [key: string]: string } = {
@@ -177,9 +182,41 @@ const ContentProductionKanban = ({
     setShowQuickAddForm(false);
   };
 
+  const handleTransformToArticle = (idea: ContentIdea) => {
+    setTransformingIdea(idea);
+  };
+
+  const handleArticleSaved = () => {
+    setTransformingIdea(null);
+    // Optionally update the idea status to 'Publicado'
+    if (transformingIdea) {
+      onIdeaStatusUpdate(transformingIdea.id, 'Publicado');
+    }
+  };
+
+  if (transformingIdea) {
+    return (
+      <div className="bg-gradient-to-br from-white to-red-50 min-h-screen">
+        <BlogPostForm
+          categories={categories}
+          personas={personas}
+          initialData={{
+            title: transformingIdea.draftTitle || transformingIdea.theme,
+            excerpt: transformingIdea.draftSummary,
+            content: transformingIdea.draftContent,
+            focusPersonas: transformingIdea.focusPersonas,
+            purchaseStage: transformingIdea.purchaseStage
+          }}
+          onSave={handleArticleSaved}
+          onCancel={() => setTransformingIdea(null)}
+        />
+      </div>
+    );
+  }
+
   if (showQuickAddForm) {
     return (
-      <div className="bg-gradient-to-br from-black via-red-900/20 to-black min-h-screen p-6">
+      <div className="bg-gradient-to-br from-white to-red-50 min-h-screen p-6">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
             <Button
@@ -201,23 +238,32 @@ const ContentProductionKanban = ({
   }
 
   return (
-    <div className="bg-gradient-to-br from-black via-red-900/20 to-black min-h-screen p-1 relative overflow-hidden">
+    <div className="bg-gradient-to-br from-white to-red-50 min-h-screen p-1 relative overflow-hidden">
       {/* Background pattern for 99Tattoo identity */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-red-900/10 to-black opacity-90"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-transparent to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 via-transparent to-red-900/5 opacity-90"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/10 via-transparent to-transparent"></div>
       
       {/* Header with Quick Add Button */}
       <div className="relative mb-6 flex justify-between items-center px-4">
-        <h2 className="text-3xl font-black text-white drop-shadow-lg">
+        <h2 className="text-3xl font-black text-red-800 drop-shadow-lg">
           Kanban de Produção de Conteúdo
         </h2>
-        <Button
-          onClick={() => handleQuickAdd('Ideias de Artigos')}
-          className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold shadow-2xl shadow-red-500/50 border border-red-400/30 backdrop-blur-sm hover:scale-105 transition-all duration-300"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Adicionar Card de Conteúdo
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="bg-gradient-to-r from-red-100 to-red-200 px-4 py-2 rounded-lg border border-red-300 flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 text-red-600" />
+            <span className="text-sm font-medium text-red-700">
+              Crie rascunhos completos e transforme em artigos
+            </span>
+            <ArrowRight className="h-4 w-4 text-red-600 animate-pulse" />
+          </div>
+          <Button
+            onClick={() => handleQuickAdd('Ideias de Artigos')}
+            className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold shadow-2xl shadow-red-500/30 border border-red-400/30 backdrop-blur-sm hover:scale-105 transition-all duration-300"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Adicionar Card de Conteúdo
+          </Button>
+        </div>
       </div>
       
       <div className="relative flex gap-6 overflow-x-auto pb-4 min-h-screen">
@@ -246,7 +292,12 @@ const ContentProductionKanban = ({
             <DragOverlay>
               {activeIdea ? (
                 <div className="rotate-3 scale-110 opacity-95 transform transition-all duration-300 shadow-2xl shadow-red-500/50">
-                  <ContentKanbanCard idea={activeIdea} />
+                  <ContentKanbanCard 
+                    idea={activeIdea} 
+                    personas={personas}
+                    onUpdate={onIdeaUpdate}
+                    onTransformToArticle={handleTransformToArticle}
+                  />
                 </div>
               ) : null}
             </DragOverlay>

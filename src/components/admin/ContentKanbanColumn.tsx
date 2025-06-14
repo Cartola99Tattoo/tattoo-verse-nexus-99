@@ -20,8 +20,8 @@ const ContentKanbanColumn = ({ id, title, ideas, onQuickAdd }: ContentKanbanColu
 
   return (
     <div className="w-[340px] flex-shrink-0">
-      <Card className="h-full bg-gradient-to-b from-red-950 via-red-900 to-black border-t-4 border-red-500 rounded-xl shadow-2xl shadow-red-500/40 backdrop-blur-sm hover:shadow-red-500/50 transition-all duration-300 group">
-        <CardHeader className="p-4 border-b border-red-600/50 bg-gradient-to-r from-red-700 via-red-600 to-red-800 rounded-t-lg">
+      <Card className="h-full bg-white border-2 border-red-300 rounded-xl shadow-2xl shadow-red-500/20 backdrop-blur-sm hover:shadow-red-500/30 transition-all duration-300 group">
+        <CardHeader className="p-4 border-b border-red-200 bg-gradient-to-r from-red-600 via-red-700 to-red-800 rounded-t-lg">
           <CardTitle className="text-white font-black flex justify-between items-center text-lg tracking-wider">
             <span className="text-white drop-shadow-lg filter brightness-110">{title}</span>
             <div className="flex items-center gap-2">
@@ -40,21 +40,21 @@ const ContentKanbanColumn = ({ id, title, ideas, onQuickAdd }: ContentKanbanColu
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent ref={setNodeRef} className="p-2 sm:p-4 h-[calc(100vh-300px)] overflow-y-auto bg-gradient-to-b from-black/95 via-red-950/30 to-black/95 scrollbar-thin scrollbar-thumb-red-600 scrollbar-track-black/50">
+        <CardContent ref={setNodeRef} className="p-2 sm:p-4 h-[calc(100vh-300px)] overflow-y-auto bg-white scrollbar-thin scrollbar-thumb-red-600 scrollbar-track-gray-100">
           <SortableContext id={id} items={ideas} strategy={verticalListSortingStrategy}>
             {ideas.length > 0 ? (
               ideas.map(idea => <ContentKanbanCard key={idea.id} idea={idea} />)
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-300 min-h-[200px]">
+              <div className="flex items-center justify-center h-full text-gray-600 min-h-[200px]">
                 <div className="text-center">
-                  <div className="mb-4 p-6 rounded-xl bg-gradient-to-br from-red-900/40 via-red-800/30 to-black/60 border border-red-700/50 shadow-xl backdrop-blur-sm hover:shadow-red-500/30 transition-all duration-300 group-hover:scale-105">
+                  <div className="mb-4 p-6 rounded-xl bg-gradient-to-br from-red-50 via-red-100 to-red-200 border-2 border-red-300 shadow-xl backdrop-blur-sm hover:shadow-red-500/20 transition-all duration-300 group-hover:scale-105">
                     <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-700 rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg animate-pulse">
                       <span className="text-white text-xl">💡</span>
                     </div>
-                    <p className="text-sm italic text-center text-red-200 font-medium mb-2">
+                    <p className="text-sm italic text-center text-red-700 font-medium mb-2">
                       Arraste as ideias para esta coluna
                     </p>
-                    <p className="text-xs text-red-300/70 mb-3">
+                    <p className="text-xs text-red-600/70 mb-3">
                       ou crie novos cards clicando no botão +
                     </p>
                     {onQuickAdd && (
@@ -62,7 +62,7 @@ const ContentKanbanColumn = ({ id, title, ideas, onQuickAdd }: ContentKanbanColu
                         onClick={onQuickAdd}
                         variant="outline"
                         size="sm"
-                        className="border-red-400/50 text-red-200 hover:bg-red-500/20 hover:border-red-300 hover:text-white transition-all duration-300 backdrop-blur-sm"
+                        className="border-red-400 text-red-600 hover:bg-red-50 hover:border-red-500 hover:text-red-700 transition-all duration-300 backdrop-blur-sm"
                       >
                         <Plus className="h-4 w-4 mr-1" />
                         Adicionar Card

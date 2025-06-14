@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,21 +5,31 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Eye, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, Save, Eye, X, Users, Target } from "lucide-react";
 import { getBlogService } from "@/services/serviceFactory";
 import { BlogCategory, CreateBlogPostData, UpdateBlogPostData } from "@/services/interfaces/IBlogService";
 import { toast } from "@/hooks/use-toast";
+import { Persona } from "@/types/persona";
 import EnhancedRichTextEditor from "@/components/admin/EnhancedRichTextEditor";
 import BlogPreview from "@/components/admin/BlogPreview";
 
 interface BlogPostFormProps {
   post?: any;
   categories: BlogCategory[];
+  personas?: Persona[];
+  initialData?: {
+    title?: string;
+    excerpt?: string;
+    content?: string;
+    focusPersonas?: string[];
+    purchaseStage?: string;
+  };
   onSave: () => void;
   onCancel: () => void;
 }
 
-const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps) => {
+const BlogPostForm = ({ post, categories, personas = [], initialData, onSave, onCancel }: BlogPostFormProps) => {
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -34,7 +43,10 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
     meta_title: '',
     meta_description: '',
     meta_keywords: '',
-    tags: [] as string[]
+    tags: [] as string[],
+    // Novos campos para análise
+    focusPersonas: [] as string[],
+    purchaseStage: '' as string
   });
 
   const [currentTag, setCurrentTag] = useState('');
@@ -42,6 +54,13 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
   const [showPreview, setShowPreview] = useState(false);
 
   const blogService = getBlogService();
+
+  const purchaseStages = [
+    'Aprendizado e Descoberta',
+    'Reconhecimento do Problema', 
+    'Consideração da Solução',
+    'Decisão de Compra'
+  ];
 
   useEffect(() => {
     if (post) {
@@ -58,10 +77,23 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
         meta_title: post.meta_title || '',
         meta_description: post.meta_description || '',
         meta_keywords: post.meta_keywords || '',
-        tags: post.tags || []
+        tags: post.tags || [],
+        focusPersonas: post.focusPersonas || [],
+        purchaseStage: post.purchaseStage || ''
       });
+    } else if (initialData) {
+      setFormData(prev => ({
+        ...prev,
+        title: initialData.title || '',
+        excerpt: initialData.excerpt || '',
+        content: initialData.content || '',
+        focusPersonas: initialData.focusPersonas || [],
+        purchaseStage: initialData.purchaseStage || '',
+        meta_title: initialData.title || '',
+        slug: initialData.title ? generateSlug(initialData.title) : ''
+      }));
     }
-  }, [post]);
+  }, [post, initialData]);
 
   const generateSlug = (title: string) => {
     return title
@@ -97,6 +129,15 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
     setFormData(prev => ({
       ...prev,
       tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  const togglePersona = (personaId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      focusPersonas: prev.focusPersonas.includes(personaId)
+        ? prev.focusPersonas.filter(id => id !== personaId)
+        : [...prev.focusPersonas, personaId]
     }));
   };
 
@@ -164,14 +205,18 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
   const selectedCategory = categories.find(cat => cat.id === formData.category_id);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-gradient-to-br from-white to-red-50 min-h-screen p-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={onCancel}>
+          <Button 
+            variant="outline" 
+            onClick={onCancel}
+            className="border-red-300 text-red-600 hover:bg-red-50"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-3xl font-bold text-red-800">
             {post ? 'Editar Artigo' : 'Novo Artigo'}
           </h1>
         </div>
@@ -188,7 +233,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
           <Button 
             onClick={handleSave} 
             disabled={isLoading}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg"
           >
             <Save className="h-4 w-4 mr-2" />
             {isLoading ? 'Salvando...' : 'Salvar'}
@@ -199,13 +244,13 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-700">Conteúdo do Artigo</CardTitle>
+          <Card className="bg-white border-2 border-red-200 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
+              <CardTitle>Conteúdo do Artigo</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-6">
               <div>
-                <Label htmlFor="title">Título *</Label>
+                <Label htmlFor="title" className="text-red-700 font-bold">Título *</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -216,7 +261,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
               </div>
 
               <div>
-                <Label htmlFor="slug">URL Amigável (Slug)</Label>
+                <Label htmlFor="slug" className="text-red-700 font-bold">URL Amigável (Slug)</Label>
                 <Input
                   id="slug"
                   value={formData.slug}
@@ -227,7 +272,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
               </div>
 
               <div>
-                <Label htmlFor="excerpt">Resumo</Label>
+                <Label htmlFor="excerpt" className="text-red-700 font-bold">Resumo</Label>
                 <Textarea
                   id="excerpt"
                   value={formData.excerpt}
@@ -239,7 +284,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
               </div>
 
               <div>
-                <Label>Conteúdo *</Label>
+                <Label className="text-red-700 font-bold">Conteúdo *</Label>
                 <EnhancedRichTextEditor
                   value={formData.content}
                   onChange={(content) => setFormData(prev => ({ ...prev, content }))}
@@ -252,11 +297,11 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Publicação */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-700">Publicação</CardTitle>
+          <Card className="bg-white border-2 border-red-200 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
+              <CardTitle>Publicação</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-6">
               <div>
                 <Label htmlFor="status">Status</Label>
                 <select
@@ -301,12 +346,64 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
             </CardContent>
           </Card>
 
-          {/* Imagem Destacada */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-700">Imagem Destacada</CardTitle>
+          {/* Estratégia de Conteúdo */}
+          <Card className="bg-white border-2 border-red-200 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Estratégia de Conteúdo
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-6">
+              <div>
+                <Label className="text-red-700 font-bold flex items-center gap-2 mb-3">
+                  <Users className="h-4 w-4" />
+                  Personas Foco
+                </Label>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {personas.map((persona) => (
+                    <div key={persona.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`persona-${persona.id}`}
+                        checked={formData.focusPersonas.includes(persona.id)}
+                        onCheckedChange={() => togglePersona(persona.id)}
+                        className="border-red-300 data-[state=checked]:bg-red-600"
+                      />
+                      <Label
+                        htmlFor={`persona-${persona.id}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {persona.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-red-700 font-bold">Etapa da Jornada de Compra</Label>
+                <select
+                  value={formData.purchaseStage}
+                  onChange={(e) => setFormData(prev => ({ ...prev, purchaseStage: e.target.value }))}
+                  className="w-full px-3 py-2 border border-red-200 rounded-md focus:border-red-500 focus:outline-none mt-2"
+                >
+                  <option value="">Selecione uma etapa</option>
+                  {purchaseStages.map((stage) => (
+                    <option key={stage} value={stage}>
+                      {stage}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Imagem Destacada */}
+          <Card className="bg-white border-2 border-red-200 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
+              <CardTitle>Imagem Destacada</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 p-6">
               {formData.cover_image && (
                 <div className="relative">
                   <img
@@ -350,11 +447,11 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
           </Card>
 
           {/* Tags */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-700">Tags</CardTitle>
+          <Card className="bg-white border-2 border-red-200 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
+              <CardTitle>Tags</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-6">
               <div className="flex gap-2">
                 <Input
                   value={currentTag}
@@ -366,7 +463,7 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
                 <Button 
                   onClick={addTag} 
                   disabled={!currentTag.trim()}
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg"
                 >
                   +
                 </Button>
@@ -386,11 +483,11 @@ const BlogPostForm = ({ post, categories, onSave, onCancel }: BlogPostFormProps)
           </Card>
 
           {/* SEO */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-700">SEO</CardTitle>
+          <Card className="bg-white border-2 border-red-200 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-t-lg">
+              <CardTitle>SEO</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-6">
               <div>
                 <Label htmlFor="meta_title">Meta Título</Label>
                 <Input

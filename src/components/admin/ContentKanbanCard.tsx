@@ -1,17 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { GripVertical, User, Target, Tag, Calendar, Lightbulb } from 'lucide-react';
+import { GripVertical, User, Target, Tag, Calendar, Lightbulb, FileText } from 'lucide-react';
 import { ContentIdea } from '@/types/contentIdea';
+import { Persona } from '@/types/persona';
+import ContentIdeaDetailModal from './ContentIdeaDetailModal';
 
 interface ContentKanbanCardProps {
   idea: ContentIdea;
+  personas?: Persona[];
+  onUpdate?: (idea: ContentIdea, data: any) => void;
+  onTransformToArticle?: (idea: ContentIdea) => void;
 }
 
-const ContentKanbanCard = ({ idea }: ContentKanbanCardProps) => {
+const ContentKanbanCard = ({ idea, personas = [], onUpdate, onTransformToArticle }: ContentKanbanCardProps) => {
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  
   const {
     attributes,
     listeners,
@@ -69,103 +76,129 @@ const ContentKanbanCard = ({ idea }: ContentKanbanCardProps) => {
     }
   };
 
+  const hasDraftContent = idea.draftTitle || idea.draftSummary || idea.draftContent;
+
   return (
-    <div ref={setNodeRef} style={style} className="transform transition-all duration-300 hover:z-10">
-      <Card
-        {...attributes}
-        className="mb-4 bg-gradient-to-br from-white via-red-50 to-red-100 border-2 border-red-300 shadow-xl hover:shadow-2xl hover:shadow-red-500/50 hover:border-red-500 transition-all duration-300 group hover:scale-[1.02] hover:-translate-y-2 cursor-pointer backdrop-blur-sm"
-      >
-        <CardContent className="p-4 relative">
-          <button 
-            {...listeners} 
-            className="absolute top-3 right-3 p-2 text-red-500 hover:text-red-700 cursor-grab active:cursor-grabbing transition-all duration-200 bg-white/90 rounded-full shadow-lg hover:shadow-red-300/50 hover:bg-red-50 group-hover:scale-110 z-10"
-          >
-            <GripVertical className="h-4 w-4" />
-          </button>
-          
-          <div className="pr-12">
-            {/* Status Icon and Title */}
-            <div className="flex items-start gap-3 mb-3">
-              <div className="text-2xl mt-1 opacity-80">
-                {getStatusIcon(idea.status)}
-              </div>
-              <h3 className="font-bold text-lg line-clamp-2 text-red-800 group-hover:text-red-900 transition-colors flex-1">
-                {idea.theme}
-              </h3>
-            </div>
+    <>
+      <div ref={setNodeRef} style={style} className="transform transition-all duration-300 hover:z-10">
+        <Card
+          {...attributes}
+          className="mb-4 bg-gradient-to-br from-white via-gray-50 to-red-50 border-2 border-red-200 shadow-xl hover:shadow-2xl hover:shadow-red-500/30 hover:border-red-400 transition-all duration-300 group hover:scale-[1.02] hover:-translate-y-2 cursor-pointer backdrop-blur-sm"
+          onClick={() => setShowDetailModal(true)}
+        >
+          <CardContent className="p-4 relative">
+            <button 
+              {...listeners} 
+              className="absolute top-3 right-3 p-2 text-red-500 hover:text-red-700 cursor-grab active:cursor-grabbing transition-all duration-200 bg-white/90 rounded-full shadow-lg hover:shadow-red-300/50 hover:bg-red-50 group-hover:scale-110 z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GripVertical className="h-4 w-4" />
+            </button>
             
-            <div className="space-y-3">
-              {/* Format and Status Badges */}
-              <div className="flex flex-wrap gap-2">
-                <Badge 
-                  variant="outline" 
-                  className={`${getFormatColor(idea.format)} text-xs font-bold shadow-lg border-2 transition-all duration-300 hover:scale-105`}
-                >
-                  {idea.format}
-                </Badge>
+            <div className="pr-12">
+              {/* Status Icon and Title */}
+              <div className="flex items-start gap-3 mb-3">
+                <div className="text-2xl mt-1 opacity-80">
+                  {getStatusIcon(idea.status)}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg line-clamp-2 text-red-800 group-hover:text-red-900 transition-colors">
+                    {idea.theme}
+                  </h3>
+                  {hasDraftContent && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <FileText className="h-3 w-3 text-green-600" />
+                      <span className="text-xs text-green-600 font-medium">Rascunho disponível</span>
+                    </div>
+                  )}
+                </div>
               </div>
-
-              {/* Purchase Stage */}
-              <div className="flex items-center gap-2 text-sm">
-                <div className={`bg-gradient-to-r ${getStageColor(idea.purchaseStage)} p-1.5 rounded-full shadow-lg`}>
-                  <Target className="h-3 w-3 text-white" />
+              
+              <div className="space-y-3">
+                {/* Format and Status Badges */}
+                <div className="flex flex-wrap gap-2">
+                  <Badge 
+                    variant="outline" 
+                    className={`${getFormatColor(idea.format)} text-xs font-bold shadow-lg border-2 transition-all duration-300 hover:scale-105`}
+                  >
+                    {idea.format}
+                  </Badge>
                 </div>
-                <span className="text-gray-700 font-medium text-xs line-clamp-1">{idea.purchaseStage}</span>
-              </div>
 
-              {/* Focus Keyword */}
-              {idea.focusKeyword && (
+                {/* Purchase Stage */}
                 <div className="flex items-center gap-2 text-sm">
-                  <Tag className="h-3 w-3 text-red-500 flex-shrink-0" />
-                  <span className="text-gray-600 text-xs line-clamp-1">
-                    <strong className="text-red-600">Keyword:</strong> {idea.focusKeyword}
-                  </span>
+                  <div className={`bg-gradient-to-r ${getStageColor(idea.purchaseStage)} p-1.5 rounded-full shadow-lg`}>
+                    <Target className="h-3 w-3 text-white" />
+                  </div>
+                  <span className="text-gray-700 font-medium text-xs line-clamp-1">{idea.purchaseStage}</span>
                 </div>
-              )}
 
-              {/* Creator */}
-              {idea.ideaCreator && (
-                <div className="flex items-center gap-2 text-sm">
-                  <User className="h-3 w-3 text-red-500 flex-shrink-0" />
-                  <span className="text-gray-600 text-xs line-clamp-1">
-                    <strong className="text-red-600">Por:</strong> {idea.ideaCreator}
-                  </span>
-                </div>
-              )}
+                {/* Focus Keyword */}
+                {idea.focusKeyword && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Tag className="h-3 w-3 text-red-500 flex-shrink-0" />
+                    <span className="text-gray-600 text-xs line-clamp-1">
+                      <strong className="text-red-600">Keyword:</strong> {idea.focusKeyword}
+                    </span>
+                  </div>
+                )}
 
-              {/* Personas */}
-              {idea.focusPersonas && idea.focusPersonas.length > 0 && (
-                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-2 rounded-lg border border-blue-200 shadow-sm">
-                  <p className="text-xs text-gray-700 line-clamp-1">
-                    <strong className="text-blue-600">Personas:</strong> {idea.focusPersonas.join(', ')}
-                  </p>
-                </div>
-              )}
+                {/* Creator */}
+                {idea.ideaCreator && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <User className="h-3 w-3 text-red-500 flex-shrink-0" />
+                    <span className="text-gray-600 text-xs line-clamp-1">
+                      <strong className="text-red-600">Por:</strong> {idea.ideaCreator}
+                    </span>
+                  </div>
+                )}
 
-              {/* Relevance - shortened for Kanban */}
-              {idea.personaRelevance && (
-                <div className="bg-gradient-to-r from-red-50 to-red-100 p-2 rounded-lg border border-red-200 shadow-sm">
-                  <p className="text-xs text-gray-700 line-clamp-2">
-                    <strong className="text-red-600">Relevância:</strong> {idea.personaRelevance}
-                  </p>
-                </div>
-              )}
+                {/* Personas */}
+                {idea.focusPersonas && idea.focusPersonas.length > 0 && (
+                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-2 rounded-lg border border-blue-200 shadow-sm">
+                    <p className="text-xs text-gray-700 line-clamp-1">
+                      <strong className="text-blue-600">Personas:</strong> {idea.focusPersonas.join(', ')}
+                    </p>
+                  </div>
+                )}
 
-              {/* Date */}
-              <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-red-100">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  <span>{new Date(idea.created_at).toLocaleDateString('pt-BR')}</span>
-                </div>
-                <div className="bg-gradient-to-r from-red-100 to-red-200 px-2 py-1 rounded-full border border-red-300">
-                  <span className="font-medium text-red-700">{idea.status}</span>
+                {/* Relevance - shortened for Kanban */}
+                {idea.personaRelevance && (
+                  <div className="bg-gradient-to-r from-red-50 to-red-100 p-2 rounded-lg border border-red-200 shadow-sm">
+                    <p className="text-xs text-gray-700 line-clamp-2">
+                      <strong className="text-red-600">Relevância:</strong> {idea.personaRelevance}
+                    </p>
+                  </div>
+                )}
+
+                {/* Date */}
+                <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-red-100">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    <span>{new Date(idea.created_at).toLocaleDateString('pt-BR')}</span>
+                  </div>
+                  <div className="bg-gradient-to-r from-red-100 to-red-200 px-2 py-1 rounded-full border border-red-300">
+                    <span className="font-medium text-red-700">{idea.status}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Modal de Detalhes */}
+      {showDetailModal && onUpdate && onTransformToArticle && (
+        <ContentIdeaDetailModal
+          idea={idea}
+          personas={personas}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+          onUpdate={onUpdate}
+          onTransformToArticle={onTransformToArticle}
+        />
+      )}
+    </>
   );
 };
 

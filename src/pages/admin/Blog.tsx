@@ -331,6 +331,7 @@ const Blog = () => {
           <ContentProductionKanban 
             ideas={ideas} 
             personas={personas || []}
+            categories={categories || []}
             onIdeaStatusUpdate={handleIdeaStatusUpdate}
             onIdeaCreate={handleCreateIdea}
             onIdeaUpdate={handleUpdateIdea}
