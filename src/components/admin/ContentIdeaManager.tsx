@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,10 +12,13 @@ import { toast } from '@/hooks/use-toast';
 
 interface ContentIdeaManagerProps {
   personas: Persona[];
+  ideas: ContentIdea[];
+  onIdeaCreate: (data: CreateContentIdeaData) => void;
+  onIdeaUpdate: (idea: ContentIdea, data: CreateContentIdeaData) => void;
 }
 
-const ContentIdeaManager = ({ personas }: ContentIdeaManagerProps) => {
-  const [ideas, setIdeas] = useState<ContentIdea[]>([]);
+const ContentIdeaManager = ({ personas, ideas, onIdeaCreate, onIdeaUpdate }: ContentIdeaManagerProps) => {
+  const [ideas, setIdeas] = useState<ContentIdea[]>(ideas);
   const [showForm, setShowForm] = useState(false);
   const [editingIdea, setEditingIdea] = useState<ContentIdea | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,40 +37,22 @@ const ContentIdeaManager = ({ personas }: ContentIdeaManagerProps) => {
     return matchesSearch && matchesStatus && matchesStage && matchesFormat;
   });
 
-  const handleCreateIdea = (data: CreateContentIdeaData) => {
-    const newIdea: ContentIdea = {
-      id: Date.now().toString(),
-      ...data,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    setIdeas(prev => [...prev, newIdea]);
-    setShowForm(false);
-    toast({
-      title: "Sucesso!",
-      description: "Ideia de conteúdo criada com sucesso!"
-    });
-  };
-
-  const handleEditIdea = (data: CreateContentIdeaData) => {
-    if (!editingIdea) return;
-
-    const updatedIdea: ContentIdea = {
-      ...editingIdea,
-      ...data,
-      updated_at: new Date().toISOString(),
-    };
-
-    setIdeas(prev => prev.map(idea => 
-      idea.id === editingIdea.id ? updatedIdea : idea
-    ));
+  const handleSave = (data: CreateContentIdeaData) => {
+    if (editingIdea) {
+      onIdeaUpdate(editingIdea, data);
+      toast({
+        title: "Sucesso!",
+        description: "Ideia de conteúdo atualizada com sucesso!"
+      });
+    } else {
+      onIdeaCreate(data);
+      toast({
+        title: "Sucesso!",
+        description: "Ideia de conteúdo criada com sucesso!"
+      });
+    }
     setEditingIdea(null);
     setShowForm(false);
-    toast({
-      title: "Sucesso!",
-      description: "Ideia de conteúdo atualizada com sucesso!"
-    });
   };
 
   const handleEdit = (idea: ContentIdea) => {
@@ -98,7 +82,7 @@ const ContentIdeaManager = ({ personas }: ContentIdeaManagerProps) => {
       <ContentIdeaForm
         idea={editingIdea || undefined}
         personas={personas}
-        onSave={editingIdea ? handleEditIdea : handleCreateIdea}
+        onSave={handleSave}
         onCancel={handleCancel}
       />
     );

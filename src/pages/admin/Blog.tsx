@@ -14,6 +14,8 @@ import BlogCategoryManager from "@/components/admin/BlogCategoryManager";
 import PersonaManager from "@/components/admin/PersonaManager";
 import JourneyManager from "@/components/admin/JourneyManager";
 import ContentIdeaManager from "@/components/admin/ContentIdeaManager";
+import ContentProductionKanban from "@/components/admin/ContentProductionKanban";
+import { ContentIdea, CreateContentIdeaData } from "@/types/contentIdea";
 
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,6 +23,7 @@ const Blog = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPost, setEditingPost] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("posts");
+  const [ideas, setIdeas] = useState<ContentIdea[]>([]);
 
   const blogService = getBlogService();
 
@@ -45,6 +48,27 @@ const Blog = () => {
     () => Promise.resolve([]), // Mock - in real app this would fetch personas
     []
   );
+
+  const handleCreateIdea = (data: CreateContentIdeaData) => {
+    const newIdea: ContentIdea = {
+      id: Date.now().toString(),
+      ...data,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setIdeas(prev => [...prev, newIdea]);
+  };
+
+  const handleUpdateIdea = (ideaToUpdate: ContentIdea, data: CreateContentIdeaData) => {
+    const updatedIdea: ContentIdea = {
+      ...ideaToUpdate,
+      ...data,
+      updated_at: new Date().toISOString(),
+    };
+    setIdeas(prev => prev.map(idea => 
+      idea.id === ideaToUpdate.id ? updatedIdea : idea
+    ));
+  };
 
   const handleDeletePost = async (postId: string) => {
     if (!blogService.deleteBlogPost) {
@@ -285,27 +309,16 @@ const Blog = () => {
         </TabsContent>
 
         <TabsContent value="ideas">
-          <ContentIdeaManager personas={personas || []} />
+          <ContentIdeaManager 
+            personas={personas || []}
+            ideas={ideas}
+            onIdeaCreate={handleCreateIdea}
+            onIdeaUpdate={handleUpdateIdea}
+          />
         </TabsContent>
 
         <TabsContent value="production">
-          <div className="space-y-6">
-            <Card variant="tattooRed" className="tattoo-card-enhanced">
-              <CardHeader variant="red">
-                <CardTitle className="tattoo-title-red flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Kanban de Produção
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <BarChart3 className="h-12 w-12 mx-auto text-red-300 mb-4" />
-                  <p>Kanban de Produção em desenvolvimento...</p>
-                  <p className="text-sm mt-2">Em breve você terá um quadro completo para gerenciar a produção de conteúdo aqui.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <ContentProductionKanban ideas={ideas} />
         </TabsContent>
       </Tabs>
     </div>
