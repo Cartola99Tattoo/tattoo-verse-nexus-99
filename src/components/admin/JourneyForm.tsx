@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,12 +50,20 @@ const JourneyForm = ({ journey, personas, onSave, onCancel }: JourneyFormProps) 
   };
 
   const handlePersonaChange = (personaId: string) => {
-    const persona = personas.find(p => p.id === personaId);
-    setFormData(prev => ({
-      ...prev,
-      personaId,
-      personaName: persona?.name || ''
-    }));
+    if (personaId === 'generic') {
+      setFormData(prev => ({
+        ...prev,
+        personaId: '',
+        personaName: ''
+      }));
+    } else {
+      const persona = personas.find(p => p.id === personaId);
+      setFormData(prev => ({
+        ...prev,
+        personaId,
+        personaName: persona?.name || ''
+      }));
+    }
   };
 
   const addContentIdea = (stageKey: keyof CreateJourneyData['stages']) => {
@@ -148,12 +155,12 @@ const JourneyForm = ({ journey, personas, onSave, onCancel }: JourneyFormProps) 
               </h3>
               <div>
                 <Label className="text-red-700 font-medium">Persona Associada (Opcional)</Label>
-                <Select value={formData.personaId} onValueChange={handlePersonaChange}>
+                <Select value={formData.personaId || 'generic'} onValueChange={handlePersonaChange}>
                   <SelectTrigger className="border-red-200 focus:border-red-600 focus:ring-2 focus:ring-red-200">
                     <SelectValue placeholder="Selecione uma persona ou deixe em branco para jornada genérica" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Jornada Genérica (Sem Persona)</SelectItem>
+                    <SelectItem value="generic">Jornada Genérica (Sem Persona)</SelectItem>
                     {personas.map(persona => (
                       <SelectItem key={persona.id} value={persona.id}>
                         {persona.name} - {persona.age} anos
