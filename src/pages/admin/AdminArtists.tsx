@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getArtistsService } from "@/services/serviceFactory";
-import { Plus, Search, Filter, Edit, Trash2, Eye, Palette, Users, Star, TrendingUp, Calendar, DollarSign, Award } from "lucide-react";
+import { Plus, Search, Filter, Edit, Trash2, Eye, Palette, Users, Star, TrendingUp, Calendar, DollarSign, Award, MapPin } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Artist } from "@/services/interfaces/IArtistsService";
 import ArtistForm from "@/components/admin/ArtistForm";
@@ -19,6 +18,7 @@ const AdminArtists = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [styleFilter, setStyleFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
@@ -28,7 +28,7 @@ const AdminArtists = () => {
 
   // Buscar artistas
   const { data: artistsData, isLoading: artistsLoading } = useQuery({
-    queryKey: ['admin-artists', searchTerm, statusFilter, styleFilter],
+    queryKey: ['admin-artists', searchTerm, statusFilter, styleFilter, locationFilter],
     queryFn: () => artistsService.fetchArtists({
       search: searchTerm || undefined,
       status: statusFilter === 'all' ? undefined : statusFilter as 'active' | 'inactive',
@@ -38,6 +38,15 @@ const AdminArtists = () => {
   });
 
   const artists = artistsData?.artists || [];
+
+  // Filtrar por localização no frontend (simulado)
+  const filteredArtists = artists.filter(artist => {
+    if (locationFilter === 'all') return true;
+    const artistLocations = (artist as any)?.locations || [];
+    return artistLocations.some((location: string) => 
+      location.toLowerCase().includes(locationFilter.toLowerCase())
+    );
+  });
 
   // Mutation para criar artista
   const createArtistMutation = useMutation({
@@ -164,6 +173,9 @@ const AdminArtists = () => {
   };
 
   const uniqueStyles = [...new Set(artists.map(artist => artist.style))];
+  const uniqueLocations = [...new Set(
+    artists.flatMap(artist => (artist as any)?.locations || [])
+  )];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50 p-6 space-y-8">
@@ -176,12 +188,12 @@ const AdminArtists = () => {
           </div>
           <div className="flex items-center gap-4 text-red-100">
             <div className="text-center">
-              <div className="text-2xl font-bold">{artists.length}</div>
+              <div className="text-2xl font-bold">{filteredArtists.length}</div>
               <div className="text-sm opacity-75">Total</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-300">
-                {artists.filter(a => a.status === 'active').length}
+                {filteredArtists.filter(a => a.status === 'active').length}
               </div>
               <div className="text-sm opacity-75">Ativos</div>
             </div>
@@ -197,7 +209,7 @@ const AdminArtists = () => {
             <Users className="h-6 w-6 text-red-600 group-hover:scale-110 transition-transform duration-300" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-red-700">{artists.length}</div>
+            <div className="text-3xl font-black text-red-700">{filteredArtists.length}</div>
             <p className="text-xs text-red-600 font-medium">
               Tatuadores cadastrados
             </p>
@@ -211,7 +223,7 @@ const AdminArtists = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-black text-green-700">
-              {artists.filter(a => a.status === 'active').length}
+              {filteredArtists.filter(a => a.status === 'active').length}
             </div>
             <p className="text-xs text-green-600 font-medium">
               Disponíveis para agendamento
@@ -234,19 +246,17 @@ const AdminArtists = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-white to-orange-50 border-orange-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group">
+        <Card className="bg-gradient-to-br from-white to-purple-50 border-purple-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-orange-800">Receita Média</CardTitle>
-            <DollarSign className="h-6 w-6 text-orange-600 group-hover:scale-110 transition-transform duration-300" />
+            <CardTitle className="text-sm font-bold text-purple-800">Localizações</CardTitle>
+            <MapPin className="h-6 w-6 text-purple-600 group-hover:scale-110 transition-transform duration-300" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-orange-700">
-              R$ {artists.length > 0 
-                ? Math.round(artists.reduce((acc) => acc + (Math.random() * 5000 + 3000), 0) / artists.length).toLocaleString()
-                : 0}
+            <div className="text-3xl font-black text-purple-700">
+              {uniqueLocations.length}
             </div>
-            <p className="text-xs text-orange-600 font-medium">
-              Por artista/mês
+            <p className="text-xs text-purple-600 font-medium">
+              Cidades atendidas
             </p>
           </CardContent>
         </Card>
@@ -292,6 +302,21 @@ const AdminArtists = () => {
                   ))}
                 </SelectContent>
               </Select>
+
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="w-[160px] border-red-200 focus:border-red-500 shadow-lg">
+                  <MapPin className="h-4 w-4 mr-2 text-red-500" />
+                  <SelectValue placeholder="Localização" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-red-200 shadow-xl">
+                  <SelectItem value="all">Todas Cidades</SelectItem>
+                  {uniqueLocations.map((location) => (
+                    <SelectItem key={location} value={location}>
+                      {location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <Button 
@@ -327,14 +352,16 @@ const AdminArtists = () => {
                     <TableHead className="font-black text-red-800">Contato</TableHead>
                     <TableHead className="font-black text-red-800">Estilo</TableHead>
                     <TableHead className="font-black text-red-800">Especialidades</TableHead>
+                    <TableHead className="font-black text-red-800">Localização</TableHead>
                     <TableHead className="font-black text-red-800">Performance</TableHead>
                     <TableHead className="font-black text-red-800">Status</TableHead>
                     <TableHead className="text-right font-black text-red-800">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {artists.map((artist) => {
+                  {filteredArtists.map((artist) => {
                     const metrics = getPerformanceMetrics(artist);
+                    const artistLocations = (artist as any)?.locations || [];
                     return (
                       <TableRow key={artist.id} className="hover:bg-red-50 transition-colors duration-200 border-b border-red-100">
                         <TableCell>
@@ -379,6 +406,21 @@ const AdminArtists = () => {
                             {artist.specialties.length > 2 && (
                               <Badge variant="outline" className="text-xs border-red-300 text-red-700 bg-red-50 font-medium">
                                 +{artist.specialties.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1 max-w-xs">
+                            {artistLocations.slice(0, 2).map((location: string, index: number) => (
+                              <Badge key={index} variant="outline" className="text-xs border-purple-300 text-purple-700 bg-purple-50 font-medium flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {location}
+                              </Badge>
+                            ))}
+                            {artistLocations.length > 2 && (
+                              <Badge variant="outline" className="text-xs border-purple-300 text-purple-700 bg-purple-50 font-medium">
+                                +{artistLocations.length - 2}
                               </Badge>
                             )}
                           </div>

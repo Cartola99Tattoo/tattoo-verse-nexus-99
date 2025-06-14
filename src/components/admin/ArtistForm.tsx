@@ -11,12 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, Plus, User, Palette, Image, Calendar, Settings, Instagram, Facebook, Phone, Mail, DollarSign } from "lucide-react";
+import { X, Plus, User, Palette, Image, Calendar, Settings, Instagram, Facebook, Phone, Mail, DollarSign, FileText, MapPin } from "lucide-react";
 import { Artist, ArtistPricing, WeeklySchedule, UnavailablePeriod } from "@/services/interfaces/IArtistsService";
 import { toast } from "@/hooks/use-toast";
 import ArtistPortfolioManager from "./ArtistPortfolioManager";
 import ArtistPricingManager from "./ArtistPricingManager";
 import ArtistScheduleManager from "./ArtistScheduleManager";
+import ImageUploadField from "./ImageUploadField";
+import ArtistDocumentsManager from "./ArtistDocumentsManager";
+import LocationManager from "./LocationManager";
 
 const artistSchema = z.object({
   first_name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -27,6 +30,7 @@ const artistSchema = z.object({
   avatar_url: z.string().url("URL da foto inválida").optional().or(z.literal("")),
   style: z.string().min(1, "Estilo é obrigatório"),
   specialties: z.array(z.string()).min(1, "Pelo menos uma especialidade é obrigatória"),
+  locations: z.array(z.string()).optional(),
   contact: z.object({
     phone: z.string().optional(),
     email: z.string().email("Email inválido").optional().or(z.literal("")),
@@ -65,6 +69,7 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
   const [pricing, setPricing] = useState<ArtistPricing | undefined>(artist?.pricing);
   const [schedule, setSchedule] = useState<WeeklySchedule | undefined>(artist?.work_schedule);
   const [unavailablePeriods, setUnavailablePeriods] = useState<UnavailablePeriod[]>(artist?.unavailable_periods || []);
+  const [documents, setDocuments] = useState<any[]>((artist as any)?.documents || []);
 
   const form = useForm<ArtistFormData>({
     resolver: zodResolver(artistSchema),
@@ -77,6 +82,7 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
       avatar_url: artist?.avatar_url || "",
       style: artist?.style || "",
       specialties: artist?.specialties || [],
+      locations: (artist as any)?.locations || [],
       contact: {
         phone: artist?.contact?.phone || "",
         email: artist?.contact?.email || "",
@@ -99,6 +105,7 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
         pricing,
         work_schedule: schedule,
         unavailable_periods: unavailablePeriods,
+        documents,
       };
       
       await onSubmit(completeData);
@@ -139,7 +146,7 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-red-100 to-red-200 rounded-xl p-1">
+            <TabsList className="grid w-full grid-cols-6 bg-gradient-to-r from-red-100 to-red-200 rounded-xl p-1">
               <TabsTrigger value="basic" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-red-700 data-[state=active]:shadow-lg data-[state=active]:font-bold transition-all duration-300">
                 <User className="h-4 w-4" />
                 Dados Básicos
@@ -155,6 +162,10 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
               <TabsTrigger value="schedule" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-red-700 data-[state=active]:shadow-lg data-[state=active]:font-bold transition-all duration-300">
                 <Calendar className="h-4 w-4" />
                 Horários
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-red-700 data-[state=active]:shadow-lg data-[state=active]:font-bold transition-all duration-300">
+                <FileText className="h-4 w-4" />
+                Documentos
               </TabsTrigger>
               <TabsTrigger value="settings" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-red-700 data-[state=active]:shadow-lg data-[state=active]:font-bold transition-all duration-300">
                 <Settings className="h-4 w-4" />
@@ -236,21 +247,12 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
                       )}
                     />
 
-                    <FormField
+                    <ImageUploadField
                       control={form.control}
                       name="avatar_url"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-blue-800 font-bold">URL da Foto de Perfil</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://..." {...field} className="border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
-                          </FormControl>
-                          <FormDescription className="text-blue-600">
-                            Cole o link da imagem de perfil do tatuador
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      label="Foto de Perfil"
+                      description="Cole o link da imagem ou escolha um arquivo do seu computador"
+                      currentImage={artist?.avatar_url}
                     />
 
                     <FormField
@@ -429,6 +431,13 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
                 </Card>
               </div>
 
+              {/* Localização */}
+              <LocationManager
+                control={form.control}
+                name="locations"
+                currentLocations={form.getValues("locations")}
+              />
+
               {/* Redes Sociais */}
               <Card className="bg-gradient-to-br from-white to-purple-50 border-purple-200 shadow-xl hover:shadow-2xl transition-all duration-300">
                 <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-t-lg">
@@ -510,6 +519,13 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
                 unavailablePeriods={unavailablePeriods}
                 onScheduleChange={setSchedule}
                 onUnavailablePeriodsChange={setUnavailablePeriods}
+              />
+            </TabsContent>
+
+            <TabsContent value="documents">
+              <ArtistDocumentsManager
+                documents={documents}
+                onDocumentsChange={setDocuments}
               />
             </TabsContent>
 
