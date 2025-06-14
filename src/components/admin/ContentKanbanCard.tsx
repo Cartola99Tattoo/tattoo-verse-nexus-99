@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -77,6 +76,7 @@ const ContentKanbanCard = ({ idea, personas = [], onUpdate, onTransformToArticle
     }
   };
 
+  // Calcular progresso do rascunho
   const hasDraftContent = idea.draftTitle || idea.draftSummary || idea.draftContent;
   const draftCompleteness = [idea.draftTitle, idea.draftSummary, idea.draftContent].filter(Boolean).length;
   const isDraftWellDeveloped = draftCompleteness >= 2;

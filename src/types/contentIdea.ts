@@ -10,7 +10,7 @@ export interface ContentIdea {
   status: 'Ideia' | 'Planejado' | 'Em Produção' | 'Em Revisão' | 'Fazendo Imagens/Gráficos' | 'Conteúdo Agendado' | 'Publicado' | 'Promover/Distribuir' | 'Arquivado';
   notes: string;
   ideaCreator: string;
-  // Novos campos de rascunho
+  // Campos de rascunho detalhado
   draftTitle?: string;
   draftSummary?: string;
   draftContent?: string;
@@ -28,7 +28,7 @@ export interface CreateContentIdeaData {
   status: 'Ideia' | 'Planejado' | 'Em Produção' | 'Em Revisão' | 'Fazendo Imagens/Gráficos' | 'Conteúdo Agendado' | 'Publicado' | 'Promover/Distribuir' | 'Arquivado';
   notes: string;
   ideaCreator: string;
-  // Novos campos de rascunho
+  // Campos de rascunho detalhado
   draftTitle?: string;
   draftSummary?: string;
   draftContent?: string;
