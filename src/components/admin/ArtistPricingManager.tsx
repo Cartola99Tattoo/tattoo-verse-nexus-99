@@ -1,241 +1,308 @@
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { ArtistPricing, PricingService } from "@/services/interfaces/IArtistsService";
-import { Plus, Trash2, DollarSign } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DollarSign, Plus, Edit, Trash2, Clock, Palette } from 'lucide-react';
+import { ArtistPricing, PricingItem } from '@/services/interfaces/IArtistsService';
 
 interface ArtistPricingManagerProps {
-  pricing: ArtistPricing | undefined;
+  pricing?: ArtistPricing;
   onPricingChange: (pricing: ArtistPricing) => void;
 }
 
+const pricingCategories = [
+  'Tamanho Pequeno (até 5cm)',
+  'Tamanho Médio (5-15cm)',
+  'Tamanho Grande (15-30cm)',
+  'Tamanho Extra Grande (30cm+)',
+  'Cover Up',
+  'Retoque',
+  'Sessão Completa',
+  'Por Hora'
+];
+
 const ArtistPricingManager = ({ pricing, onPricingChange }: ArtistPricingManagerProps) => {
-  const [newService, setNewService] = useState<Partial<PricingService>>({
-    name: '',
+  const [newItem, setNewItem] = useState({
+    category: '',
+    min_price: '',
+    max_price: '',
     description: '',
-    price: 0,
-    price_type: 'fixed'
+    estimated_hours: ''
   });
 
-  const currentPricing: ArtistPricing = pricing || {
+  const currentPricing = pricing || {
+    base_price_per_hour: 0,
     minimum_session_price: 0,
-    hourly_rate: 0,
-    services: []
+    pricing_items: [],
+    additional_costs: {
+      consultation: 0,
+      design: 0,
+      touch_up: 0
+    },
+    payment_methods: [],
+    pricing_notes: ''
   };
 
-  const handleBasePriceChange = (field: keyof ArtistPricing, value: number) => {
-    onPricingChange({
-      ...currentPricing,
-      [field]: value
-    });
-  };
+  const handleAddPricingItem = () => {
+    if (!newItem.category || !newItem.min_price) return;
 
-  const handleAddService = () => {
-    if (!newService.name?.trim()) {
-      toast({
-        title: "Erro",
-        description: "Nome do serviço é obrigatório.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const service: PricingService = {
-      id: `service-${Date.now()}`,
-      name: newService.name,
-      description: newService.description || '',
-      price: newService.price || 0,
-      price_type: newService.price_type || 'fixed'
+    const pricingItem: PricingItem = {
+      id: Date.now().toString(),
+      category: newItem.category,
+      min_price: Number(newItem.min_price),
+      max_price: newItem.max_price ? Number(newItem.max_price) : undefined,
+      description: newItem.description,
+      estimated_hours: newItem.estimated_hours ? Number(newItem.estimated_hours) : undefined
     };
 
     onPricingChange({
       ...currentPricing,
-      services: [...currentPricing.services, service]
+      pricing_items: [...currentPricing.pricing_items, pricingItem]
     });
 
-    setNewService({
-      name: '',
+    setNewItem({
+      category: '',
+      min_price: '',
+      max_price: '',
       description: '',
-      price: 0,
-      price_type: 'fixed'
-    });
-
-    toast({
-      title: "Sucesso",
-      description: "Serviço adicionado com sucesso!",
+      estimated_hours: ''
     });
   };
 
-  const handleRemoveService = (serviceId: string) => {
+  const handleRemovePricingItem = (id: string) => {
     onPricingChange({
       ...currentPricing,
-      services: currentPricing.services.filter(service => service.id !== serviceId)
+      pricing_items: currentPricing.pricing_items.filter(item => item.id !== id)
     });
   };
 
-  const handleUpdateService = (serviceId: string, updates: Partial<PricingService>) => {
+  const handleBasePriceChange = (field: string, value: string) => {
     onPricingChange({
       ...currentPricing,
-      services: currentPricing.services.map(service =>
-        service.id === serviceId ? { ...service, ...updates } : service
-      )
+      [field]: Number(value) || 0
+    });
+  };
+
+  const handleAdditionalCostChange = (field: string, value: string) => {
+    onPricingChange({
+      ...currentPricing,
+      additional_costs: {
+        ...currentPricing.additional_costs,
+        [field]: Number(value) || 0
+      }
     });
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="bg-gradient-to-br from-white to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
+        <CardTitle className="flex items-center gap-2 text-xl font-black">
           <DollarSign className="h-5 w-5" />
           Preços e Serviços
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Base Prices */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="minimum_session">Valor Mínimo da Sessão (R$)</Label>
-            <Input
-              id="minimum_session"
-              type="number"
-              min="0"
-              step="0.01"
-              value={currentPricing.minimum_session_price || ''}
-              onChange={(e) => handleBasePriceChange('minimum_session_price', Number(e.target.value))}
-              placeholder="0,00"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="hourly_rate">Preço por Hora (R$)</Label>
-            <Input
-              id="hourly_rate"
-              type="number"
-              min="0"
-              step="0.01"
-              value={currentPricing.hourly_rate || ''}
-              onChange={(e) => handleBasePriceChange('hourly_rate', Number(e.target.value))}
-              placeholder="0,00"
-            />
+      <CardContent className="space-y-8 p-6">
+        {/* Preços Base */}
+        <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-lg border border-green-200">
+          <h3 className="text-green-800 font-bold text-lg mb-4 flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Valores Base
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className="text-green-700 font-medium">Valor por Hora (R$)</Label>
+              <Input
+                type="number"
+                value={currentPricing.base_price_per_hour}
+                onChange={(e) => handleBasePriceChange('base_price_per_hour', e.target.value)}
+                placeholder="150"
+                className="border-green-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+              />
+            </div>
+            <div>
+              <Label className="text-green-700 font-medium">Valor Mínimo da Sessão (R$)</Label>
+              <Input
+                type="number"
+                value={currentPricing.minimum_session_price}
+                onChange={(e) => handleBasePriceChange('minimum_session_price', e.target.value)}
+                placeholder="200"
+                className="border-green-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Services List */}
-        <div className="space-y-4">
-          <h3 className="font-medium">Serviços Específicos</h3>
-          
-          {currentPricing.services.length > 0 && (
-            <div className="space-y-3">
-              {currentPricing.services.map((service) => (
-                <div key={service.id} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 space-y-3">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <Input
-                          value={service.name}
-                          onChange={(e) => handleUpdateService(service.id, { name: e.target.value })}
-                          placeholder="Nome do serviço"
-                        />
-                        <div className="flex gap-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={service.price || ''}
-                            onChange={(e) => handleUpdateService(service.id, { price: Number(e.target.value) })}
-                            placeholder="Preço"
-                            className="flex-1"
-                          />
-                          <Select 
-                            value={service.price_type} 
-                            onValueChange={(value: 'fixed' | 'hourly' | 'custom') => 
-                              handleUpdateService(service.id, { price_type: value })
-                            }
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="fixed">Fixo</SelectItem>
-                              <SelectItem value="hourly">Por Hora</SelectItem>
-                              <SelectItem value="custom">Customizado</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <Textarea
-                        value={service.description || ''}
-                        onChange={(e) => handleUpdateService(service.id, { description: e.target.value })}
-                        placeholder="Descrição do serviço (opcional)"
-                        className="min-h-[60px]"
-                      />
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="ml-2"
-                      onClick={() => handleRemoveService(service.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Add New Service */}
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 space-y-3">
-            <h4 className="font-medium text-sm">Adicionar Novo Serviço</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Custos Adicionais */}
+        <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200">
+          <h3 className="text-blue-800 font-bold text-lg mb-4">Custos Adicionais</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label className="text-blue-700 font-medium">Consulta (R$)</Label>
               <Input
-                value={newService.name || ''}
-                onChange={(e) => setNewService(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Nome do serviço"
+                type="number"
+                value={currentPricing.additional_costs.consultation}
+                onChange={(e) => handleAdditionalCostChange('consultation', e.target.value)}
+                placeholder="50"
+                className="border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
               />
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={newService.price || ''}
-                  onChange={(e) => setNewService(prev => ({ ...prev, price: Number(e.target.value) }))}
-                  placeholder="Preço"
-                  className="flex-1"
-                />
-                <Select 
-                  value={newService.price_type} 
-                  onValueChange={(value: 'fixed' | 'hourly' | 'custom') => 
-                    setNewService(prev => ({ ...prev, price_type: value }))
-                  }
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
+            </div>
+            <div>
+              <Label className="text-blue-700 font-medium">Design (R$)</Label>
+              <Input
+                type="number"
+                value={currentPricing.additional_costs.design}
+                onChange={(e) => handleAdditionalCostChange('design', e.target.value)}
+                placeholder="100"
+                className="border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <Label className="text-blue-700 font-medium">Retoque (R$)</Label>
+              <Input
+                type="number"
+                value={currentPricing.additional_costs.touch_up}
+                onChange={(e) => handleAdditionalCostChange('touch_up', e.target.value)}
+                placeholder="80"
+                className="border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Tabela de Preços por Categoria */}
+        <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-lg border border-purple-200">
+          <h3 className="text-purple-800 font-bold text-lg mb-4 flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            Preços por Categoria
+          </h3>
+
+          {/* Adicionar novo item */}
+          <div className="bg-white p-4 rounded-lg border border-purple-200 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div>
+                <Label className="text-purple-700 font-medium">Categoria</Label>
+                <Select value={newItem.category} onValueChange={(value) => setNewItem({ ...newItem, category: value })}>
+                  <SelectTrigger className="border-purple-200 focus:border-purple-500">
+                    <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="fixed">Fixo</SelectItem>
-                    <SelectItem value="hourly">Por Hora</SelectItem>
-                    <SelectItem value="custom">Customizado</SelectItem>
+                  <SelectContent className="bg-white border-purple-200 shadow-xl">
+                    {pricingCategories.map((category) => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label className="text-purple-700 font-medium">Preço Mín. (R$)</Label>
+                <Input
+                  type="number"
+                  value={newItem.min_price}
+                  onChange={(e) => setNewItem({ ...newItem, min_price: e.target.value })}
+                  placeholder="200"
+                  className="border-purple-200 focus:border-purple-500"
+                />
+              </div>
+              <div>
+                <Label className="text-purple-700 font-medium">Preço Máx. (R$)</Label>
+                <Input
+                  type="number"
+                  value={newItem.max_price}
+                  onChange={(e) => setNewItem({ ...newItem, max_price: e.target.value })}
+                  placeholder="500"
+                  className="border-purple-200 focus:border-purple-500"
+                />
+              </div>
+              <div>
+                <Label className="text-purple-700 font-medium">Horas Est.</Label>
+                <Input
+                  type="number"
+                  value={newItem.estimated_hours}
+                  onChange={(e) => setNewItem({ ...newItem, estimated_hours: e.target.value })}
+                  placeholder="2"
+                  className="border-purple-200 focus:border-purple-500"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button
+                  onClick={handleAddPricingItem}
+                  disabled={!newItem.category || !newItem.min_price}
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <Textarea
-              value={newService.description || ''}
-              onChange={(e) => setNewService(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Descrição do serviço (opcional)"
-              className="min-h-[60px]"
-            />
-            <Button onClick={handleAddService} className="w-full">
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Serviço
-            </Button>
+            <div className="mt-4">
+              <Label className="text-purple-700 font-medium">Descrição</Label>
+              <Input
+                value={newItem.description}
+                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+                placeholder="Descrição adicional sobre esta categoria..."
+                className="border-purple-200 focus:border-purple-500"
+              />
+            </div>
           </div>
+
+          {/* Lista de itens existentes */}
+          <div className="space-y-3">
+            {currentPricing.pricing_items.map((item) => (
+              <div key={item.id} className="bg-white p-4 rounded-lg border border-purple-200 shadow-md hover:shadow-lg transition-all duration-200">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Badge className="bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium">
+                        {item.category}
+                      </Badge>
+                      <span className="font-bold text-purple-800">
+                        R$ {item.min_price}
+                        {item.max_price && ` - R$ ${item.max_price}`}
+                      </span>
+                      {item.estimated_hours && (
+                        <span className="text-sm text-gray-600 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {item.estimated_hours}h
+                        </span>
+                      )}
+                    </div>
+                    {item.description && (
+                      <p className="text-sm text-gray-600">{item.description}</p>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleRemovePricingItem(item.id)}
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {currentPricing.pricing_items.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <DollarSign className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+              <p>Nenhuma categoria de preço configurada</p>
+            </div>
+          )}
+        </div>
+
+        {/* Observações sobre Preços */}
+        <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 p-6 rounded-lg border border-yellow-200">
+          <h3 className="text-yellow-800 font-bold text-lg mb-4">Observações sobre Preços</h3>
+          <Textarea
+            value={currentPricing.pricing_notes}
+            onChange={(e) => onPricingChange({ ...currentPricing, pricing_notes: e.target.value })}
+            placeholder="Observações gerais sobre política de preços, descontos, formas de pagamento..."
+            className="border-yellow-200 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200"
+          />
         </div>
       </CardContent>
     </Card>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +19,7 @@ import ArtistScheduleManager from "./ArtistScheduleManager";
 import ImageUploadField from "./ImageUploadField";
 import ArtistDocumentsManager from "./ArtistDocumentsManager";
 import LocationManager from "./LocationManager";
+import ArtistPermissionsManager from "./ArtistPermissionsManager";
 
 const artistSchema = z.object({
   first_name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -70,6 +70,7 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
   const [schedule, setSchedule] = useState<WeeklySchedule | undefined>(artist?.work_schedule);
   const [unavailablePeriods, setUnavailablePeriods] = useState<UnavailablePeriod[]>(artist?.unavailable_periods || []);
   const [documents, setDocuments] = useState<any[]>((artist as any)?.documents || []);
+  const [permissions, setPermissions] = useState<any>((artist as any)?.permissions || {});
 
   const form = useForm<ArtistFormData>({
     resolver: zodResolver(artistSchema),
@@ -106,6 +107,7 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
         work_schedule: schedule,
         unavailable_periods: unavailablePeriods,
         documents,
+        permissions,
       };
       
       await onSubmit(completeData);
@@ -530,36 +532,45 @@ const ArtistForm = ({ artist, onSubmit, onCancel, isLoading = false }: ArtistFor
             </TabsContent>
 
             <TabsContent value="settings">
-              <Card className="bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-xl">
-                <CardHeader className="bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center gap-2 text-xl font-black">
-                    <Settings className="h-5 w-5" />
-                    Configurações Avançadas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6 p-6">
-                  <FormField
-                    control={form.control}
-                    name="internal_notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-800 font-bold">Notas Internas</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Observações internas sobre o tatuador: performance, feedback de clientes, histórico, pontos de atenção..."
-                            className="min-h-[150px] border-gray-200 focus:border-gray-500 focus:ring-2 focus:ring-gray-200"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormDescription className="text-gray-600">
-                          Essas notas são visíveis apenas para administradores e podem conter informações sobre performance, histórico, feedbacks internos, etc.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
+              <div className="space-y-8">
+                {/* Permissões de Acesso */}
+                <ArtistPermissionsManager
+                  permissions={permissions}
+                  onPermissionsChange={setPermissions}
+                />
+
+                {/* Configurações Avançadas */}
+                <Card className="bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-xl">
+                  <CardHeader className="bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center gap-2 text-xl font-black">
+                      <Settings className="h-5 w-5" />
+                      Configurações Avançadas
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6 p-6">
+                    <FormField
+                      control={form.control}
+                      name="internal_notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-800 font-bold">Notas Internas</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Observações internas sobre o tatuador: performance, feedback de clientes, histórico, pontos de atenção..."
+                              className="min-h-[150px] border-gray-200 focus:border-gray-500 focus:ring-2 focus:ring-gray-200"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormDescription className="text-gray-600">
+                            Essas notas são visíveis apenas para administradores e podem conter informações sobre performance, histórico, feedbacks internos, etc.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
 
