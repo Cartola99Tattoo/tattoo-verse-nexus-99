@@ -2,14 +2,21 @@
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { ContentIdea } from '@/types/contentIdea';
+import { Button } from '@/components/ui/button';
+import { Plus, Lightbulb } from 'lucide-react';
+import { ContentIdea, CreateContentIdeaData } from '@/types/contentIdea';
+import { Persona } from '@/types/persona';
 import KanbanGuideColumn from './KanbanGuideColumn';
 import ContentKanbanColumn from './ContentKanbanColumn';
 import ContentKanbanCard from './ContentKanbanCard';
+import ContentIdeaForm from './ContentIdeaForm';
 
 interface ContentProductionKanbanProps {
   ideas: ContentIdea[];
+  personas: Persona[];
   onIdeaStatusUpdate: (ideaId: string, newStatus: ContentIdea['status']) => void;
+  onIdeaCreate: (data: CreateContentIdeaData) => void;
+  onIdeaUpdate: (idea: ContentIdea, data: CreateContentIdeaData) => void;
 }
 
 const KANBAN_COLUMNS = [
@@ -27,9 +34,17 @@ type IdeaColumns = {
   [key: string]: ContentIdea[];
 };
 
-const ContentProductionKanban = ({ ideas: initialIdeas, onIdeaStatusUpdate }: ContentProductionKanbanProps) => {
+const ContentProductionKanban = ({ 
+  ideas: initialIdeas, 
+  personas,
+  onIdeaStatusUpdate, 
+  onIdeaCreate,
+  onIdeaUpdate 
+}: ContentProductionKanbanProps) => {
   const [columns, setColumns] = useState<IdeaColumns>({});
   const [activeIdea, setActiveIdea] = useState<ContentIdea | null>(null);
+  const [showQuickAddForm, setShowQuickAddForm] = useState(false);
+  const [targetColumn, setTargetColumn] = useState<string>('Ideias de Artigos');
 
   useEffect(() => {
     const statusToColumnMap: { [key: string]: string } = {
@@ -136,11 +151,74 @@ const ContentProductionKanban = ({ ideas: initialIdeas, onIdeaStatusUpdate }: Co
     }
   };
 
+  const handleQuickAdd = (columnName: string) => {
+    setTargetColumn(columnName);
+    setShowQuickAddForm(true);
+  };
+
+  const handleQuickSave = (data: CreateContentIdeaData) => {
+    const columnToStatusMap: { [key: string]: ContentIdea['status'] } = {
+      'Ideias de Artigos': 'Ideia',
+      'Pesquisando': 'Planejado',
+      'Escrevendo': 'Em Produção',
+      'Editando': 'Em Revisão',
+      'Fazendo Imagens/Gráficos': 'Fazendo Imagens/Gráficos',
+      'Conteúdo Agendado': 'Conteúdo Agendado',
+      'Conteúdo Publicado': 'Publicado',
+      'Promover/Distribuir': 'Promover/Distribuir',
+    };
+
+    const ideaData = {
+      ...data,
+      status: columnToStatusMap[targetColumn] || 'Ideia'
+    };
+
+    onIdeaCreate(ideaData);
+    setShowQuickAddForm(false);
+  };
+
+  if (showQuickAddForm) {
+    return (
+      <div className="bg-gradient-to-br from-black via-red-900/20 to-black min-h-screen p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowQuickAddForm(false)}
+              className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-500"
+            >
+              ← Voltar ao Kanban
+            </Button>
+          </div>
+          <ContentIdeaForm
+            personas={personas}
+            onSave={handleQuickSave}
+            onCancel={() => setShowQuickAddForm(false)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gradient-to-br from-black via-red-900/20 to-black min-h-screen p-1 relative overflow-hidden">
       {/* Background pattern for 99Tattoo identity */}
       <div className="absolute inset-0 bg-gradient-to-br from-black via-red-900/10 to-black opacity-90"></div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-transparent to-transparent"></div>
+      
+      {/* Header with Quick Add Button */}
+      <div className="relative mb-6 flex justify-between items-center px-4">
+        <h2 className="text-3xl font-black text-white drop-shadow-lg">
+          Kanban de Produção de Conteúdo
+        </h2>
+        <Button
+          onClick={() => handleQuickAdd('Ideias de Artigos')}
+          className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold shadow-2xl shadow-red-500/50 border border-red-400/30 backdrop-blur-sm hover:scale-105 transition-all duration-300"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Adicionar Card de Conteúdo
+        </Button>
+      </div>
       
       <div className="relative flex gap-6 overflow-x-auto pb-4 min-h-screen">
         {/* Guide Column - Always first */}
@@ -161,6 +239,7 @@ const ContentProductionKanban = ({ ideas: initialIdeas, onIdeaStatusUpdate }: Co
                   id={columnName}
                   title={columnName}
                   ideas={columns[columnName] || []}
+                  onQuickAdd={() => handleQuickAdd(columnName)}
                 />
               ))}
             </div>

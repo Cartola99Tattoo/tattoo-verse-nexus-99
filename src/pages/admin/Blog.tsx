@@ -328,7 +328,13 @@ const Blog = () => {
         </TabsContent>
 
         <TabsContent value="production">
-          <ContentProductionKanban ideas={ideas} onIdeaStatusUpdate={handleIdeaStatusUpdate} />
+          <ContentProductionKanban 
+            ideas={ideas} 
+            personas={personas || []}
+            onIdeaStatusUpdate={handleIdeaStatusUpdate}
+            onIdeaCreate={handleCreateIdea}
+            onIdeaUpdate={handleUpdateIdea}
+          />
         </TabsContent>
       </Tabs>
     </div>

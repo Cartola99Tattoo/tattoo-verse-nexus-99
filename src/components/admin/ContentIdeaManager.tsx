@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Lightbulb, Filter, BarChart3, Target, Users } from 'lucide-react';
+import { Plus, Search, Lightbulb, Filter, BarChart3, Target, Users, ArrowRight } from 'lucide-react';
 import { ContentIdea, CreateContentIdeaData } from '@/types/contentIdea';
 import { Persona } from '@/types/persona';
 import ContentIdeaCard from './ContentIdeaCard';
@@ -106,10 +106,11 @@ const ContentIdeaManager = ({ personas, ideas, onIdeaCreate, onIdeaUpdate }: Con
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Ideia
               </Button>
-              <div className="bg-white/20 px-3 py-2 rounded-lg backdrop-blur-sm">
+              <div className="bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm flex items-center gap-2">
                 <span className="text-sm font-medium text-white">
-                  💡 Ideias criadas aqui aparecerão no Kanban de Produção
+                  💡 Ideias criadas aqui aparecerão no Kanban
                 </span>
+                <ArrowRight className="h-4 w-4 text-white animate-pulse" />
               </div>
             </div>
           </div>
