@@ -204,11 +204,18 @@ const ContentProductionKanban = ({
           categories={categories}
           personas={personas}
           initialData={{
-            title: transformingIdea.draftTitle || transformingIdea.theme,
+            title: transformingIdea.draftTitles?.[0] || transformingIdea.theme,
+            titles: transformingIdea.draftTitles,
             excerpt: transformingIdea.draftSummary,
             content: transformingIdea.draftContent,
             focusPersonas: transformingIdea.focusPersonas,
-            purchaseStage: transformingIdea.purchaseStage
+            purchaseStage: transformingIdea.purchaseStage,
+            seoKeywords: transformingIdea.seoKeywords,
+            provisionalSlug: transformingIdea.provisionalSlug,
+            suggestedAuthor: transformingIdea.suggestedAuthor,
+            featuredImageUrl: transformingIdea.featuredImageUrl,
+            internalLinks: transformingIdea.internalLinks,
+            suggestedCTA: transformingIdea.suggestedCTA
           }}
           onSave={handleArticleSaved}
           onCancel={() => setTransformingIdea(null)}

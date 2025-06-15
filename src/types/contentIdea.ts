@@ -10,10 +10,16 @@ export interface ContentIdea {
   status: 'Ideia' | 'Planejado' | 'Em Produção' | 'Em Revisão' | 'Fazendo Imagens/Gráficos' | 'Conteúdo Agendado' | 'Publicado' | 'Promover/Distribuir' | 'Arquivado';
   notes: string;
   ideaCreator: string;
-  // Campos de rascunho detalhado
-  draftTitle?: string;
+  // Campos expandidos de rascunho detalhado
+  draftTitles?: string[]; // Múltiplas ideias de título
   draftSummary?: string;
   draftContent?: string;
+  seoKeywords?: string[]; // Palavras-chave para SEO
+  provisionalSlug?: string; // URL provisória
+  suggestedAuthor?: string; // Autor sugerido
+  featuredImageUrl?: string; // Imagem destacada
+  internalLinks?: string[]; // Links internos sugeridos
+  suggestedCTA?: string; // Call to Action sugerido
   created_at: string;
   updated_at: string;
 }
@@ -28,8 +34,14 @@ export interface CreateContentIdeaData {
   status: 'Ideia' | 'Planejado' | 'Em Produção' | 'Em Revisão' | 'Fazendo Imagens/Gráficos' | 'Conteúdo Agendado' | 'Publicado' | 'Promover/Distribuir' | 'Arquivado';
   notes: string;
   ideaCreator: string;
-  // Campos de rascunho detalhado
-  draftTitle?: string;
+  // Campos expandidos de rascunho detalhado
+  draftTitles?: string[];
   draftSummary?: string;
   draftContent?: string;
+  seoKeywords?: string[];
+  provisionalSlug?: string;
+  suggestedAuthor?: string;
+  featuredImageUrl?: string;
+  internalLinks?: string[];
+  suggestedCTA?: string;
 }

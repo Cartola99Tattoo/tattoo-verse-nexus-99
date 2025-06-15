@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Save, FileText, Users, Target, Tag, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Save, FileText, Users, Target, Tag, Sparkles, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { BlogCategory } from '@/services/interfaces/IBlogService';
 import { Persona } from '@/types/persona';
 import { toast } from '@/hooks/use-toast';
@@ -22,6 +22,14 @@ interface BlogPostFormProps {
     content?: string;
     focusPersonas?: string[];
     purchaseStage?: string;
+    // Novos campos vindos do rascunho
+    titles?: string[];
+    seoKeywords?: string[];
+    provisionalSlug?: string;
+    suggestedAuthor?: string;
+    featuredImageUrl?: string;
+    internalLinks?: string[];
+    suggestedCTA?: string;
   };
   onSave: () => void;
   onCancel: () => void;
@@ -43,22 +51,35 @@ const BlogPostForm = ({
   onCancel 
 }: BlogPostFormProps) => {
   const [formData, setFormData] = useState({
-    title: initialData?.title || post?.title || '',
+    // Campos principais do artigo
+    title: initialData?.title || initialData?.titles?.[0] || post?.title || '',
     excerpt: initialData?.excerpt || post?.excerpt || '',
     content: initialData?.content || post?.content || '',
     categoryId: post?.blog_categories?.id || categories[0]?.id || '',
-    slug: post?.slug || '',
+    slug: initialData?.provisionalSlug || post?.slug || '',
+    
+    // Tags estratégicas
     focusPersonas: initialData?.focusPersonas || [],
     purchaseStages: initialData?.purchaseStage ? [initialData.purchaseStage] : [],
-    focusKeyword: '',
+    
+    // SEO e metadados
+    focusKeyword: initialData?.seoKeywords?.[0] || '',
     metaDescription: '',
+    seoKeywords: initialData?.seoKeywords || [''],
+    
+    // Campos adicionais vindos do rascunho
+    alternativeTitles: initialData?.titles?.slice(1) || [],
+    author: initialData?.suggestedAuthor || 'Equipe 99Tattoo',
+    featuredImageUrl: initialData?.featuredImageUrl || '',
+    internalLinks: initialData?.internalLinks || [''],
+    callToAction: initialData?.suggestedCTA || '',
   });
 
   const [isLoading, setIsLoading] = useState(false);
 
   // Auto-generate slug from title
   useEffect(() => {
-    if (formData.title && !post) {
+    if (formData.title && !post && !initialData?.provisionalSlug) {
       const slug = formData.title
         .toLowerCase()
         .normalize('NFD')
@@ -69,7 +90,7 @@ const BlogPostForm = ({
         .trim();
       setFormData(prev => ({ ...prev, slug }));
     }
-  }, [formData.title, post]);
+  }, [formData.title, post, initialData?.provisionalSlug]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,6 +135,47 @@ const BlogPostForm = ({
     }));
   };
 
+  // Funções auxiliares para campos de array
+  const addSeoKeyword = () => {
+    setFormData(prev => ({
+      ...prev,
+      seoKeywords: [...prev.seoKeywords, '']
+    }));
+  };
+
+  const removeSeoKeyword = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      seoKeywords: prev.seoKeywords.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateSeoKeyword = (index: number, value: string) => {
+    const newKeywords = [...formData.seoKeywords];
+    newKeywords[index] = value;
+    setFormData(prev => ({ ...prev, seoKeywords: newKeywords }));
+  };
+
+  const addInternalLink = () => {
+    setFormData(prev => ({
+      ...prev,
+      internalLinks: [...prev.internalLinks, '']
+    }));
+  };
+
+  const removeInternalLink = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      internalLinks: prev.internalLinks.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateInternalLink = (index: number, value: string) => {
+    const newLinks = [...formData.internalLinks];
+    newLinks[index] = value;
+    setFormData(prev => ({ ...prev, internalLinks: newLinks }));
+  };
+
   const isFormValid = formData.title && formData.content && formData.excerpt;
   const hasStrategicTags = formData.focusPersonas.length > 0 || formData.purchaseStages.length > 0;
 
@@ -139,8 +201,19 @@ const BlogPostForm = ({
               {post ? 'Editar Artigo do Blog' : 'Criar Novo Artigo'}
             </h1>
             <p className="text-red-100 text-lg font-medium">
-              {initialData?.title ? `Transformando rascunho: "${initialData.title}"` : 'Configure todas as informações do seu artigo'}
+              {initialData?.titles?.[0] ? `Transformando rascunho: "${initialData.titles[0]}"` : 'Configure todas as informações do seu artigo'}
             </p>
+            {initialData && (
+              <div className="mt-4 bg-white/20 p-4 rounded-lg">
+                <p className="text-red-100 font-bold">✨ Dados importados do rascunho:</p>
+                <ul className="text-red-200 text-sm mt-2 space-y-1">
+                  {initialData.titles && <li>• {initialData.titles.length} título(s) sugerido(s)</li>}
+                  {initialData.seoKeywords && <li>• {initialData.seoKeywords.filter(Boolean).length} palavra(s)-chave SEO</li>}
+                  {initialData.internalLinks && <li>• {initialData.internalLinks.filter(Boolean).length} link(s) interno(s)</li>}
+                  {initialData.suggestedCTA && <li>• Call to Action sugerido</li>}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
@@ -168,6 +241,31 @@ const BlogPostForm = ({
                     className="border-red-200 focus:border-red-500 shadow-lg text-xl py-4 font-medium"
                     required
                   />
+                  
+                  {/* Títulos alternativos do rascunho */}
+                  {formData.alternativeTitles.length > 0 && (
+                    <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                      <Label className="text-blue-700 font-bold text-sm mb-2 block">
+                        📝 Outras ideias de título do rascunho:
+                      </Label>
+                      <div className="space-y-2">
+                        {formData.alternativeTitles.map((altTitle, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <span className="text-blue-600 text-sm font-medium">• {altTitle}</span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFormData(prev => ({ ...prev, title: altTitle }))}
+                              className="text-xs border-blue-300 text-blue-600 hover:bg-blue-100"
+                            >
+                              Usar este
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -213,21 +311,38 @@ const BlogPostForm = ({
                     required
                   />
                 </div>
+
+                {/* Call to Action */}
+                {formData.callToAction && (
+                  <div>
+                    <Label htmlFor="callToAction" className="text-red-700 font-black text-lg mb-3 block">
+                      Call to Action
+                    </Label>
+                    <Textarea
+                      id="callToAction"
+                      value={formData.callToAction}
+                      onChange={(e) => setFormData(prev => ({ ...prev, callToAction: e.target.value }))}
+                      placeholder="Call to Action do artigo..."
+                      className="border-red-200 focus:border-red-500 shadow-lg resize-y font-medium"
+                      rows={3}
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* SEO e Metadados */}
+            {/* SEO e Metadados Expandidos */}
             <Card className="bg-white border-4 border-blue-200 shadow-2xl">
               <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6">
                 <CardTitle className="text-2xl font-black flex items-center gap-3">
                   <Tag className="h-6 w-6" />
-                  SEO e Metadados
+                  SEO e Metadados Avançados
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
                 <div>
                   <Label htmlFor="focusKeyword" className="text-blue-700 font-black text-lg mb-3 block">
-                    Palavra-chave Foco
+                    Palavra-chave Foco Principal
                   </Label>
                   <Input
                     id="focusKeyword"
@@ -236,6 +351,46 @@ const BlogPostForm = ({
                     placeholder="Ex: tatuagem realista, cuidados com tatuagem..."
                     className="border-blue-200 focus:border-blue-500 shadow-lg"
                   />
+                </div>
+
+                {/* Múltiplas palavras-chave SEO */}
+                <div>
+                  <Label className="text-blue-700 font-black text-lg mb-3 block">
+                    Palavras-chave SEO Adicionais
+                  </Label>
+                  <div className="space-y-3">
+                    {formData.seoKeywords.map((keyword, index) => (
+                      <div key={index} className="flex gap-2 items-center">
+                        <Input
+                          value={keyword}
+                          onChange={(e) => updateSeoKeyword(index, e.target.value)}
+                          placeholder={`Palavra-chave ${index + 1}...`}
+                          className="border-blue-200 focus:border-blue-500 shadow-sm"
+                        />
+                        {formData.seoKeywords.length > 1 && (
+                          <Button
+                            type="button"
+                            onClick={() => removeSeoKeyword(index)}
+                            variant="outline"
+                            size="sm"
+                            className="border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      onClick={addSeoKeyword}
+                      variant="outline"
+                      size="sm"
+                      className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar Palavra-chave
+                    </Button>
+                  </div>
                 </div>
 
                 <div>
@@ -256,23 +411,80 @@ const BlogPostForm = ({
                   </p>
                 </div>
 
-                <div>
-                  <Label htmlFor="category" className="text-blue-700 font-black text-lg mb-3 block">
-                    Categoria
-                  </Label>
-                  <select
-                    id="category"
-                    value={formData.categoryId}
-                    onChange={(e) => setFormData(prev => ({ ...prev, categoryId: e.target.value }))}
-                    className="w-full px-4 py-3 border-blue-200 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 shadow-lg font-medium"
-                  >
-                    {categories.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="category" className="text-blue-700 font-black text-lg mb-3 block">
+                      Categoria
+                    </Label>
+                    <select
+                      id="category"
+                      value={formData.categoryId}
+                      onChange={(e) => setFormData(prev => ({ ...prev, categoryId: e.target.value }))}
+                      className="w-full px-4 py-3 border-blue-200 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 shadow-lg font-medium"
+                    >
+                      {categories.map(category => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="author" className="text-blue-700 font-black text-lg mb-3 block">
+                      Autor
+                    </Label>
+                    <Input
+                      id="author"
+                      value={formData.author}
+                      onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
+                      placeholder="Nome do autor..."
+                      className="border-blue-200 focus:border-blue-500 shadow-lg"
+                    />
+                  </div>
                 </div>
+
+                {/* Links internos */}
+                {formData.internalLinks.some(Boolean) && (
+                  <div>
+                    <Label className="text-blue-700 font-black text-lg mb-3 block">
+                      Links Internos Sugeridos
+                    </Label>
+                    <div className="space-y-3">
+                      {formData.internalLinks.map((link, index) => (
+                        <div key={index} className="flex gap-2 items-center">
+                          <Input
+                            value={link}
+                            onChange={(e) => updateInternalLink(index, e.target.value)}
+                            placeholder={`Link interno ${index + 1}...`}
+                            className="border-blue-200 focus:border-blue-500 shadow-sm"
+                          />
+                          {formData.internalLinks.length > 1 && (
+                            <Button
+                              type="button"
+                              onClick={() => removeInternalLink(index)}
+                              variant="outline"
+                              size="sm"
+                              className="border-red-300 text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        onClick={addInternalLink}
+                        variant="outline"
+                        size="sm"
+                        className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar Link Interno
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
