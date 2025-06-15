@@ -601,9 +601,6 @@ const Appointments = () => {
                   date={currentDate}
                   messages={messages}
                   culture="pt-BR"
-                  components={{
-                    event: EventComponent,
-                  }}
                   className={cn(
                     "rounded-lg overflow-hidden",
                     isFullscreen ? "calendar-99tattoo-fullscreen" : "calendar-99tattoo-enhanced"
@@ -732,7 +729,7 @@ const Appointments = () => {
         appointments={appointments}
         clients={clients}
         onClose={handleCloseDayStatusKanban}
-        onStatusChange={handleRescheduleAppointment}
+        onUpdateAppointmentStatus={handleRescheduleAppointment}
       />
     </div>
   );
