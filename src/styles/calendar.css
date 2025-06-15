@@ -29,7 +29,7 @@
   background: white;
   border: 1px solid #fecaca;
   transition: all 0.3s ease;
-  min-height: 120px; /* Grades ampliadas */
+  min-height: 160px; /* Grades ainda mais ampliadas */
 }
 
 .calendar-99tattoo-enhanced .rbc-date-cell:hover {
@@ -132,40 +132,7 @@
   text-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);
 }
 
-.calendar-99tattoo-enhanced .rbc-time-slot {
-  border-color: #fecaca;
-}
-
-.calendar-99tattoo-enhanced .rbc-time-header {
-  background: linear-gradient(to bottom, #fef2f2, #ffffff);
-  border-color: #fecaca;
-}
-
-.calendar-99tattoo-enhanced .rbc-time-content {
-  border-color: #fecaca;
-}
-
-.calendar-99tattoo-enhanced .rbc-allday-cell {
-  background: linear-gradient(to right, #fef2f2, #fee2e2);
-  border-color: #fecaca;
-}
-
-.calendar-99tattoo-enhanced .rbc-show-more {
-  background: linear-gradient(to right, #dc2626, #ef4444);
-  color: white;
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-weight: bold;
-  border: none;
-  transition: all 0.3s ease;
-}
-
-.calendar-99tattoo-enhanced .rbc-show-more:hover {
-  background: linear-gradient(to right, #b91c1c, #dc2626);
-  transform: scale(1.05);
-}
-
-/* Fullscreen mode specific styles */
+/* Fullscreen mode specific styles - Otimizadas */
 .calendar-99tattoo-fullscreen {
   font-family: 'Montserrat', sans-serif;
 }
@@ -174,20 +141,30 @@
   background: linear-gradient(to bottom right, #ffffff, #fef2f2);
   border-radius: 8px;
   border: 1px solid #fecaca;
+  height: 100% !important;
 }
 
 .calendar-99tattoo-fullscreen .rbc-header {
   background: linear-gradient(to right, #dc2626, #ef4444);
   color: white;
   font-weight: bold;
-  padding: 8px 6px;
+  padding: 10px 8px;
   border-bottom: 1px solid #b91c1c;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .calendar-99tattoo-fullscreen .rbc-date-cell {
-  min-height: 150px; /* Grades ainda maiores em tela cheia */
+  min-height: 180px; /* Grades ainda maiores em tela cheia */
   padding: 12px;
+  background: white;
+  border: 1px solid #fecaca;
+  transition: all 0.3s ease;
+}
+
+.calendar-99tattoo-fullscreen .rbc-date-cell:hover {
+  background: linear-gradient(to bottom right, #fef2f2, #fee2e2);
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
 }
 
 .calendar-99tattoo-fullscreen .rbc-event {
@@ -202,7 +179,7 @@
 
 .calendar-99tattoo-fullscreen .rbc-toolbar {
   background: linear-gradient(to right, #ffffff, #fef2f2);
-  padding: 8px;
+  padding: 10px;
   border-radius: 8px 8px 0 0;
   border-bottom: 1px solid #fecaca;
 }
@@ -217,54 +194,63 @@
   font-size: 12px;
 }
 
-/* Mini Dashboard Cell Styling */
+/* Mini Dashboard Cell Styling - Melhoradas */
 .calendar-99tattoo-enhanced .mini-dashboard-cell {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 8px;
+  padding: 12px;
   background: white;
   border: 1px solid #fecaca;
   transition: all 0.3s ease;
+  min-height: 160px;
 }
 
 .calendar-99tattoo-enhanced .mini-dashboard-cell:hover {
   background: linear-gradient(to bottom right, #fef2f2, #fee2e2);
   transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
 }
 
 .calendar-99tattoo-enhanced .mini-dashboard-cell .day-number {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   color: #dc2626;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .calendar-99tattoo-enhanced .mini-dashboard-cell .appointments-summary {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .calendar-99tattoo-enhanced .mini-dashboard-cell .appointment-item {
   background: linear-gradient(to right, #fee2e2, #fecaca);
-  padding: 4px;
-  border-radius: 4px;
-  font-size: 10px;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 11px;
   color: #7f1d1d;
   border: 1px solid #fca5a5;
+  transition: all 0.2s ease;
+}
+
+.calendar-99tattoo-enhanced .mini-dashboard-cell .appointment-item:hover {
+  background: linear-gradient(to right, #fecaca, #fca5a5);
+  transform: scale(1.02);
 }
 
 .calendar-99tattoo-enhanced .mini-dashboard-cell .view-day-button {
   margin-top: auto;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
+  transform: translateY(10px);
 }
 
 .calendar-99tattoo-enhanced .mini-dashboard-cell:hover .view-day-button {
   opacity: 1;
+  transform: translateY(0);
 }
 
 /* Enhanced hover effects */
@@ -318,15 +304,16 @@
   }
 }
 
-/* Timer specific styles */
+/* Timer specific styles - Melhorados */
 .timer-display {
   background: linear-gradient(to right, #f97316, #ea580c);
   color: white;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
   animation: pulse 2s infinite;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 }
 
 @keyframes pulse {
@@ -339,4 +326,53 @@
   100% {
     box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
   }
+}
+
+/* Melhorias para fullscreen */
+.calendar-99tattoo-fullscreen .rbc-month-view {
+  height: 100% !important;
+}
+
+.calendar-99tattoo-fullscreen .rbc-month-row {
+  min-height: calc((100vh - 300px) / 6) !important;
+}
+
+/* Responsividade aprimorada */
+@media (max-width: 768px) {
+  .calendar-99tattoo-enhanced .rbc-date-cell {
+    min-height: 120px;
+    padding: 6px;
+  }
+  
+  .calendar-99tattoo-fullscreen .rbc-date-cell {
+    min-height: 140px;
+    padding: 8px;
+  }
+  
+  .calendar-99tattoo-enhanced .mini-dashboard-cell {
+    min-height: 120px;
+    padding: 8px;
+  }
+}
+
+/* Animações de hover melhoradas */
+.hover-scale {
+  transition: all 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.2);
+}
+
+/* Botões de ação no hover */
+.action-buttons {
+  opacity: 0;
+  transition: all 0.3s ease;
+  transform: translateY(5px);
+}
+
+.group:hover .action-buttons {
+  opacity: 1;
+  transform: translateY(0);
 }

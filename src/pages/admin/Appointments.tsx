@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -442,6 +441,168 @@ const mockAppointments: Appointment[] = [
     created_at: '2024-12-22T10:00:00Z',
     updated_at: '2024-12-22T10:00:00Z',
   }
+  // Novos agendamentos para testar todas as funcionalidades
+  {
+    id: '26',
+    client_id: '1',
+    artist_id: '1',
+    bed_id: '1',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: '08:00',
+    duration_minutes: 90,
+    service_type: 'consultation',
+    status: 'scheduled',
+    service_description: 'Consulta inicial',
+    notes: 'Primeira consulta',
+    estimated_price: 0,
+    created_at: '2024-12-15T07:00:00Z',
+    updated_at: '2024-12-15T07:00:00Z',
+  },
+  {
+    id: '27',
+    client_id: '3',
+    artist_id: '2',
+    bed_id: '2',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: '10:00',
+    duration_minutes: 180,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Sleeve completa - sessão 1',
+    notes: 'Projeto grande',
+    estimated_price: 800,
+    created_at: '2024-12-15T08:00:00Z',
+    updated_at: '2024-12-15T08:00:00Z',
+  },
+  {
+    id: '28',
+    client_id: '5',
+    artist_id: '3',
+    bed_id: '3',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: '15:30',
+    duration_minutes: 120,
+    service_type: 'tattoo',
+    status: 'in_progress',
+    service_description: 'Tatuagem minimalista',
+    notes: 'Em andamento',
+    estimated_price: 350,
+    created_at: '2024-12-15T14:00:00Z',
+    updated_at: '2024-12-15T14:00:00Z',
+  },
+  {
+    id: '29',
+    client_id: '7',
+    artist_id: '1',
+    bed_id: '1',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: '18:00',
+    duration_minutes: 60,
+    service_type: 'piercing',
+    status: 'completed',
+    service_description: 'Piercing helix',
+    notes: 'Finalizado',
+    estimated_price: 120,
+    created_at: '2024-12-15T17:00:00Z',
+    updated_at: '2024-12-15T17:00:00Z',
+  },
+  // Mais agendamentos para os próximos dias
+  {
+    id: '30',
+    client_id: '2',
+    artist_id: '2',
+    bed_id: '2',
+    date: '2024-12-16',
+    time: '09:00',
+    duration_minutes: 150,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Tatuagem geométrica',
+    notes: 'Design personalizado',
+    estimated_price: 450,
+    created_at: '2024-12-15T15:00:00Z',
+    updated_at: '2024-12-15T15:00:00Z',
+  },
+  {
+    id: '31',
+    client_id: '4',
+    artist_id: '3',
+    bed_id: '3',
+    date: '2024-12-16',
+    time: '14:00',
+    duration_minutes: 90,
+    service_type: 'tattoo',
+    status: 'scheduled',
+    service_description: 'Retoque tatuagem antiga',
+    notes: 'Manutenção',
+    estimated_price: 150,
+    created_at: '2024-12-15T13:00:00Z',
+    updated_at: '2024-12-15T13:00:00Z',
+  },
+  {
+    id: '32',
+    client_id: '6',
+    artist_id: '1',
+    bed_id: '1',
+    date: '2024-12-17',
+    time: '11:00',
+    duration_minutes: 240,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Tatuagem tribal costas',
+    notes: 'Sessão longa',
+    estimated_price: 700,
+    created_at: '2024-12-16T10:00:00Z',
+    updated_at: '2024-12-16T10:00:00Z',
+  },
+  {
+    id: '33',
+    client_id: '8',
+    artist_id: '2',
+    bed_id: '2',
+    date: '2024-12-17',
+    time: '16:30',
+    duration_minutes: 75,
+    service_type: 'piercing',
+    status: 'scheduled',
+    service_description: 'Piercing nostril',
+    notes: 'Cliente experiente',
+    estimated_price: 100,
+    created_at: '2024-12-16T15:00:00Z',
+    updated_at: '2024-12-16T15:00:00Z',
+  },
+  {
+    id: '34',
+    client_id: '9',
+    artist_id: '3',
+    bed_id: '3',
+    date: '2024-12-18',
+    time: '13:00',
+    duration_minutes: 180,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Mandala colorida',
+    notes: 'Arte complexa',
+    estimated_price: 600,
+    created_at: '2024-12-17T12:00:00Z',
+    updated_at: '2024-12-17T12:00:00Z',
+  },
+  {
+    id: '35',
+    client_id: '10',
+    artist_id: '1',
+    bed_id: '1',
+    date: '2024-12-19',
+    time: '10:30',
+    duration_minutes: 120,
+    service_type: 'tattoo',
+    status: 'scheduled',
+    service_description: 'Primeira tatuagem',
+    notes: 'Cliente nervoso',
+    estimated_price: 300,
+    created_at: '2024-12-18T09:00:00Z',
+    updated_at: '2024-12-18T09:00:00Z',
+  }
 ];
 
 const mockClients: Client[] = [
@@ -663,77 +824,139 @@ const Appointments = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'bg-green-500';
-      case 'scheduled': return 'bg-blue-500';
-      case 'cancelled': return 'bg-gray-500';
-      case 'completed': return 'bg-purple-500';
-      case 'in_progress': return 'bg-orange-500';
-      default: return 'bg-red-500';
+  const handleCreateAppointment = (date: Date, timeSlot?: string) => {
+    const slotStart = new Date(date);
+    if (timeSlot) {
+      const [hours, minutes] = timeSlot.split(':');
+      slotStart.setHours(parseInt(hours), parseInt(minutes));
+    } else {
+      slotStart.setHours(9, 0); // Default to 9:00 AM
+    }
+    
+    const slotEnd = new Date(slotStart.getTime() + 60 * 60000); // 1 hour default
+    
+    setSelectedSlot({ start: slotStart, end: slotEnd });
+    setShowCreateForm(true);
+  };
+
+  const handleEditAppointment = (appointment: Appointment) => {
+    const client = clients.find(c => c.id === appointment.client_id);
+    setSelectedEvent(appointment);
+    setSelectedClient(client || null);
+  };
+
+  const handleDeleteAppointment = async (appointmentId: string) => {
+    try {
+      console.log(`Excluindo agendamento ${appointmentId}`);
+      
+      toast({
+        title: "✅ Agendamento excluído!",
+        description: "O agendamento foi removido com sucesso.",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+    } catch (error) {
+      toast({
+        title: "❌ Erro ao excluir",
+        description: "Não foi possível excluir o agendamento.",
+        variant: "destructive"
+      });
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'Confirmado';
-      case 'scheduled': return 'Agendado';
-      case 'cancelled': return 'Cancelado';
-      case 'completed': return 'Concluído';
-      case 'in_progress': return 'Em Atendimento';
-      default: return 'Pendente';
-    }
-  };
-
-  // Custom Day Cell Component para mini dashboard
+  // Custom Day Cell Component para mini dashboard expandido
   const CustomDayCell = ({ date }: { date: Date }) => {
     const dayAppointments = appointments.filter(apt => 
       apt.date === format(date, 'yyyy-MM-dd')
     );
     
+    const appointmentsByArtist = dayAppointments.reduce((acc, apt) => {
+      const artistId = apt.artist_id;
+      if (!acc[artistId]) acc[artistId] = 0;
+      acc[artistId]++;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+    
     return (
-      <div className="h-full min-h-[120px] p-2 bg-white border border-red-100 hover:bg-red-50/30 transition-all duration-300 cursor-pointer group">
+      <div className="h-full min-h-[160px] p-3 bg-white border border-red-100 hover:bg-red-50/30 transition-all duration-300 cursor-pointer group hover:shadow-lg">
         <div className="flex flex-col h-full">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-bold text-red-800">
+          {/* Cabeçalho do dia */}
+          <div className="flex justify-between items-center mb-3">
+            <span className={`text-lg font-bold ${isToday ? 'text-red-800' : 'text-red-700'}`}>
               {format(date, 'd')}
             </span>
             {dayAppointments.length > 0 && (
-              <Badge className="bg-gradient-to-r from-red-600 to-red-800 text-white text-xs font-bold">
+              <Badge className={`text-xs font-bold ${isToday ? 'bg-red-800' : 'bg-gradient-to-r from-red-600 to-red-800'} text-white`}>
                 {dayAppointments.length}
               </Badge>
             )}
           </div>
           
+          {/* Mini Dashboard */}
           {dayAppointments.length > 0 && (
-            <div className="flex-1 space-y-1">
-              {dayAppointments.slice(0, 2).map((apt) => {
+            <div className="flex-1 space-y-2">
+              {/* Indicadores por tatuador */}
+              <div className="flex flex-wrap gap-1">
+                {Object.entries(appointmentsByArtist).map(([artistId, count]) => {
+                  const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500'];
+                  const colorIndex = parseInt(artistId) - 1;
+                  return (
+                    <div
+                      key={artistId}
+                      className={`w-3 h-3 rounded-full ${colors[colorIndex] || 'bg-gray-500'}`}
+                      title={`Tatuador ${artistId}: ${count} agendamentos`}
+                    />
+                  );
+                })}
+              </div>
+              
+              {/* Lista de agendamentos */}
+              {dayAppointments.slice(0, 3).map((apt) => {
                 const client = clients.find(c => c.id === apt.client_id);
                 return (
-                  <div key={apt.id} className="text-xs bg-red-100 p-1 rounded border border-red-200">
+                  <div key={apt.id} className="text-xs bg-red-100 p-2 rounded border border-red-200 hover:bg-red-200 transition-colors">
                     <div className="font-medium text-red-800 truncate">
                       {apt.time} - {client?.name?.split(' ')[0] || 'Cliente'}
+                    </div>
+                    <div className="text-red-600 truncate text-xs">
+                      {apt.service_description}
                     </div>
                   </div>
                 );
               })}
               
-              {dayAppointments.length > 2 && (
-                <div className="text-xs text-red-600 font-medium">
-                  +{dayAppointments.length - 2} mais
+              {dayAppointments.length > 3 && (
+                <div className="text-xs text-red-600 font-medium text-center">
+                  +{dayAppointments.length - 3} agendamentos
                 </div>
               )}
+              
+              {/* Barra de ocupação */}
+              <div className="mt-2">
+                <div className="w-full bg-red-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-gradient-to-r from-red-600 to-red-800 h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${Math.min((dayAppointments.length / 8) * 100, 100)}%` }}
+                  />
+                </div>
+                <div className="text-xs text-red-600 text-center mt-1">
+                  {dayAppointments.length}/8 slots
+                </div>
+              </div>
             </div>
           )}
           
-          <div className="mt-auto pt-2">
+          {/* Botão Ver Dia */}
+          <div className="mt-auto pt-3">
             <Button
               onClick={(e) => {
                 e.stopPropagation();
                 handleDayStatusClick(date);
               }}
               variant="outline"
-              className="w-full text-xs h-6 text-red-600 border-red-200 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-bold"
+              className="w-full text-xs h-8 text-red-600 border-red-200 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all duration-300 font-bold hover:border-red-300 hover:shadow-md"
             >
               <Eye className="h-3 w-3 mr-1" />
               Ver Dia
@@ -763,12 +986,12 @@ const Appointments = () => {
   };
 
   const containerClass = isFullscreen 
-    ? "fixed inset-0 z-50 bg-gradient-to-br from-red-50 via-white to-red-50 overflow-auto"
+    ? "fixed inset-0 z-50 bg-gradient-to-br from-red-50 via-white to-red-50 overflow-auto p-4"
     : "p-4 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden";
 
   const calendarHeight = isFullscreen 
-    ? 'calc(100vh - 200px)'
-    : 'calc(100vh - 400px)';
+    ? 'calc(100vh - 280px)'
+    : 'calc(100vh - 450px)';
 
   return (
     <div className={containerClass}>
@@ -852,7 +1075,7 @@ const Appointments = () => {
             />
           </TabsContent>
 
-          {/* Calendário Mensal com Mini Dashboard */}
+          {/* Calendário Mensal com Mini Dashboard Expandido */}
           <TabsContent value="monthly" className="space-y-6">
             <div className="bg-white rounded-xl shadow-xl border-2 border-red-100/50 backdrop-blur-sm relative overflow-hidden">
               <div className="relative z-10 p-2">
@@ -889,7 +1112,6 @@ const Appointments = () => {
                       "hover:bg-red-50/60 transition-colors duration-200 cursor-pointer",
                       format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && "bg-red-100/40"
                     ),
-                    onClick: () => handleDayStatusClick(date),
                   })}
                   components={{
                     dateCellWrapper: ({ children, value }) => (
@@ -923,6 +1145,9 @@ const Appointments = () => {
               currentDate={currentDate}
               onReschedule={handleRescheduleAppointment}
               onDayClick={handleDayStatusClick}
+              onCreateAppointment={handleCreateAppointment}
+              onEditAppointment={handleEditAppointment}
+              onDeleteAppointment={handleDeleteAppointment}
             />
           </TabsContent>
 
@@ -999,13 +1224,16 @@ const Appointments = () => {
         onReschedule={handleRescheduleAppointment}
       />
 
-      {/* Kanban Diário de Status com Timer */}
+      {/* Kanban Diário de Status com Timer e CRUD Completo */}
       <DailyAppointmentStatusKanban
         selectedDate={selectedDayStatusDate}
         appointments={appointments}
         clients={clients}
         onClose={handleCloseDayStatusKanban}
         onUpdateAppointmentStatus={handleRescheduleAppointment}
+        onCreateAppointment={handleCreateAppointment}
+        onEditAppointment={handleEditAppointment}
+        onDeleteAppointment={handleDeleteAppointment}
       />
     </div>
   );

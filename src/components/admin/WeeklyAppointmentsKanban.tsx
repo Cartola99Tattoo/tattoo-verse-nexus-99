@@ -5,7 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, Clock, User, Scissors, Eye, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Scissors, Eye, Plus, ChevronLeft, ChevronRight, Edit, Trash2 } from 'lucide-react';
 import { format, addWeeks, subWeeks, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Appointment, Client } from '@/services/interfaces/IClientService';
@@ -17,6 +17,9 @@ interface WeeklyAppointmentsKanbanProps {
   currentDate: Date;
   onReschedule: (appointmentId: string, newDate: string) => void;
   onDayClick: (date: Date) => void;
+  onCreateAppointment: (date: Date, timeSlot?: string) => void;
+  onEditAppointment: (appointment: Appointment) => void;
+  onDeleteAppointment: (appointmentId: string) => void;
 }
 
 const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
@@ -25,6 +28,9 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
   currentDate,
   onReschedule,
   onDayClick,
+  onCreateAppointment,
+  onEditAppointment,
+  onDeleteAppointment,
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [weekDate, setWeekDate] = useState(currentDate);
@@ -89,6 +95,48 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
     return appointmentsByDay[dayKey]?.reduce((sum, apt) => sum + (apt.estimated_price || 0), 0) || 0;
   };
 
+  const AppointmentCardWithActions = ({ appointment, client, timeSlot }: {
+    appointment: Appointment;
+    client?: Client;
+    timeSlot: string;
+  }) => {
+    return (
+      <div className="relative group">
+        <DraggableAppointmentCard
+          appointment={appointment}
+          client={client}
+          timeSlot={timeSlot}
+        />
+        
+        {/* Botões de ação - aparecem no hover */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditAppointment(appointment);
+            }}
+            variant="outline"
+            size="sm"
+            className="h-6 w-6 p-0 bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
+          >
+            <Edit className="h-3 w-3" />
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteAppointment(appointment.id);
+            }}
+            variant="outline"
+            size="sm"
+            className="h-6 w-6 p-0 bg-white border-red-200 text-red-600 hover:bg-red-50"
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Navegação da Semana */}
@@ -107,7 +155,7 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
               <h2 className="text-xl font-black">
                 {format(weekStart, "dd 'de' MMMM", { locale: ptBR })} - {format(weekEnd, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
               </h2>
-              <p className="text-red-100 font-medium">Visualização Semanal Kanban</p>
+              <p className="text-red-100 font-medium">Visualização Semanal Kanban com Gestão Completa</p>
             </div>
             
             <Button
@@ -144,7 +192,7 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
             const dayRevenue = getDayRevenue(dayKey);
 
             return (
-              <div key={dayKey} className="min-h-[500px]">
+              <div key={dayKey} className="min-h-[600px]">
                 <Card className={`h-full bg-white border-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
                   isToday ? 'border-red-500 bg-red-50/30' : 'border-red-200'
                 }`}>
@@ -186,13 +234,23 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                       </div>
                     </div>
 
+                    {/* Botão Adicionar Agendamento */}
+                    <Button
+                      onClick={() => onCreateAppointment(day)}
+                      variant="outline"
+                      className="w-full text-red-600 border-red-200 hover:bg-red-50 transition-all duration-300 font-medium text-xs"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Novo Agendamento
+                    </Button>
+
                     {/* Lista de Agendamentos */}
                     <SortableContext items={dayAppointments.map(apt => apt.id)} strategy={verticalListSortingStrategy}>
-                      <div className="space-y-2 min-h-[300px]" id={dayKey}>
+                      <div className="space-y-2 min-h-[350px]" id={dayKey}>
                         {dayAppointments.map((appointment) => {
                           const client = clients.find(c => c.id === appointment.client_id);
                           return (
-                            <DraggableAppointmentCard
+                            <AppointmentCardWithActions
                               key={appointment.id}
                               appointment={appointment}
                               client={client}
@@ -200,6 +258,13 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                             />
                           );
                         })}
+                        
+                        {dayAppointments.length === 0 && (
+                          <div className="text-center py-8 text-gray-400">
+                            <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                            <p className="text-xs">Nenhum agendamento</p>
+                          </div>
+                        )}
                       </div>
                     </SortableContext>
 
@@ -211,7 +276,7 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                         className="w-full text-red-600 border-red-200 hover:bg-red-50 transition-all duration-300 font-medium text-xs"
                       >
                         <Eye className="h-3 w-3 mr-1" />
-                        Ver Dia
+                        Ver Dia Detalhado
                       </Button>
                     </div>
                   </CardContent>
@@ -240,7 +305,7 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
           Resumo da Semana
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-red-50 p-4 rounded-lg border border-red-200 text-center">
             <div className="text-2xl font-black text-red-800">
               {weekAppointments.length}
@@ -265,6 +330,15 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
             </div>
             <div className="text-sm text-blue-600 font-medium">
               Confirmados
+            </div>
+          </div>
+          
+          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center">
+            <div className="text-2xl font-black text-purple-800">
+              {weekAppointments.filter(apt => apt.status === 'completed').length}
+            </div>
+            <div className="text-sm text-purple-600 font-medium">
+              Concluídos
             </div>
           </div>
         </div>
