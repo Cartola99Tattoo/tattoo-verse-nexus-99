@@ -128,11 +128,28 @@ const EventForm: React.FC<EventFormProps> = ({ event, onClose }) => {
           description: "As informações do evento foram atualizadas com sucesso.",
         });
       } else {
-        savedEvent = await eventService.createEvent({
-          ...data,
+        // Create the event data with proper typing
+        const eventData: Omit<IEvent, 'id' | 'createdAt' | 'updatedAt'> = {
+          name: data.name,
+          description: data.description,
+          detailedDescription: data.detailedDescription,
           startDate: new Date(data.startDate).toISOString(),
           endDate: new Date(data.endDate).toISOString(),
-        });
+          startTime: data.startTime,
+          endTime: data.endTime,
+          location: data.location,
+          fullAddress: data.fullAddress,
+          featuredImage: data.featuredImage,
+          eventType: data.eventType,
+          isPublic: data.isPublic,
+          price: data.price,
+          ticketLink: data.ticketLink,
+          participatingArtists: data.participatingArtists,
+          status: data.status,
+          landingPageUrl: data.landingPageUrl,
+        };
+        
+        savedEvent = await eventService.createEvent(eventData);
         
         toast({
           title: "Evento criado!",
