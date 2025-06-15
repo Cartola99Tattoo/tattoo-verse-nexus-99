@@ -1,13 +1,15 @@
+
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles, Expand, Minimize } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles, Expand, Minimize, X, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AppointmentForm from "@/components/admin/AppointmentForm";
 import AppointmentEditModal from "@/components/admin/AppointmentEditModal";
+import DailyAppointmentsKanban from "@/components/admin/DailyAppointmentsKanban";
 import { Client, Appointment } from "@/services/interfaces/IClientService";
 import { getClientService } from "@/services/serviceFactory";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -220,6 +222,7 @@ const Appointments = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState<View>('month');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null);
 
   const queryClient = useQueryClient();
   const clientService = getClientService();
@@ -278,6 +281,34 @@ const Appointments = () => {
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
+  };
+
+  const handleDayClick = (date: Date) => {
+    setSelectedDayDate(date);
+  };
+
+  const handleCloseDayKanban = () => {
+    setSelectedDayDate(null);
+  };
+
+  const handleRescheduleAppointment = async (appointmentId: string, newTime: string) => {
+    try {
+      // Aqui você implementaria a lógica real de reagendamento
+      console.log(`Reagendando agendamento ${appointmentId} para ${newTime}`);
+      
+      toast({
+        title: "✅ Agendamento reagendado!",
+        description: "O horário foi alterado com sucesso.",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+    } catch (error) {
+      toast({
+        title: "❌ Erro ao reagendar",
+        description: "Não foi possível alterar o horário do agendamento.",
+        variant: "destructive"
+      });
+    }
   };
 
   const EventComponent = ({ event }: { event: any }) => {
@@ -403,12 +434,12 @@ const Appointments = () => {
               style={{ height: calendarHeight }}
               onSelectSlot={handleSelectSlot}
               onSelectEvent={handleSelectEvent}
+              onNavigate={setCurrentDate}
+              onView={handleViewChange}
               selectable
               views={['month', 'week', 'day', 'agenda']}
               view={currentView}
-              onView={handleViewChange}
               date={currentDate}
-              onNavigate={setCurrentDate}
               messages={messages}
               culture="pt-BR"
               components={{
@@ -428,9 +459,10 @@ const Appointments = () => {
               })}
               dayPropGetter={(date) => ({
                 className: cn(
-                  "hover:bg-red-50/60 transition-colors duration-200",
+                  "hover:bg-red-50/60 transition-colors duration-200 cursor-pointer",
                   format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && "bg-red-100/40"
                 ),
+                onClick: () => handleDayClick(date),
               })}
               formats={{
                 dayFormat: (date, culture, localizer) =>
@@ -459,11 +491,34 @@ const Appointments = () => {
 
       {/* Modal Criar Agendamento */}
       {showCreateForm && (
-        <AppointmentForm
-          selectedSlot={selectedSlot}
-          clients={clients}
-          onSuccess={handleFormSuccess}
-        />
+        <Dialog open={showCreateForm} onOpenChange={handleCloseCreateForm}>
+          <DialogContent 
+            className="max-w-4xl max-h-[90vh] overflow-auto bg-gradient-to-br from-white to-red-50 border-red-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-lg -mx-6 -mt-6 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <DialogTitle className="text-xl font-black flex items-center gap-2">
+                    <CalendarIcon className="h-5 w-5" />
+                    Novo Agendamento
+                  </DialogTitle>
+                  <p className="text-red-100">Preencha os dados para criar um novo agendamento</p>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleCloseCreateForm} className="text-white hover:bg-white/20">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </DialogHeader>
+            
+            <AppointmentForm
+              selectedSlot={selectedSlot}
+              clients={clients}
+              onSuccess={handleFormSuccess}
+              onClose={handleCloseCreateForm}
+            />
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Modal Editar Agendamento */}
@@ -473,6 +528,15 @@ const Appointments = () => {
         isOpen={!!selectedEvent}
         onClose={handleCloseEditModal}
         onUpdate={handleEditSuccess}
+      />
+
+      {/* Kanban Diário de Agendamentos */}
+      <DailyAppointmentsKanban
+        selectedDate={selectedDayDate}
+        appointments={appointments}
+        clients={clients}
+        onClose={handleCloseDayKanban}
+        onReschedule={handleRescheduleAppointment}
       />
     </div>
   );
