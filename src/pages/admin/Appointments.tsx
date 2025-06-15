@@ -1,11 +1,12 @@
-
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles, Expand, Minimize, X, Eye } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles, Expand, Minimize, X, Eye, Scissors, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AppointmentForm from "@/components/admin/AppointmentForm";
 import AppointmentEditModal from "@/components/admin/AppointmentEditModal";
@@ -231,6 +232,13 @@ const Appointments = () => {
   const appointments = mockAppointments;
   const clients = mockClients;
 
+  // Filtrar próximos agendamentos do dia atual
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const todayAppointments = appointments
+    .filter(apt => apt.date === today)
+    .sort((a, b) => a.time.localeCompare(b.time))
+    .slice(0, 5);
+
   const calendarEvents = appointments.map(appointment => ({
     ...appointment,
     title: `${clients.find(c => c.id === appointment.client_id)?.name || 'Cliente'} - ${appointment.time}`,
@@ -311,6 +319,26 @@ const Appointments = () => {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmed': return 'bg-green-500';
+      case 'scheduled': return 'bg-blue-500';
+      case 'cancelled': return 'bg-gray-500';
+      case 'completed': return 'bg-purple-500';
+      default: return 'bg-red-500';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'confirmed': return 'Confirmado';
+      case 'scheduled': return 'Agendado';
+      case 'cancelled': return 'Cancelado';
+      case 'completed': return 'Concluído';
+      default: return 'Pendente';
+    }
+  };
+
   const EventComponent = ({ event }: { event: any }) => {
     const appointment = event.resource;
     const client = clients.find(c => c.id === appointment.client_id);
@@ -364,49 +392,49 @@ const Appointments = () => {
 
   const containerClass = isFullscreen 
     ? "fixed inset-0 z-50 bg-gradient-to-br from-red-50 via-white to-red-50 overflow-hidden"
-    : "p-2 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden";
+    : "p-4 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden";
 
   const calendarHeight = isFullscreen 
-    ? 'calc(100vh - 80px)'
-    : 'calc(100vh - 120px)';
+    ? 'calc(100vh - 200px)'
+    : 'calc(100vh - 400px)';
 
   return (
     <div className={containerClass}>
-      {/* Elementos decorativos de fundo - mais sutis no modo tela cheia */}
+      {/* Elementos decorativos de fundo */}
       {!isFullscreen && (
         <>
-          <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-red-100/10 via-transparent to-transparent rounded-full transform translate-x-24 -translate-y-24"></div>
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-red-100/8 via-transparent to-transparent rounded-full transform -translate-x-16 translate-y-16"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-red-100/20 via-transparent to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-100/15 via-transparent to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
         </>
       )}
 
       <div className="relative z-10">
-        {/* Cabeçalho Ultra Compacto */}
-        <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-2 rounded-lg shadow-lg mb-1.5 relative overflow-hidden">
+        {/* Cabeçalho Renovado */}
+        <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-xl shadow-xl mb-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] animate-pulse"></div>
-          <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2">
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4" />
+          <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <CalendarIcon className="h-8 w-8" />
               <div>
-                <h1 className="text-base font-black">Calendário de Agendamentos</h1>
-                <p className="text-red-100 font-medium text-xs">Gerencie todos os agendamentos do estúdio</p>
+                <h1 className="text-2xl font-black">Calendário de Agendamentos</h1>
+                <p className="text-red-100 font-medium">Gerencie todos os agendamentos do estúdio com eficiência</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Button
                 onClick={toggleFullscreen}
                 variant="outline"
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 px-3 py-1.5 h-auto rounded-md font-bold text-xs"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-bold"
               >
                 {isFullscreen ? (
                   <>
-                    <Minimize className="h-3 w-3 mr-1" />
+                    <Minimize className="h-4 w-4 mr-2" />
                     Sair Tela Cheia
                   </>
                 ) : (
                   <>
-                    <Expand className="h-3 w-3 mr-1" />
+                    <Expand className="h-4 w-4 mr-2" />
                     Tela Cheia
                   </>
                 )}
@@ -414,18 +442,101 @@ const Appointments = () => {
               
               <Button
                 onClick={() => setShowCreateForm(true)}
-                className="bg-white text-red-700 hover:bg-red-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-3 py-1.5 h-auto rounded-md font-bold text-xs"
+                className="bg-white text-red-700 hover:bg-red-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-bold"
               >
-                <Plus className="h-3 w-3 mr-1" />
+                <Plus className="h-4 w-4 mr-2" />
                 Novo Agendamento
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Calendário Principal Maximizado */}
-        <div className="bg-white rounded-lg shadow-lg border border-red-100/50 backdrop-blur-sm relative overflow-hidden">
-          <div className="relative z-10 p-1">
+        {/* Seção de Visão Rápida dos Agendamentos do Dia */}
+        {!isFullscreen && (
+          <div className="mb-6">
+            <Card className="bg-gradient-to-br from-white to-red-50 border-2 border-red-200 shadow-xl">
+              <CardHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-2 text-lg font-bold">
+                  <Clock className="h-5 w-5" />
+                  Próximos Agendamentos de Hoje
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                {todayAppointments.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {todayAppointments.map((appointment) => {
+                      const client = clients.find(c => c.id === appointment.client_id);
+                      const artist = ['João Silva', 'Maria Santos', 'Pedro Costa'].find((_, index) => 
+                        ['1', '2', '3'][index] === appointment.artist_id
+                      );
+                      
+                      return (
+                        <Card 
+                          key={appointment.id} 
+                          className="bg-gradient-to-br from-white to-red-50 border border-red-200 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105"
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <User className="h-3 w-3 text-red-600" />
+                                  <span className="font-bold text-red-800 text-sm">
+                                    {client?.name?.split(' ')[0] || 'Cliente'}
+                                  </span>
+                                </div>
+                                
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Clock className="h-3 w-3 text-red-600" />
+                                  <span className="text-xs text-red-700">
+                                    {appointment.time} ({appointment.duration_minutes}min)
+                                  </span>
+                                </div>
+                                
+                                {artist && (
+                                  <div className="flex items-center gap-2">
+                                    <Scissors className="h-3 w-3 text-red-600" />
+                                    <span className="text-xs text-red-700">
+                                      {artist.split(' ')[0]}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <Badge 
+                              className={`${getStatusColor(appointment.status)} text-white text-xs font-bold mb-2`}
+                            >
+                              {getStatusText(appointment.status)}
+                            </Badge>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-red-600">
+                    <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p className="font-medium">Nenhum agendamento para hoje</p>
+                  </div>
+                )}
+                
+                <div className="flex justify-center mt-4">
+                  <Button
+                    onClick={() => setSelectedDayDate(new Date())}
+                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-bold"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Ver Dia Completo
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Calendário Principal Renovado */}
+        <div className="bg-white rounded-xl shadow-xl border-2 border-red-100/50 backdrop-blur-sm relative overflow-hidden">
+          <div className="relative z-10 p-2">
             <Calendar
               localizer={localizer}
               events={calendarEvents}
@@ -447,7 +558,7 @@ const Appointments = () => {
               }}
               className={cn(
                 "rounded-lg overflow-hidden",
-                isFullscreen ? "calendar-99tattoo-fullscreen" : "calendar-99tattoo-maximized"
+                isFullscreen ? "calendar-99tattoo-fullscreen" : "calendar-99tattoo-enhanced"
               )}
               eventPropGetter={(event) => ({
                 className: cn(
@@ -489,24 +600,29 @@ const Appointments = () => {
         </div>
       </div>
 
-      {/* Modal Criar Agendamento */}
+      {/* Modal Criar Agendamento Renovado */}
       {showCreateForm && (
         <Dialog open={showCreateForm} onOpenChange={handleCloseCreateForm}>
           <DialogContent 
-            className="max-w-4xl max-h-[90vh] overflow-auto bg-gradient-to-br from-white to-red-50 border-red-200"
+            className="max-w-5xl max-h-[95vh] overflow-auto bg-gradient-to-br from-white to-red-50 border-2 border-red-200 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-lg -mx-6 -mt-6 mb-6">
+            <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-xl -mx-6 -mt-6 mb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <DialogTitle className="text-xl font-black flex items-center gap-2">
-                    <CalendarIcon className="h-5 w-5" />
+                  <DialogTitle className="text-2xl font-black flex items-center gap-3">
+                    <CalendarIcon className="h-6 w-6" />
                     Novo Agendamento
                   </DialogTitle>
-                  <p className="text-red-100">Preencha os dados para criar um novo agendamento</p>
+                  <p className="text-red-100 text-lg">Preencha os dados para criar um novo agendamento</p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={handleCloseCreateForm} className="text-white hover:bg-white/20">
-                  <X className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleCloseCreateForm} 
+                  className="text-white hover:bg-white/20 transition-all duration-300"
+                >
+                  <X className="h-5 w-5" />
                 </Button>
               </div>
             </DialogHeader>

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -117,240 +118,274 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Cliente */}
-        <div className="space-y-2">
-          <Label htmlFor="client" className="text-red-800 font-bold flex items-center gap-2">
-            <User className="h-4 w-4" />
-            Cliente *
-          </Label>
-          <Select value={selectedClientId} onValueChange={setSelectedClientId} disabled={!!prefilledClientData}>
-            <SelectTrigger className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md">
-              <SelectValue placeholder="Selecione o cliente" />
-            </SelectTrigger>
-            <SelectContent className="border-red-200 shadow-xl">
-              {clients.map((client) => (
-                <SelectItem key={client.id} value={client.id} className="hover:bg-red-50">
-                  <div className="flex flex-col">
-                    <span className="font-medium text-red-800">{client.name}</span>
-                    <span className="text-sm text-red-600">{client.email}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {prefilledClientData && (
-            <p className="text-sm text-red-600 font-medium bg-red-50 p-2 rounded border border-red-200">
-              Cliente pré-selecionado da ficha 360°
-            </p>
-          )}
+    <div className="bg-gradient-to-br from-white to-red-50 rounded-xl p-6">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Seção de Informações Principais */}
+        <div className="bg-white rounded-xl p-6 border-2 border-red-200 shadow-lg">
+          <h3 className="text-xl font-bold text-red-800 mb-6 flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Informações Principais
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Cliente */}
+            <div className="space-y-3">
+              <Label htmlFor="client" className="text-red-800 font-bold flex items-center gap-2 text-base">
+                <User className="h-4 w-4" />
+                Cliente *
+              </Label>
+              <Select value={selectedClientId} onValueChange={setSelectedClientId} disabled={!!prefilledClientData}>
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md hover:shadow-lg transition-all duration-300">
+                  <SelectValue placeholder="Selecione o cliente" />
+                </SelectTrigger>
+                <SelectContent className="border-red-200 shadow-xl bg-white">
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id} className="hover:bg-red-50 focus:bg-red-50">
+                      <div className="flex flex-col py-1">
+                        <span className="font-medium text-red-800">{client.name}</span>
+                        <span className="text-sm text-red-600">{client.email}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {prefilledClientData && (
+                <div className="bg-gradient-to-r from-red-50 to-red-100 p-3 rounded-lg border border-red-200">
+                  <p className="text-sm text-red-700 font-medium">
+                    Cliente pré-selecionado da ficha 360°
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Tatuador */}
+            <div className="space-y-3">
+              <Label htmlFor="artist" className="text-red-800 font-bold flex items-center gap-2 text-base">
+                <Scissors className="h-4 w-4" />
+                Tatuador *
+              </Label>
+              <Select value={selectedArtistId} onValueChange={setSelectedArtistId}>
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md hover:shadow-lg transition-all duration-300">
+                  <SelectValue placeholder="Selecione o tatuador" />
+                </SelectTrigger>
+                <SelectContent className="border-red-200 shadow-xl bg-white">
+                  {artists.map((artist) => (
+                    <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50 focus:bg-red-50">
+                      <div className="flex flex-col py-1">
+                        <span className="font-medium text-red-800">{artist.name}</span>
+                        <span className="text-sm text-red-600">{artist.specialty}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
 
-        {/* Tatuador */}
-        <div className="space-y-2">
-          <Label htmlFor="artist" className="text-red-800 font-bold flex items-center gap-2">
-            <Scissors className="h-4 w-4" />
-            Tatuador *
-          </Label>
-          <Select value={selectedArtistId} onValueChange={setSelectedArtistId}>
-            <SelectTrigger className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md">
-              <SelectValue placeholder="Selecione o tatuador" />
-            </SelectTrigger>
-            <SelectContent className="border-red-200 shadow-xl">
-              {artists.map((artist) => (
-                <SelectItem key={artist.id} value={artist.id} className="hover:bg-red-50">
-                  <div className="flex flex-col">
-                    <span className="font-medium text-red-800">{artist.name}</span>
-                    <span className="text-sm text-red-600">{artist.specialty}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Seção de Data e Horário */}
+        <div className="bg-white rounded-xl p-6 border-2 border-red-200 shadow-lg">
+          <h3 className="text-xl font-bold text-red-800 mb-6 flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Data e Horário
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Data */}
+            <div className="space-y-3">
+              <Label className="text-red-800 font-bold flex items-center gap-2 text-base">
+                <CalendarIcon className="h-4 w-4" />
+                Data *
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full h-12 justify-start text-left font-normal border-2 border-red-200 focus:border-red-500 bg-white shadow-md hover:bg-red-50 hover:shadow-lg transition-all duration-300",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "PPP", { locale: ptBR }) : "Selecione a data"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 border-red-200 shadow-xl" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                    locale={ptBR}
+                    className="bg-white"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
 
-        {/* Data */}
-        <div className="space-y-2">
-          <Label className="text-red-800 font-bold flex items-center gap-2">
-            <CalendarIcon className="h-4 w-4" />
-            Data *
-          </Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal border-2 border-red-200 focus:border-red-500 bg-white shadow-md hover:bg-red-50",
-                  !selectedDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? format(selectedDate, "PPP", { locale: ptBR }) : "Selecione a data"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 border-red-200 shadow-xl" align="start">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                disabled={(date) => date < new Date()}
-                initialFocus
-                locale={ptBR}
-                className="bg-white"
+            {/* Horário */}
+            <div className="space-y-3">
+              <Label className="text-red-800 font-bold flex items-center gap-2 text-base">
+                <Clock className="h-4 w-4" />
+                Horário *
+              </Label>
+              <Select value={selectedTime} onValueChange={setSelectedTime}>
+                <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md hover:shadow-lg transition-all duration-300">
+                  <SelectValue placeholder="Selecione o horário" />
+                </SelectTrigger>
+                <SelectContent className="border-red-200 shadow-xl bg-white">
+                  {timeSlots.map((time) => (
+                    <SelectItem key={time} value={time} className="hover:bg-red-50 focus:bg-red-50">
+                      <span className="font-medium text-red-800">{time}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Duração */}
+            <div className="space-y-3">
+              <Label htmlFor="duration" className="text-red-800 font-bold flex items-center gap-2 text-base">
+                <Clock className="h-4 w-4" />
+                Duração (minutos)
+              </Label>
+              <Input
+                id="duration"
+                type="number"
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+                min={30}
+                max={480}
+                step={30}
+                className="h-12 border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md hover:shadow-lg transition-all duration-300"
               />
-            </PopoverContent>
-          </Popover>
+            </div>
+          </div>
         </div>
 
-        {/* Horário */}
-        <div className="space-y-2">
-          <Label className="text-red-800 font-bold flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            Horário *
-          </Label>
-          <Select value={selectedTime} onValueChange={setSelectedTime}>
-            <SelectTrigger className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md">
-              <SelectValue placeholder="Selecione o horário" />
-            </SelectTrigger>
-            <SelectContent className="border-red-200 shadow-xl">
-              {timeSlots.map((time) => (
-                <SelectItem key={time} value={time} className="hover:bg-red-50">
-                  <span className="font-medium text-red-800">{time}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Seção de Serviço */}
+        <div className="bg-white rounded-xl p-6 border-2 border-red-200 shadow-lg">
+          <h3 className="text-xl font-bold text-red-800 mb-6 flex items-center gap-2">
+            <Scissors className="h-5 w-5" />
+            Detalhes do Serviço
+          </h3>
+          
+          <div className="space-y-6">
+            {/* Tipo de Serviço e Maca */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label className="text-red-800 font-bold text-base">Tipo de Serviço</Label>
+                <Select value={serviceType} onValueChange={(value: any) => setServiceType(value)}>
+                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md hover:shadow-lg transition-all duration-300">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="border-red-200 shadow-xl bg-white">
+                    <SelectItem value="tattoo" className="hover:bg-red-50 focus:bg-red-50">
+                      <span className="font-medium text-red-800">Tatuagem</span>
+                    </SelectItem>
+                    <SelectItem value="piercing" className="hover:bg-red-50 focus:bg-red-50">
+                      <span className="font-medium text-red-800">Piercing</span>
+                    </SelectItem>
+                    <SelectItem value="consultation" className="hover:bg-red-50 focus:bg-red-50">
+                      <span className="font-medium text-red-800">Consultoria</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-red-800 font-bold flex items-center gap-2 text-base">
+                  <Bed className="h-4 w-4" />
+                  Maca
+                </Label>
+                <Select value={selectedBedId} onValueChange={setSelectedBedId}>
+                  <SelectTrigger className="h-12 border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md hover:shadow-lg transition-all duration-300">
+                    <SelectValue placeholder="Selecione a maca" />
+                  </SelectTrigger>
+                  <SelectContent className="border-red-200 shadow-xl bg-white">
+                    {beds.map((bed) => (
+                      <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50 focus:bg-red-50">
+                        <span className="font-medium text-red-800">{bed.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Descrição do Serviço */}
+            <div className="space-y-3">
+              <Label htmlFor="serviceDescription" className="text-red-800 font-bold flex items-center gap-2 text-base">
+                <FileText className="h-4 w-4" />
+                Descrição do Serviço
+              </Label>
+              <Textarea
+                id="serviceDescription"
+                value={serviceDescription}
+                onChange={(e) => setServiceDescription(e.target.value)}
+                placeholder="Descreva o que será feito na sessão..."
+                className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md hover:shadow-lg transition-all duration-300 resize-none"
+                rows={4}
+              />
+            </div>
+
+            {/* Preço e Observações */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="estimatedPrice" className="text-red-800 font-bold flex items-center gap-2 text-base">
+                  <DollarSign className="h-4 w-4" />
+                  Preço Estimado (R$)
+                </Label>
+                <Input
+                  id="estimatedPrice"
+                  type="number"
+                  value={estimatedPrice || ''}
+                  onChange={(e) => setEstimatedPrice(Number(e.target.value) || undefined)}
+                  placeholder="0.00"
+                  min={0}
+                  step={0.01}
+                  className="h-12 border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md hover:shadow-lg transition-all duration-300"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="notes" className="text-red-800 font-bold text-base">Observações</Label>
+                <Textarea
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Observações adicionais..."
+                  className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md hover:shadow-lg transition-all duration-300 resize-none"
+                  rows={3}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Maca */}
-        <div className="space-y-2">
-          <Label className="text-red-800 font-bold flex items-center gap-2">
-            <Bed className="h-4 w-4" />
-            Maca
-          </Label>
-          <Select value={selectedBedId} onValueChange={setSelectedBedId}>
-            <SelectTrigger className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md">
-              <SelectValue placeholder="Selecione a maca" />
-            </SelectTrigger>
-            <SelectContent className="border-red-200 shadow-xl">
-              {beds.map((bed) => (
-                <SelectItem key={bed.id} value={bed.id} className="hover:bg-red-50">
-                  <span className="font-medium text-red-800">{bed.name}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Duração */}
-        <div className="space-y-2">
-          <Label htmlFor="duration" className="text-red-800 font-bold flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            Duração (minutos)
-          </Label>
-          <Input
-            id="duration"
-            type="number"
-            value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
-            min={30}
-            max={480}
-            step={30}
-            className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md"
-          />
-        </div>
-      </div>
-
-      {/* Tipo de Serviço */}
-      <div className="space-y-2">
-        <Label className="text-red-800 font-bold">Tipo de Serviço</Label>
-        <Select value={serviceType} onValueChange={(value: any) => setServiceType(value)}>
-          <SelectTrigger className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="border-red-200 shadow-xl">
-            <SelectItem value="tattoo" className="hover:bg-red-50">
-              <span className="font-medium text-red-800">Tatuagem</span>
-            </SelectItem>
-            <SelectItem value="piercing" className="hover:bg-red-50">
-              <span className="font-medium text-red-800">Piercing</span>
-            </SelectItem>
-            <SelectItem value="consultation" className="hover:bg-red-50">
-              <span className="font-medium text-red-800">Consultoria</span>
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Descrição do Serviço */}
-      <div className="space-y-2">
-        <Label htmlFor="serviceDescription" className="text-red-800 font-bold flex items-center gap-2">
-          <FileText className="h-4 w-4" />
-          Descrição do Serviço
-        </Label>
-        <Textarea
-          id="serviceDescription"
-          value={serviceDescription}
-          onChange={(e) => setServiceDescription(e.target.value)}
-          placeholder="Descreva o que será feito na sessão..."
-          className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md resize-none"
-          rows={3}
-        />
-      </div>
-
-      {/* Preço Estimado */}
-      <div className="space-y-2">
-        <Label htmlFor="estimatedPrice" className="text-red-800 font-bold flex items-center gap-2">
-          <DollarSign className="h-4 w-4" />
-          Preço Estimado (R$)
-        </Label>
-        <Input
-          id="estimatedPrice"
-          type="number"
-          value={estimatedPrice || ''}
-          onChange={(e) => setEstimatedPrice(Number(e.target.value) || undefined)}
-          placeholder="0.00"
-          min={0}
-          step={0.01}
-          className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md"
-        />
-      </div>
-
-      {/* Observações */}
-      <div className="space-y-2">
-        <Label htmlFor="notes" className="text-red-800 font-bold">Observações</Label>
-        <Textarea
-          id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Observações adicionais..."
-          className="border-2 border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white shadow-md resize-none"
-          rows={3}
-        />
-      </div>
-
-      {/* Botões */}
-      <div className="flex justify-end space-x-4 pt-6 border-t-2 border-red-200">
-        {onClose && (
+        {/* Botões de Ação */}
+        <div className="flex justify-end space-x-4 pt-6">
+          {onClose && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              className="h-12 px-8 border-2 border-red-300 text-red-700 hover:bg-red-50 hover:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 font-bold"
+            >
+              Cancelar
+            </Button>
+          )}
           <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onClose}
-            className="border-2 border-red-300 text-red-700 hover:bg-red-50 hover:border-red-500 shadow-md hover:shadow-lg transition-all duration-300 font-bold"
+            type="submit" 
+            disabled={createAppointmentMutation.isPending}
+            className="h-12 px-8 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-bold"
           >
-            Cancelar
+            {createAppointmentMutation.isPending ? 'Criando...' : 'Criar Agendamento'}
           </Button>
-        )}
-        <Button 
-          type="submit" 
-          disabled={createAppointmentMutation.isPending}
-          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-bold"
-        >
-          {createAppointmentMutation.isPending ? 'Criando...' : 'Criar Agendamento'}
-        </Button>
-      </div>
-    </form>
+        </div>
+      </form>
+    </div>
   );
 };
 
