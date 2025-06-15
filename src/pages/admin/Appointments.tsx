@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -8,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles, Expand, Minimize, X, Eye, Scissors, User, BarChart3, TrendingUp, Timer, Edit, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AppointmentForm from "@/components/admin/AppointmentForm";
@@ -746,225 +746,161 @@ const Appointments = () => {
     resource: appointment,
   }));
 
-  const handleSelectSlot = useCallback(({ start, end }: { start: Date; end: Date }) => {
-    setSelectedSlot({ start, end });
-    setShowCreateForm(true);
-  }, []);
+  // Função para determinar cor por tatuador/tipo de serviço
+  const getAppointmentColor = (appointment: Appointment) => {
+    // Cores por tatuador
+    const artistColors = {
+      '1': 'bg-gradient-to-r from-blue-500 to-blue-600 border-blue-600',
+      '2': 'bg-gradient-to-r from-green-500 to-green-600 border-green-600',
+      '3': 'bg-gradient-to-r from-purple-500 to-purple-600 border-purple-600',
+    };
 
-  const handleSelectEvent = useCallback((event: any) => {
-    const appointment = event.resource;
-    const client = clients.find(c => c.id === appointment.client_id);
-    setSelectedEvent(appointment);
-    setSelectedClient(client || null);
-  }, [clients]);
+    // Cores por tipo de serviço
+    const serviceColors = {
+      'consultation': 'bg-gradient-to-r from-orange-500 to-orange-600 border-orange-600',
+      'piercing': 'bg-gradient-to-r from-pink-500 to-pink-600 border-pink-600',
+    };
 
-  const handleCloseCreateForm = () => {
-    setShowCreateForm(false);
-    setSelectedSlot(null);
-  };
-
-  const handleCloseEditModal = () => {
-    setSelectedEvent(null);
-    setSelectedClient(null);
-  };
-
-  const handleFormSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['appointments'] });
-    handleCloseCreateForm();
-    toast({
-      title: "✨ Agendamento criado!",
-      description: "O agendamento foi criado com sucesso e aparece no calendário.",
-    });
-  };
-
-  const handleEditSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['appointments'] });
-    handleCloseEditModal();
-  };
-
-  const handleViewChange = useCallback((view: View) => {
-    setCurrentView(view);
-  }, []);
-
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
-
-  const handleDayClick = (date: Date) => {
-    setSelectedDayDate(date);
-  };
-
-  const handleCloseDayKanban = () => {
-    setSelectedDayDate(null);
-  };
-
-  const handleDayStatusClick = (date: Date) => {
-    setSelectedDayStatusDate(date);
-  };
-
-  const handleCloseDayStatusKanban = () => {
-    setSelectedDayStatusDate(null);
-  };
-
-  const handleRescheduleAppointment = async (appointmentId: string, newTime: string) => {
-    try {
-      console.log(`Reagendando agendamento ${appointmentId} para ${newTime}`);
-      
-      toast({
-        title: "✅ Agendamento reagendado!",
-        description: "O horário foi alterado com sucesso.",
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-    } catch (error) {
-      toast({
-        title: "❌ Erro ao reagendar",
-        description: "Não foi possível alterar o horário do agendamento.",
-        variant: "destructive"
-      });
+    if (appointment.service_type === 'consultation') {
+      return serviceColors.consultation;
     }
-  };
-
-  const handleCreateAppointment = (date: Date, timeSlot?: string) => {
-    const slotStart = new Date(date);
-    if (timeSlot) {
-      const [hours, minutes] = timeSlot.split(':');
-      slotStart.setHours(parseInt(hours), parseInt(minutes));
-    } else {
-      slotStart.setHours(9, 0); // Default to 9:00 AM
+    if (appointment.service_type === 'piercing') {
+      return serviceColors.piercing;
     }
-    
-    const slotEnd = new Date(slotStart.getTime() + 60 * 60000); // 1 hour default
-    
-    setSelectedSlot({ start: slotStart, end: slotEnd });
-    setShowCreateForm(true);
+
+    return artistColors[appointment.artist_id as keyof typeof artistColors] || 'bg-gradient-to-r from-red-500 to-red-600 border-red-600';
   };
 
-  const handleEditAppointment = (appointment: Appointment) => {
-    const client = clients.find(c => c.id === appointment.client_id);
-    setSelectedEvent(appointment);
-    setSelectedClient(client || null);
-  };
-
-  const handleDeleteAppointment = async (appointmentId: string) => {
-    try {
-      console.log(`Excluindo agendamento ${appointmentId}`);
-      
-      toast({
-        title: "✅ Agendamento excluído!",
-        description: "O agendamento foi removido com sucesso.",
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-    } catch (error) {
-      toast({
-        title: "❌ Erro ao excluir",
-        description: "Não foi possível excluir o agendamento.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Custom Day Cell Component para mini dashboard expandido
-  const CustomDayCell = ({ date }: { date: Date }) => {
+  // Custom Day Cell Component para calendário compacto com tooltips
+  const EnhancedDayCell = ({ date }: { date: Date }) => {
     const dayAppointments = appointments.filter(apt => 
       apt.date === format(date, 'yyyy-MM-dd')
     );
     
-    const appointmentsByArtist = dayAppointments.reduce((acc, apt) => {
-      const artistId = apt.artist_id;
-      if (!acc[artistId]) acc[artistId] = 0;
-      acc[artistId]++;
-      return acc;
-    }, {} as Record<string, number>);
-    
     const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
     
     return (
-      <div className="h-full min-h-[160px] p-3 bg-white border border-red-100 hover:bg-red-50/30 transition-all duration-300 cursor-pointer group hover:shadow-lg">
-        <div className="flex flex-col h-full">
-          {/* Cabeçalho do dia */}
-          <div className="flex justify-between items-center mb-3">
-            <span className={`text-lg font-bold ${isToday ? 'text-red-800' : 'text-red-700'}`}>
-              {format(date, 'd')}
-            </span>
+      <TooltipProvider>
+        <div className="h-full min-h-[120px] p-2 bg-white border border-red-100 hover:bg-red-50/30 transition-all duration-300 cursor-pointer group hover:shadow-lg">
+          <div className="flex flex-col h-full">
+            {/* Cabeçalho do dia */}
+            <div className="flex justify-between items-center mb-2">
+              <span className={`text-lg font-bold ${isToday ? 'text-red-800' : 'text-red-700'}`}>
+                {format(date, 'd')}
+              </span>
+              {dayAppointments.length > 0 && (
+                <Badge className={`text-xs font-bold ${isToday ? 'bg-red-800' : 'bg-gradient-to-r from-red-600 to-red-800'} text-white`}>
+                  {dayAppointments.length}
+                </Badge>
+              )}
+            </div>
+            
+            {/* Lista compacta de agendamentos */}
             {dayAppointments.length > 0 && (
-              <Badge className={`text-xs font-bold ${isToday ? 'bg-red-800' : 'bg-gradient-to-r from-red-600 to-red-800'} text-white`}>
-                {dayAppointments.length}
-              </Badge>
-            )}
-          </div>
-          
-          {/* Mini Dashboard */}
-          {dayAppointments.length > 0 && (
-            <div className="flex-1 space-y-2">
-              {/* Indicadores por tatuador */}
-              <div className="flex flex-wrap gap-1">
-                {Object.entries(appointmentsByArtist).map(([artistId, count]) => {
-                  const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500'];
-                  const colorIndex = parseInt(artistId) - 1;
+              <div className="flex-1 space-y-1 overflow-hidden">
+                {dayAppointments.slice(0, 4).map((apt) => {
+                  const client = clients.find(c => c.id === apt.client_id);
+                  const colorClass = getAppointmentColor(apt);
+                  
                   return (
-                    <div
-                      key={artistId}
-                      className={`w-3 h-3 rounded-full ${colors[colorIndex] || 'bg-gray-500'}`}
-                      title={`Tatuador ${artistId}: ${count} agendamentos`}
-                    />
+                    <Tooltip key={apt.id}>
+                      <TooltipTrigger asChild>
+                        <div 
+                          className={`text-xs ${colorClass} text-white p-1.5 rounded border-l-4 hover:shadow-md transition-all duration-200 cursor-pointer`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectEvent({ resource: apt });
+                          }}
+                        >
+                          <div className="flex items-center justify-between gap-1 min-h-[16px]">
+                            <span className="font-medium truncate">
+                              {apt.time}
+                            </span>
+                            <span className="text-xs opacity-90 truncate max-w-[60px]">
+                              {client?.name?.split(' ')[0] || 'Cliente'}
+                            </span>
+                          </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs p-3 bg-white border-2 border-red-200 shadow-xl">
+                        <div className="space-y-2">
+                          <div className="font-bold text-red-800 text-sm">
+                            {client?.name || 'Cliente'} - {apt.time}
+                          </div>
+                          <div className="text-xs text-gray-600">
+                            <div><strong>Tatuador:</strong> Artista {apt.artist_id}</div>
+                            <div><strong>Serviço:</strong> {apt.service_description}</div>
+                            <div><strong>Duração:</strong> {apt.duration_minutes} min</div>
+                            <div><strong>Status:</strong> 
+                              <Badge 
+                                className={`ml-1 text-xs ${
+                                  apt.status === 'confirmed' ? 'bg-green-500' :
+                                  apt.status === 'scheduled' ? 'bg-blue-500' :
+                                  apt.status === 'in_progress' ? 'bg-orange-500' :
+                                  apt.status === 'completed' ? 'bg-purple-500' :
+                                  'bg-gray-500'
+                                }`}
+                              >
+                                {apt.status}
+                              </Badge>
+                            </div>
+                            {apt.estimated_price && (
+                              <div><strong>Valor:</strong> R$ {apt.estimated_price}</div>
+                            )}
+                            {apt.notes && (
+                              <div><strong>Obs:</strong> {apt.notes}</div>
+                            )}
+                          </div>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
                   );
                 })}
+                
+                {dayAppointments.length > 4 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="text-xs text-red-600 font-medium text-center bg-red-50 p-1 rounded border border-red-200 cursor-pointer hover:bg-red-100 transition-colors">
+                        +{dayAppointments.length - 4} mais
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs p-3 bg-white border-2 border-red-200 shadow-xl">
+                      <div className="space-y-1">
+                        <div className="font-bold text-red-800 text-sm mb-2">
+                          Agendamentos restantes:
+                        </div>
+                        {dayAppointments.slice(4).map((apt) => {
+                          const client = clients.find(c => c.id === apt.client_id);
+                          return (
+                            <div key={apt.id} className="text-xs text-gray-600">
+                              <strong>{apt.time}</strong> - {client?.name?.split(' ')[0] || 'Cliente'}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
-              
-              {/* Lista de agendamentos */}
-              {dayAppointments.slice(0, 3).map((apt) => {
-                const client = clients.find(c => c.id === apt.client_id);
-                return (
-                  <div key={apt.id} className="text-xs bg-red-100 p-2 rounded border border-red-200 hover:bg-red-200 transition-colors">
-                    <div className="font-medium text-red-800 truncate">
-                      {apt.time} - {client?.name?.split(' ')[0] || 'Cliente'}
-                    </div>
-                    <div className="text-red-600 truncate text-xs">
-                      {apt.service_description}
-                    </div>
-                  </div>
-                );
-              })}
-              
-              {dayAppointments.length > 3 && (
-                <div className="text-xs text-red-600 font-medium text-center">
-                  +{dayAppointments.length - 3} agendamentos
-                </div>
-              )}
-              
-              {/* Barra de ocupação */}
-              <div className="mt-2">
-                <div className="w-full bg-red-200 rounded-full h-1.5">
-                  <div 
-                    className="bg-gradient-to-r from-red-600 to-red-800 h-1.5 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min((dayAppointments.length / 8) * 100, 100)}%` }}
-                  />
-                </div>
-                <div className="text-xs text-red-600 text-center mt-1">
-                  {dayAppointments.length}/8 slots
-                </div>
-              </div>
+            )}
+            
+            {/* Botão Ver Dia */}
+            <div className="mt-auto pt-2">
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDayStatusClick(date);
+                }}
+                variant="outline"
+                className="w-full text-xs h-7 text-red-600 border-red-200 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all duration-300 font-bold hover:border-red-300 hover:shadow-md"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                Ver Dia
+              </Button>
             </div>
-          )}
-          
-          {/* Botão Ver Dia */}
-          <div className="mt-auto pt-3">
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDayStatusClick(date);
-              }}
-              variant="outline"
-              className="w-full text-xs h-8 text-red-600 border-red-200 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all duration-300 font-bold hover:border-red-300 hover:shadow-md"
-            >
-              <Eye className="h-3 w-3 mr-1" />
-              Ver Dia
-            </Button>
           </div>
         </div>
-      </div>
+      </TooltipProvider>
     );
   };
 
@@ -1076,9 +1012,36 @@ const Appointments = () => {
             />
           </TabsContent>
 
-          {/* Calendário Mensal com Mini Dashboard Expandido */}
+          {/* Calendário Mensal Otimizado */}
           <TabsContent value="monthly" className="space-y-6">
             <div className="bg-white rounded-xl shadow-xl border-2 border-red-100/50 backdrop-blur-sm relative overflow-hidden">
+              {/* Legenda de Cores */}
+              <div className="p-4 bg-gradient-to-r from-red-50 to-white border-b border-red-200">
+                <h3 className="text-sm font-bold text-red-800 mb-2">Legenda de Cores:</h3>
+                <div className="flex flex-wrap gap-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded"></div>
+                    <span className="text-gray-700">Tatuador 1</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-green-600 rounded"></div>
+                    <span className="text-gray-700">Tatuador 2</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded"></div>
+                    <span className="text-gray-700">Tatuador 3</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded"></div>
+                    <span className="text-gray-700">Consultas</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-gradient-to-r from-pink-500 to-pink-600 rounded"></div>
+                    <span className="text-gray-700">Piercings</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="relative z-10 p-2">
                 <Calendar
                   localizer={localizer}
@@ -1101,22 +1064,17 @@ const Appointments = () => {
                     isFullscreen ? "calendar-99tattoo-fullscreen" : "calendar-99tattoo-enhanced"
                   )}
                   eventPropGetter={(event) => ({
-                    className: cn(
-                      "transition-all duration-300 hover:shadow-xl appointment-event-enhanced",
-                      event.resource.status === 'confirmed' && "appointment-confirmed",
-                      event.resource.status === 'cancelled' && "appointment-cancelled",
-                      event.resource.status === 'completed' && "appointment-completed"
-                    ),
+                    style: { display: 'none' }, // Esconder eventos padrão para usar componente customizado
                   })}
                   dayPropGetter={(date) => ({
                     className: cn(
-                      "hover:bg-red-50/60 transition-colors duration-200 cursor-pointer",
-                      format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && "bg-red-100/40"
+                      "transition-colors duration-200 cursor-pointer",
+                      format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && "today-cell"
                     ),
                   })}
                   components={{
                     dateCellWrapper: ({ children, value }) => (
-                      <CustomDayCell date={value} />
+                      <EnhancedDayCell date={value} />
                     ),
                   }}
                   formats={{
@@ -1131,8 +1089,7 @@ const Appointments = () => {
                   timeslots={2}
                   min={new Date(2024, 0, 1, 8, 0)}
                   max={new Date(2024, 0, 1, 20, 0)}
-                  popup={true}
-                  popupOffset={30}
+                  popup={false}
                 />
               </div>
             </div>
