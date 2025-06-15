@@ -1,14 +1,17 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Package2, AlertTriangle, TrendingDown, TrendingUp, Minus, Edit, Trash, Package, ShoppingCart, Image as ImageIcon, ArrowDown, ArrowUp } from "lucide-react";
+import { Plus, Search, Package2, AlertTriangle, TrendingDown, TrendingUp, Minus, Edit, Trash, Package, ShoppingCart, Image as ImageIcon, ArrowDown, ArrowUp, Download, Check, X } from "lucide-react";
 import StockItemForm from "@/components/admin/StockItemForm";
 import StockMovementForm from "@/components/admin/StockMovementForm";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface StockItem {
   id: string;
@@ -25,6 +28,17 @@ interface StockItem {
   sku?: string;
   supplier?: string;
   image?: string;
+}
+
+interface ShoppingListItem {
+  id: string;
+  name: string;
+  brand: string;
+  unit: string;
+  currentQuantity: number;
+  minimumStock: number;
+  desiredQuantity: number;
+  selected: boolean;
 }
 
 const mockStockItems: StockItem[] = [
@@ -83,6 +97,7 @@ const Stock = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showShoppingListDialog, setShowShoppingListDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
+  const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -109,22 +124,78 @@ const Stock = () => {
 
   const totalValue = stockItems.reduce((sum, item) => sum + (item.currentQuantity * item.averageCost), 0);
 
-  const generateShoppingList = () => {
-    const lowStockItems = stockItems.filter(item => item.currentQuantity <= item.minimumStock);
-    const criticalItems = stockItems.filter(item => item.status === 'critical');
+  const handleShoppingListGeneration = () => {
+    // Convert all stock items to shopping list items
+    const allItems = stockItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      brand: item.brand,
+      unit: item.unit,
+      currentQuantity: item.currentQuantity,
+      minimumStock: item.minimumStock,
+      desiredQuantity: item.currentQuantity <= item.minimumStock ? item.minimumStock * 2 : item.minimumStock,
+      selected: item.currentQuantity <= item.minimumStock // Auto-select items with low stock
+    }));
     
-    return {
-      critical: criticalItems,
-      lowStock: lowStockItems.filter(item => !criticalItems.includes(item)),
-      suggested: stockItems.filter(item => 
-        item.currentQuantity <= item.minimumStock * 2 && 
-        !lowStockItems.includes(item)
-      ).slice(0, 3)
-    };
+    setShoppingList(allItems);
+    setShowShoppingListDialog(true);
   };
 
-  const handleShoppingListGeneration = () => {
-    setShowShoppingListDialog(true);
+  const handleShoppingListItemToggle = (itemId: string, checked: boolean) => {
+    setShoppingList(prev => prev.map(item => 
+      item.id === itemId ? { ...item, selected: checked } : item
+    ));
+  };
+
+  const handleQuantityChange = (itemId: string, quantity: number) => {
+    setShoppingList(prev => prev.map(item => 
+      item.id === itemId ? { ...item, desiredQuantity: Math.max(1, quantity) } : item
+    ));
+  };
+
+  const exportShoppingList = () => {
+    const selectedItems = shoppingList.filter(item => item.selected);
+    
+    if (selectedItems.length === 0) {
+      toast({
+        title: "Lista vazia",
+        description: "Selecione pelo menos um item para exportar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    let listContent = "LISTA DE COMPRAS - 99TATTOO\n";
+    listContent += "================================\n\n";
+    
+    selectedItems.forEach(item => {
+      listContent += `${item.name} (${item.brand})\n`;
+      listContent += `Quantidade desejada: ${item.desiredQuantity} ${item.unit}\n`;
+      listContent += `Estoque atual: ${item.currentQuantity} ${item.unit}\n`;
+      listContent += `Estoque mínimo: ${item.minimumStock} ${item.unit}\n`;
+      listContent += "---\n";
+    });
+
+    listContent += `\nTotal de itens: ${selectedItems.length}\n`;
+    listContent += `Data: ${new Date().toLocaleDateString('pt-BR')}`;
+
+    // Create and download the file
+    const blob = new Blob([listContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `lista-compras-99tattoo-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Lista exportada",
+      description: "Lista de compras foi baixada com sucesso!",
+    });
+
+    setShowShoppingListDialog(false);
   };
 
   const handleSaveItem = (itemData: any) => {
@@ -203,7 +274,7 @@ const Stock = () => {
     setSelectedItem(null);
   };
 
-  const quickDeduct = (item: StockItem) => {
+  const useItem = (item: StockItem) => {
     setSelectedItem(item);
     setShowMovementForm(true);
   };
@@ -416,9 +487,9 @@ const Stock = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => quickDeduct(item)}
+                      onClick={() => useItem(item)}
                       className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700"
-                      title="Descontar Item"
+                      title="Usar Item"
                     >
                       <Minus size={14} />
                     </Button>
@@ -456,119 +527,89 @@ const Stock = () => {
 
       {/* Shopping List Dialog */}
       <Dialog open={showShoppingListDialog} onOpenChange={setShowShoppingListDialog}>
-        <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-white to-red-50 border-red-200">
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-hidden bg-gradient-to-br from-white to-red-50 border-red-200">
           <DialogHeader>
             <DialogTitle className="text-red-800 font-black flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
-              Lista de Compras Sugerida
+              Lista de Compras Completa
             </DialogTitle>
             <DialogDescription className="text-red-600">
-              Itens que precisam ser reabastecidos baseado no estoque atual
+              Selecione os itens que deseja incluir na lista de compras e ajuste as quantidades
             </DialogDescription>
           </DialogHeader>
 
-          <div className="max-h-96 overflow-y-auto space-y-4">
-            {(() => {
-              const shoppingList = generateShoppingList();
-              return (
-                <>
-                  {shoppingList.critical.length > 0 && (
-                    <div>
-                      <h3 className="font-bold text-red-800 mb-2 flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4" />
-                        Crítico (Acabando)
-                      </h3>
-                      <div className="space-y-2">
-                        {shoppingList.critical.map((item) => (
-                          <div key={item.id} className="flex justify-between items-center p-2 bg-red-100 rounded border-red-300">
-                            <div>
-                              <span className="font-medium text-red-800">{item.name}</span>
-                              <p className="text-xs text-red-600">{item.brand} - {item.currentQuantity} {item.unit} restante(s)</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-bold text-red-700">
-                                Sugerido: {item.minimumStock * 3} {item.unit}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+          <div className="flex flex-col max-h-[60vh]">
+            <div className="overflow-y-auto flex-1 space-y-3 pr-2">
+              {shoppingList.map((item) => (
+                <div 
+                  key={item.id} 
+                  className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${
+                    item.selected 
+                      ? 'bg-red-50 border-red-300 shadow-md' 
+                      : 'bg-white border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3 flex-1">
+                    <Checkbox
+                      id={`item-${item.id}`}
+                      checked={item.selected}
+                      onCheckedChange={(checked) => handleShoppingListItemToggle(item.id, checked as boolean)}
+                      className="border-red-300 text-red-600 focus:ring-red-200"
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor={`item-${item.id}`} className="font-medium text-red-800 cursor-pointer">
+                        {item.name}
+                      </Label>
+                      <p className="text-sm text-red-600">{item.brand}</p>
+                      <p className="text-xs text-red-500">
+                        Estoque atual: {item.currentQuantity} {item.unit} | 
+                        Mínimo: {item.minimumStock} {item.unit}
+                      </p>
                     </div>
-                  )}
-
-                  {shoppingList.lowStock.length > 0 && (
-                    <div>
-                      <h3 className="font-bold text-yellow-700 mb-2 flex items-center gap-2">
-                        <TrendingDown className="h-4 w-4" />
-                        Estoque Baixo
-                      </h3>
-                      <div className="space-y-2">
-                        {shoppingList.lowStock.map((item) => (
-                          <div key={item.id} className="flex justify-between items-center p-2 bg-yellow-100 rounded border-yellow-300">
-                            <div>
-                              <span className="font-medium text-yellow-800">{item.name}</span>
-                              <p className="text-xs text-yellow-600">{item.brand} - {item.currentQuantity} {item.unit}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-bold text-yellow-700">
-                                Sugerido: {item.minimumStock * 2} {item.unit}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {shoppingList.suggested.length > 0 && (
-                    <div>
-                      <h3 className="font-bold text-blue-700 mb-2 flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        Sugestões Adicionais
-                      </h3>
-                      <div className="space-y-2">
-                        {shoppingList.suggested.map((item) => (
-                          <div key={item.id} className="flex justify-between items-center p-2 bg-blue-100 rounded border-blue-300">
-                            <div>
-                              <span className="font-medium text-blue-800">{item.name}</span>
-                              <p className="text-xs text-blue-600">{item.brand} - {item.currentQuantity} {item.unit}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-bold text-blue-700">
-                                Sugerido: {item.minimumStock} {item.unit}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              );
-            })()}
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Label htmlFor={`qty-${item.id}`} className="text-sm text-red-700 font-medium">
+                      Qtd:
+                    </Label>
+                    <Input
+                      id={`qty-${item.id}`}
+                      type="number"
+                      min="1"
+                      value={item.desiredQuantity}
+                      onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
+                      className="w-20 h-8 text-center border-red-200 focus:border-red-400"
+                      disabled={!item.selected}
+                    />
+                    <span className="text-sm text-red-600">{item.unit}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="flex justify-end gap-4 pt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowShoppingListDialog(false)}
-              className="border-red-200 text-red-600 hover:bg-red-50"
-            >
-              Fechar
-            </Button>
-            <Button 
-              variant="tattoo"
-              onClick={() => {
-                toast({
-                  title: "Lista exportada",
-                  description: "Lista de compras foi gerada com sucesso!",
-                });
-                setShowShoppingListDialog(false);
-              }}
-              className="shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              Exportar Lista
-            </Button>
+          <div className="flex justify-between items-center pt-4 border-t border-red-200">
+            <div className="text-sm text-red-600">
+              {shoppingList.filter(item => item.selected).length} item(s) selecionado(s)
+            </div>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowShoppingListDialog(false)}
+                className="border-red-200 text-red-600 hover:bg-red-50"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Cancelar
+              </Button>
+              <Button 
+                variant="tattoo"
+                onClick={exportShoppingList}
+                className="shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exportar Lista
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
