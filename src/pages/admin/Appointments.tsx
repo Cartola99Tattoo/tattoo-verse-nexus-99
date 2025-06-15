@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -800,15 +799,15 @@ const Appointments = () => {
     });
   }, []);
 
-  const handleRescheduleAppointment = useCallback((appointment: Appointment) => {
-    console.log('Reagendando:', appointment);
+  const handleRescheduleAppointment = useCallback((appointmentId: string, newDate: string) => {
+    console.log('Reagendando:', appointmentId, 'para', newDate);
     toast({
       title: "Agendamento reagendado",
       description: "O agendamento foi reagendado com sucesso.",
     });
   }, []);
 
-  const handleCreateAppointment = useCallback((date: Date) => {
+  const handleCreateAppointment = useCallback((date: Date, timeSlot?: string) => {
     setSelectedSlot({ start: date, end: new Date(date.getTime() + 60 * 60 * 1000) });
     setShowCreateForm(true);
   }, []);
@@ -819,11 +818,19 @@ const Appointments = () => {
     setSelectedClient(client || null);
   }, [clients]);
 
-  const handleDeleteAppointment = useCallback((appointment: Appointment) => {
-    console.log('Excluindo:', appointment);
+  const handleDeleteAppointment = useCallback((appointmentId: string) => {
+    console.log('Excluindo:', appointmentId);
     toast({
       title: "Agendamento excluído",
       description: "O agendamento foi excluído com sucesso.",
+    });
+  }, []);
+
+  const handleUpdateAppointmentStatus = useCallback((appointmentId: string, newStatus: string) => {
+    console.log('Atualizando status:', appointmentId, 'para', newStatus);
+    toast({
+      title: "Status atualizado",
+      description: "O status do agendamento foi atualizado com sucesso.",
     });
   }, []);
 
@@ -1277,7 +1284,7 @@ const Appointments = () => {
         appointments={appointments}
         clients={clients}
         onClose={handleCloseDayStatusKanban}
-        onUpdateAppointmentStatus={handleRescheduleAppointment}
+        onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
         onCreateAppointment={handleCreateAppointment}
         onEditAppointment={handleEditAppointment}
         onDeleteAppointment={handleDeleteAppointment}
