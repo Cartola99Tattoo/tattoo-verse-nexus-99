@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Edit, Trash2, Eye, Filter, Users, Target, Lightbulb, Calendar, BarChart3, FileText, TrendingUp, Clock, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Eye, Filter, Users, Target, Lightbulb, Calendar, BarChart3, FileText, TrendingUp, Clock, CheckCircle2, Maximize2, Minimize2 } from "lucide-react";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getBlogService } from "@/services/serviceFactory";
 import { BlogQueryParams } from "@/services/interfaces/IBlogService";
@@ -23,6 +23,7 @@ const Blog = () => {
   const [editingPost, setEditingPost] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("production");
   const [ideas, setIdeas] = useState<ContentIdea[]>([]);
+  const [isKanbanFullscreen, setIsKanbanFullscreen] = useState(false);
 
   const blogService = getBlogService();
 
@@ -123,6 +124,22 @@ const Blog = () => {
     }
   };
 
+  const toggleKanbanFullscreen = () => {
+    setIsKanbanFullscreen(!isKanbanFullscreen);
+  };
+
+  // Handle fullscreen exit with Escape key
+  React.useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isKanbanFullscreen) {
+        setIsKanbanFullscreen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isKanbanFullscreen]);
+
   // Calcular métricas do dashboard de progresso - usando propriedades corretas
   const getDashboardMetrics = () => {
     const statusCounts = ideas.reduce((acc, idea) => {
@@ -173,12 +190,57 @@ const Blog = () => {
     );
   }
 
+  // Render fullscreen Kanban
+  if (isKanbanFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 bg-gradient-to-br from-white to-red-50 overflow-hidden">
+        {/* Fullscreen Header */}
+        <div className="bg-gradient-to-r from-red-600 to-red-800 text-white p-4 shadow-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl lg:text-3xl font-black">
+                Kanban de Produção - Modo Foco Total
+              </h1>
+              <Button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-white hover:bg-red-50 text-red-600 hover:text-red-700 font-bold shadow-xl transition-all duration-300"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar Card
+              </Button>
+            </div>
+            <Button
+              onClick={toggleKanbanFullscreen}
+              variant="outline"
+              className="bg-white/20 border-white/30 text-white hover:bg-white/30 transition-all duration-300"
+            >
+              <Minimize2 className="h-4 w-4 mr-2" />
+              Sair do Foco Total
+            </Button>
+          </div>
+        </div>
+
+        {/* Fullscreen Kanban */}
+        <div className="h-[calc(100vh-80px)] overflow-hidden">
+          <ContentProductionKanban 
+            ideas={ideas} 
+            personas={personas || []}
+            categories={categories || []}
+            onIdeaStatusUpdate={handleIdeaStatusUpdate}
+            onIdeaCreate={handleCreateIdea}
+            onIdeaUpdate={handleUpdateIdea}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header with Action Buttons POSICIONADOS À ESQUERDA */}
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
         <div className="flex-1">
-          <h1 className="text-4xl font-black tattoo-title-gradient bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tattoo-title-gradient bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-4">
             Centro de Produção de Conteúdo 99Tattoo
           </h1>
           
@@ -234,61 +296,93 @@ const Blog = () => {
         </TabsList>
 
         <TabsContent value="production" className="space-y-6">
-          {/* Dashboard de Progresso Visual */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+          {/* Dashboard de Progresso Visual - Layout Mais Adaptativo */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+            <Card className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               <CardHeader className="pb-3">
-                <CardTitle className="text-red-700 flex items-center gap-2 text-lg font-bold">
-                  <Lightbulb className="h-5 w-5" />
-                  Total de Ideias
+                <CardTitle className="text-red-700 flex items-center gap-2 text-sm lg:text-lg font-bold">
+                  <Lightbulb className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                  <span className="truncate">Total de Ideias</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-black text-red-600">{metrics.totalIdeas}</div>
-                <p className="text-sm text-gray-600 mt-1">Cards no Kanban</p>
+                <div className="text-2xl lg:text-3xl font-black text-red-600">{metrics.totalIdeas}</div>
+                <p className="text-xs lg:text-sm text-gray-600 mt-1">Cards no Kanban</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-white to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-gradient-to-br from-white to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               <CardHeader className="pb-3">
-                <CardTitle className="text-green-700 flex items-center gap-2 text-lg font-bold">
-                  <CheckCircle2 className="h-5 w-5" />
-                  Rascunhos Desenvolvidos
+                <CardTitle className="text-green-700 flex items-center gap-2 text-sm lg:text-lg font-bold">
+                  <CheckCircle2 className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                  <span className="truncate">Rascunhos Desenvolvidos</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-black text-green-600">{metrics.wellDevelopedDrafts}</div>
-                <p className="text-sm text-gray-600 mt-1">Prontos para transformar</p>
+                <div className="text-2xl lg:text-3xl font-black text-green-600">{metrics.wellDevelopedDrafts}</div>
+                <p className="text-xs lg:text-sm text-gray-600 mt-1">Prontos para transformar</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               <CardHeader className="pb-3">
-                <CardTitle className="text-blue-700 flex items-center gap-2 text-lg font-bold">
-                  <TrendingUp className="h-5 w-5" />
-                  Publicados Este Mês
+                <CardTitle className="text-blue-700 flex items-center gap-2 text-sm lg:text-lg font-bold">
+                  <TrendingUp className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                  <span className="truncate">Publicados Este Mês</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-black text-blue-600">{metrics.publishedThisMonth}</div>
-                <p className="text-sm text-gray-600 mt-1">Meta: 8 artigos/mês</p>
+                <div className="text-2xl lg:text-3xl font-black text-blue-600">{metrics.publishedThisMonth}</div>
+                <p className="text-xs lg:text-sm text-gray-600 mt-1">Meta: 8 artigos/mês</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-white to-purple-50 border-purple-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-gradient-to-br from-white to-purple-50 border-purple-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               <CardHeader className="pb-3">
-                <CardTitle className="text-purple-700 flex items-center gap-2 text-lg font-bold">
-                  <Clock className="h-5 w-5" />
-                  Em Produção
+                <CardTitle className="text-purple-700 flex items-center gap-2 text-sm lg:text-lg font-bold">
+                  <Clock className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                  <span className="truncate">Em Produção</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-black text-purple-600">
+                <div className="text-2xl lg:text-3xl font-black text-purple-600">
                   {(metrics.statusCounts['Em Produção'] || 0) + (metrics.statusCounts['Em Revisão'] || 0)}
                 </div>
-                <p className="text-sm text-gray-600 mt-1">Cards ativos</p>
+                <p className="text-xs lg:text-sm text-gray-600 mt-1">Cards ativos</p>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Header do Kanban com Botão de Tela Cheia */}
+          <div className="bg-gradient-to-r from-red-100 to-red-200 p-4 lg:p-6 rounded-lg border-2 border-red-300 shadow-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex-1">
+                <h2 className="text-2xl lg:text-3xl font-black text-red-800 mb-2">
+                  Kanban de Produção de Conteúdo
+                </h2>
+                <p className="text-sm lg:text-base text-red-700 font-medium">
+                  Gerencie suas ideias de conteúdo desde a concepção até a publicação
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={() => setShowCreateForm(true)}
+                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Adicionar Card</span>
+                  <span className="sm:hidden">Card</span>
+                </Button>
+                <Button
+                  onClick={toggleKanbanFullscreen}
+                  className="bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 text-white font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                >
+                  <Maximize2 className="h-4 w-4 mr-2" />
+                  <span className="hidden lg:inline">Foco Total</span>
+                  <span className="lg:hidden">Foco</span>
+                </Button>
+              </div>
+            </div>
           </div>
 
           {/* Kanban Unificado de Produção */}
