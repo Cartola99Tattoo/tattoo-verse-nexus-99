@@ -187,7 +187,7 @@ const EventTaskModal = ({ isOpen, onClose, onSave, editingTask, events }: EventT
                   <SelectValue placeholder="Selecione um evento" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-red-200">
-                  <SelectItem value="">Nenhum evento específico</SelectItem>
+                  <SelectItem value="no-event">Nenhum evento específico</SelectItem>
                   {events.map((event) => (
                     <SelectItem key={event.id} value={event.id}>{event.name}</SelectItem>
                   ))}
