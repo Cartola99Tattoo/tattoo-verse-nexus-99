@@ -175,19 +175,23 @@ const Blog = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with Action Buttons */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-black tattoo-title-gradient bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
-          Centro de Produção de Conteúdo 99Tattoo
-        </h1>
-        <div className="flex gap-4">
-          <Button 
-            onClick={() => setShowCreateForm(true)} 
-            className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 font-bold"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Novo Artigo
-          </Button>
+      {/* Header with Action Buttons POSICIONADOS À ESQUERDA */}
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+        <div className="flex-1">
+          <h1 className="text-4xl font-black tattoo-title-gradient bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-4">
+            Centro de Produção de Conteúdo 99Tattoo
+          </h1>
+          
+          {/* Botões de Ação Principais - POSICIONADOS À ESQUERDA */}
+          <div className="flex flex-wrap gap-4">
+            <Button 
+              onClick={() => setShowCreateForm(true)} 
+              className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 font-bold"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Novo Artigo
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -253,12 +253,15 @@ const ContentProductionKanban = ({
       <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 via-transparent to-red-900/5 opacity-90"></div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/10 via-transparent to-transparent"></div>
       
-      {/* Header with Quick Add Button */}
-      <div className="relative mb-6 flex justify-between items-center px-4">
-        <h2 className="text-3xl font-black text-red-800 drop-shadow-lg">
-          Kanban de Produção de Conteúdo
-        </h2>
-        <div className="flex items-center gap-4">
+      {/* Header com Botões Posicionados à Esquerda */}
+      <div className="relative mb-6 px-4">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+          {/* Título */}
+          <h2 className="text-3xl font-black text-red-800 drop-shadow-lg">
+            Kanban de Produção de Conteúdo
+          </h2>
+          
+          {/* Guia de Uso */}
           <div className="bg-gradient-to-r from-red-100 to-red-200 px-4 py-2 rounded-lg border border-red-300 flex items-center gap-2">
             <Lightbulb className="h-4 w-4 text-red-600" />
             <span className="text-sm font-medium text-red-700">
@@ -266,6 +269,10 @@ const ContentProductionKanban = ({
             </span>
             <ArrowRight className="h-4 w-4 text-red-600 animate-pulse" />
           </div>
+        </div>
+        
+        {/* Botões de Ação Principais - POSICIONADOS À ESQUERDA */}
+        <div className="flex flex-wrap gap-4 mt-6">
           <Button
             onClick={() => handleQuickAdd('Ideias de Artigos')}
             className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold shadow-2xl shadow-red-500/30 border border-red-400/30 backdrop-blur-sm hover:scale-105 transition-all duration-300"
