@@ -1,11 +1,13 @@
+
 import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/layout/Layout';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { AuthProvider, CartProvider } from './context';
-import Toaster from './components/common/Toaster';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
+import { Toaster } from '@/components/ui/toaster';
 import InviteAcceptance from "./pages/InviteAcceptance";
 
 const queryClient = new QueryClient();
@@ -52,7 +54,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <BrowserRouter>
+          <Router>
             <div className="min-h-screen bg-gray-50">
               <Routes>
                 {/* Public routes with Layout wrapper */}
@@ -110,7 +112,7 @@ function App() {
               </Routes>
               <Toaster />
             </div>
-          </BrowserRouter>
+          </Router>
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
