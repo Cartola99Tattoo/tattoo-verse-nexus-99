@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -7,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles, Expand, Minimize, X, Eye, Scissors, User, BarChart3, TrendingUp } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles, Expand, Minimize, X, Eye, Scissors, User, BarChart3, TrendingUp, Timer, Edit, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AppointmentForm from "@/components/admin/AppointmentForm";
 import AppointmentEditModal from "@/components/admin/AppointmentEditModal";
@@ -34,15 +35,15 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-// Dados simulados expandidos para demonstração
+// Dados simulados expandidos significativamente para demonstração completa
 const mockAppointments: Appointment[] = [
-  // Agendamentos para dezembro 2024
+  // Dezembro 2024 - Semana 1
   {
     id: '1',
     client_id: '1',
     artist_id: '1',
     bed_id: '1',
-    date: '2024-12-12',
+    date: '2024-12-09',
     time: '09:00',
     duration_minutes: 120,
     service_type: 'tattoo',
@@ -50,15 +51,15 @@ const mockAppointments: Appointment[] = [
     service_description: 'Tatuagem dragão no braço',
     notes: 'Cliente regular',
     estimated_price: 300,
-    created_at: '2024-12-10T10:00:00Z',
-    updated_at: '2024-12-10T10:00:00Z',
+    created_at: '2024-12-08T10:00:00Z',
+    updated_at: '2024-12-08T10:00:00Z',
   },
   {
     id: '2',
     client_id: '2',
     artist_id: '2',
     bed_id: '2',
-    date: '2024-12-12',
+    date: '2024-12-09',
     time: '10:30',
     duration_minutes: 90,
     service_type: 'tattoo',
@@ -66,15 +67,15 @@ const mockAppointments: Appointment[] = [
     service_description: 'Rosa no ombro',
     notes: 'Primeira sessão',
     estimated_price: 200,
-    created_at: '2024-12-09T15:30:00Z',
-    updated_at: '2024-12-09T15:30:00Z',
+    created_at: '2024-12-08T15:30:00Z',
+    updated_at: '2024-12-08T15:30:00Z',
   },
   {
     id: '3',
     client_id: '3',
     artist_id: '1',
     bed_id: '1',
-    date: '2024-12-12',
+    date: '2024-12-09',
     time: '14:00',
     duration_minutes: 180,
     service_type: 'tattoo',
@@ -82,16 +83,15 @@ const mockAppointments: Appointment[] = [
     service_description: 'Mandala nas costas',
     notes: 'Sessão longa',
     estimated_price: 500,
-    created_at: '2024-12-08T12:00:00Z',
-    updated_at: '2024-12-08T12:00:00Z',
+    created_at: '2024-12-07T12:00:00Z',
+    updated_at: '2024-12-07T12:00:00Z',
   },
-  // Mais agendamentos para testar as visualizações
   {
     id: '4',
     client_id: '4',
     artist_id: '3',
     bed_id: '3',
-    date: '2024-12-13',
+    date: '2024-12-10',
     time: '09:30',
     duration_minutes: 60,
     service_type: 'tattoo',
@@ -99,15 +99,15 @@ const mockAppointments: Appointment[] = [
     service_description: 'Retoque em tatuagem',
     notes: 'Cliente antigo',
     estimated_price: 100,
-    created_at: '2024-12-11T09:00:00Z',
-    updated_at: '2024-12-11T09:00:00Z',
+    created_at: '2024-12-09T09:00:00Z',
+    updated_at: '2024-12-09T09:00:00Z',
   },
   {
     id: '5',
     client_id: '5',
     artist_id: '2',
     bed_id: '2',
-    date: '2024-12-13',
+    date: '2024-12-10',
     time: '15:30',
     duration_minutes: 150,
     service_type: 'tattoo',
@@ -115,15 +115,15 @@ const mockAppointments: Appointment[] = [
     service_description: 'Tatuagem tribal',
     notes: 'Design personalizado',
     estimated_price: 400,
-    created_at: '2024-12-07T14:20:00Z',
-    updated_at: '2024-12-07T14:20:00Z',
+    created_at: '2024-12-06T14:20:00Z',
+    updated_at: '2024-12-06T14:20:00Z',
   },
   {
     id: '6',
     client_id: '1',
     artist_id: '1',
     bed_id: '1',
-    date: '2024-12-14',
+    date: '2024-12-11',
     time: '09:30',
     duration_minutes: 240,
     service_type: 'tattoo',
@@ -131,15 +131,15 @@ const mockAppointments: Appointment[] = [
     service_description: 'Sleeve completa',
     notes: 'Sessão 2 de 4',
     estimated_price: 800,
-    created_at: '2024-12-06T16:45:00Z',
-    updated_at: '2024-12-06T16:45:00Z',
+    created_at: '2024-12-05T16:45:00Z',
+    updated_at: '2024-12-05T16:45:00Z',
   },
   {
     id: '7',
     client_id: '6',
     artist_id: '3',
     bed_id: '3',
-    date: '2024-12-14',
+    date: '2024-12-11',
     time: '16:00',
     duration_minutes: 90,
     service_type: 'tattoo',
@@ -150,13 +150,12 @@ const mockAppointments: Appointment[] = [
     created_at: '2024-12-10T11:30:00Z',
     updated_at: '2024-12-10T11:30:00Z',
   },
-  // Agendamentos para a semana atual
   {
     id: '8',
     client_id: '7',
     artist_id: '1',
     bed_id: '1',
-    date: '2024-12-16',
+    date: '2024-12-12',
     time: '10:00',
     duration_minutes: 120,
     service_type: 'tattoo',
@@ -164,15 +163,15 @@ const mockAppointments: Appointment[] = [
     service_description: 'Lobo geométrico',
     notes: 'Cliente VIP',
     estimated_price: 450,
-    created_at: '2024-12-12T08:00:00Z',
-    updated_at: '2024-12-12T08:00:00Z',
+    created_at: '2024-12-11T08:00:00Z',
+    updated_at: '2024-12-11T08:00:00Z',
   },
   {
     id: '9',
     client_id: '8',
     artist_id: '2',
     bed_id: '2',
-    date: '2024-12-16',
+    date: '2024-12-12',
     time: '14:30',
     duration_minutes: 90,
     service_type: 'piercing',
@@ -180,15 +179,15 @@ const mockAppointments: Appointment[] = [
     service_description: 'Piercing no nariz',
     notes: 'Primeira vez',
     estimated_price: 80,
-    created_at: '2024-12-13T10:00:00Z',
-    updated_at: '2024-12-13T10:00:00Z',
+    created_at: '2024-12-11T10:00:00Z',
+    updated_at: '2024-12-11T10:00:00Z',
   },
   {
     id: '10',
     client_id: '9',
     artist_id: '3',
     bed_id: '3',
-    date: '2024-12-17',
+    date: '2024-12-13',
     time: '11:00',
     duration_minutes: 180,
     service_type: 'tattoo',
@@ -196,16 +195,16 @@ const mockAppointments: Appointment[] = [
     service_description: 'Fênix colorida',
     notes: 'Design complexo',
     estimated_price: 600,
-    created_at: '2024-12-14T16:00:00Z',
-    updated_at: '2024-12-14T16:00:00Z',
+    created_at: '2024-12-12T16:00:00Z',
+    updated_at: '2024-12-12T16:00:00Z',
   },
-  // Mais agendamentos para completar a semana
+  // Agendamentos adicionais para semana 2
   {
     id: '11',
     client_id: '10',
     artist_id: '1',
     bed_id: '1',
-    date: '2024-12-18',
+    date: '2024-12-16',
     time: '09:00',
     duration_minutes: 60,
     service_type: 'consultation',
@@ -221,7 +220,7 @@ const mockAppointments: Appointment[] = [
     client_id: '2',
     artist_id: '2',
     bed_id: '2',
-    date: '2024-12-18',
+    date: '2024-12-16',
     time: '15:00',
     duration_minutes: 120,
     service_type: 'tattoo',
@@ -229,8 +228,219 @@ const mockAppointments: Appointment[] = [
     service_description: 'Continuação rosa no ombro',
     notes: 'Segunda sessão',
     estimated_price: 300,
-    created_at: '2024-12-16T09:00:00Z',
-    updated_at: '2024-12-16T09:00:00Z',
+    created_at: '2024-12-15T09:00:00Z',
+    updated_at: '2024-12-15T09:00:00Z',
+  },
+  {
+    id: '13',
+    client_id: '3',
+    artist_id: '3',
+    bed_id: '3',
+    date: '2024-12-17',
+    time: '10:30',
+    duration_minutes: 90,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Finalizando mandala',
+    notes: 'Última sessão',
+    estimated_price: 250,
+    created_at: '2024-12-16T14:00:00Z',
+    updated_at: '2024-12-16T14:00:00Z',
+  },
+  {
+    id: '14',
+    client_id: '4',
+    artist_id: '1',
+    bed_id: '1',
+    date: '2024-12-17',
+    time: '14:00',
+    duration_minutes: 120,
+    service_type: 'tattoo',
+    status: 'scheduled',
+    service_description: 'Nova tatuagem perna',
+    notes: 'Cliente fiel',
+    estimated_price: 350,
+    created_at: '2024-12-16T10:30:00Z',
+    updated_at: '2024-12-16T10:30:00Z',
+  },
+  {
+    id: '15',
+    client_id: '5',
+    artist_id: '2',
+    bed_id: '2',
+    date: '2024-12-18',
+    time: '09:00',
+    duration_minutes: 180,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Tribal no braço direito',
+    notes: 'Continuação do projeto',
+    estimated_price: 450,
+    created_at: '2024-12-17T11:00:00Z',
+    updated_at: '2024-12-17T11:00:00Z',
+  },
+  // Semana 3 - Mais agendamentos
+  {
+    id: '16',
+    client_id: '6',
+    artist_id: '3',
+    bed_id: '3',
+    date: '2024-12-19',
+    time: '13:30',
+    duration_minutes: 150,
+    service_type: 'tattoo',
+    status: 'scheduled',
+    service_description: 'Borboleta colorida - sessão 2',
+    notes: 'Adicionando cores',
+    estimated_price: 300,
+    created_at: '2024-12-18T15:00:00Z',
+    updated_at: '2024-12-18T15:00:00Z',
+  },
+  {
+    id: '17',
+    client_id: '7',
+    artist_id: '1',
+    bed_id: '1',
+    date: '2024-12-20',
+    time: '11:00',
+    duration_minutes: 90,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Retoque lobo geométrico',
+    notes: 'Ajustes finais',
+    estimated_price: 150,
+    created_at: '2024-12-19T09:30:00Z',
+    updated_at: '2024-12-19T09:30:00Z',
+  },
+  {
+    id: '18',
+    client_id: '8',
+    artist_id: '2',
+    bed_id: '2',
+    date: '2024-12-20',
+    time: '16:00',
+    duration_minutes: 60,
+    service_type: 'piercing',
+    status: 'scheduled',
+    service_description: 'Segundo piercing orelha',
+    notes: 'Complementando o primeiro',
+    estimated_price: 90,
+    created_at: '2024-12-19T12:00:00Z',
+    updated_at: '2024-12-19T12:00:00Z',
+  },
+  {
+    id: '19',
+    client_id: '9',
+    artist_id: '3',
+    bed_id: '3',
+    date: '2024-12-21',
+    time: '10:00',
+    duration_minutes: 240,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Fênix - sessão final',
+    notes: 'Finalizando projeto grande',
+    estimated_price: 600,
+    created_at: '2024-12-20T08:00:00Z',
+    updated_at: '2024-12-20T08:00:00Z',
+  },
+  // Agendamentos para o dia atual (hoje)
+  {
+    id: '20',
+    client_id: '1',
+    artist_id: '1',
+    bed_id: '1',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: '09:00',
+    duration_minutes: 120,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Tatuagem águia peito',
+    notes: 'Agendamento de hoje',
+    estimated_price: 400,
+    created_at: '2024-12-14T08:00:00Z',
+    updated_at: '2024-12-14T08:00:00Z',
+  },
+  {
+    id: '21',
+    client_id: '2',
+    artist_id: '2',
+    bed_id: '2',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: '11:30',
+    duration_minutes: 90,
+    service_type: 'tattoo',
+    status: 'in_progress',
+    service_description: 'Rosa - adicionando detalhes',
+    notes: 'Em atendimento agora',
+    estimated_price: 200,
+    created_at: '2024-12-14T09:00:00Z',
+    updated_at: '2024-12-14T09:00:00Z',
+  },
+  {
+    id: '22',
+    client_id: '3',
+    artist_id: '3',
+    bed_id: '3',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: '14:00',
+    duration_minutes: 60,
+    service_type: 'piercing',
+    status: 'scheduled',
+    service_description: 'Piercing labret',
+    notes: 'Agendado para hoje',
+    estimated_price: 100,
+    created_at: '2024-12-14T10:00:00Z',
+    updated_at: '2024-12-14T10:00:00Z',
+  },
+  {
+    id: '23',
+    client_id: '4',
+    artist_id: '1',
+    bed_id: '1',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: '16:30',
+    duration_minutes: 150,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Continuação sleeve',
+    notes: 'Sessão 3 de 4',
+    estimated_price: 500,
+    created_at: '2024-12-14T11:00:00Z',
+    updated_at: '2024-12-14T11:00:00Z',
+  },
+  // Agendamentos para próximos dias
+  {
+    id: '24',
+    client_id: '5',
+    artist_id: '2',
+    bed_id: '2',
+    date: '2024-12-23',
+    time: '10:00',
+    duration_minutes: 180,
+    service_type: 'tattoo',
+    status: 'scheduled',
+    service_description: 'Tribal costas completo',
+    notes: 'Projeto grande',
+    estimated_price: 700,
+    created_at: '2024-12-21T14:00:00Z',
+    updated_at: '2024-12-21T14:00:00Z',
+  },
+  {
+    id: '25',
+    client_id: '6',
+    artist_id: '3',
+    bed_id: '3',
+    date: '2024-12-24',
+    time: '09:00',
+    duration_minutes: 120,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Tatuagem natalina especial',
+    notes: 'Véspera de Natal',
+    estimated_price: 300,
+    created_at: '2024-12-22T10:00:00Z',
+    updated_at: '2024-12-22T10:00:00Z',
   }
 ];
 
@@ -243,8 +453,8 @@ const mockClients: Client[] = [
     status: 'active',
     created_at: '2024-01-15T10:00:00Z',
     updated_at: '2024-12-10T10:00:00Z',
-    total_spent: 1100,
-    total_orders: 3
+    total_spent: 1500,
+    total_orders: 4
   },
   { 
     id: '2', 
@@ -254,8 +464,8 @@ const mockClients: Client[] = [
     status: 'active',
     created_at: '2024-02-20T14:30:00Z',
     updated_at: '2024-12-09T15:30:00Z',
-    total_spent: 500,
-    total_orders: 2
+    total_spent: 700,
+    total_orders: 3
   },
   { 
     id: '3', 
@@ -265,8 +475,8 @@ const mockClients: Client[] = [
     status: 'vip',
     created_at: '2023-11-05T09:15:00Z',
     updated_at: '2024-12-08T12:00:00Z',
-    total_spent: 2500,
-    total_orders: 5
+    total_spent: 2800,
+    total_orders: 6
   },
   { 
     id: '4', 
@@ -276,8 +486,8 @@ const mockClients: Client[] = [
     status: 'returning',
     created_at: '2023-08-12T16:20:00Z',
     updated_at: '2024-12-11T09:00:00Z',
-    total_spent: 800,
-    total_orders: 4
+    total_spent: 1200,
+    total_orders: 5
   },
   { 
     id: '5', 
@@ -287,19 +497,19 @@ const mockClients: Client[] = [
     status: 'active',
     created_at: '2024-03-08T11:45:00Z',
     updated_at: '2024-12-07T14:20:00Z',
-    total_spent: 400,
-    total_orders: 1
+    total_spent: 850,
+    total_orders: 2
   },
   { 
     id: '6', 
     name: 'Felipe Oliveira', 
     email: 'felipe@email.com', 
     phone: '(11) 99999-6666',
-    status: 'new',
+    status: 'active',
     created_at: '2024-12-10T11:30:00Z',
     updated_at: '2024-12-10T11:30:00Z',
-    total_spent: 250,
-    total_orders: 1
+    total_spent: 550,
+    total_orders: 2
   },
   { 
     id: '7', 
@@ -309,19 +519,19 @@ const mockClients: Client[] = [
     status: 'vip',
     created_at: '2023-10-22T14:00:00Z',
     updated_at: '2024-12-12T08:00:00Z',
-    total_spent: 1800,
-    total_orders: 4
+    total_spent: 2100,
+    total_orders: 5
   },
   { 
     id: '8', 
     name: 'Hugo Martins', 
     email: 'hugo@email.com', 
     phone: '(11) 99999-8888',
-    status: 'new',
+    status: 'active',
     created_at: '2024-12-13T10:00:00Z',
     updated_at: '2024-12-13T10:00:00Z',
-    total_spent: 0,
-    total_orders: 0
+    total_spent: 170,
+    total_orders: 2
   },
   { 
     id: '9', 
@@ -331,7 +541,7 @@ const mockClients: Client[] = [
     status: 'active',
     created_at: '2024-05-18T11:30:00Z',
     updated_at: '2024-12-14T16:00:00Z',
-    total_spent: 900,
+    total_spent: 1200,
     total_orders: 2
   },
   { 
@@ -343,7 +553,7 @@ const mockClients: Client[] = [
     created_at: '2024-12-15T12:00:00Z',
     updated_at: '2024-12-15T12:00:00Z',
     total_spent: 0,
-    total_orders: 0
+    total_orders: 1
   }
 ];
 
@@ -459,6 +669,7 @@ const Appointments = () => {
       case 'scheduled': return 'bg-blue-500';
       case 'cancelled': return 'bg-gray-500';
       case 'completed': return 'bg-purple-500';
+      case 'in_progress': return 'bg-orange-500';
       default: return 'bg-red-500';
     }
   };
@@ -469,8 +680,68 @@ const Appointments = () => {
       case 'scheduled': return 'Agendado';
       case 'cancelled': return 'Cancelado';
       case 'completed': return 'Concluído';
+      case 'in_progress': return 'Em Atendimento';
       default: return 'Pendente';
     }
+  };
+
+  // Custom Day Cell Component para mini dashboard
+  const CustomDayCell = ({ date }: { date: Date }) => {
+    const dayAppointments = appointments.filter(apt => 
+      apt.date === format(date, 'yyyy-MM-dd')
+    );
+    
+    return (
+      <div className="h-full min-h-[120px] p-2 bg-white border border-red-100 hover:bg-red-50/30 transition-all duration-300 cursor-pointer group">
+        <div className="flex flex-col h-full">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-bold text-red-800">
+              {format(date, 'd')}
+            </span>
+            {dayAppointments.length > 0 && (
+              <Badge className="bg-gradient-to-r from-red-600 to-red-800 text-white text-xs font-bold">
+                {dayAppointments.length}
+              </Badge>
+            )}
+          </div>
+          
+          {dayAppointments.length > 0 && (
+            <div className="flex-1 space-y-1">
+              {dayAppointments.slice(0, 2).map((apt) => {
+                const client = clients.find(c => c.id === apt.client_id);
+                return (
+                  <div key={apt.id} className="text-xs bg-red-100 p-1 rounded border border-red-200">
+                    <div className="font-medium text-red-800 truncate">
+                      {apt.time} - {client?.name?.split(' ')[0] || 'Cliente'}
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {dayAppointments.length > 2 && (
+                <div className="text-xs text-red-600 font-medium">
+                  +{dayAppointments.length - 2} mais
+                </div>
+              )}
+            </div>
+          )}
+          
+          <div className="mt-auto pt-2">
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDayStatusClick(date);
+              }}
+              variant="outline"
+              className="w-full text-xs h-6 text-red-600 border-red-200 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-bold"
+            >
+              <Eye className="h-3 w-3 mr-1" />
+              Ver Dia
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Mensagens em português brasileiro
@@ -492,7 +763,7 @@ const Appointments = () => {
   };
 
   const containerClass = isFullscreen 
-    ? "fixed inset-0 z-50 bg-gradient-to-br from-red-50 via-white to-red-50 overflow-hidden"
+    ? "fixed inset-0 z-50 bg-gradient-to-br from-red-50 via-white to-red-50 overflow-auto"
     : "p-4 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen relative overflow-hidden";
 
   const calendarHeight = isFullscreen 
@@ -581,7 +852,7 @@ const Appointments = () => {
             />
           </TabsContent>
 
-          {/* Calendário Mensal */}
+          {/* Calendário Mensal com Mini Dashboard */}
           <TabsContent value="monthly" className="space-y-6">
             <div className="bg-white rounded-xl shadow-xl border-2 border-red-100/50 backdrop-blur-sm relative overflow-hidden">
               <div className="relative z-10 p-2">
@@ -620,6 +891,11 @@ const Appointments = () => {
                     ),
                     onClick: () => handleDayStatusClick(date),
                   })}
+                  components={{
+                    dateCellWrapper: ({ children, value }) => (
+                      <CustomDayCell date={value} />
+                    ),
+                  }}
                   formats={{
                     dayFormat: (date, culture, localizer) =>
                       localizer?.format(date, 'dd', culture) || '',
@@ -723,7 +999,7 @@ const Appointments = () => {
         onReschedule={handleRescheduleAppointment}
       />
 
-      {/* Kanban Diário de Status */}
+      {/* Kanban Diário de Status com Timer */}
       <DailyAppointmentStatusKanban
         selectedDate={selectedDayStatusDate}
         appointments={appointments}

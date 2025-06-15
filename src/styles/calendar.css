@@ -29,6 +29,7 @@
   background: white;
   border: 1px solid #fecaca;
   transition: all 0.3s ease;
+  min-height: 120px; /* Grades ampliadas */
 }
 
 .calendar-99tattoo-enhanced .rbc-date-cell:hover {
@@ -184,6 +185,11 @@
   font-size: 12px;
 }
 
+.calendar-99tattoo-fullscreen .rbc-date-cell {
+  min-height: 150px; /* Grades ainda maiores em tela cheia */
+  padding: 12px;
+}
+
 .calendar-99tattoo-fullscreen .rbc-event {
   background: linear-gradient(135deg, #dc2626, #ef4444) !important;
   border: none !important;
@@ -211,25 +217,54 @@
   font-size: 12px;
 }
 
-/* Appointment card styling */
-.appointment-card-compact {
-  position: relative;
-  overflow: hidden;
+/* Mini Dashboard Cell Styling */
+.calendar-99tattoo-enhanced .mini-dashboard-cell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 8px;
+  background: white;
+  border: 1px solid #fecaca;
+  transition: all 0.3s ease;
 }
 
-.appointment-event-enhanced {
-  animation: slideIn 0.3s ease-out;
+.calendar-99tattoo-enhanced .mini-dashboard-cell:hover {
+  background: linear-gradient(to bottom right, #fef2f2, #fee2e2);
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.calendar-99tattoo-enhanced .mini-dashboard-cell .day-number {
+  font-size: 14px;
+  font-weight: bold;
+  color: #dc2626;
+  margin-bottom: 8px;
+}
+
+.calendar-99tattoo-enhanced .mini-dashboard-cell .appointments-summary {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-99tattoo-enhanced .mini-dashboard-cell .appointment-item {
+  background: linear-gradient(to right, #fee2e2, #fecaca);
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 10px;
+  color: #7f1d1d;
+  border: 1px solid #fca5a5;
+}
+
+.calendar-99tattoo-enhanced .mini-dashboard-cell .view-day-button {
+  margin-top: auto;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.calendar-99tattoo-enhanced .mini-dashboard-cell:hover .view-day-button {
+  opacity: 1;
 }
 
 /* Enhanced hover effects */
@@ -260,4 +295,48 @@
 
 .calendar-99tattoo-enhanced .rbc-time-content::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, #b91c1c, #dc2626);
+}
+
+/* Appointment card styling */
+.appointment-card-compact {
+  position: relative;
+  overflow: hidden;
+}
+
+.appointment-event-enhanced {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Timer specific styles */
+.timer-display {
+  background: linear-gradient(to right, #f97316, #ea580c);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 12px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+  }
 }

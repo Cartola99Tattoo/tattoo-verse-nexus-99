@@ -1,16 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCorners } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, User, Scissors, X, Calendar as CalendarIcon, CheckCircle, Play, Calendar } from 'lucide-react';
+import { Clock, User, Scissors, X, Calendar as CalendarIcon, CheckCircle, Play, Calendar, Timer, Pause, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Appointment, Client } from '@/services/interfaces/IClientService';
-import DraggableAppointmentCard from './DraggableAppointmentCard';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface DailyAppointmentStatusKanbanProps {
   selectedDate: Date | null;
@@ -20,6 +21,164 @@ interface DailyAppointmentStatusKanbanProps {
   onUpdateAppointmentStatus: (appointmentId: string, newStatus: string) => void;
 }
 
+interface AppointmentTimer {
+  id: string;
+  startTime: Date;
+  isRunning: boolean;
+  elapsedTime: number; // em segundos
+}
+
+const DraggableAppointmentCard: React.FC<{
+  appointment: Appointment;
+  client?: Client;
+  timer?: AppointmentTimer;
+  onStartTimer: (id: string) => void;
+  onPauseTimer: (id: string) => void;
+}> = ({ appointment, client, timer, onStartTimer, onPauseTimer }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: appointment.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const artist = ['João Silva', 'Maria Santos', 'Pedro Costa'].find((_, index) => 
+    ['1', '2', '3'][index] === appointment.artist_id
+  );
+
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <Card 
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="bg-gradient-to-br from-white to-red-50 border-2 border-red-200 shadow-lg hover:shadow-xl transition-all duration-300 cursor-grab active:cursor-grabbing transform hover:scale-105"
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <User className="h-4 w-4 text-red-600" />
+              <span className="font-bold text-red-800 text-base">
+                {client?.name || 'Cliente'}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="h-4 w-4 text-red-600" />
+              <span className="text-sm text-red-700">
+                {appointment.time} ({appointment.duration_minutes}min)
+              </span>
+            </div>
+            
+            {artist && (
+              <div className="flex items-center gap-2 mb-3">
+                <Scissors className="h-4 w-4 text-red-600" />
+                <span className="text-sm text-red-700">
+                  {artist}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {appointment.service_description && (
+          <div className="bg-red-50 p-3 rounded-lg border border-red-200 mb-3">
+            <p className="text-sm text-red-600 font-medium">
+              {appointment.service_description}
+            </p>
+          </div>
+        )}
+
+        {/* Timer para agendamentos em atendimento */}
+        {appointment.status === 'in_progress' && timer && (
+          <div className="bg-orange-50 p-3 rounded-lg border border-orange-200 mb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Timer className="h-4 w-4 text-orange-600" />
+                <span className="text-sm font-bold text-orange-800">
+                  Tempo: {formatTime(timer.elapsedTime)}
+                </span>
+              </div>
+              <div className="flex gap-1">
+                {timer.isRunning ? (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onPauseTimer(appointment.id);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-orange-600 border-orange-200 hover:bg-orange-50"
+                  >
+                    <Pause className="h-3 w-3" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStartTimer(appointment.id);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-orange-600 border-orange-200 hover:bg-orange-50"
+                  >
+                    <Play className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-between items-center">
+          <Badge className="bg-gradient-to-r from-red-600 to-red-800 text-white font-bold">
+            {appointment.service_type === 'tattoo' ? 'Tatuagem' : 
+             appointment.service_type === 'piercing' ? 'Piercing' : 'Consultoria'}
+          </Badge>
+          
+          <div className="flex items-center gap-2">
+            {appointment.estimated_price && (
+              <span className="text-sm font-bold text-green-600">
+                R$ {appointment.estimated_price}
+              </span>
+            )}
+            
+            <div className="flex gap-1">
+              <Button
+                onClick={(e) => e.stopPropagation()}
+                variant="outline"
+                size="sm"
+                className="h-6 w-6 p-0 text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+              <Button
+                onClick={(e) => e.stopPropagation()}
+                variant="outline"
+                size="sm"
+                className="h-6 w-6 p-0 text-red-600 border-red-200 hover:bg-red-50"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 const DailyAppointmentStatusKanban: React.FC<DailyAppointmentStatusKanbanProps> = ({
   selectedDate,
   appointments,
@@ -28,6 +187,7 @@ const DailyAppointmentStatusKanban: React.FC<DailyAppointmentStatusKanbanProps> 
   onUpdateAppointmentStatus,
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [timers, setTimers] = useState<AppointmentTimer[]>([]);
 
   // Definir as colunas do status do agendamento
   const statusColumns = [
@@ -77,6 +237,51 @@ const DailyAppointmentStatusKanban: React.FC<DailyAppointmentStatusKanbanProps> 
     return acc;
   }, {} as Record<string, Appointment[]>);
 
+  // Atualizar timers a cada segundo
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimers(prevTimers => 
+        prevTimers.map(timer => 
+          timer.isRunning 
+            ? { ...timer, elapsedTime: timer.elapsedTime + 1 }
+            : timer
+        )
+      );
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleStartTimer = (appointmentId: string) => {
+    setTimers(prevTimers => {
+      const existingTimer = prevTimers.find(t => t.id === appointmentId);
+      if (existingTimer) {
+        return prevTimers.map(timer => 
+          timer.id === appointmentId 
+            ? { ...timer, isRunning: true, startTime: new Date() }
+            : timer
+        );
+      } else {
+        return [...prevTimers, {
+          id: appointmentId,
+          startTime: new Date(),
+          isRunning: true,
+          elapsedTime: 0
+        }];
+      }
+    });
+  };
+
+  const handlePauseTimer = (appointmentId: string) => {
+    setTimers(prevTimers => 
+      prevTimers.map(timer => 
+        timer.id === appointmentId 
+          ? { ...timer, isRunning: false }
+          : timer
+      )
+    );
+  };
+
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
@@ -87,6 +292,18 @@ const DailyAppointmentStatusKanban: React.FC<DailyAppointmentStatusKanbanProps> 
     if (over && active.id !== over.id) {
       const appointmentId = active.id as string;
       const newStatus = over.id as string;
+      
+      // Se movendo para "Em Atendimento", iniciar timer
+      if (newStatus === 'in_progress') {
+        handleStartTimer(appointmentId);
+      }
+      
+      // Se movendo de "Em Atendimento" para "Concluído", parar timer
+      const appointment = dayAppointments.find(apt => apt.id === appointmentId);
+      if (appointment?.status === 'in_progress' && newStatus === 'completed') {
+        handlePauseTimer(appointmentId);
+      }
+      
       onUpdateAppointmentStatus(appointmentId, newStatus);
     }
     
@@ -144,68 +361,20 @@ const DailyAppointmentStatusKanban: React.FC<DailyAppointmentStatusKanbanProps> 
                         items={appointmentsByStatus[column.id]?.map(apt => apt.id) || []} 
                         strategy={verticalListSortingStrategy}
                       >
-                        <div className="space-y-3">
+                        <div className="space-y-3" id={column.id}>
                           {appointmentsByStatus[column.id]?.map((appointment) => {
                             const client = clients.find(c => c.id === appointment.client_id);
-                            const artist = ['João Silva', 'Maria Santos', 'Pedro Costa'].find((_, index) => 
-                              ['1', '2', '3'][index] === appointment.artist_id
-                            );
+                            const timer = timers.find(t => t.id === appointment.id);
                             
                             return (
-                              <Card 
+                              <DraggableAppointmentCard
                                 key={appointment.id}
-                                className="bg-gradient-to-br from-white to-red-50 border-2 border-red-200 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105"
-                              >
-                                <CardContent className="p-4">
-                                  <div className="flex items-start justify-between mb-3">
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <User className="h-4 w-4 text-red-600" />
-                                        <span className="font-bold text-red-800 text-base">
-                                          {client?.name || 'Cliente'}
-                                        </span>
-                                      </div>
-                                      
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <Clock className="h-4 w-4 text-red-600" />
-                                        <span className="text-sm text-red-700">
-                                          {appointment.time} ({appointment.duration_minutes}min)
-                                        </span>
-                                      </div>
-                                      
-                                      {artist && (
-                                        <div className="flex items-center gap-2 mb-3">
-                                          <Scissors className="h-4 w-4 text-red-600" />
-                                          <span className="text-sm text-red-700">
-                                            {artist}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  {appointment.service_description && (
-                                    <div className="bg-red-50 p-3 rounded-lg border border-red-200 mb-3">
-                                      <p className="text-sm text-red-600 font-medium">
-                                        {appointment.service_description}
-                                      </p>
-                                    </div>
-                                  )}
-
-                                  <div className="flex justify-between items-center">
-                                    <Badge className="bg-gradient-to-r from-red-600 to-red-800 text-white font-bold">
-                                      {appointment.service_type === 'tattoo' ? 'Tatuagem' : 
-                                       appointment.service_type === 'piercing' ? 'Piercing' : 'Consultoria'}
-                                    </Badge>
-                                    
-                                    {appointment.estimated_price && (
-                                      <span className="text-sm font-bold text-green-600">
-                                        R$ {appointment.estimated_price}
-                                      </span>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
+                                appointment={appointment}
+                                client={client}
+                                timer={timer}
+                                onStartTimer={handleStartTimer}
+                                onPauseTimer={handlePauseTimer}
+                              />
                             );
                           })}
                           
