@@ -123,7 +123,7 @@ const Blog = () => {
     }
   };
 
-  // Calcular métricas do dashboard de progresso
+  // Calcular métricas do dashboard de progresso - usando propriedades corretas
   const getDashboardMetrics = () => {
     const statusCounts = ideas.reduce((acc, idea) => {
       acc[idea.status] = (acc[idea.status] || 0) + 1;
@@ -136,7 +136,11 @@ const Blog = () => {
     ).length;
 
     const wellDevelopedDrafts = ideas.filter(idea => {
-      const draftCount = [idea.draftTitle, idea.draftSummary, idea.draftContent].filter(Boolean).length;
+      const draftCount = [
+        idea.draftTitles?.length ? idea.draftTitles[0] : null, 
+        idea.draftSummary, 
+        idea.draftContent
+      ].filter(Boolean).length;
       return draftCount >= 2;
     }).length;
 

@@ -76,9 +76,13 @@ const ContentKanbanCard = ({ idea, personas = [], onUpdate, onTransformToArticle
     }
   };
 
-  // Calcular progresso do rascunho
-  const hasDraftContent = idea.draftTitle || idea.draftSummary || idea.draftContent;
-  const draftCompleteness = [idea.draftTitle, idea.draftSummary, idea.draftContent].filter(Boolean).length;
+  // Calcular progresso do rascunho - usando as propriedades corretas
+  const hasDraftContent = idea.draftTitles?.length || idea.draftSummary || idea.draftContent;
+  const draftCompleteness = [
+    idea.draftTitles?.length ? idea.draftTitles[0] : null, 
+    idea.draftSummary, 
+    idea.draftContent
+  ].filter(Boolean).length;
   const isDraftWellDeveloped = draftCompleteness >= 2;
 
   const handleQuickTransform = (e: React.MouseEvent) => {
@@ -142,7 +146,7 @@ const ContentKanbanCard = ({ idea, personas = [], onUpdate, onTransformToArticle
                         {/* Indicadores específicos */}
                         <div className="flex gap-1 mt-2">
                           {[
-                            { field: idea.draftTitle, label: 'T', tooltip: 'Título' },
+                            { field: idea.draftTitles?.length ? idea.draftTitles[0] : null, label: 'T', tooltip: 'Título' },
                             { field: idea.draftSummary, label: 'R', tooltip: 'Resumo' },
                             { field: idea.draftContent, label: 'C', tooltip: 'Conteúdo' }
                           ].map((item, i) => (
