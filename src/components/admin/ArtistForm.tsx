@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { User, Shield } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Artist } from "@/services/interfaces/IArtistsService";
@@ -407,10 +409,8 @@ const ArtistForm = ({ artist, onSave, onCancel }: Props) => {
                 <CardDescription>Defina as especialidades do tatuador</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
-                {/* Implement multi-select or tag input here */}
                 <div>
                   <Label>Especialidades</Label>
-                  {/* Mock multi-select */}
                   <div className="flex flex-wrap gap-2">
                     <Button type="button" variant="outline" size="sm" onClick={() => handleSpecialtiesChange([...(watch("specialties") || []), "Realismo"])}>
                       Realismo
@@ -442,10 +442,8 @@ const ArtistForm = ({ artist, onSave, onCancel }: Props) => {
                 <CardDescription>Defina as localizações de atendimento do tatuador</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
-                {/* Implement multi-select or tag input here */}
                 <div>
                   <Label>Localizações</Label>
-                  {/* Mock multi-select */}
                   <div className="flex flex-wrap gap-2">
                     <Button type="button" variant="outline" size="sm" onClick={() => handleLocationsChange([...(watch("locations") || []), "São Paulo"])}>
                       São Paulo
@@ -470,28 +468,28 @@ const ArtistForm = ({ artist, onSave, onCancel }: Props) => {
             </Card>
           </TabsContent>
 
-        <TabsContent value="permissions" className="space-y-6">
-          {artist ? (
-            <ArtistPermissionsManager
-              artist={artist}
-              onPermissionsUpdate={handlePermissionsUpdate}
-            />
-          ) : (
-            <div className="p-8 text-center text-gray-500">
-              <Shield className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <p>Salve o artista primeiro para configurar permissões</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="permissions" className="space-y-6">
+            {artist ? (
+              <ArtistPermissionsManager
+                artist={artist}
+                onPermissionsUpdate={handlePermissionsUpdate}
+              />
+            ) : (
+              <div className="p-8 text-center text-gray-500">
+                <Shield className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <p>Salve o artista primeiro para configurar permissões</p>
+              </div>
+            )}
+          </TabsContent>
 
-      <div className="flex justify-end space-x-2">
-        <Button variant="ghost" onClick={handleCancel}>Cancelar</Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Salvando..." : "Salvar"}
-        </Button>
-      </div>
-    </form>
+          <div className="flex justify-end space-x-2">
+            <Button variant="ghost" onClick={handleCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+        </form>
+      </Tabs>
     </div>
   );
 };
