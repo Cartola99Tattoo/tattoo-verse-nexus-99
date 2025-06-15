@@ -195,33 +195,36 @@ const Blog = () => {
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-br from-white to-red-50 overflow-hidden">
         {/* Fullscreen Header */}
-        <div className="bg-gradient-to-r from-red-600 to-red-800 text-white p-4 shadow-2xl">
+        <div className="bg-gradient-to-r from-red-600 to-red-800 text-white p-3 md:p-4 shadow-2xl">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl lg:text-3xl font-black">
+            <div className="flex items-center gap-2 md:gap-4">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-black">
                 Kanban de Produção - Modo Foco Total
               </h1>
               <Button
                 onClick={() => setShowCreateForm(true)}
-                className="bg-white hover:bg-red-50 text-red-600 hover:text-red-700 font-bold shadow-xl transition-all duration-300"
+                className="bg-white hover:bg-red-50 text-red-600 hover:text-red-700 font-bold shadow-xl transition-all duration-300 text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar Card
+                <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">Adicionar Card</span>
+                <span className="sm:hidden">Card</span>
               </Button>
             </div>
             <Button
               onClick={toggleKanbanFullscreen}
               variant="outline"
-              className="bg-white/20 border-white/30 text-white hover:bg-white/30 transition-all duration-300"
+              className="bg-white/20 border-white/30 text-white hover:bg-white/30 transition-all duration-300 text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
             >
-              <Minimize2 className="h-4 w-4 mr-2" />
-              Sair do Foco Total
+              <Minimize2 className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">Sair do Foco Total</span>
+              <span className="hidden sm:inline lg:hidden">Foco Total</span>
+              <span className="sm:hidden">Foco</span>
             </Button>
           </div>
         </div>
 
         {/* Fullscreen Kanban */}
-        <div className="h-[calc(100vh-80px)] overflow-hidden">
+        <div className="h-[calc(100vh-64px)] md:h-[calc(100vh-80px)] overflow-hidden">
           <ContentProductionKanban 
             ideas={ideas} 
             personas={personas || []}
@@ -236,150 +239,154 @@ const Blog = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header with Action Buttons POSICIONADOS À ESQUERDA */}
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 md:gap-6">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tattoo-title-gradient bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-4">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tattoo-title-gradient bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-3 md:mb-4">
             Centro de Produção de Conteúdo 99Tattoo
           </h1>
           
-          {/* Botões de Ação Principais - POSICIONADOS À ESQUERDA */}
-          <div className="flex flex-wrap gap-4">
+          {/* Botões de Ação Principais - POSICIONADOS À ESQUERDA COM BOTÃO DE TELA CHEIA */}
+          <div className="flex flex-wrap gap-2 md:gap-4">
             <Button 
               onClick={() => setShowCreateForm(true)} 
-              className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 font-bold"
+              className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 font-bold text-sm md:text-base px-3 md:px-4 py-2"
             >
-              <Plus className="h-5 w-5 mr-2" />
-              Novo Artigo
+              <Plus className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Novo Artigo</span>
+              <span className="sm:hidden">Artigo</span>
+            </Button>
+            
+            <Button
+              onClick={toggleKanbanFullscreen}
+              className="bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 text-white font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-sm md:text-base px-3 md:px-4 py-2"
+            >
+              <Maximize2 className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
+              <span className="hidden lg:inline">Modo Foco Total</span>
+              <span className="hidden sm:inline lg:hidden">Foco Total</span>
+              <span className="sm:hidden">Foco</span>
             </Button>
           </div>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-lg">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-lg">
           <TabsTrigger 
             value="production" 
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold text-xs md:text-sm"
           >
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Produção Central
+            <BarChart3 className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+            <span className="hidden sm:inline">Produção Central</span>
+            <span className="sm:hidden">Produção</span>
           </TabsTrigger>
           <TabsTrigger 
             value="posts" 
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold text-xs md:text-sm"
           >
-            <FileText className="h-4 w-4 mr-1" />
+            <FileText className="h-3 w-3 md:h-4 md:w-4 mr-1" />
             Artigos
           </TabsTrigger>
           <TabsTrigger 
             value="categories" 
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold text-xs md:text-sm hidden md:flex"
           >
             Categorias
           </TabsTrigger>
           <TabsTrigger 
             value="personas" 
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold text-xs md:text-sm hidden md:flex"
           >
-            <Users className="h-4 w-4 mr-1" />
+            <Users className="h-3 w-3 md:h-4 md:w-4 mr-1" />
             Personas
           </TabsTrigger>
           <TabsTrigger 
             value="journey" 
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold text-xs md:text-sm hidden md:flex"
           >
-            <Target className="h-4 w-4 mr-1" />
+            <Target className="h-3 w-3 md:h-4 md:w-4 mr-1" />
             Jornada
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="production" className="space-y-6">
-          {/* Dashboard de Progresso Visual - Layout Mais Adaptativo */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+        <TabsContent value="production" className="space-y-4 md:space-y-6">
+          {/* Dashboard de Progresso Visual - Layout Mais Adaptativo e Fluido */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-6 md:mb-8">
             <Card className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-red-700 flex items-center gap-2 text-sm lg:text-lg font-bold">
-                  <Lightbulb className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-red-700 flex items-center gap-1 md:gap-2 text-xs md:text-sm lg:text-lg font-bold">
+                  <Lightbulb className="h-3 w-3 md:h-4 md:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
                   <span className="truncate">Total de Ideias</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl lg:text-3xl font-black text-red-600">{metrics.totalIdeas}</div>
-                <p className="text-xs lg:text-sm text-gray-600 mt-1">Cards no Kanban</p>
+              <CardContent className="pt-0">
+                <div className="text-xl md:text-2xl lg:text-3xl font-black text-red-600">{metrics.totalIdeas}</div>
+                <p className="text-xs text-gray-600 mt-1">Cards no Kanban</p>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-white to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-green-700 flex items-center gap-2 text-sm lg:text-lg font-bold">
-                  <CheckCircle2 className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-green-700 flex items-center gap-1 md:gap-2 text-xs md:text-sm lg:text-lg font-bold">
+                  <CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
                   <span className="truncate">Rascunhos Desenvolvidos</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl lg:text-3xl font-black text-green-600">{metrics.wellDevelopedDrafts}</div>
-                <p className="text-xs lg:text-sm text-gray-600 mt-1">Prontos para transformar</p>
+              <CardContent className="pt-0">
+                <div className="text-xl md:text-2xl lg:text-3xl font-black text-green-600">{metrics.wellDevelopedDrafts}</div>
+                <p className="text-xs text-gray-600 mt-1">Prontos para transformar</p>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-blue-700 flex items-center gap-2 text-sm lg:text-lg font-bold">
-                  <TrendingUp className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-blue-700 flex items-center gap-1 md:gap-2 text-xs md:text-sm lg:text-lg font-bold">
+                  <TrendingUp className="h-3 w-3 md:h-4 md:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
                   <span className="truncate">Publicados Este Mês</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl lg:text-3xl font-black text-blue-600">{metrics.publishedThisMonth}</div>
-                <p className="text-xs lg:text-sm text-gray-600 mt-1">Meta: 8 artigos/mês</p>
+              <CardContent className="pt-0">
+                <div className="text-xl md:text-2xl lg:text-3xl font-black text-blue-600">{metrics.publishedThisMonth}</div>
+                <p className="text-xs text-gray-600 mt-1">Meta: 8 artigos/mês</p>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-white to-purple-50 border-purple-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-purple-700 flex items-center gap-2 text-sm lg:text-lg font-bold">
-                  <Clock className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-purple-700 flex items-center gap-1 md:gap-2 text-xs md:text-sm lg:text-lg font-bold">
+                  <Clock className="h-3 w-3 md:h-4 md:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
                   <span className="truncate">Em Produção</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl lg:text-3xl font-black text-purple-600">
+              <CardContent className="pt-0">
+                <div className="text-xl md:text-2xl lg:text-3xl font-black text-purple-600">
                   {(metrics.statusCounts['Em Produção'] || 0) + (metrics.statusCounts['Em Revisão'] || 0)}
                 </div>
-                <p className="text-xs lg:text-sm text-gray-600 mt-1">Cards ativos</p>
+                <p className="text-xs text-gray-600 mt-1">Cards ativos</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Header do Kanban com Botão de Tela Cheia */}
-          <div className="bg-gradient-to-r from-red-100 to-red-200 p-4 lg:p-6 rounded-lg border-2 border-red-300 shadow-xl">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          {/* Header do Kanban */}
+          <div className="bg-gradient-to-r from-red-100 to-red-200 p-3 md:p-4 lg:p-6 rounded-lg border-2 border-red-300 shadow-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4">
               <div className="flex-1">
-                <h2 className="text-2xl lg:text-3xl font-black text-red-800 mb-2">
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-red-800 mb-1 md:mb-2">
                   Kanban de Produção de Conteúdo
                 </h2>
-                <p className="text-sm lg:text-base text-red-700 font-medium">
+                <p className="text-xs md:text-sm lg:text-base text-red-700 font-medium">
                   Gerencie suas ideias de conteúdo desde a concepção até a publicação
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 <Button
                   onClick={() => setShowCreateForm(true)}
-                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
                   <span className="hidden sm:inline">Adicionar Card</span>
                   <span className="sm:hidden">Card</span>
-                </Button>
-                <Button
-                  onClick={toggleKanbanFullscreen}
-                  className="bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 text-white font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-                >
-                  <Maximize2 className="h-4 w-4 mr-2" />
-                  <span className="hidden lg:inline">Foco Total</span>
-                  <span className="lg:hidden">Foco</span>
                 </Button>
               </div>
             </div>
