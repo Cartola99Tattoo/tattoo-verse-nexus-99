@@ -8,16 +8,16 @@ import { Badge } from '@/components/ui/badge';
 import { Plus } from 'lucide-react';
 import { ContentIdea } from '@/types/contentIdea';
 import ContentKanbanCard from './ContentKanbanCard';
-import { Persona } from '@/types/persona';
 
 interface ContentKanbanColumnProps {
   id: string;
   title: string;
   ideas: ContentIdea[];
   onQuickAdd: () => void;
+  onEditIdea?: (idea: ContentIdea) => void;
 }
 
-const ContentKanbanColumn = ({ id, title, ideas, onQuickAdd }: ContentKanbanColumnProps) => {
+const ContentKanbanColumn = ({ id, title, ideas, onQuickAdd, onEditIdea }: ContentKanbanColumnProps) => {
   const { setNodeRef } = useDroppable({
     id: id,
   });
@@ -72,7 +72,8 @@ const ContentKanbanColumn = ({ id, title, ideas, onQuickAdd }: ContentKanbanColu
                   <ContentKanbanCard
                     key={idea.id}
                     idea={idea}
-                    personas={[]} // Will be passed from parent when needed
+                    personas={[]}
+                    onEdit={onEditIdea}
                   />
                 ))}
               </div>

@@ -5,36 +5,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Save, 
   ArrowRight, 
   Plus, 
   Trash2, 
   FileText, 
-  Users, 
-  Target, 
   Tag, 
   Image,
   Link,
   Sparkles,
   PenTool,
   Upload,
-  CheckCircle2
+  X
 } from 'lucide-react';
 import { ContentIdea, CreateContentIdeaData } from '@/types/contentIdea';
-import { Persona } from '@/types/persona';
 import { toast } from '@/hooks/use-toast';
 
-interface ContentIdeaDetailModalProps {
-  idea: ContentIdea;
-  personas: Persona[];
+interface ArticleDraftModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (idea: ContentIdea, data: CreateContentIdeaData) => void;
-  onTransformToArticle: (idea: ContentIdea) => void;
+  onSave: (data: CreateContentIdeaData) => void;
+  onTransformToArticle: (data: CreateContentIdeaData) => void;
+  editingIdea?: ContentIdea | null;
 }
 
 const FORMATS = [
@@ -59,41 +53,90 @@ const MOCK_AUTHORS = [
   'Ana Paula', 'Bruno Santos', 'Equipe 99Tattoo'
 ];
 
-const ContentIdeaDetailModal = ({ 
-  idea, 
-  personas, 
+const ArticleDraftModal = ({ 
   isOpen, 
   onClose, 
-  onUpdate, 
-  onTransformToArticle 
-}: ContentIdeaDetailModalProps) => {
+  onSave, 
+  onTransformToArticle,
+  editingIdea 
+}: ArticleDraftModalProps) => {
   const [formData, setFormData] = useState<CreateContentIdeaData>({
-    theme: idea.theme,
-    format: idea.format,
-    purchaseStage: idea.purchaseStage,
-    focusPersonas: idea.focusPersonas,
-    personaRelevance: idea.personaRelevance,
-    focusKeyword: idea.focusKeyword,
-    status: idea.status,
-    notes: idea.notes,
-    ideaCreator: idea.ideaCreator,
-    draftTitles: idea.draftTitles || [''],
-    draftSummary: idea.draftSummary || '',
-    draftContent: idea.draftContent || '',
-    seoKeywords: idea.seoKeywords || [''],
-    provisionalSlug: idea.provisionalSlug || '',
-    suggestedAuthor: idea.suggestedAuthor || '',
-    featuredImageUrl: idea.featuredImageUrl || '',
-    internalLinks: idea.internalLinks || [''],
-    suggestedCTA: idea.suggestedCTA || ''
+    theme: '',
+    format: 'Blog Post',
+    purchaseStage: 'Aprendizado e Descoberta',
+    focusPersonas: [],
+    personaRelevance: '',
+    focusKeyword: '',
+    status: 'Ideia',
+    notes: '',
+    ideaCreator: '',
+    draftTitles: [''],
+    draftSummary: '',
+    draftContent: '',
+    seoKeywords: [''],
+    provisionalSlug: '',
+    suggestedAuthor: '',
+    featuredImageUrl: '',
+    internalLinks: [''],
+    suggestedCTA: ''
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
 
+  // Initialize form with editing data
+  useEffect(() => {
+    if (editingIdea) {
+      setFormData({
+        theme: editingIdea.theme,
+        format: editingIdea.format,
+        purchaseStage: editingIdea.purchaseStage,
+        focusPersonas: editingIdea.focusPersonas,
+        personaRelevance: editingIdea.personaRelevance,
+        focusKeyword: editingIdea.focusKeyword,
+        status: editingIdea.status,
+        notes: editingIdea.notes,
+        ideaCreator: editingIdea.ideaCreator,
+        draftTitles: editingIdea.draftTitles || [''],
+        draftSummary: editingIdea.draftSummary || '',
+        draftContent: editingIdea.draftContent || '',
+        seoKeywords: editingIdea.seoKeywords || [''],
+        provisionalSlug: editingIdea.provisionalSlug || '',
+        suggestedAuthor: editingIdea.suggestedAuthor || '',
+        featuredImageUrl: editingIdea.featuredImageUrl || '',
+        internalLinks: editingIdea.internalLinks || [''],
+        suggestedCTA: editingIdea.suggestedCTA || ''
+      });
+      setImagePreview(editingIdea.featuredImageUrl || '');
+    } else {
+      // Reset form for new idea
+      setFormData({
+        theme: '',
+        format: 'Blog Post',
+        purchaseStage: 'Aprendizado e Descoberta',
+        focusPersonas: [],
+        personaRelevance: '',
+        focusKeyword: '',
+        status: 'Ideia',
+        notes: '',
+        ideaCreator: '',
+        draftTitles: [''],
+        draftSummary: '',
+        draftContent: '',
+        seoKeywords: [''],
+        provisionalSlug: '',
+        suggestedAuthor: '',
+        featuredImageUrl: '',
+        internalLinks: [''],
+        suggestedCTA: ''
+      });
+      setImagePreview('');
+    }
+  }, [editingIdea, isOpen]);
+
   // Auto-generate slug from first title
   useEffect(() => {
-    if (formData.draftTitles[0] && !idea.provisionalSlug) {
+    if (formData.draftTitles[0] && !editingIdea?.provisionalSlug) {
       const slug = formData.draftTitles[0]
         .toLowerCase()
         .normalize('NFD')
@@ -104,20 +147,22 @@ const ContentIdeaDetailModal = ({
         .trim();
       setFormData(prev => ({ ...prev, provisionalSlug: slug }));
     }
-  }, [formData.draftTitles, idea.provisionalSlug]);
-
-  // Set image preview
-  useEffect(() => {
-    if (formData.featuredImageUrl) {
-      setImagePreview(formData.featuredImageUrl);
-    }
-  }, [formData.featuredImageUrl]);
+  }, [formData.draftTitles, editingIdea?.provisionalSlug]);
 
   const handleSave = async () => {
+    if (!formData.theme.trim()) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um tema para o conteúdo",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
-      onUpdate(idea, formData);
+      onSave(formData);
       toast({
         title: "Rascunho Salvo!",
         description: "Todos os dados do rascunho foram salvos com sucesso!"
@@ -135,12 +180,20 @@ const ContentIdeaDetailModal = ({
   };
 
   const handleTransform = () => {
-    const updatedIdea = { ...idea, ...formData, updated_at: new Date().toISOString() };
+    if (!formData.theme.trim()) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um tema antes de transformar em artigo",
+        variant: "destructive"
+      });
+      return;
+    }
+
     toast({
       title: "Transformando em Artigo!",
       description: "Redirecionando para criação do artigo..."
     });
-    onTransformToArticle(updatedIdea);
+    onTransformToArticle(formData);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,7 +209,7 @@ const ContentIdeaDetailModal = ({
     }
   };
 
-  // Funções auxiliares para campos de array
+  // Helper functions for array fields
   const addTitle = () => {
     setFormData(prev => ({
       ...prev,
@@ -223,16 +276,7 @@ const ContentIdeaDetailModal = ({
     setFormData(prev => ({ ...prev, internalLinks: newLinks }));
   };
 
-  const handlePersonaChange = (personaId: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      focusPersonas: checked 
-        ? [...prev.focusPersonas, personaId]
-        : prev.focusPersonas.filter(id => id !== personaId)
-    }));
-  };
-
-  // Calcular progresso do rascunho
+  // Calculate draft progress
   const draftProgress = [
     formData.draftTitles?.some(Boolean),
     formData.draftSummary,
@@ -244,20 +288,26 @@ const ContentIdeaDetailModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white via-red-50 to-gray-50 border-4 border-red-200 shadow-2xl">
-        <DialogHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white p-6 rounded-t-lg -m-6 mb-6 shadow-xl">
+        <DialogHeader className="bg-gradient-to-r from-red-600 to-red-800 text-white p-6 rounded-t-lg -m-6 mb-6 shadow-xl relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 hover:bg-red-700 rounded-full transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <DialogTitle className="text-3xl font-black flex items-center gap-3">
             <PenTool className="h-8 w-8" />
-            Centro de Rascunhos - Desenvolva sua Ideia
+            {editingIdea ? 'Editar Rascunho de Artigo' : 'Novo Rascunho de Artigo'}
           </DialogTitle>
           <p className="text-red-100 font-medium text-lg">
-            Complete os campos para desenvolver um rascunho detalhado do seu artigo
+            Desenvolva seu rascunho completo antes de transformá-lo em artigo
           </p>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-          {/* Coluna Principal - Rascunho de Artigo (3/4) */}
-          <div className="xl:col-span-3 space-y-8">
-            {/* Informações Básicas */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Main Content - 2/3 */}
+          <div className="xl:col-span-2 space-y-8">
+            {/* Basic Information */}
             <Card className="border-4 border-red-200 shadow-xl bg-gradient-to-br from-white to-red-50">
               <CardHeader className="bg-gradient-to-r from-red-100 to-red-200 border-b-4 border-red-300">
                 <CardTitle className="text-red-700 font-black text-xl flex items-center gap-3">
@@ -274,6 +324,7 @@ const ContentIdeaDetailModal = ({
                     onChange={(e) => setFormData(prev => ({ ...prev, theme: e.target.value }))}
                     className="border-2 border-red-200 focus:border-red-500 text-lg p-4"
                     placeholder="Ex: Guia completo de cuidados com tatuagem..."
+                    required
                   />
                 </div>
 
@@ -317,22 +368,34 @@ const ContentIdeaDetailModal = ({
                     ))}
                   </select>
                 </div>
+
+                <div>
+                  <Label htmlFor="ideaCreator" className="text-red-700 font-bold text-lg mb-2 block">Criador da Ideia</Label>
+                  <Input
+                    id="ideaCreator"
+                    value={formData.ideaCreator}
+                    onChange={(e) => setFormData(prev => ({ ...prev, ideaCreator: e.target.value }))}
+                    className="border-2 border-red-200 focus:border-red-500 text-lg p-4"
+                    placeholder="Seu nome..."
+                  />
+                </div>
               </CardContent>
             </Card>
 
-            {/* Rascunho de Conteúdo */}
+            {/* Article Draft Content */}
             <Card className="border-4 border-green-200 shadow-xl bg-gradient-to-br from-white to-green-50">
               <CardHeader className="bg-gradient-to-r from-green-100 to-green-200 border-b-4 border-green-300">
                 <CardTitle className="text-green-700 font-black text-xl flex items-center gap-3">
                   <PenTool className="h-6 w-6" />
                   Desenvolvimento do Rascunho de Artigo
-                  <Badge className={`ml-auto text-lg px-4 py-2 ${isWellDeveloped ? 'bg-green-600' : 'bg-yellow-500'} text-white shadow-lg`}>
-                    {draftProgress}/3 Completo
-                  </Badge>
+                  <div className="ml-auto flex items-center gap-2 bg-green-600 text-white px-3 py-1 rounded-full text-sm">
+                    <span className="font-bold">{draftProgress}/3 Completo</span>
+                    {isWellDeveloped && <Sparkles className="h-4 w-4" />}
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8 space-y-8">
-                {/* Múltiplas Ideias de Título */}
+                {/* Multiple Title Ideas */}
                 <div>
                   <Label className="text-green-700 font-black text-xl mb-4 block">
                     Rascunho(s) de Título
@@ -373,7 +436,7 @@ const ContentIdeaDetailModal = ({
                   </div>
                 </div>
 
-                {/* Resumo do Artigo */}
+                {/* Article Summary */}
                 <div>
                   <Label htmlFor="draftSummary" className="text-green-700 font-black text-xl mb-4 block">
                     Resumo do Artigo (Rascunho)
@@ -388,7 +451,7 @@ const ContentIdeaDetailModal = ({
                   />
                 </div>
 
-                {/* Conteúdo do Artigo */}
+                {/* Article Content */}
                 <div>
                   <Label htmlFor="draftContent" className="text-green-700 font-black text-xl mb-4 block">
                     Conteúdo do Artigo (Rascunho)
@@ -405,7 +468,7 @@ const ContentIdeaDetailModal = ({
               </CardContent>
             </Card>
 
-            {/* SEO e Metadados */}
+            {/* SEO and Metadata */}
             <Card className="border-4 border-blue-200 shadow-xl bg-gradient-to-br from-white to-blue-50">
               <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-200 border-b-4 border-blue-300">
                 <CardTitle className="text-blue-700 font-black text-xl flex items-center gap-3">
@@ -425,7 +488,7 @@ const ContentIdeaDetailModal = ({
                   />
                 </div>
 
-                {/* Palavras-chave SEO */}
+                {/* SEO Keywords */}
                 <div>
                   <Label className="text-blue-700 font-bold text-lg mb-2 block">Palavras-chave Sugeridas para SEO</Label>
                   <div className="space-y-4">
@@ -492,7 +555,7 @@ const ContentIdeaDetailModal = ({
                   </div>
                 </div>
 
-                {/* Imagem Destacada */}
+                {/* Featured Image */}
                 <div>
                   <Label className="text-blue-700 font-bold text-lg mb-2 block flex items-center gap-2">
                     <Image className="h-5 w-5" />
@@ -535,7 +598,7 @@ const ContentIdeaDetailModal = ({
                   </div>
                 </div>
 
-                {/* Links Internos */}
+                {/* Internal Links */}
                 <div>
                   <Label className="text-blue-700 font-bold text-lg mb-2 block flex items-center gap-2">
                     <Link className="h-5 w-5" />
@@ -592,83 +655,15 @@ const ContentIdeaDetailModal = ({
             </Card>
           </div>
 
-          {/* Coluna Lateral - Personas e Ações (1/4) */}
+          {/* Sidebar - 1/3 */}
           <div className="space-y-8">
-            {/* Personas Foco */}
-            <Card className="border-4 border-purple-200 shadow-xl bg-gradient-to-br from-white to-purple-50">
-              <CardHeader className="bg-gradient-to-r from-purple-100 to-purple-200 border-b-4 border-purple-300">
-                <CardTitle className="text-purple-700 font-black text-lg flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Personas Foco
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                {personas.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">Nenhuma persona cadastrada</p>
-                ) : (
-                  personas.map(persona => (
-                    <div key={persona.id} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={`persona-${persona.id}`}
-                        checked={formData.focusPersonas.includes(persona.id)}
-                        onCheckedChange={(checked) => 
-                          handlePersonaChange(persona.id, checked as boolean)
-                        }
-                      />
-                      <Label 
-                        htmlFor={`persona-${persona.id}`} 
-                        className="flex-1 cursor-pointer font-medium"
-                      >
-                        {persona.name}
-                      </Label>
-                    </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Relevância para Personas */}
-            <Card className="border-4 border-orange-200 shadow-xl bg-gradient-to-br from-white to-orange-50">
-              <CardHeader className="bg-gradient-to-r from-orange-100 to-orange-200 border-b-4 border-orange-300">
-                <CardTitle className="text-orange-700 font-black text-lg flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Relevância
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <Textarea
-                  value={formData.personaRelevance}
-                  onChange={(e) => setFormData(prev => ({ ...prev, personaRelevance: e.target.value }))}
-                  placeholder="Por que este conteúdo é relevante para as personas selecionadas?"
-                  className="border-2 border-orange-200 focus:border-orange-500 resize-y text-lg p-4"
-                  rows={5}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Observações */}
-            <Card className="border-4 border-gray-200 shadow-xl bg-gradient-to-br from-white to-gray-50">
-              <CardHeader className="bg-gradient-to-r from-gray-100 to-gray-200 border-b-4 border-gray-300">
-                <CardTitle className="text-gray-700 font-black text-lg">Observações</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <Textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Observações adicionais..."
-                  className="border-2 border-gray-200 focus:border-gray-500 resize-y text-lg p-4"
-                  rows={4}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Progresso e Ações */}
+            {/* Progress and Actions */}
             <Card className="border-4 border-red-200 shadow-xl bg-gradient-to-br from-white to-red-50">
               <CardHeader className="bg-gradient-to-r from-red-100 to-red-200 border-b-4 border-red-300">
                 <CardTitle className="text-red-700 font-black text-lg">Ações</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
-                {/* Indicador de Progresso */}
+                {/* Progress Indicator */}
                 <div className="bg-green-50 border-4 border-green-200 rounded-lg p-4 shadow-lg">
                   <p className="text-green-800 font-black text-center mb-3">
                     Progresso do Rascunho: {draftProgress}/3
@@ -687,7 +682,7 @@ const ContentIdeaDetailModal = ({
                   )}
                 </div>
 
-                {/* Botão Transformar em Artigo - SEMPRE VISÍVEL */}
+                {/* Transform to Article Button - ALWAYS VISIBLE */}
                 <Button
                   onClick={handleTransform}
                   className="w-full py-4 font-black text-lg transition-all duration-300 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-xl transform hover:scale-105 border-2 border-red-400"
@@ -697,7 +692,7 @@ const ContentIdeaDetailModal = ({
                   <Sparkles className="h-6 w-6 ml-2" />
                 </Button>
 
-                {/* Botão Salvar Rascunho */}
+                {/* Save Draft Button */}
                 <Button
                   onClick={handleSave}
                   disabled={isLoading}
@@ -718,6 +713,22 @@ const ContentIdeaDetailModal = ({
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Additional Notes */}
+            <Card className="border-4 border-gray-200 shadow-xl bg-gradient-to-br from-white to-gray-50">
+              <CardHeader className="bg-gradient-to-r from-gray-100 to-gray-200 border-b-4 border-gray-300">
+                <CardTitle className="text-gray-700 font-black text-lg">Observações Adicionais</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <Textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Observações, ideias extras, referências..."
+                  className="border-2 border-gray-200 focus:border-gray-500 resize-y text-lg p-4"
+                  rows={6}
+                />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </DialogContent>
@@ -725,4 +736,4 @@ const ContentIdeaDetailModal = ({
   );
 };
 
-export default ContentIdeaDetailModal;
+export default ArticleDraftModal;

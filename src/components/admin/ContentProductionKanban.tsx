@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -9,7 +8,7 @@ import { Persona } from '@/types/persona';
 import KanbanGuideColumn from './KanbanGuideColumn';
 import ContentKanbanColumn from './ContentKanbanColumn';
 import ContentKanbanCard from './ContentKanbanCard';
-import ContentIdeaForm from './ContentIdeaForm';
+import ArticleDraftModal from './ArticleDraftModal';
 import BlogPostForm from './BlogPostForm';
 import { BlogCategory } from '@/services/interfaces/IBlogService';
 
@@ -47,8 +46,8 @@ const ContentProductionKanban = ({
 }: ContentProductionKanbanProps) => {
   const [columns, setColumns] = useState<IdeaColumns>({});
   const [activeIdea, setActiveIdea] = useState<ContentIdea | null>(null);
-  const [showQuickAddForm, setShowQuickAddForm] = useState(false);
-  const [targetColumn, setTargetColumn] = useState<string>('Ideias de Artigos');
+  const [showDraftModal, setShowDraftModal] = useState(false);
+  const [editingIdea, setEditingIdea] = useState<ContentIdea | null>(null);
   const [transformingIdea, setTransformingIdea] = useState<ContentIdea | null>(null);
 
   useEffect(() => {
@@ -157,46 +156,46 @@ const ContentProductionKanban = ({
   };
 
   const handleQuickAdd = (columnName: string) => {
-    setTargetColumn(columnName);
-    setShowQuickAddForm(true);
+    setEditingIdea(null);
+    setShowDraftModal(true);
   };
 
-  const handleQuickSave = (data: CreateContentIdeaData) => {
-    const columnToStatusMap: { [key: string]: ContentIdea['status'] } = {
-      'Ideias de Artigos': 'Ideia',
-      'Pesquisando': 'Planejado',
-      'Escrevendo': 'Em Produção',
-      'Editando': 'Em Revisão',
-      'Fazendo Imagens/Gráficos': 'Fazendo Imagens/Gráficos',
-      'Conteúdo Agendado': 'Conteúdo Agendado',
-      'Conteúdo Publicado': 'Publicado',
-      'Promover/Distribuir': 'Promover/Distribuir',
-    };
-
-    const ideaData = {
-      ...data,
-      status: columnToStatusMap[targetColumn] || 'Ideia'
-    };
-
-    onIdeaCreate(ideaData);
-    setShowQuickAddForm(false);
+  const handleEditIdea = (idea: ContentIdea) => {
+    setEditingIdea(idea);
+    setShowDraftModal(true);
   };
 
-  const handleTransformToArticle = (idea: ContentIdea) => {
-    console.log('Transformando em artigo:', idea);
-    setTransformingIdea(idea);
+  const handleDraftSave = (data: CreateContentIdeaData) => {
+    if (editingIdea) {
+      onIdeaUpdate(editingIdea, data);
+    } else {
+      onIdeaCreate(data);
+    }
+    setShowDraftModal(false);
+    setEditingIdea(null);
+  };
+
+  const handleTransformToArticle = (data: CreateContentIdeaData) => {
+    console.log('Transformando em artigo:', data);
+    setTransformingIdea({ 
+      ...data, 
+      id: editingIdea?.id || 'temp-id',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    } as ContentIdea);
+    setShowDraftModal(false);
+    setEditingIdea(null);
   };
 
   const handleArticleSaved = () => {
     console.log('Artigo salvo, voltando ao Kanban');
     setTransformingIdea(null);
-    // Optionally update the idea status to 'Publicado'
-    if (transformingIdea) {
-      onIdeaStatusUpdate(transformingIdea.id, 'Publicado');
+    if (transformingIdea && editingIdea) {
+      onIdeaStatusUpdate(editingIdea.id, 'Publicado');
     }
   };
 
-  // Se estiver transformando uma ideia em artigo, mostrar o formulário de artigo
+  // If transforming idea to article, show article form
   if (transformingIdea) {
     return (
       <div className="bg-gradient-to-br from-white to-red-50 min-h-screen">
@@ -220,29 +219,6 @@ const ContentProductionKanban = ({
           onSave={handleArticleSaved}
           onCancel={() => setTransformingIdea(null)}
         />
-      </div>
-    );
-  }
-
-  if (showQuickAddForm) {
-    return (
-      <div className="bg-gradient-to-br from-white to-red-50 min-h-screen p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6">
-            <Button
-              variant="outline"
-              onClick={() => setShowQuickAddForm(false)}
-              className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-500"
-            >
-              ← Voltar ao Kanban
-            </Button>
-          </div>
-          <ContentIdeaForm
-            personas={personas}
-            onSave={handleQuickSave}
-            onCancel={() => setShowQuickAddForm(false)}
-          />
-        </div>
       </div>
     );
   }
@@ -303,6 +279,7 @@ const ContentProductionKanban = ({
                   title={columnName}
                   ideas={columns[columnName] || []}
                   onQuickAdd={() => handleQuickAdd(columnName)}
+                  onEditIdea={handleEditIdea}
                 />
               ))}
             </div>
@@ -321,6 +298,18 @@ const ContentProductionKanban = ({
           </DndContext>
         </div>
       </div>
+
+      {/* Article Draft Modal */}
+      <ArticleDraftModal
+        isOpen={showDraftModal}
+        onClose={() => {
+          setShowDraftModal(false);
+          setEditingIdea(null);
+        }}
+        onSave={handleDraftSave}
+        onTransformToArticle={handleTransformToArticle}
+        editingIdea={editingIdea}
+      />
     </div>
   );
 };
