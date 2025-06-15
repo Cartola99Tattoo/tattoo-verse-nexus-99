@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,11 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Calendar, MapPin, Search, Filter, Edit, Trash2, Users, Target, ShoppingCart, TrendingUp } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Calendar, MapPin, Search, Filter, Edit, Trash2, Users, Target, ShoppingCart, TrendingUp, BarChart3, CheckCircle2, Maximize2, Minimize2 } from "lucide-react";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getEventService } from "@/services/serviceFactory";
 import { IEvent } from "@/services/interfaces/IEventService";
 import EventForm from "@/components/admin/EventForm";
+import EventKanban from "@/components/admin/EventKanban";
 import { toast } from "@/hooks/use-toast";
 
 const Events = () => {
@@ -19,6 +20,8 @@ const Events = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState("kanban");
+  const [isKanbanFullscreen, setIsKanbanFullscreen] = useState(false);
   const eventService = getEventService();
 
   const { data: events, loading, refresh } = useDataQuery<IEvent[]>(
@@ -64,7 +67,22 @@ const Events = () => {
     refresh();
   };
 
-  // Use safeEvents instead of events to avoid null filter error
+  // Handle fullscreen exit with Escape key
+  React.useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isKanbanFullscreen) {
+        setIsKanbanFullscreen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isKanbanFullscreen]);
+
+  const toggleKanbanFullscreen = () => {
+    setIsKanbanFullscreen(!isKanbanFullscreen);
+  };
+
   const filteredEvents = safeEvents.filter(event => {
     const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -119,264 +137,351 @@ const Events = () => {
     );
   }
 
-  return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Eventos</h1>
-          <p className="text-gray-600 mt-1">Gerencie todos os eventos da 99Tattoo</p>
+  // Render fullscreen Kanban
+  if (isKanbanFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 bg-gradient-to-br from-white to-red-50 overflow-hidden">
+        {/* Fullscreen Header */}
+        <div className="bg-gradient-to-r from-red-600 to-red-800 text-white p-3 md:p-4 shadow-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 md:gap-4">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-black">
+                Kanban de Gestão de Eventos - Modo Foco Total
+              </h1>
+              <Button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-white hover:bg-red-50 text-red-600 hover:text-red-700 font-bold shadow-xl transition-all duration-300 text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
+              >
+                <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">Nova Tarefa</span>
+                <span className="sm:hidden">Tarefa</span>
+              </Button>
+            </div>
+            <Button
+              onClick={toggleKanbanFullscreen}
+              variant="outline"
+              className="bg-white/20 border-white/30 text-white hover:bg-white/30 transition-all duration-300 text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
+            >
+              <Minimize2 className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">Sair do Foco Total</span>
+              <span className="hidden sm:inline lg:hidden">Foco Total</span>
+              <span className="sm:hidden">Foco</span>
+            </Button>
+          </div>
         </div>
-        <Button 
-          onClick={handleCreateEvent}
-          className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Evento
-        </Button>
+
+        {/* Fullscreen Kanban */}
+        <div className="h-[calc(100vh-64px)] md:h-[calc(100vh-80px)] overflow-hidden">
+          <EventKanban events={safeEvents} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 md:space-y-6 bg-gradient-to-br from-white to-red-50 min-h-screen p-4 md:p-6">
+      {/* Header with Action Buttons */}
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 md:gap-6">
+        <div className="flex-1">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-3 md:mb-4">
+            Centro de Gestão de Eventos 99Tattoo
+          </h1>
+          
+          {/* Botões de Ação Principais */}
+          <div className="flex flex-wrap gap-2 md:gap-4">
+            <Button 
+              onClick={() => setShowCreateForm(true)} 
+              className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 font-bold text-sm md:text-base px-3 md:px-4 py-2"
+            >
+              <Plus className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Novo Evento</span>
+              <span className="sm:hidden">Evento</span>
+            </Button>
+            
+            <Button
+              onClick={toggleKanbanFullscreen}
+              className="bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 text-white font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-sm md:text-base px-3 md:px-4 py-2"
+            >
+              <Maximize2 className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
+              <span className="hidden lg:inline">Modo Foco Total</span>
+              <span className="hidden sm:inline lg:hidden">Foco Total</span>
+              <span className="sm:hidden">Foco</span>
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <Card className="mb-6 shadow-lg border-red-100">
-        <CardHeader className="bg-gradient-to-r from-red-50 to-gray-50">
-          <CardTitle className="flex items-center gap-2 text-red-800">
-            <Filter className="h-5 w-5 text-red-600" />
-            Filtros e Busca
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Buscar</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-400" />
-                <Input
-                  placeholder="Nome ou descrição..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-red-200 focus:border-red-500"
-                />
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-lg">
+          <TabsTrigger 
+            value="kanban" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold text-xs md:text-sm"
+          >
+            <BarChart3 className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+            <span className="hidden sm:inline">Kanban de Gestão</span>
+            <span className="sm:hidden">Kanban</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="events" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold text-xs md:text-sm"
+          >
+            <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+            Lista de Eventos
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="kanban" className="space-y-4 md:space-y-6">
+          {/* Dashboard de Métricas */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-6 md:mb-8">
+            <Card className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-red-700 flex items-center gap-1 md:gap-2 text-xs md:text-sm lg:text-lg font-bold">
+                  <Calendar className="h-3 w-3 md:h-4 md:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                  <span className="truncate">Total de Eventos</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-xl md:text-2xl lg:text-3xl font-black text-red-600">{safeEvents.length}</div>
+                <p className="text-xs text-gray-600 mt-1">Eventos cadastrados</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-white to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-green-700 flex items-center gap-1 md:gap-2 text-xs md:text-sm lg:text-lg font-bold">
+                  <CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                  <span className="truncate">Eventos Ativos</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-xl md:text-2xl lg:text-3xl font-black text-green-600">
+                  {safeEvents.filter(e => e.status === 'active').length}
+                </div>
+                <p className="text-xs text-gray-600 mt-1">Em andamento</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-blue-700 flex items-center gap-1 md:gap-2 text-xs md:text-sm lg:text-lg font-bold">
+                  <TrendingUp className="h-3 w-3 md:h-4 md:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                  <span className="truncate">Concluídos</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-xl md:text-2xl lg:text-3xl font-black text-blue-600">
+                  {safeEvents.filter(e => e.status === 'completed').length}
+                </div>
+                <p className="text-xs text-gray-600 mt-1">Finalizados</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-white to-purple-50 border-purple-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-purple-700 flex items-center gap-1 md:gap-2 text-xs md:text-sm lg:text-lg font-bold">
+                  <Target className="h-3 w-3 md:h-4 md:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                  <span className="truncate">Em Planejamento</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-xl md:text-2xl lg:text-3xl font-black text-purple-600">
+                  {safeEvents.filter(e => e.status === 'pending').length}
+                </div>
+                <p className="text-xs text-gray-600 mt-1">A iniciar</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Header do Kanban */}
+          <div className="bg-gradient-to-r from-red-100 to-red-200 p-3 md:p-4 lg:p-6 rounded-lg border-2 border-red-300 shadow-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4">
+              <div className="flex-1">
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-red-800 mb-1 md:mb-2">
+                  Kanban de Gestão de Eventos
+                </h2>
+                <p className="text-xs md:text-sm lg:text-base text-red-700 font-medium">
+                  Gerencie todas as etapas dos seus eventos desde o planejamento até a análise pós-evento
+                </p>
               </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Status</label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="border-red-200 focus:border-red-500">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-red-200 shadow-lg">
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                  <SelectItem value="active">Ativo</SelectItem>
-                  <SelectItem value="completed">Concluído</SelectItem>
-                  <SelectItem value="cancelled">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Tipo</label>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="border-red-200 focus:border-red-500">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-red-200 shadow-lg">
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="flash_day">Flash Day</SelectItem>
-                  <SelectItem value="workshop">Workshop</SelectItem>
-                  <SelectItem value="collection_launch">Lançamento</SelectItem>
-                  <SelectItem value="exhibition">Exposição</SelectItem>
-                  <SelectItem value="other">Outro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-end">
-              <div className="text-sm text-gray-600">
-                {filteredEvents.length} evento(s) encontrado(s)
+              <div className="flex items-center gap-2 md:gap-3">
+                <Button
+                  onClick={() => setShowCreateForm(true)}
+                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
+                >
+                  <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                  <span className="hidden sm:inline">Nova Tarefa</span>
+                  <span className="sm:hidden">Tarefa</span>
+                </Button>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <div className="h-48 bg-gray-200 rounded-t-lg"></div>
-              <CardContent className="p-4">
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded mb-4"></div>
-                <div className="flex gap-2">
-                  <div className="h-6 w-16 bg-gray-200 rounded"></div>
-                  <div className="h-6 w-20 bg-gray-200 rounded"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => (
-            <Card key={event.id} className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-red-50 border-2 hover:border-red-200">
-              <div className="relative h-48 overflow-hidden">
-                {event.featuredImage ? (
-                  <img
-                    src={event.featuredImage}
-                    alt={event.name}
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center">
-                    <Calendar className="h-16 w-16 text-white opacity-50" />
+          {/* Kanban de Gestão de Eventos */}
+          <EventKanban events={safeEvents} />
+        </TabsContent>
+
+        <TabsContent value="events" className="space-y-6">
+          {/* Filtros */}
+          <Card className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-red-50 to-gray-50">
+              <CardTitle className="flex items-center gap-2 text-red-800">
+                <Filter className="h-5 w-5 text-red-600" />
+                Filtros e Busca
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Buscar</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-400" />
+                    <Input
+                      placeholder="Nome ou descrição..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 border-red-200 focus:border-red-500"
+                    />
                   </div>
-                )}
-                <div className="absolute top-2 left-2">
-                  <Badge className={getStatusColor(event.status)}>
-                    {getStatusLabel(event.status)}
-                  </Badge>
                 </div>
-                <div className="absolute top-2 right-2 flex gap-1">
-                  {event.isPublic && (
-                    <Badge variant="outline" className="bg-white/90 text-red-700 border-red-200">
-                      Público
-                    </Badge>
-                  )}
-                  {event.ticketProduct?.isEnabled && (
-                    <Badge variant="outline" className="bg-white/90 text-green-700 border-green-200">
-                      <ShoppingCart className="h-3 w-3 mr-1" />
-                      Venda
-                    </Badge>
-                  )}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Status</label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="border-red-200 focus:border-red-500">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-red-200 shadow-lg">
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="pending">Pendente</SelectItem>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="completed">Concluído</SelectItem>
+                      <SelectItem value="cancelled">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Tipo</label>
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="border-red-200 focus:border-red-500">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-red-200 shadow-lg">
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="flash_day">Flash Day</SelectItem>
+                      <SelectItem value="workshop">Workshop</SelectItem>
+                      <SelectItem value="collection_launch">Lançamento</SelectItem>
+                      <SelectItem value="exhibition">Exposição</SelectItem>
+                      <SelectItem value="other">Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end">
+                  <div className="text-sm text-gray-600">
+                    {filteredEvents.length} evento(s) encontrado(s)
+                  </div>
                 </div>
               </div>
-              
-              <CardContent className="p-4">
-                <h3 className="font-bold text-lg mb-2 text-gray-900 line-clamp-1">{event.name}</h3>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">{event.description}</p>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <Calendar className="h-4 w-4 text-red-600" />
-                    <span>
-                      {new Date(event.startDate).toLocaleDateString('pt-BR')} • {event.startTime}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <MapPin className="h-4 w-4 text-red-600" />
-                    <span>{event.location}</span>
-                  </div>
-                  {event.participatingArtists && event.participatingArtists.length > 0 && (
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Users className="h-4 w-4 text-red-600" />
-                      <span className="line-clamp-1">
-                        {event.participatingArtists.length <= 2 
-                          ? event.participatingArtists.join(', ')
-                          : `${event.participatingArtists.slice(0, 2).join(', ')} e mais ${event.participatingArtists.length - 2}`
-                        }
-                      </span>
-                    </div>
-                  )}
-                </div>
+            </CardContent>
+          </Card>
 
-                {/* Performance Indicators */}
-                {event.smartGoals && event.smartGoals.length > 0 && (
-                  <div className="mb-4 p-3 bg-gradient-to-r from-red-50 to-gray-50 rounded-lg border border-red-100">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Target className="h-4 w-4 text-red-600" />
-                      <span className="text-sm font-medium text-red-800">Progresso Principal</span>
-                    </div>
-                    {event.smartGoals.slice(0, 1).map((goal) => {
-                      const progress = goal.targetValue > 0 ? Math.min((goal.currentValue / goal.targetValue) * 100, 100) : 0;
-                      return (
-                        <div key={goal.id} className="space-y-1">
-                          <div className="flex justify-between text-xs text-gray-600">
-                            <span>{goal.title}</span>
-                            <span>{progress.toFixed(0)}%</span>
+          {/* Lista de Eventos */}
+          <Card className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-red-50 to-gray-50">
+              <CardTitle className="text-red-800">Eventos ({filteredEvents.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="h-8 w-32 mx-auto rounded-md bg-gradient-to-r from-red-200 to-red-300 animate-pulse"></div>
+                  <p className="mt-2 text-gray-600">Carregando eventos...</p>
+                </div>
+              ) : !filteredEvents.length ? (
+                <div className="text-center py-8 text-gray-500">Nenhum evento encontrado</div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredEvents.map((event) => (
+                    <div key={event.id} className="border border-red-200 rounded-lg p-4 bg-gradient-to-br from-white to-red-50 hover:shadow-xl hover:shadow-red-500/20 transition-all duration-300 transform hover:scale-[1.02]">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-lg text-red-800">{event.name}</h3>
+                            <Badge className={getStatusColor(event.status)}>
+                              {getStatusLabel(event.status)}
+                            </Badge>
                           </div>
-                          <Progress value={progress} className="h-2 bg-gray-200">
-                            <div 
-                              className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all" 
-                              style={{ width: `${progress}%` }}
-                            />
-                          </Progress>
-                          <div className="text-xs text-gray-500">
-                            {goal.currentValue} / {goal.targetValue} {goal.unit}
+                          <p className="text-gray-600 mb-3 line-clamp-2">{event.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4 text-red-600" />
+                              {new Date(event.startDate).toLocaleDateString('pt-BR')} • {event.startTime}
+                            </span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4 text-red-600" />
+                              {event.location}
+                            </span>
+                            {event.participatingArtists && event.participatingArtists.length > 0 && (
+                              <>
+                                <span>•</span>
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-4 w-4 text-red-600" />
+                                  {event.participatingArtists.length <= 2 
+                                    ? event.participatingArtists.join(', ')
+                                    : `${event.participatingArtists.slice(0, 2).join(', ')} e mais ${event.participatingArtists.length - 2}`
+                                  }
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Ticket Sales Indicator */}
-                {event.ticketProduct?.isEnabled && (
-                  <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
-                    <div className="flex items-center gap-2 mb-1">
-                      <ShoppingCart className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-800">Ingressos</span>
+                        <div className="flex items-center gap-2 ml-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditEvent(event)}
+                            className="border-red-200 text-red-700 hover:bg-red-50"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteEvent(event.id)}
+                            className="border-red-200 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-600">
-                      {event.ticketProduct.ticketStock - (event.smartGoals?.find(g => g.title.toLowerCase().includes('ingresso'))?.currentValue || 0)} disponíveis de {event.ticketProduct.ticketStock}
-                    </div>
-                    <div className="text-xs text-green-600 font-medium">
-                      R$ {event.ticketProduct.productPrice.toFixed(2)}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between mb-4">
-                  <Badge variant="outline" className="text-red-700 border-red-200">
-                    {getTypeLabel(event.eventType)}
-                  </Badge>
-                  <span className="font-semibold text-red-600">
-                    {formatPrice(event.price)}
-                  </span>
+                  ))}
                 </div>
+              )}
+            </CardContent>
+          </Card>
 
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditEvent(event)}
-                    className="flex-1 border-red-200 text-red-700 hover:bg-red-50"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteEvent(event.id)}
-                    className="border-red-200 text-red-600 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {filteredEvents.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <Calendar className="h-16 w-16 mx-auto mb-4 text-red-300" />
-          <h3 className="text-xl font-medium text-gray-900 mb-2">Nenhum evento encontrado</h3>
-          <p className="text-gray-600 mb-6">
-            {searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
-              ? 'Tente ajustar os filtros de busca.'
-              : 'Comece criando seu primeiro evento e aproveite todas as funcionalidades de gestão e análise.'
-            }
-          </p>
-          {!searchTerm && statusFilter === 'all' && typeFilter === 'all' && (
-            <Button 
-              onClick={handleCreateEvent} 
-              className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Criar Primeiro Evento
-            </Button>
+          {filteredEvents.length === 0 && !loading && (
+            <div className="text-center py-12">
+              <Calendar className="h-16 w-16 mx-auto mb-4 text-red-300" />
+              <h3 className="text-xl font-medium text-gray-900 mb-2">Nenhum evento encontrado</h3>
+              <p className="text-gray-600 mb-6">
+                {searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
+                  ? 'Tente ajustar os filtros de busca.'
+                  : 'Comece criando seu primeiro evento e aproveite todas as funcionalidades de gestão e análise.'
+                }
+              </p>
+              {!searchTerm && statusFilter === 'all' && typeFilter === 'all' && (
+                <Button 
+                  onClick={handleCreateEvent} 
+                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-lg"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Primeiro Evento
+                </Button>
+              )}
+            </div>
           )}
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
