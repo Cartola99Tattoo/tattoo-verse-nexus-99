@@ -1,12 +1,12 @@
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Package, Minus } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { X, Minus, Plus, Loader } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface StockItem {
   id: string;
@@ -17,13 +17,10 @@ interface StockItem {
 }
 
 interface StockMovement {
-  type: "entrada" | "saida";
+  type: 'entrada' | 'saida';
   quantity: number;
   reason: string;
-  supplier?: string;
-  cost?: number;
-  user?: string;
-  date: string;
+  notes?: string;
 }
 
 interface StockMovementFormProps {
@@ -32,193 +29,185 @@ interface StockMovementFormProps {
   onSave: (movement: StockMovement) => void;
 }
 
-const StockMovementForm = ({ item, onClose, onSave }: StockMovementFormProps) => {
-  const [formData, setFormData] = useState<StockMovement>({
-    type: "entrada",
-    quantity: 0,
-    reason: "",
-    supplier: "",
-    cost: 0,
-    user: "",
-    date: new Date().toISOString().split('T')[0]
-  });
+export default function StockMovementForm({ item, onClose, onSave }: StockMovementFormProps) {
+  const [movementType, setMovementType] = useState<'entrada' | 'saida'>('saida');
+  const [quantity, setQuantity] = useState(1);
+  const [reason, setReason] = useState("");
+  const [notes, setNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const reasonOptions = {
+    saida: [
+      "Uso em procedimento",
+      "Vencimento",
+      "Perda/Dano",
+      "Transferência",
+      "Teste de qualidade",
+      "Outro"
+    ],
+    entrada: [
+      "Compra",
+      "Devolução",
+      "Transferência",
+      "Doação",
+      "Ajuste de inventário",
+      "Outro"
+    ]
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    setIsSubmitting(true);
+    
+    try {
+      await onSave({
+        type: movementType,
+        quantity,
+        reason,
+        notes
+      });
+    } catch (error) {
+      console.error("Error saving movement:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleChange = (field: keyof StockMovement, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  const newQuantity = movementType === 'entrada' 
+    ? item.currentQuantity + quantity 
+    : item.currentQuantity - quantity;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            {formData.type === "entrada" ? (
-              <Package className="h-5 w-5 text-green-600" />
-            ) : (
-              <Minus className="h-5 w-5 text-red-600" />
-            )}
-            Movimentação de Estoque
-          </CardTitle>
-          <Button variant="outline" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 p-3 bg-gray-50 rounded-md">
-            <h3 className="font-medium">{item.name}</h3>
-            <p className="text-sm text-gray-600">{item.brand}</p>
-            <p className="text-sm text-gray-600">
-              Estoque atual: {item.currentQuantity} {item.unit}
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-white to-red-50 border-red-200">
+        <DialogHeader>
+          <DialogTitle className="text-red-800 font-black flex items-center justify-between">
+            Movimentar Estoque
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-6 w-6 text-red-600 hover:text-red-800"
+            >
+              <X size={16} />
+            </Button>
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Item Info */}
+          <Card className="border-red-200 bg-gradient-to-br from-white to-red-50">
+            <CardContent className="p-4">
+              <h3 className="font-black text-red-800 text-lg mb-2">{item.name}</h3>
+              <p className="text-red-600 text-sm">{item.brand}</p>
+              <p className="text-red-700 font-medium">
+                Estoque atual: <span className="font-black">{item.currentQuantity} {item.unit}</span>
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Movement Type */}
+          <div className="space-y-3">
+            <Label className="text-red-700 font-bold">Tipo de Movimentação</Label>
+            <div className="flex gap-4">
+              <Button
+                type="button"
+                variant={movementType === 'entrada' ? 'tattoo' : 'outline'}
+                onClick={() => setMovementType('entrada')}
+                className="flex-1 flex items-center gap-2"
+              >
+                <Plus size={16} />
+                Entrada
+              </Button>
+              <Button
+                type="button"
+                variant={movementType === 'saida' ? 'tattoo' : 'outline'}
+                onClick={() => setMovementType('saida')}
+                className="flex-1 flex items-center gap-2"
+              >
+                <Minus size={16} />
+                Saída
+              </Button>
+            </div>
+          </div>
+
+          {/* Quantity */}
+          <div>
+            <Label htmlFor="quantity" className="text-red-700 font-bold">Quantidade</Label>
+            <Input
+              id="quantity"
+              type="number"
+              min="1"
+              max={movementType === 'saida' ? item.currentQuantity : undefined}
+              variant="tattoo"
+              value={quantity}
+              onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+              required
+            />
+            <p className="text-xs text-red-500 mt-1">
+              Novo estoque: <span className="font-bold">{newQuantity} {item.unit}</span>
+              {newQuantity < 0 && <span className="text-red-700 font-bold"> - ATENÇÃO: Estoque ficará negativo!</span>}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="type">Tipo de Movimentação *</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value: "entrada" | "saida") => handleChange("type", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="entrada">
-                    <div className="flex items-center gap-2">
-                      <Package className="h-4 w-4 text-green-600" />
-                      Entrada (Recebimento)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="saida">
-                    <div className="flex items-center gap-2">
-                      <Minus className="h-4 w-4 text-red-600" />
-                      Saída (Consumo)
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Reason */}
+          <div>
+            <Label htmlFor="reason" className="text-red-700 font-bold">Motivo</Label>
+            <select
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-red-200 bg-background px-3 py-2 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-200 focus:outline-none"
+              required
+            >
+              <option value="">Selecione um motivo</option>
+              {reasonOptions[movementType].map((reasonOption) => (
+                <option key={reasonOption} value={reasonOption}>{reasonOption}</option>
+              ))}
+            </select>
+          </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="quantity">Quantidade *</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  min="0.1"
-                  step="0.1"
-                  value={formData.quantity}
-                  onChange={(e) => handleChange("quantity", parseFloat(e.target.value) || 0)}
-                  placeholder={`Em ${item.unit}`}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="date">Data *</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => handleChange("date", e.target.value)}
-                  required
-                />
-              </div>
-            </div>
+          {/* Notes */}
+          <div>
+            <Label htmlFor="notes" className="text-red-700 font-bold">Observações (opcional)</Label>
+            <Textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Informações adicionais sobre a movimentação..."
+              className="border-red-200 focus:border-red-600 focus:ring-red-200"
+              rows={3}
+            />
+          </div>
 
-            {formData.type === "entrada" && (
-              <>
-                <div>
-                  <Label htmlFor="supplier">Fornecedor</Label>
-                  <Input
-                    id="supplier"
-                    value={formData.supplier || ""}
-                    onChange={(e) => handleChange("supplier", e.target.value)}
-                    placeholder="Nome do fornecedor"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cost">Custo Total (R$)</Label>
-                  <Input
-                    id="cost"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.cost || ""}
-                    onChange={(e) => handleChange("cost", parseFloat(e.target.value) || 0)}
-                    placeholder="Valor total da compra"
-                  />
-                </div>
-              </>
-            )}
-
-            {formData.type === "saida" && (
-              <div>
-                <Label htmlFor="user">Tatuador/Usuário</Label>
-                <Input
-                  id="user"
-                  value={formData.user || ""}
-                  onChange={(e) => handleChange("user", e.target.value)}
-                  placeholder="Quem utilizou o material"
-                />
-              </div>
-            )}
-
-            <div>
-              <Label htmlFor="reason">Observações *</Label>
-              <Textarea
-                id="reason"
-                value={formData.reason}
-                onChange={(e) => handleChange("reason", e.target.value)}
-                placeholder={
-                  formData.type === "entrada" 
-                    ? "Ex: Reposição de estoque, pedido #123"
-                    : "Ex: Tatuagem cliente João, sessão da tarde"
-                }
-                rows={3}
-                required
-              />
-            </div>
-
-            {formData.quantity > 0 && (
-              <div className="p-3 bg-blue-50 rounded-md">
-                <p className="text-sm text-blue-800">
-                  <strong>Novo estoque:</strong> {
-                    formData.type === "entrada" 
-                      ? item.currentQuantity + formData.quantity
-                      : item.currentQuantity - formData.quantity
-                  } {item.unit}
-                </p>
-              </div>
-            )}
-
-            <div className="flex gap-2 justify-end pt-4">
-              <Button variant="outline" type="button" onClick={onClose}>
-                Cancelar
-              </Button>
-              <Button 
-                type="submit" 
-                className={
-                  formData.type === "entrada" 
-                    ? "bg-green-600 hover:bg-green-700" 
-                    : "bg-red-600 hover:bg-red-700"
-                }
-              >
-                Registrar {formData.type === "entrada" ? "Entrada" : "Saída"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          {/* Buttons */}
+          <div className="flex justify-end gap-4 pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="border-red-200 text-red-600 hover:bg-red-50"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              variant="tattoo"
+              disabled={isSubmitting || newQuantity < 0}
+              className="shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                "Confirmar Movimentação"
+              )}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
-};
-
-export default StockMovementForm;
+}

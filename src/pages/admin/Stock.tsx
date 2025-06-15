@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Package2, AlertTriangle, TrendingDown, TrendingUp } from "lucide-react";
+import { Plus, Search, Package2, AlertTriangle, TrendingDown, TrendingUp, Minus, Edit, Trash, Package } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/table";
 import StockItemForm from "@/components/admin/StockItemForm";
 import StockMovementForm from "@/components/admin/StockMovementForm";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/use-toast";
 
 interface StockItem {
   id: string;
@@ -29,6 +31,9 @@ interface StockItem {
   minimumStock: number;
   location: string;
   status: 'sufficient' | 'low' | 'critical';
+  sku?: string;
+  supplier?: string;
+  image?: string;
 }
 
 const mockStockItems: StockItem[] = [
@@ -43,7 +48,9 @@ const mockStockItems: StockItem[] = [
     averageCost: 45.00,
     minimumStock: 5,
     location: 'Armário 1, Prateleira 2',
-    status: 'sufficient'
+    status: 'sufficient',
+    sku: 'TNT-001',
+    supplier: 'Distribuidora ABC'
   },
   {
     id: '2',
@@ -56,7 +63,9 @@ const mockStockItems: StockItem[] = [
     averageCost: 12.50,
     minimumStock: 10,
     location: 'Armário 2, Gaveta 1',
-    status: 'critical'
+    status: 'critical',
+    sku: 'AGL-007',
+    supplier: 'Fornecedor XYZ'
   },
   {
     id: '3',
@@ -69,7 +78,9 @@ const mockStockItems: StockItem[] = [
     averageCost: 25.00,
     minimumStock: 5,
     location: 'Armário 3, Prateleira 1',
-    status: 'low'
+    status: 'low',
+    sku: 'LUV-P01',
+    supplier: 'Higiene Total'
   }
 ];
 
@@ -78,16 +89,17 @@ const Stock = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showItemForm, setShowItemForm] = useState(false);
   const [showMovementForm, setShowMovementForm] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'sufficient':
-        return <Badge className="bg-green-100 text-green-800">Suficiente</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-300">Suficiente</Badge>;
       case 'low':
-        return <Badge className="bg-yellow-100 text-yellow-800">Baixo</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">Baixo</Badge>;
       case 'critical':
-        return <Badge className="bg-red-100 text-red-800">Crítico</Badge>;
+        return <Badge className="bg-red-100 text-red-800 border-red-300">Crítico</Badge>;
       default:
         return <Badge>Desconhecido</Badge>;
     }
@@ -96,7 +108,8 @@ const Stock = () => {
   const filteredItems = stockItems.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchTerm.toLowerCase())
+    item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.sku?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const criticalItems = stockItems.filter(item => item.status === 'critical');
@@ -104,53 +117,155 @@ const Stock = () => {
 
   const totalValue = stockItems.reduce((sum, item) => sum + (item.currentQuantity * item.averageCost), 0);
 
+  const handleSaveItem = (itemData: any) => {
+    if (selectedItem) {
+      // Update existing item
+      setStockItems(prev => prev.map(item => 
+        item.id === selectedItem.id 
+          ? { ...item, ...itemData, status: getItemStatus(itemData.currentQuantity, itemData.minimumStock) }
+          : item
+      ));
+      toast({
+        title: "Item atualizado",
+        description: "O item foi atualizado com sucesso.",
+      });
+    } else {
+      // Add new item
+      const newItem: StockItem = {
+        ...itemData,
+        id: Date.now().toString(),
+        status: getItemStatus(itemData.currentQuantity, itemData.minimumStock)
+      };
+      setStockItems(prev => [...prev, newItem]);
+      toast({
+        title: "Item adicionado",
+        description: "O item foi adicionado ao estoque com sucesso.",
+      });
+    }
+    
+    setShowItemForm(false);
+    setSelectedItem(null);
+  };
+
+  const handleMovement = (movement: any) => {
+    if (!selectedItem) return;
+
+    const newQuantity = movement.type === 'entrada' 
+      ? selectedItem.currentQuantity + movement.quantity
+      : selectedItem.currentQuantity - movement.quantity;
+
+    setStockItems(prev => prev.map(item => 
+      item.id === selectedItem.id 
+        ? { 
+            ...item, 
+            currentQuantity: newQuantity,
+            status: getItemStatus(newQuantity, item.minimumStock)
+          }
+        : item
+    ));
+
+    toast({
+      title: "Movimentação registrada",
+      description: `${movement.type === 'entrada' ? 'Entrada' : 'Saída'} de ${movement.quantity} ${selectedItem.unit} registrada com sucesso.`,
+    });
+
+    setShowMovementForm(false);
+    setSelectedItem(null);
+  };
+
+  const getItemStatus = (currentQuantity: number, minimumStock: number): 'sufficient' | 'low' | 'critical' => {
+    if (currentQuantity <= 0) return 'critical';
+    if (currentQuantity <= minimumStock) return 'critical';
+    if (currentQuantity <= minimumStock * 1.5) return 'low';
+    return 'sufficient';
+  };
+
+  const handleDeleteItem = () => {
+    if (!selectedItem) return;
+
+    setStockItems(prev => prev.filter(item => item.id !== selectedItem.id));
+    toast({
+      title: "Item excluído",
+      description: "O item foi removido do estoque.",
+    });
+
+    setShowDeleteDialog(false);
+    setSelectedItem(null);
+  };
+
+  const quickDeduct = (item: StockItem) => {
+    setSelectedItem(item);
+    setShowMovementForm(true);
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 bg-gradient-to-br from-gray-50 to-red-50 min-h-screen">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex-1">
+          <h1 className="text-3xl font-black text-red-800 bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+            Controle de Estoque 99Tattoo
+          </h1>
+          <p className="text-gray-600 mt-2">Gerencie todos os materiais e suprimentos do estúdio</p>
+        </div>
+        <Button 
+          onClick={() => {
+            setSelectedItem(null);
+            setShowItemForm(true);
+          }}
+          variant="tattoo"
+          className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+        >
+          <Plus className="h-4 w-4" />
+          Adicionar Item
+        </Button>
+      </div>
+
       {/* Header Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+      <div className="grid gap-4 md:grid-cols-4 mb-6">
+        <Card variant="tattooRed" className="hover:shadow-xl transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Itens</CardTitle>
-            <Package2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-red-800">Total de Itens</CardTitle>
+            <Package2 className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stockItems.length}</div>
+            <div className="text-2xl font-black text-red-800">{stockItems.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card variant="tattooRed" className="hover:shadow-xl transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-red-800">Valor Total</CardTitle>
+            <TrendingUp className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ {totalValue.toFixed(2)}</div>
+            <div className="text-2xl font-black text-red-800">R$ {totalValue.toFixed(2)}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card variant="tattooRed" className="hover:shadow-xl transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Estoque Baixo</CardTitle>
+            <CardTitle className="text-sm font-medium text-red-800">Estoque Baixo</CardTitle>
             <TrendingDown className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{lowStockItems.length}</div>
+            <div className="text-2xl font-black text-yellow-600">{lowStockItems.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card variant="tattooRed" className="hover:shadow-xl transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Estoque Crítico</CardTitle>
+            <CardTitle className="text-sm font-medium text-red-800">Estoque Crítico</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{criticalItems.length}</div>
+            <div className="text-2xl font-black text-red-600">{criticalItems.length}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Alerts */}
       {criticalItems.length > 0 && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-300 bg-gradient-to-r from-red-50 to-red-100 mb-6 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-red-800 flex items-center gap-2">
+            <CardTitle className="text-red-800 flex items-center gap-2 font-black">
               <AlertTriangle className="h-5 w-5" />
               Alertas de Estoque Crítico
             </CardTitle>
@@ -158,7 +273,7 @@ const Stock = () => {
           <CardContent>
             <div className="space-y-2">
               {criticalItems.map((item) => (
-                <div key={item.id} className="text-red-700">
+                <div key={item.id} className="text-red-700 font-medium">
                   <strong>{item.name}</strong> - Apenas {item.currentQuantity} {item.unit} restante(s)
                 </div>
               ))}
@@ -167,121 +282,122 @@ const Stock = () => {
         </Card>
       )}
 
-      <Tabs defaultValue="items" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="items">Itens do Estoque</TabsTrigger>
-          <TabsTrigger value="movements">Movimentações</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="items" className="space-y-4">
-          {/* Search and Actions */}
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <Search className="h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Buscar itens..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-80"
-              />
-            </div>
-            <Button 
-              onClick={() => setShowItemForm(true)}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Item
-            </Button>
+      {/* Search */}
+      <Card className="mb-6 shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200">
+        <CardHeader className="pb-2 bg-gradient-to-r from-red-50 to-red-100 rounded-t-lg">
+          <CardTitle className="text-lg text-red-800 font-black">Buscar Itens</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-2">
+            <Search className="h-4 w-4 text-red-400" />
+            <Input
+              placeholder="Buscar por nome, marca, categoria ou SKU..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              variant="tattoo"
+              className="flex-1"
+            />
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Stock Items Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Itens em Estoque</CardTitle>
-              <CardDescription>
-                Gerencie todos os suprimentos do seu estúdio de tatuagem
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Quantidade</TableHead>
-                    <TableHead>Custo Médio</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Localização</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{item.name}</div>
-                          <div className="text-sm text-gray-500">{item.brand}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{item.category}</TableCell>
-                      <TableCell>
-                        {item.currentQuantity} {item.unit}
-                        <div className="text-xs text-gray-500">
-                          Mín: {item.minimumStock} {item.unit}
-                        </div>
-                      </TableCell>
-                      <TableCell>R$ {item.averageCost.toFixed(2)}</TableCell>
-                      <TableCell>{getStatusBadge(item.status)}</TableCell>
-                      <TableCell className="text-sm">{item.location}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedItem(item);
-                              setShowItemForm(true);
-                            }}
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedItem(item);
-                              setShowMovementForm(true);
-                            }}
-                          >
-                            Movimentar
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="movements">
-          <Card>
-            <CardHeader>
-              <CardTitle>Movimentações de Estoque</CardTitle>
-              <CardDescription>
-                Histórico de entradas e saídas de materiais
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center py-8 text-muted-foreground">
-                Funcionalidade de movimentações em desenvolvimento
+      {/* Stock Items Table */}
+      <Card variant="tattooRed" className="shadow-xl">
+        <CardHeader className="bg-gradient-to-r from-red-50 to-red-100 rounded-t-lg">
+          <CardTitle className="text-red-800 font-black">Itens em Estoque</CardTitle>
+          <CardDescription className="text-red-600">
+            Gerencie todos os suprimentos do seu estúdio de tatuagem
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {filteredItems.length === 0 ? (
+            <div className="text-center py-12">
+              <Package className="mx-auto h-12 w-12 text-red-400" />
+              <h2 className="mt-4 text-lg font-black text-red-800">Nenhum item encontrado</h2>
+              <p className="mt-2 text-red-600">
+                {searchTerm ? "Tente ajustar sua busca." : "Comece adicionando seu primeiro item ao estoque."}
               </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gradient-to-r from-red-100 to-red-200">
+                  <TableHead className="font-black text-red-800">Item</TableHead>
+                  <TableHead className="font-black text-red-800">SKU</TableHead>
+                  <TableHead className="font-black text-red-800">Categoria</TableHead>
+                  <TableHead className="font-black text-red-800">Quantidade</TableHead>
+                  <TableHead className="font-black text-red-800">Custo Médio</TableHead>
+                  <TableHead className="font-black text-red-800">Status</TableHead>
+                  <TableHead className="font-black text-red-800">Localização</TableHead>
+                  <TableHead className="font-black text-red-800 text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredItems.map((item) => (
+                  <TableRow key={item.id} className="hover:bg-red-50 transition-colors duration-200">
+                    <TableCell>
+                      <div>
+                        <div className="font-black text-red-800">{item.name}</div>
+                        <div className="text-sm text-red-600">{item.brand}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium text-red-700">{item.sku}</TableCell>
+                    <TableCell className="text-red-700">{item.category}</TableCell>
+                    <TableCell>
+                      <div className="font-black text-red-800">
+                        {item.currentQuantity} {item.unit}
+                      </div>
+                      <div className="text-xs text-red-500">
+                        Mín: {item.minimumStock} {item.unit}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium text-red-700">R$ {item.averageCost.toFixed(2)}</TableCell>
+                    <TableCell>{getStatusBadge(item.status)}</TableCell>
+                    <TableCell className="text-sm text-red-600">{item.location}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-end space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => quickDeduct(item)}
+                          className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700"
+                          title="Descontar Item"
+                        >
+                          <Minus size={14} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setShowItemForm(true);
+                          }}
+                          className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700"
+                          title="Editar Item"
+                        >
+                          <Edit size={14} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setShowDeleteDialog(true);
+                          }}
+                          className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700"
+                          title="Excluir Item"
+                        >
+                          <Trash size={14} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Modals */}
       {showItemForm && (
@@ -291,11 +407,7 @@ const Stock = () => {
             setShowItemForm(false);
             setSelectedItem(null);
           }}
-          onSave={(item) => {
-            // Implement save logic here
-            setShowItemForm(false);
-            setSelectedItem(null);
-          }}
+          onSave={handleSaveItem}
         />
       )}
 
@@ -306,13 +418,32 @@ const Stock = () => {
             setShowMovementForm(false);
             setSelectedItem(null);
           }}
-          onSave={(movement) => {
-            // Implement movement logic here
-            setShowMovementForm(false);
-            setSelectedItem(null);
-          }}
+          onSave={handleMovement}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="bg-gradient-to-br from-white to-red-50 border-red-200">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-800 font-black">Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription className="text-red-600">
+              Tem certeza que deseja excluir o item "{selectedItem?.name}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-red-200 text-red-600 hover:bg-red-50">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteItem}
+              className="bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

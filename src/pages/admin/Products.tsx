@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Package, Search, Plus, Edit, Trash, Loader, Palette, ShoppingBag, Heart } from "lucide-react";
+import { Package, Search, Plus, Edit, Trash, Loader, Palette, ShoppingBag, Heart, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
@@ -108,6 +108,27 @@ export default function Products() {
         return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Limitado</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getItemTypeIcon = (item: Product) => {
+    // Determine type based on item properties
+    if (item.style_tags || item.body_locations || item.average_time) {
+      return <Palette className="h-4 w-4 text-red-600" />;
+    } else if (item.category_id?.includes('digital') || item.category_id?.includes('apoio')) {
+      return <Heart className="h-4 w-4 text-purple-600" />;
+    } else {
+      return <ShoppingBag className="h-4 w-4 text-blue-600" />;
+    }
+  };
+
+  const getItemTypeBadge = (item: Product) => {
+    if (item.style_tags || item.body_locations || item.average_time) {
+      return <Badge className="bg-red-100 text-red-800 border-red-300">Tatuagem</Badge>;
+    } else if (item.category_id?.includes('digital') || item.category_id?.includes('apoio')) {
+      return <Badge className="bg-purple-100 text-purple-800 border-purple-300">Serviço</Badge>;
+    } else {
+      return <Badge className="bg-blue-100 text-blue-800 border-blue-300">Produto</Badge>;
     }
   };
 
@@ -315,62 +336,105 @@ export default function Products() {
           </p>
         </div>
       ) : (
-        <div className="rounded-lg border bg-white shadow-xl border-red-200">
-          <div className="grid grid-cols-12 border-b px-6 py-3 font-black text-sm text-red-700 bg-gradient-to-r from-red-50 to-red-100">
-            <div className="col-span-5">Item</div>
-            <div className="col-span-2">Categoria</div>
-            <div className="col-span-1">Preço</div>
-            <div className="col-span-2">Artista</div>
-            <div className="col-span-1">Status</div>
-            <div className="col-span-1 text-right">Ações</div>
-          </div>
-
+        /* Cards Grid Layout */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="grid grid-cols-12 items-center px-6 py-4 hover:bg-red-50 border-b last:border-0 transition-all duration-300">
-              <div className="col-span-5 flex items-center gap-3">
-                {product.images && product.images[0] ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="h-10 w-10 rounded-md object-cover shadow-md border border-red-200"
-                  />
-                ) : (
-                  <div className="h-10 w-10 rounded-md bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center shadow-md">
-                    <Package size={16} className="text-red-600" />
+            <Card 
+              key={product.id} 
+              className="group cursor-pointer shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300 transform hover:scale-105"
+              onClick={() => openEditDialog(product)}
+            >
+              <CardHeader className="p-0">
+                {/* Image Container */}
+                <div className="relative h-48 overflow-hidden rounded-t-lg bg-gradient-to-br from-red-100 to-red-200">
+                  {product.images && product.images[0] ? (
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon className="h-16 w-16 text-red-400" />
+                    </div>
+                  )}
+                  
+                  {/* Type Badge */}
+                  <div className="absolute top-2 left-2">
+                    {getItemTypeBadge(product)}
                   </div>
-                )}
-                <div>
-                  <h3 className="font-black text-red-800">{product.name}</h3>
+                  
+                  {/* Status Badge */}
+                  <div className="absolute top-2 right-2">
+                    {getStatusBadge(product.status)}
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-white/80 hover:bg-white text-red-600 hover:text-red-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditDialog(product);
+                      }}
+                    >
+                      <Edit size={14} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-white/80 hover:bg-white text-red-600 hover:text-red-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDeleteDialog(product);
+                      }}
+                    >
+                      <Trash size={14} />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  {/* Title and Type Icon */}
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-black text-red-800 text-lg leading-tight line-clamp-2">
+                      {product.name}
+                    </h3>
+                    {getItemTypeIcon(product)}
+                  </div>
+                  
+                  {/* Description */}
                   {product.description && (
-                    <p className="text-xs text-red-600 truncate max-w-xs">
+                    <p className="text-sm text-red-600 line-clamp-2">
                       {product.description}
                     </p>
                   )}
+                  
+                  {/* Category and Artist */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-red-500">
+                      <strong>Categoria:</strong> {product.category_name}
+                    </p>
+                    <p className="text-xs text-red-500">
+                      <strong>Artista:</strong> {product.artist_name}
+                    </p>
+                  </div>
+                  
+                  {/* Price */}
+                  <div className="pt-2 border-t border-red-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-black text-red-800">
+                        {formatCurrency(product.price)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="col-span-2 text-sm font-medium text-red-700">{product.category_name}</div>
-              <div className="col-span-1 text-sm font-black text-red-800">{formatCurrency(product.price)}</div>
-              <div className="col-span-2 text-sm font-medium text-red-700">{product.artist_name}</div>
-              <div className="col-span-1">{getStatusBadge(product.status)}</div>
-              <div className="col-span-1 flex justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 hover:bg-red-100 hover:text-red-600"
-                  onClick={() => openEditDialog(product)}
-                >
-                  <Edit size={16} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-red-500 hover:bg-red-100 hover:text-red-700"
-                  onClick={() => openDeleteDialog(product)}
-                >
-                  <Trash size={16} />
-                </Button>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
