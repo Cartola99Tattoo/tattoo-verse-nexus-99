@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,12 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Calendar, MapPin, Search, Filter, Edit, Trash2, Users, Target, ShoppingCart, TrendingUp, BarChart3, CheckCircle2, Maximize2, Minimize2 } from "lucide-react";
+import { Plus, Calendar, MapPin, Search, Filter, Edit, Trash2, Users, Target, ShoppingCart, TrendingUp, BarChart3, CheckCircle2, Maximize2, Minimize2, Activity } from "lucide-react";
 import { useDataQuery } from "@/hooks/useDataQuery";
-import { getEventService } from "@/services/serviceFactory";
+import { getEventService, getProjectService } from "@/services/serviceFactory";
 import { IEvent } from "@/services/interfaces/IEventService";
+import { IProject, IProjectSmartGoal } from "@/services/interfaces/IProjectService";
 import EventForm from "@/components/admin/EventForm";
 import EventKanban from "@/components/admin/EventKanban";
+import EventDashboard from "@/components/admin/EventDashboard";
 import { toast } from "@/hooks/use-toast";
 
 const Events = () => {
@@ -20,17 +23,31 @@ const Events = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [activeTab, setActiveTab] = useState("kanban");
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [isKanbanFullscreen, setIsKanbanFullscreen] = useState(false);
+  
   const eventService = getEventService();
+  const projectService = getProjectService();
 
   const { data: events, loading, refresh } = useDataQuery<IEvent[]>(
     () => eventService.fetchEvents(),
     []
   );
 
-  // Ensure events is always an array, even if data is null
+  const { data: projects } = useDataQuery<IProject[]>(
+    () => projectService.fetchProjects(),
+    []
+  );
+
+  const { data: smartGoals } = useDataQuery<IProjectSmartGoal[]>(
+    () => projectService.fetchProjectSmartGoals('all'),
+    []
+  );
+
+  // Ensure data is always an array, even if null
   const safeEvents = events || [];
+  const safeProjects = projects || [];
+  const safeSmartGoals = smartGoals || [];
 
   const handleCreateEvent = () => {
     setEditingEvent(null);
@@ -184,7 +201,7 @@ const Events = () => {
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 md:gap-6">
         <div className="flex-1">
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-3 md:mb-4">
-            Centro de Gestão de Eventos 99Tattoo
+            Centro de Gestão Estratégica de Eventos 99Tattoo
           </h1>
           
           {/* Botões de Ação Principais */}
@@ -212,7 +229,15 @@ const Events = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-lg">
+        <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-lg">
+          <TabsTrigger 
+            value="dashboard" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold text-xs md:text-sm"
+          >
+            <Activity className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+            <span className="hidden sm:inline">Dashboard</span>
+            <span className="sm:hidden">Dash</span>
+          </TabsTrigger>
           <TabsTrigger 
             value="kanban" 
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold text-xs md:text-sm"
@@ -229,6 +254,10 @@ const Events = () => {
             Lista de Eventos
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="dashboard" className="space-y-4 md:space-y-6">
+          <EventDashboard events={safeEvents} smartGoals={safeSmartGoals} />
+        </TabsContent>
 
         <TabsContent value="kanban" className="space-y-4 md:space-y-6">
           {/* Dashboard de Métricas */}
@@ -280,14 +309,14 @@ const Events = () => {
               <CardHeader className="pb-2 md:pb-3">
                 <CardTitle className="text-purple-700 flex items-center gap-1 md:gap-2 text-xs md:text-sm lg:text-lg font-bold">
                   <Target className="h-3 w-3 md:h-4 md:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
-                  <span className="truncate">Em Planejamento</span>
+                  <span className="truncate">Metas SMART</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="text-xl md:text-2xl lg:text-3xl font-black text-purple-600">
-                  {safeEvents.filter(e => e.status === 'pending').length}
+                  {safeSmartGoals.length}
                 </div>
-                <p className="text-xs text-gray-600 mt-1">A iniciar</p>
+                <p className="text-xs text-gray-600 mt-1">Metas ativas</p>
               </CardContent>
             </Card>
           </div>

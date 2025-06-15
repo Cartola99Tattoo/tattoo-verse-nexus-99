@@ -1,9 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
 import { Plus, Lightbulb, ArrowRight } from 'lucide-react';
 import { IEvent } from '@/services/interfaces/IEventService';
+import { IProject, IProjectSmartGoal } from '@/services/interfaces/IProjectService';
+import { useDataQuery } from "@/hooks/useDataQuery";
+import { getProjectService } from "@/services/serviceFactory";
 import EventKanbanColumn from './EventKanbanColumn';
 import EventTaskCard from './EventTaskCard';
 import EventTaskModal from './EventTaskModal';
@@ -20,6 +24,8 @@ interface EventTask {
   priority: 'low' | 'medium' | 'high';
   created_at: string;
   updated_at: string;
+  smartGoalId?: string;
+  projectId?: string;
 }
 
 interface EventKanbanProps {
@@ -44,6 +50,21 @@ const EventKanban = ({ events }: EventKanbanProps) => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState<EventTask | null>(null);
   const [tasks, setTasks] = useState<EventTask[]>([]);
+
+  const projectService = getProjectService();
+
+  const { data: projects } = useDataQuery<IProject[]>(
+    () => projectService.fetchProjects(),
+    []
+  );
+
+  const { data: smartGoals } = useDataQuery<IProjectSmartGoal[]>(
+    () => projectService.fetchProjectSmartGoals('all'),
+    []
+  );
+
+  const safeProjects = projects || [];
+  const safeSmartGoals = smartGoals || [];
 
   useEffect(() => {
     // Initialize empty columns
@@ -154,7 +175,9 @@ const EventKanban = ({ events }: EventKanbanProps) => {
         responsible: taskData.responsible || '',
         deadline: taskData.deadline || '',
         status: 'Planejamento Inicial / Ideação',
-        eventId: '',
+        eventId: taskData.eventId || '',
+        projectId: taskData.projectId || '',
+        smartGoalId: taskData.smartGoalId || '',
         checklist: taskData.checklist || [],
         priority: taskData.priority || 'medium',
         created_at: new Date().toISOString(),
@@ -177,14 +200,14 @@ const EventKanban = ({ events }: EventKanbanProps) => {
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
           {/* Título */}
           <h2 className="text-3xl font-black text-red-800 drop-shadow-lg">
-            Kanban de Gestão de Eventos
+            Kanban de Gestão Estratégica de Eventos
           </h2>
           
           {/* Guia de Uso */}
           <div className="bg-gradient-to-r from-red-100 to-red-200 px-4 py-2 rounded-lg border border-red-300 flex items-center gap-2">
             <Lightbulb className="h-4 w-4 text-red-600" />
             <span className="text-sm font-medium text-red-700">
-              Gerencie todas as etapas dos seus eventos
+              Gerencie eventos com metas SMART e projetos integrados
             </span>
             <ArrowRight className="h-4 w-4 text-red-600 animate-pulse" />
           </div>
@@ -247,6 +270,8 @@ const EventKanban = ({ events }: EventKanbanProps) => {
         onSave={handleTaskSave}
         editingTask={editingTask}
         events={events}
+        projects={safeProjects}
+        smartGoals={safeSmartGoals}
       />
     </div>
   );
