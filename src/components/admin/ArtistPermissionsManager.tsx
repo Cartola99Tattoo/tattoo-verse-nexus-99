@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,9 +64,19 @@ const defaultPermissions: DetailedPermissions = {
 };
 
 const ArtistPermissionsManager = ({ artist, onPermissionsUpdate }: Props) => {
-  const [permissions, setPermissions] = useState<DetailedPermissions>(
-    artist.permissions || defaultPermissions
-  );
+  // Initialize permissions with proper type checking
+  const initializePermissions = (): DetailedPermissions => {
+    if (artist.permissions && typeof artist.permissions === 'object') {
+      // Merge artist permissions with default permissions to ensure all fields exist
+      return {
+        ...defaultPermissions,
+        ...artist.permissions
+      };
+    }
+    return defaultPermissions;
+  };
+
+  const [permissions, setPermissions] = useState<DetailedPermissions>(initializePermissions());
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteToken, setInviteToken] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
