@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,13 +12,12 @@ import { DateRange } from "react-day-picker";
 import { CalendarDateRangePicker } from "@/components/ui/calendar-date-range-picker";
 import { getFinancialService } from "@/services/serviceFactory";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { TrendingUp, DollarSign, Users, PieChart, Search, Filter, Receipt, FileBarChart, Settings } from "lucide-react";
+import { TrendingUp, DollarSign, Users, PieChart, Search, Filter, Receipt, FileBarChart, Settings, Plus, Download, Upload, Edit, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import TransactionManagement from "@/components/admin/TransactionManagement";
 import ExpenseManagement from "@/components/admin/ExpenseManagement";
-import DREReport from "@/components/admin/DREReport";
-import CashFlowReport from "@/components/admin/CashFlowReport";
-import CategoryManagement from "@/components/admin/CategoryManagement";
-import FinancialTransactionManagement from "@/components/admin/FinancialTransactionManagement";
-import FinancialSettings from "@/components/admin/FinancialSettings";
+import CommissionManagement from "@/components/admin/CommissionManagement";
+import DREFlowReport from "@/components/admin/DREFlowReport";
+import ImportExportModal from "@/components/admin/ImportExportModal";
 
 const Financial = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -26,6 +26,7 @@ const Financial = () => {
   });
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isImportExportOpen, setIsImportExportOpen] = useState(false);
 
   const financialService = getFinancialService();
 
@@ -79,286 +80,189 @@ const Financial = () => {
     );
   };
 
-  const filteredTransactions = transactions.filter(transaction =>
-    transaction.customer_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
-    <div className="space-y-6">
-      {/* Filtros e Controles */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <CalendarDateRangePicker
-          date={dateRange}
-          onDateChange={setDateRange}
-          className="w-full sm:w-auto"
-        />
-        <div className="flex gap-2 flex-1">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Buscar por cliente..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50">
+      <div className="space-y-6 p-6">
+        {/* Header Principal com Gradiente 99Tattoo */}
+        <div className="bg-gradient-to-r from-red-600 via-red-700 to-black rounded-xl shadow-2xl p-6 text-white">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-black tracking-wider">FINANCEIRO 99TATTOO</h1>
+              <p className="text-red-100 mt-2">Gestão completa das finanças do estúdio</p>
+            </div>
+            
+            {/* Botões de Importar/Exportar */}
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setIsImportExportOpen(true)}
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105"
+                variant="outline"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Importar Dados
+              </Button>
+              <Button
+                onClick={() => setIsImportExportOpen(true)}
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105"
+                variant="outline"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exportar Dados
+              </Button>
+            </div>
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="pending">Pendente</SelectItem>
-              <SelectItem value="confirmed">Confirmado</SelectItem>
-              <SelectItem value="completed">Concluído</SelectItem>
-              <SelectItem value="cancelled">Cancelado</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
+
+        {/* Filtros e Controles */}
+        <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <CalendarDateRangePicker
+                date={dateRange}
+                onDateChange={setDateRange}
+                className="w-full sm:w-auto"
+              />
+              <div className="flex gap-2 flex-1">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Buscar por cliente..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-red-200 focus:border-red-500 focus:ring-red-200"
+                  />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[180px] border-red-200 focus:border-red-500">
+                    <Filter className="h-4 w-4 mr-2 text-red-600" />
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-red-200">
+                    <SelectItem value="all">Todos os Status</SelectItem>
+                    <SelectItem value="pending">Pendente</SelectItem>
+                    <SelectItem value="confirmed">Confirmado</SelectItem>
+                    <SelectItem value="completed">Concluído</SelectItem>
+                    <SelectItem value="cancelled">Cancelado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Cards de Resumo */}
+        {report && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="shadow-xl bg-gradient-to-br from-white to-green-50 border-green-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-green-700">Receita Total</CardTitle>
+                <DollarSign className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-800">{formatCurrency(report.total_revenue)}</div>
+                <p className="text-xs text-green-600">
+                  {report.transaction_count} transações
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-xl bg-gradient-to-br from-white to-blue-50 border-blue-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-blue-700">Comissões Totais</CardTitle>
+                <Users className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-800">{formatCurrency(report.total_commissions)}</div>
+                <p className="text-xs text-blue-600">
+                  Para artistas
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-xl bg-gradient-to-br from-white to-red-50 border-red-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-red-700">Lucro Líquido</CardTitle>
+                <TrendingUp className="h-4 w-4 text-red-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-800">{formatCurrency(report.net_profit)}</div>
+                <p className="text-xs text-red-600">
+                  Após comissões e custos
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-xl bg-gradient-to-br from-white to-purple-50 border-purple-200 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-purple-700">Custos de Material</CardTitle>
+                <PieChart className="h-4 w-4 text-purple-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-800">{formatCurrency(report.total_material_costs)}</div>
+                <p className="text-xs text-purple-600">
+                  Materiais utilizados
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Tabs para navegação aprimorada */}
+        <Tabs defaultValue="transactions" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-red-100 to-red-200 p-1 rounded-lg shadow-lg">
+            <TabsTrigger 
+              value="transactions" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+            >
+              <Receipt className="h-4 w-4 mr-2" />
+              Transações
+            </TabsTrigger>
+            <TabsTrigger 
+              value="expenses" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+            >
+              <ArrowDown className="h-4 w-4 mr-2" />
+              Despesas
+            </TabsTrigger>
+            <TabsTrigger 
+              value="commissions" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Comissões
+            </TabsTrigger>
+            <TabsTrigger 
+              value="dre-flow" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+            >
+              <FileBarChart className="h-4 w-4 mr-2" />
+              DRE & Fluxo de Caixa
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="transactions" className="space-y-4">
+            <TransactionManagement />
+          </TabsContent>
+
+          <TabsContent value="expenses" className="space-y-4">
+            <ExpenseManagement />
+          </TabsContent>
+
+          <TabsContent value="commissions" className="space-y-4">
+            <CommissionManagement />
+          </TabsContent>
+
+          <TabsContent value="dre-flow" className="space-y-4">
+            <DREFlowReport />
+          </TabsContent>
+        </Tabs>
+
+        {/* Modal de Importar/Exportar */}
+        <ImportExportModal 
+          isOpen={isImportExportOpen} 
+          onClose={() => setIsImportExportOpen(false)} 
+        />
       </div>
-
-      {/* Cards de Resumo */}
-      {report && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(report.total_revenue)}</div>
-              <p className="text-xs text-muted-foreground">
-                {report.transaction_count} transações
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Comissões Totais</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(report.total_commissions)}</div>
-              <p className="text-xs text-muted-foreground">
-                Para artistas
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Lucro Líquido</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(report.net_profit)}</div>
-              <p className="text-xs text-muted-foreground">
-                Após comissões e custos
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Custos de Material</CardTitle>
-              <PieChart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(report.total_material_costs)}</div>
-              <p className="text-xs text-muted-foreground">
-                Materiais utilizados
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Tabs para diferentes visualizações */}
-      <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="transactions">Transações</TabsTrigger>
-          <TabsTrigger value="financial">Financeiro</TabsTrigger>
-          <TabsTrigger value="commissions">Comissões</TabsTrigger>
-          <TabsTrigger value="expenses">Despesas</TabsTrigger>
-          <TabsTrigger value="categories">Categorias</TabsTrigger>
-          <TabsTrigger value="dre">DRE</TabsTrigger>
-          <TabsTrigger value="cashflow">Fluxo de Caixa</TabsTrigger>
-          <TabsTrigger value="settings">Configurações</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="transactions" className="space-y-4">
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
-              <CardTitle className="text-gray-800">Transações de Tatuagens</CardTitle>
-              <CardDescription>
-                Histórico de todas as transações de tatuagens realizadas
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Cliente</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Comissão</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactionsLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center">
-                          Carregando transações...
-                        </TableCell>
-                      </TableRow>
-                    ) : filteredTransactions.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center">
-                          Nenhuma transação encontrada
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredTransactions.map((transaction) => (
-                        <TableRow key={transaction.id}>
-                          <TableCell className="font-medium">
-                            {transaction.customer_name}
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">
-                                {formatCurrency(transaction.final_amount || transaction.amount)}
-                              </div>
-                              {transaction.final_amount && transaction.final_amount !== transaction.amount && (
-                                <div className="text-sm text-gray-500 line-through">
-                                  {formatCurrency(transaction.amount)}
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(transaction.payment_status)}
-                          </TableCell>
-                          <TableCell>
-                            {formatDate(transaction.transaction_date)}
-                          </TableCell>
-                          <TableCell>
-                            {transaction.artist_commission ? 
-                              formatCurrency(transaction.artist_commission) : 
-                              <span className="text-gray-400">Não calculada</span>
-                            }
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="outline" size="sm">
-                              Ver Detalhes
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Nova aba de Transações Financeiras */}
-        <TabsContent value="financial" className="space-y-4">
-          <FinancialTransactionManagement />
-        </TabsContent>
-
-        <TabsContent value="commissions" className="space-y-4">
-          <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
-              <CardTitle className="text-gray-800">Comissões de Artistas</CardTitle>
-              <CardDescription>
-                Gestão de comissões pagas aos artistas
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Artista</TableHead>
-                      <TableHead>Valor Base</TableHead>
-                      <TableHead>Taxa</TableHead>
-                      <TableHead>Comissão</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {commissionsLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center">
-                          Carregando comissões...
-                        </TableCell>
-                      </TableRow>
-                    ) : commissions.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center">
-                          Nenhuma comissão encontrada
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      commissions.map((commission) => (
-                          <TableRow key={commission.id}>
-                            <TableCell className="font-medium">
-                              {commission.artist_name}
-                            </TableCell>
-                            <TableCell>
-                              {formatCurrency(commission.base_amount)}
-                            </TableCell>
-                            <TableCell>
-                              {(commission.commission_rate * 100).toFixed(1)}%
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {formatCurrency(commission.commission_amount)}
-                            </TableCell>
-                            <TableCell>
-                              {getStatusBadge(commission.status)}
-                            </TableCell>
-                            <TableCell>
-                              <Button variant="outline" size="sm">
-                                Marcar como Pago
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="expenses" className="space-y-4">
-          <ExpenseManagement />
-        </TabsContent>
-
-        <TabsContent value="categories" className="space-y-4">
-          <CategoryManagement />
-        </TabsContent>
-
-        <TabsContent value="dre" className="space-y-4">
-          <DREReport />
-        </TabsContent>
-
-        <TabsContent value="cashflow" className="space-y-4">
-          <CashFlowReport />
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-4">
-          <FinancialSettings />
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };
