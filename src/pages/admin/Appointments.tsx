@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -11,6 +12,8 @@ import { cn } from "@/lib/utils";
 import AppointmentForm from "@/components/admin/AppointmentForm";
 import AppointmentEditModal from "@/components/admin/AppointmentEditModal";
 import DailyAppointmentsKanban from "@/components/admin/DailyAppointmentsKanban";
+import DailyAppointmentStatusKanban from "@/components/admin/DailyAppointmentStatusKanban";
+import AppointmentsDashboard from "@/components/admin/AppointmentsDashboard";
 import { Client, Appointment } from "@/services/interfaces/IClientService";
 import { getClientService } from "@/services/serviceFactory";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
