@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -7,13 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles, Expand, Minimize, X, Eye, Scissors, User } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Calendar as CalendarIcon, Users, Clock, MapPin, Sparkles, Expand, Minimize, X, Eye, Scissors, User, BarChart3, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AppointmentForm from "@/components/admin/AppointmentForm";
 import AppointmentEditModal from "@/components/admin/AppointmentEditModal";
 import DailyAppointmentsKanban from "@/components/admin/DailyAppointmentsKanban";
 import DailyAppointmentStatusKanban from "@/components/admin/DailyAppointmentStatusKanban";
 import AppointmentsDashboard from "@/components/admin/AppointmentsDashboard";
+import WeeklyAppointmentsKanban from "@/components/admin/WeeklyAppointmentsKanban";
 import { Client, Appointment } from "@/services/interfaces/IClientService";
 import { getClientService } from "@/services/serviceFactory";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,8 +34,9 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-// Mock data para demonstração de um estúdio movimentado
+// Dados simulados expandidos para demonstração
 const mockAppointments: Appointment[] = [
+  // Agendamentos para dezembro 2024
   {
     id: '1',
     client_id: '1',
@@ -83,13 +85,14 @@ const mockAppointments: Appointment[] = [
     created_at: '2024-12-08T12:00:00Z',
     updated_at: '2024-12-08T12:00:00Z',
   },
+  // Mais agendamentos para testar as visualizações
   {
     id: '4',
     client_id: '4',
     artist_id: '3',
     bed_id: '3',
     date: '2024-12-13',
-    time: '11:00',
+    time: '09:30',
     duration_minutes: 60,
     service_type: 'tattoo',
     status: 'scheduled',
@@ -147,6 +150,88 @@ const mockAppointments: Appointment[] = [
     created_at: '2024-12-10T11:30:00Z',
     updated_at: '2024-12-10T11:30:00Z',
   },
+  // Agendamentos para a semana atual
+  {
+    id: '8',
+    client_id: '7',
+    artist_id: '1',
+    bed_id: '1',
+    date: '2024-12-16',
+    time: '10:00',
+    duration_minutes: 120,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Lobo geométrico',
+    notes: 'Cliente VIP',
+    estimated_price: 450,
+    created_at: '2024-12-12T08:00:00Z',
+    updated_at: '2024-12-12T08:00:00Z',
+  },
+  {
+    id: '9',
+    client_id: '8',
+    artist_id: '2',
+    bed_id: '2',
+    date: '2024-12-16',
+    time: '14:30',
+    duration_minutes: 90,
+    service_type: 'piercing',
+    status: 'scheduled',
+    service_description: 'Piercing no nariz',
+    notes: 'Primeira vez',
+    estimated_price: 80,
+    created_at: '2024-12-13T10:00:00Z',
+    updated_at: '2024-12-13T10:00:00Z',
+  },
+  {
+    id: '10',
+    client_id: '9',
+    artist_id: '3',
+    bed_id: '3',
+    date: '2024-12-17',
+    time: '11:00',
+    duration_minutes: 180,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Fênix colorida',
+    notes: 'Design complexo',
+    estimated_price: 600,
+    created_at: '2024-12-14T16:00:00Z',
+    updated_at: '2024-12-14T16:00:00Z',
+  },
+  // Mais agendamentos para completar a semana
+  {
+    id: '11',
+    client_id: '10',
+    artist_id: '1',
+    bed_id: '1',
+    date: '2024-12-18',
+    time: '09:00',
+    duration_minutes: 60,
+    service_type: 'consultation',
+    status: 'scheduled',
+    service_description: 'Consulta para nova tatuagem',
+    notes: 'Orçamento',
+    estimated_price: 0,
+    created_at: '2024-12-15T12:00:00Z',
+    updated_at: '2024-12-15T12:00:00Z',
+  },
+  {
+    id: '12',
+    client_id: '2',
+    artist_id: '2',
+    bed_id: '2',
+    date: '2024-12-18',
+    time: '15:00',
+    duration_minutes: 120,
+    service_type: 'tattoo',
+    status: 'confirmed',
+    service_description: 'Continuação rosa no ombro',
+    notes: 'Segunda sessão',
+    estimated_price: 300,
+    created_at: '2024-12-16T09:00:00Z',
+    updated_at: '2024-12-16T09:00:00Z',
+  }
 ];
 
 const mockClients: Client[] = [
@@ -169,8 +254,8 @@ const mockClients: Client[] = [
     status: 'active',
     created_at: '2024-02-20T14:30:00Z',
     updated_at: '2024-12-09T15:30:00Z',
-    total_spent: 200,
-    total_orders: 1
+    total_spent: 500,
+    total_orders: 2
   },
   { 
     id: '3', 
@@ -213,9 +298,53 @@ const mockClients: Client[] = [
     status: 'new',
     created_at: '2024-12-10T11:30:00Z',
     updated_at: '2024-12-10T11:30:00Z',
+    total_spent: 250,
+    total_orders: 1
+  },
+  { 
+    id: '7', 
+    name: 'Gabriela Lima', 
+    email: 'gabriela@email.com', 
+    phone: '(11) 99999-7777',
+    status: 'vip',
+    created_at: '2023-10-22T14:00:00Z',
+    updated_at: '2024-12-12T08:00:00Z',
+    total_spent: 1800,
+    total_orders: 4
+  },
+  { 
+    id: '8', 
+    name: 'Hugo Martins', 
+    email: 'hugo@email.com', 
+    phone: '(11) 99999-8888',
+    status: 'new',
+    created_at: '2024-12-13T10:00:00Z',
+    updated_at: '2024-12-13T10:00:00Z',
     total_spent: 0,
     total_orders: 0
   },
+  { 
+    id: '9', 
+    name: 'Isabela Rocha', 
+    email: 'isabela@email.com', 
+    phone: '(11) 99999-9999',
+    status: 'active',
+    created_at: '2024-05-18T11:30:00Z',
+    updated_at: '2024-12-14T16:00:00Z',
+    total_spent: 900,
+    total_orders: 2
+  },
+  { 
+    id: '10', 
+    name: 'João Pereira', 
+    email: 'joao@email.com', 
+    phone: '(11) 99999-0000',
+    status: 'new',
+    created_at: '2024-12-15T12:00:00Z',
+    updated_at: '2024-12-15T12:00:00Z',
+    total_spent: 0,
+    total_orders: 0
+  }
 ];
 
 const Appointments = () => {
@@ -227,6 +356,8 @@ const Appointments = () => {
   const [currentView, setCurrentView] = useState<View>('month');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null);
+  const [selectedDayStatusDate, setSelectedDayStatusDate] = useState<Date | null>(null);
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const queryClient = useQueryClient();
   const clientService = getClientService();
@@ -234,13 +365,6 @@ const Appointments = () => {
   // Usar dados mock para demonstração
   const appointments = mockAppointments;
   const clients = mockClients;
-
-  // Filtrar próximos agendamentos do dia atual
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const todayAppointments = appointments
-    .filter(apt => apt.date === today)
-    .sort((a, b) => a.time.localeCompare(b.time))
-    .slice(0, 5);
 
   const calendarEvents = appointments.map(appointment => ({
     ...appointment,
@@ -302,9 +426,16 @@ const Appointments = () => {
     setSelectedDayDate(null);
   };
 
+  const handleDayStatusClick = (date: Date) => {
+    setSelectedDayStatusDate(date);
+  };
+
+  const handleCloseDayStatusKanban = () => {
+    setSelectedDayStatusDate(null);
+  };
+
   const handleRescheduleAppointment = async (appointmentId: string, newTime: string) => {
     try {
-      // Aqui você implementaria a lógica real de reagendamento
       console.log(`Reagendando agendamento ${appointmentId} para ${newTime}`);
       
       toast({
@@ -340,39 +471,6 @@ const Appointments = () => {
       case 'completed': return 'Concluído';
       default: return 'Pendente';
     }
-  };
-
-  const EventComponent = ({ event }: { event: any }) => {
-    const appointment = event.resource;
-    const client = clients.find(c => c.id === appointment.client_id);
-    const artist = ['João Silva', 'Maria Santos', 'Pedro Costa'].find((_, index) => 
-      ['1', '2', '3'][index] === appointment.artist_id
-    );
-
-    const firstName = client?.name?.split(' ')[0] || 'Cliente';
-    const artistFirstName = artist?.split(' ')[0] || 'Artista';
-
-    return (
-      <div className="appointment-card-compact bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white rounded-md shadow-lg border border-red-400 hover:shadow-xl transition-all duration-300 cursor-pointer group overflow-hidden h-full">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-        <div className="relative z-10 p-1.5 h-full flex flex-col justify-between text-xs">
-          <div className="space-y-0.5">
-            <div className="font-bold truncate flex items-center gap-1">
-              <Users className="h-2.5 w-2.5 flex-shrink-0" />
-              <span className="text-xs">{firstName}</span>
-            </div>
-            <div className="opacity-90 truncate flex items-center gap-1">
-              <Clock className="h-2.5 w-2.5 flex-shrink-0" />
-              <span className="text-xs">{appointment.time}</span>
-            </div>
-          </div>
-          <div className="opacity-80 truncate flex items-center gap-1">
-            <Sparkles className="h-2.5 w-2.5 flex-shrink-0" />
-            <span className="text-xs">{artistFirstName}</span>
-          </div>
-        </div>
-      </div>
-    );
   };
 
   // Mensagens em português brasileiro
@@ -412,15 +510,15 @@ const Appointments = () => {
       )}
 
       <div className="relative z-10">
-        {/* Cabeçalho Renovado */}
+        {/* Cabeçalho Principal */}
         <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-xl shadow-xl mb-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] animate-pulse"></div>
           <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <div className="flex items-center gap-3">
               <CalendarIcon className="h-8 w-8" />
               <div>
-                <h1 className="text-2xl font-black">Calendário de Agendamentos</h1>
-                <p className="text-red-100 font-medium">Gerencie todos os agendamentos do estúdio com eficiência</p>
+                <h1 className="text-2xl font-black">Gestão de Agendamentos 99Tattoo</h1>
+                <p className="text-red-100 font-medium">Dashboard completo e calendário inteligente com fluxo Kanban</p>
               </div>
             </div>
             
@@ -454,156 +552,126 @@ const Appointments = () => {
           </div>
         </div>
 
-        {/* Seção de Visão Rápida dos Agendamentos do Dia */}
-        {!isFullscreen && (
-          <div className="mb-6">
-            <Card className="bg-gradient-to-br from-white to-red-50 border-2 border-red-200 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                  <Clock className="h-5 w-5" />
-                  Próximos Agendamentos de Hoje
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                {todayAppointments.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {todayAppointments.map((appointment) => {
-                      const client = clients.find(c => c.id === appointment.client_id);
-                      const artist = ['João Silva', 'Maria Santos', 'Pedro Costa'].find((_, index) => 
-                        ['1', '2', '3'][index] === appointment.artist_id
-                      );
-                      
-                      return (
-                        <Card 
-                          key={appointment.id} 
-                          className="bg-gradient-to-br from-white to-red-50 border border-red-200 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105"
-                        >
-                          <CardContent className="p-3">
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <User className="h-3 w-3 text-red-600" />
-                                  <span className="font-bold text-red-800 text-sm">
-                                    {client?.name?.split(' ')[0] || 'Cliente'}
-                                  </span>
-                                </div>
-                                
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Clock className="h-3 w-3 text-red-600" />
-                                  <span className="text-xs text-red-700">
-                                    {appointment.time} ({appointment.duration_minutes}min)
-                                  </span>
-                                </div>
-                                
-                                {artist && (
-                                  <div className="flex items-center gap-2">
-                                    <Scissors className="h-3 w-3 text-red-600" />
-                                    <span className="text-xs text-red-700">
-                                      {artist.split(' ')[0]}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
+        {/* Navegação por Abas */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-red-600 to-red-700 rounded-xl shadow-lg mb-6">
+            <TabsTrigger value="dashboard" className="text-white data-[state=active]:bg-white data-[state=active]:text-red-700 font-bold">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="monthly" className="text-white data-[state=active]:bg-white data-[state=active]:text-red-700 font-bold">
+              <CalendarIcon className="h-4 w-4 mr-2" />
+              Mensal
+            </TabsTrigger>
+            <TabsTrigger value="weekly" className="text-white data-[state=active]:bg-white data-[state=active]:text-red-700 font-bold">
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Semanal
+            </TabsTrigger>
+            <TabsTrigger value="daily" className="text-white data-[state=active]:bg-white data-[state=active]:text-red-700 font-bold">
+              <Eye className="h-4 w-4 mr-2" />
+              Diário
+            </TabsTrigger>
+          </TabsList>
 
-                            <Badge 
-                              className={`${getStatusColor(appointment.status)} text-white text-xs font-bold mb-2`}
-                            >
-                              {getStatusText(appointment.status)}
-                            </Badge>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-red-600">
-                    <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium">Nenhum agendamento para hoje</p>
-                  </div>
-                )}
-                
-                <div className="flex justify-center mt-4">
-                  <Button
-                    onClick={() => setSelectedDayDate(new Date())}
-                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-bold"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Ver Dia Completo
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Calendário Principal Renovado */}
-        <div className="bg-white rounded-xl shadow-xl border-2 border-red-100/50 backdrop-blur-sm relative overflow-hidden">
-          <div className="relative z-10 p-2">
-            <Calendar
-              localizer={localizer}
-              events={calendarEvents}
-              startAccessor="start"
-              endAccessor="end"
-              style={{ height: calendarHeight }}
-              onSelectSlot={handleSelectSlot}
-              onSelectEvent={handleSelectEvent}
-              onNavigate={setCurrentDate}
-              onView={handleViewChange}
-              selectable
-              views={['month', 'week', 'day', 'agenda']}
-              view={currentView}
-              date={currentDate}
-              messages={messages}
-              culture="pt-BR"
-              components={{
-                event: EventComponent,
-              }}
-              className={cn(
-                "rounded-lg overflow-hidden",
-                isFullscreen ? "calendar-99tattoo-fullscreen" : "calendar-99tattoo-enhanced"
-              )}
-              eventPropGetter={(event) => ({
-                className: cn(
-                  "transition-all duration-300 hover:shadow-xl appointment-event-enhanced",
-                  event.resource.status === 'confirmed' && "appointment-confirmed",
-                  event.resource.status === 'cancelled' && "appointment-cancelled",
-                  event.resource.status === 'completed' && "appointment-completed"
-                ),
-              })}
-              dayPropGetter={(date) => ({
-                className: cn(
-                  "hover:bg-red-50/60 transition-colors duration-200 cursor-pointer",
-                  format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && "bg-red-100/40"
-                ),
-                onClick: () => handleDayClick(date),
-              })}
-              formats={{
-                dayFormat: (date, culture, localizer) =>
-                  localizer?.format(date, 'dd', culture) || '',
-                dayHeaderFormat: (date, culture, localizer) =>
-                  localizer?.format(date, 'EEEE', culture) || '',
-                monthHeaderFormat: (date, culture, localizer) =>
-                  localizer?.format(date, 'MMMM yyyy', culture) || '',
-                agendaDateFormat: (date, culture, localizer) =>
-                  localizer?.format(date, 'dd/MM', culture) || '',
-                agendaTimeFormat: (date, culture, localizer) =>
-                  localizer?.format(date, 'HH:mm', culture) || '',
-                timeGutterFormat: (date, culture, localizer) =>
-                  localizer?.format(date, 'HH:mm', culture) || '',
-              }}
-              step={30}
-              timeslots={2}
-              min={new Date(2024, 0, 1, 8, 0)}
-              max={new Date(2024, 0, 1, 20, 0)}
-              popup={true}
-              popupOffset={30}
+          {/* Dashboard de Agendamentos */}
+          <TabsContent value="dashboard" className="space-y-6">
+            <AppointmentsDashboard 
+              appointments={appointments} 
+              clients={clients} 
             />
-          </div>
-        </div>
+          </TabsContent>
+
+          {/* Calendário Mensal */}
+          <TabsContent value="monthly" className="space-y-6">
+            <div className="bg-white rounded-xl shadow-xl border-2 border-red-100/50 backdrop-blur-sm relative overflow-hidden">
+              <div className="relative z-10 p-2">
+                <Calendar
+                  localizer={localizer}
+                  events={calendarEvents}
+                  startAccessor="start"
+                  endAccessor="end"
+                  style={{ height: calendarHeight }}
+                  onSelectSlot={handleSelectSlot}
+                  onSelectEvent={handleSelectEvent}
+                  onNavigate={setCurrentDate}
+                  onView={handleViewChange}
+                  selectable
+                  views={['month']}
+                  view="month"
+                  date={currentDate}
+                  messages={messages}
+                  culture="pt-BR"
+                  components={{
+                    event: EventComponent,
+                  }}
+                  className={cn(
+                    "rounded-lg overflow-hidden",
+                    isFullscreen ? "calendar-99tattoo-fullscreen" : "calendar-99tattoo-enhanced"
+                  )}
+                  eventPropGetter={(event) => ({
+                    className: cn(
+                      "transition-all duration-300 hover:shadow-xl appointment-event-enhanced",
+                      event.resource.status === 'confirmed' && "appointment-confirmed",
+                      event.resource.status === 'cancelled' && "appointment-cancelled",
+                      event.resource.status === 'completed' && "appointment-completed"
+                    ),
+                  })}
+                  dayPropGetter={(date) => ({
+                    className: cn(
+                      "hover:bg-red-50/60 transition-colors duration-200 cursor-pointer",
+                      format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && "bg-red-100/40"
+                    ),
+                    onClick: () => handleDayStatusClick(date),
+                  })}
+                  formats={{
+                    dayFormat: (date, culture, localizer) =>
+                      localizer?.format(date, 'dd', culture) || '',
+                    dayHeaderFormat: (date, culture, localizer) =>
+                      localizer?.format(date, 'EEEE', culture) || '',
+                    monthHeaderFormat: (date, culture, localizer) =>
+                      localizer?.format(date, 'MMMM yyyy', culture) || '',
+                  }}
+                  step={30}
+                  timeslots={2}
+                  min={new Date(2024, 0, 1, 8, 0)}
+                  max={new Date(2024, 0, 1, 20, 0)}
+                  popup={true}
+                  popupOffset={30}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Calendário Semanal Kanban */}
+          <TabsContent value="weekly" className="space-y-6">
+            <WeeklyAppointmentsKanban
+              appointments={appointments}
+              clients={clients}
+              currentDate={currentDate}
+              onReschedule={handleRescheduleAppointment}
+              onDayClick={handleDayStatusClick}
+            />
+          </TabsContent>
+
+          {/* Calendário Diário */}
+          <TabsContent value="daily" className="space-y-6">
+            <div className="text-center py-8">
+              <CalendarIcon className="h-16 w-16 mx-auto mb-4 text-red-600" />
+              <h3 className="text-xl font-bold text-red-800 mb-2">Visualização Diária</h3>
+              <p className="text-red-600 mb-4">Clique em um dia no calendário mensal ou semanal para ver os detalhes</p>
+              <Button
+                onClick={() => handleDayStatusClick(new Date())}
+                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-bold"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Ver Dia de Hoje
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* Modal Criar Agendamento Renovado */}
+      {/* Modal Criar Agendamento */}
       {showCreateForm && (
         <Dialog open={showCreateForm} onOpenChange={handleCloseCreateForm}>
           <DialogContent 
@@ -649,13 +717,22 @@ const Appointments = () => {
         onUpdate={handleEditSuccess}
       />
 
-      {/* Kanban Diário de Agendamentos */}
+      {/* Kanban Diário de Agendamentos (Horários) */}
       <DailyAppointmentsKanban
         selectedDate={selectedDayDate}
         appointments={appointments}
         clients={clients}
         onClose={handleCloseDayKanban}
         onReschedule={handleRescheduleAppointment}
+      />
+
+      {/* Kanban Diário de Status */}
+      <DailyAppointmentStatusKanban
+        selectedDate={selectedDayStatusDate}
+        appointments={appointments}
+        clients={clients}
+        onClose={handleCloseDayStatusKanban}
+        onStatusChange={handleRescheduleAppointment}
       />
     </div>
   );
