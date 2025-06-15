@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -737,6 +738,94 @@ const Appointments = () => {
   // Usar dados mock para demonstração
   const appointments = mockAppointments;
   const clients = mockClients;
+
+  // Handler functions
+  const toggleFullscreen = useCallback(() => {
+    setIsFullscreen(!isFullscreen);
+  }, [isFullscreen]);
+
+  const handleSelectEvent = useCallback((event: any) => {
+    const appointment = event.resource || event;
+    setSelectedEvent(appointment);
+    const client = clients.find(c => c.id === appointment.client_id);
+    setSelectedClient(client || null);
+  }, [clients]);
+
+  const handleSelectSlot = useCallback((slotInfo: { start: Date; end: Date }) => {
+    setSelectedSlot(slotInfo);
+    setShowCreateForm(true);
+  }, []);
+
+  const handleViewChange = useCallback((view: View) => {
+    setCurrentView(view);
+  }, []);
+
+  const handleDayStatusClick = useCallback((date: Date) => {
+    setSelectedDayStatusDate(date);
+  }, []);
+
+  const handleCloseDayKanban = useCallback(() => {
+    setSelectedDayDate(null);
+  }, []);
+
+  const handleCloseDayStatusKanban = useCallback(() => {
+    setSelectedDayStatusDate(null);
+  }, []);
+
+  const handleCloseCreateForm = useCallback(() => {
+    setShowCreateForm(false);
+    setSelectedSlot(null);
+  }, []);
+
+  const handleCloseEditModal = useCallback(() => {
+    setSelectedEvent(null);
+    setSelectedClient(null);
+  }, []);
+
+  const handleFormSuccess = useCallback(() => {
+    setShowCreateForm(false);
+    setSelectedSlot(null);
+    toast({
+      title: "Agendamento criado",
+      description: "O novo agendamento foi criado com sucesso.",
+    });
+  }, []);
+
+  const handleEditSuccess = useCallback(() => {
+    setSelectedEvent(null);
+    setSelectedClient(null);
+    toast({
+      title: "Agendamento atualizado",
+      description: "O agendamento foi atualizado com sucesso.",
+    });
+  }, []);
+
+  const handleRescheduleAppointment = useCallback((appointment: Appointment) => {
+    console.log('Reagendando:', appointment);
+    toast({
+      title: "Agendamento reagendado",
+      description: "O agendamento foi reagendado com sucesso.",
+    });
+  }, []);
+
+  const handleCreateAppointment = useCallback((date: Date) => {
+    setSelectedSlot({ start: date, end: new Date(date.getTime() + 60 * 60 * 1000) });
+    setShowCreateForm(true);
+  }, []);
+
+  const handleEditAppointment = useCallback((appointment: Appointment) => {
+    setSelectedEvent(appointment);
+    const client = clients.find(c => c.id === appointment.client_id);
+    setSelectedClient(client || null);
+  }, [clients]);
+
+  const handleDeleteAppointment = useCallback((appointment: Appointment) => {
+    console.log('Excluindo:', appointment);
+    toast({
+      title: "Agendamento excluído",
+      description: "O agendamento foi excluído com sucesso.",
+    });
+  }, []);
 
   const calendarEvents = appointments.map(appointment => ({
     ...appointment,
