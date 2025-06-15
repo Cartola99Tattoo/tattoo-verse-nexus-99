@@ -19,6 +19,7 @@ export interface IEvent {
   ticketLink?: string;
   participatingArtists?: string[];
   status: 'pending' | 'active' | 'completed' | 'cancelled';
+  landingPageUrl?: string; // Added this property
   smartGoals?: IEventSmartGoal[];
   projectId?: string; // Nova associação com projetos
   ticketProduct?: IEventTicketProduct; // Nova configuração de ingresso
