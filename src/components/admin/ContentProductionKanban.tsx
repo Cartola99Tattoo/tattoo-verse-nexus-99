@@ -289,8 +289,7 @@ const ContentProductionKanban = ({
                   <ContentKanbanCard 
                     idea={activeIdea} 
                     personas={personas}
-                    onUpdate={onIdeaUpdate}
-                    onTransformToArticle={handleTransformToArticle}
+                    onEdit={handleEditIdea}
                   />
                 </div>
               ) : null}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -6,16 +5,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { GripVertical, User, Target, Tag, Calendar, PenTool, CheckCircle2, Sparkles, Edit } from 'lucide-react';
-import { ContentIdea } from '@/types/contentIdea';
+import { ContentIdea, CreateContentIdeaData } from '@/types/contentIdea';
 import { Persona } from '@/types/persona';
 
 interface ContentKanbanCardProps {
   idea: ContentIdea;
   personas?: Persona[];
   onEdit?: (idea: ContentIdea) => void;
+  onUpdate?: (idea: ContentIdea, data: CreateContentIdeaData) => void;
+  onTransformToArticle?: (data: CreateContentIdeaData) => void;
 }
 
-const ContentKanbanCard = ({ idea, personas = [], onEdit }: ContentKanbanCardProps) => {
+const ContentKanbanCard = ({ idea, personas = [], onEdit, onUpdate, onTransformToArticle }: ContentKanbanCardProps) => {
   const {
     attributes,
     listeners,
