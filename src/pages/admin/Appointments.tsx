@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -440,7 +441,7 @@ const mockAppointments: Appointment[] = [
     estimated_price: 300,
     created_at: '2024-12-22T10:00:00Z',
     updated_at: '2024-12-22T10:00:00Z',
-  }
+  },
   // Novos agendamentos para testar todas as funcionalidades
   {
     id: '26',
