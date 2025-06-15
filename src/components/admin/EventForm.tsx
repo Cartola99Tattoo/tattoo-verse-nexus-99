@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Calendar, MapPin, Clock, Users, DollarSign, Globe, ExternalLink } from "lucide-react";
+import { ArrowLeft, Save, Calendar, MapPin, Clock, Users, DollarSign, Globe, ExternalLink, Tag } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { getEventService } from "@/services/serviceFactory";
 import { IEvent } from "@/services/interfaces/IEventService";
@@ -34,6 +34,7 @@ const eventSchema = z.object({
   participatingArtists: z.array(z.string()).optional(),
   status: z.enum(['pending', 'active', 'completed', 'cancelled']),
   landingPageUrl: z.string().optional(),
+  associatedCouponId: z.string().optional(),
 });
 
 type EventFormData = z.infer<typeof eventSchema>;
@@ -42,6 +43,13 @@ interface EventFormProps {
   event?: IEvent | null;
   onClose: () => void;
 }
+
+// Mock coupons data - in a real app this would come from the loyalty service
+const mockCoupons = [
+  { id: "1", name: "FlashPartyVerão-A", code: "X2Y7Z9A1B3", eventName: "Flash Day Verão 2025" },
+  { id: "2", name: "ClienteFiel2025", code: "K8M5N2P9Q4", eventName: "Workshop Especial" },
+  { id: "3", name: "ExclusiveTattooFest", code: "F7G1H6J3L2", eventName: "Festival de Tatuagem" },
+];
 
 const EventForm: React.FC<EventFormProps> = ({ event, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,7 +82,8 @@ const EventForm: React.FC<EventFormProps> = ({ event, onClose }) => {
       ticketLink: event.ticketLink || "",
       participatingArtists: event.participatingArtists || [],
       status: event.status,
-      landingPageUrl: `https://99tattoo.com/events/${event.id}`,
+      landingPageUrl: event.landingPageUrl || `https://99tattoo.com.br/events/${event.id}`,
+      associatedCouponId: "",
     } : {
       name: "",
       description: "",
@@ -93,19 +102,20 @@ const EventForm: React.FC<EventFormProps> = ({ event, onClose }) => {
       participatingArtists: [],
       status: 'pending',
       landingPageUrl: "",
+      associatedCouponId: "",
     }
   });
 
   const watchedEventType = watch('eventType');
   const watchedName = watch('name');
 
-  // Auto-generate landing page URL when name changes
+  // Auto-generate friendly URL when name changes
   useEffect(() => {
     if (watchedName && !event) {
       const slug = watchedName.toLowerCase()
         .replace(/[^a-z0-9\s]/g, '')
         .replace(/\s+/g, '-');
-      setValue('landingPageUrl', `https://99tattoo.com/events/${slug}`);
+      setValue('landingPageUrl', `https://99tattoo.com.br/events/${slug}`);
     }
   }, [watchedName, event, setValue]);
 
@@ -128,7 +138,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onClose }) => {
           description: "As informações do evento foram atualizadas com sucesso.",
         });
       } else {
-        // Create the event data with proper typing
         const eventData: Omit<IEvent, 'id' | 'createdAt' | 'updatedAt'> = {
           name: data.name,
           description: data.description,
@@ -159,7 +168,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onClose }) => {
       
       setCurrentEvent(savedEvent);
       
-      // Don't close immediately, let user see the landing page option
       setTimeout(() => {
         onClose();
       }, 1500);
@@ -374,12 +382,12 @@ const EventForm: React.FC<EventFormProps> = ({ event, onClose }) => {
             </CardContent>
           </Card>
 
-          {/* Landing Page */}
+          {/* Landing Page e Cupom Promocional */}
           <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-200 shadow-xl">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">
               <CardTitle className="flex items-center gap-2 text-blue-800">
                 <Globe className="h-5 w-5 text-blue-600" />
-                Landing Page do Evento
+                Landing Page e Promoções do Evento
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
@@ -389,7 +397,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onClose }) => {
                   <Input
                     id="landingPageUrl"
                     {...register('landingPageUrl')}
-                    placeholder="https://99tattoo.com/events/nome-do-evento"
+                    placeholder="https://99tattoo.com.br/events/nome-do-evento"
                     className="border-blue-200 focus:border-blue-500 focus:ring-blue-200 flex-1"
                     readOnly
                   />
@@ -405,7 +413,33 @@ const EventForm: React.FC<EventFormProps> = ({ event, onClose }) => {
                   )}
                 </div>
                 <p className="text-sm text-blue-600">
-                  Esta URL será gerada automaticamente após salvar o evento e será usada para divulgação pública.
+                  URL amigável gerada automaticamente com base no nome do evento.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="associatedCouponId" className="text-blue-700 font-bold">Cupom Promocional Associado (Opcional)</Label>
+                <Select onValueChange={(value) => setValue('associatedCouponId', value)}>
+                  <SelectTrigger className="border-blue-200 focus:border-blue-500">
+                    <SelectValue placeholder="Selecione um cupom promocional" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-blue-200">
+                    <SelectItem value="">Nenhum cupom</SelectItem>
+                    {mockCoupons.map((coupon) => (
+                      <SelectItem key={coupon.id} value={coupon.id}>
+                        <div className="flex items-center gap-2">
+                          <Tag className="h-4 w-4 text-orange-600" />
+                          <span className="font-medium">{coupon.name}</span>
+                          <Badge className="bg-orange-100 text-orange-800 text-xs">
+                            {coupon.code}
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-blue-600">
+                  Associe um cupom promocional criado em /admin/loyalty para integrar à loja do evento.
                 </p>
               </div>
             </CardContent>
