@@ -1,120 +1,169 @@
 
-import React, { useState, useRef } from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Upload, X, User } from 'lucide-react';
-import { Control } from 'react-hook-form';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Upload, X, Camera } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
-interface ImageUploadFieldProps {
-  control: Control<any>;
-  name: string;
-  label: string;
-  description?: string;
+interface Props {
+  value?: string;
+  onChange: (url: string) => void;
+  label?: string;
   placeholder?: string;
-  currentImage?: string;
 }
 
-const ImageUploadField = ({ 
-  control, 
-  name, 
-  label, 
-  description, 
-  placeholder = "Cole o URL da imagem ou escolha um arquivo",
-  currentImage 
-}: ImageUploadFieldProps) => {
-  const [previewUrl, setPreviewUrl] = useState<string>(currentImage || '');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+const ImageUploadField = ({ value, onChange, label = "Foto de Perfil", placeholder }: Props) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
+  const handleFileSelect = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione apenas arquivos de imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast({
+        title: "Erro", 
+        description: "A imagem deve ter no máximo 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    
+    // Simular upload - no futuro conectar com Firebase Storage
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setTimeout(() => {
+        onChange(result);
+        setIsUploading(false);
+        toast({
+          title: "Sucesso",
+          description: "Imagem carregada com sucesso!",
+        });
+      }, 1000); // Simular delay do upload
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Simular upload - em produção seria feito upload real
-      const fakeUrl = `https://example.com/uploads/${file.name}`;
-      setPreviewUrl(URL.createObjectURL(file));
-      onChange(fakeUrl);
+      handleFileSelect(file);
     }
   };
 
-  const clearImage = (onChange: (value: string) => void) => {
-    setPreviewUrl('');
-    onChange('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDragging(false);
+    
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      handleFileSelect(file);
     }
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const removeImage = () => {
+    onChange('');
   };
 
   return (
-    <FormField
-      control={control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-red-800 font-bold">{label}</FormLabel>
-          <FormControl>
-            <div className="space-y-4">
-              {/* Preview da imagem */}
-              <div className="flex items-center gap-4">
-                <Avatar className="h-20 w-20 border-2 border-red-200 shadow-lg">
-                  <AvatarImage src={previewUrl || field.value} />
-                  <AvatarFallback className="bg-gradient-to-r from-red-500 to-red-600 text-white">
-                    <User className="h-8 w-8" />
-                  </AvatarFallback>
-                </Avatar>
-                {(previewUrl || field.value) && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => clearImage(field.onChange)}
-                    className="border-red-300 text-red-600 hover:bg-red-50"
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Remover
-                  </Button>
-                )}
-              </div>
-
-              {/* URL Input */}
-              <Input
-                placeholder={placeholder}
-                value={field.value || ''}
-                onChange={(e) => {
-                  field.onChange(e.target.value);
-                  setPreviewUrl(e.target.value);
-                }}
-                className="border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-              />
-
-              {/* File Upload */}
-              <div className="flex gap-2">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileSelect(e, field.onChange)}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="bg-gradient-to-r from-red-50 to-red-100 border-red-300 text-red-700 hover:from-red-100 hover:to-red-200 hover:border-red-400"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Escolher Ficheiro
-                </Button>
-              </div>
+    <div className="space-y-4">
+      <Label className="text-sm font-medium text-gray-700">{label}</Label>
+      
+      {value ? (
+        <div className="flex items-center gap-4">
+          <Avatar className="h-24 w-24 border-2 border-red-200 shadow-lg">
+            <AvatarImage src={value} alt="Foto de perfil" />
+            <AvatarFallback className="bg-gradient-to-r from-red-500 to-red-600 text-white">
+              <Camera className="h-8 w-8" />
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={removeImage}
+              className="border-red-300 text-red-600 hover:bg-red-50"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Remover Foto
+            </Button>
+            <p className="text-xs text-gray-500">Clique para remover a imagem atual</p>
+          </div>
+        </div>
+      ) : (
+        <div
+          className={`
+            border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200
+            ${isDragging 
+              ? 'border-red-500 bg-red-50' 
+              : 'border-red-300 hover:border-red-400 hover:bg-red-50'
+            }
+            ${isUploading ? 'opacity-50 pointer-events-none' : ''}
+          `}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+        >
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-16 w-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
+              <Upload className="h-8 w-8 text-white" />
             </div>
-          </FormControl>
-          {description && (
-            <FormDescription className="text-red-600">{description}</FormDescription>
-          )}
-          <FormMessage />
-        </FormItem>
+            
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium text-gray-800">
+                {isUploading ? 'Enviando imagem...' : 'Escolher Foto de Perfil'}
+              </h3>
+              <p className="text-sm text-gray-600">
+                Arraste uma imagem aqui ou clique para selecionar
+              </p>
+              <p className="text-xs text-gray-500">
+                PNG, JPG ou JPEG (máx. 5MB)
+              </p>
+            </div>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileInput}
+              className="hidden"
+              id="image-upload"
+              disabled={isUploading}
+            />
+            
+            <Button
+              type="button"
+              variant="outline"
+              className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+              onClick={() => document.getElementById('image-upload')?.click()}
+              disabled={isUploading}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              {isUploading ? 'Enviando...' : 'Escolher Ficheiros'}
+            </Button>
+          </div>
+        </div>
       )}
-    />
+    </div>
   );
 };
 

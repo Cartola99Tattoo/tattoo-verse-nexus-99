@@ -17,6 +17,7 @@ import { User, Shield } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Artist } from "@/services/interfaces/IArtistsService";
 import ArtistPermissionsManager from './ArtistPermissionsManager';
+import ImageUploadField from './ImageUploadField';
 
 const formSchema = z.object({
   first_name: z.string().min(2, {
@@ -30,9 +31,7 @@ const formSchema = z.object({
   }),
   phone: z.string().optional(),
   bio: z.string().optional(),
-  avatar_url: z.string().url({
-    message: "URL da imagem inválida.",
-  }).optional(),
+  avatar_url: z.string().optional(),
   specialties: z.array(z.string()).optional(),
   style: z.string().optional(),
   commission_percentage: z.number().min(0).max(100).default(0),
@@ -191,9 +190,22 @@ const ArtistForm = ({ artist, onSave, onCancel }: Props) => {
             <Card className="shadow-lg bg-gradient-to-br from-white to-red-50 border-red-200">
               <CardHeader>
                 <CardTitle className="text-lg font-medium">Informações Básicas</CardTitle>
-                <CardDescription>Dados pessoais do tatuador</CardDescription>
+                <CardDescription>Dados pessoais e foto do tatuador</CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-4">
+              <CardContent className="grid gap-6">
+                {/* Upload de Foto */}
+                <Controller
+                  control={control}
+                  name="avatar_url"
+                  render={({ field }) => (
+                    <ImageUploadField
+                      value={field.value}
+                      onChange={field.onChange}
+                      label="Foto de Perfil"
+                    />
+                  )}
+                />
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="first_name">Nome</Label>
@@ -234,26 +246,6 @@ const ArtistForm = ({ artist, onSave, onCancel }: Props) => {
                   />
                   {errors.email && (
                     <p className="text-red-500 text-sm">{errors.email.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="avatar_url">URL do Avatar</Label>
-                  <Controller
-                    control={control}
-                    name="avatar_url"
-                    render={({ field }) => (
-                      <Input id="avatar_url" placeholder="URL do Avatar" {...field} />
-                    )}
-                  />
-                  {errors.avatar_url && (
-                    <p className="text-red-500 text-sm">{errors.avatar_url.message}</p>
-                  )}
-                  {avatarUrl && (
-                    <Avatar className="h-16 w-16 mt-2">
-                      <AvatarImage src={avatarUrl} alt="Avatar" />
-                      <AvatarFallback>{formData.first_name.charAt(0)}{formData.last_name.charAt(0)}</AvatarFallback>
-                    </Avatar>
                   )}
                 </div>
               </CardContent>
