@@ -11,6 +11,8 @@ import { getProjectService } from "@/services/serviceFactory";
 import EventKanbanColumn from './EventKanbanColumn';
 import EventTaskCard from './EventTaskCard';
 import EventTaskModal from './EventTaskModal';
+import EventSmartGoalModal from './EventSmartGoalModal';
+import EventSmartGoalCard from './EventSmartGoalCard';
 
 interface EventTask {
   id: string;
@@ -18,7 +20,7 @@ interface EventTask {
   description: string;
   responsible: string;
   deadline: string;
-  status: 'Planejamento Inicial / Ideação' | 'Pré-Produção / Logística' | 'Marketing / Promoção' | 'Execução / Durante o Evento' | 'Pós-Evento / Análise';
+  status: 'Metas' | 'Planejamento Inicial / Ideação' | 'Pré-Produção / Logística' | 'Marketing / Promoção' | 'Execução / Durante o Evento' | 'Pós-Evento / Análise';
   eventId: string;
   checklist: string[];
   priority: 'low' | 'medium' | 'high';
@@ -28,11 +30,29 @@ interface EventTask {
   projectId?: string;
 }
 
+interface EventSmartGoal {
+  id: string;
+  title: string;
+  specific: string;
+  measurable: string;
+  achievable: string;
+  relevant: string;
+  timeBound: string;
+  deadline?: string;
+  responsible?: string;
+  progress: number;
+  eventId?: string;
+  projectId?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface EventKanbanProps {
   events: IEvent[];
 }
 
 const KANBAN_COLUMNS = [
+  "Metas",
   "Planejamento Inicial / Ideação",
   "Pré-Produção / Logística", 
   "Marketing / Promoção",
@@ -44,12 +64,21 @@ type TaskColumns = {
   [key: string]: EventTask[];
 };
 
+type SmartGoalColumns = {
+  [key: string]: EventSmartGoal[];
+};
+
 const EventKanban = ({ events }: EventKanbanProps) => {
   const [columns, setColumns] = useState<TaskColumns>({});
+  const [smartGoalColumns, setSmartGoalColumns] = useState<SmartGoalColumns>({ "Metas": [] });
   const [activeTask, setActiveTask] = useState<EventTask | null>(null);
+  const [activeSmartGoal, setActiveSmartGoal] = useState<EventSmartGoal | null>(null);
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showSmartGoalModal, setShowSmartGoalModal] = useState(false);
   const [editingTask, setEditingTask] = useState<EventTask | null>(null);
+  const [editingSmartGoal, setEditingSmartGoal] = useState<EventSmartGoal | null>(null);
   const [tasks, setTasks] = useState<EventTask[]>([]);
+  const [smartGoals, setSmartGoals] = useState<EventSmartGoal[]>([]);
 
   const projectService = getProjectService();
 
@@ -58,35 +87,41 @@ const EventKanban = ({ events }: EventKanbanProps) => {
     []
   );
 
-  const { data: smartGoals } = useDataQuery<IProjectSmartGoal[]>(
+  const { data: projectSmartGoals } = useDataQuery<IProjectSmartGoal[]>(
     () => projectService.fetchProjectSmartGoals('all'),
     []
   );
 
   const safeProjects = projects || [];
-  const safeSmartGoals = smartGoals || [];
+  const safeProjectSmartGoals = projectSmartGoals || [];
 
   useEffect(() => {
     // Initialize empty columns
     const initialColumns: TaskColumns = KANBAN_COLUMNS.reduce((acc, col) => ({ ...acc, [col]: [] }), {});
 
-    // Distribute tasks across columns
+    // Distribute tasks across columns (excluding Metas column)
     tasks.forEach(task => {
       const columnName = task.status || 'Planejamento Inicial / Ideação';
-      if (initialColumns[columnName]) {
+      if (initialColumns[columnName] && columnName !== 'Metas') {
         initialColumns[columnName].push(task);
-      } else {
+      } else if (columnName !== 'Metas') {
         initialColumns['Planejamento Inicial / Ideação'].push(task);
       }
     });
 
     // Sort tasks within columns by update time
     for (const col in initialColumns) {
-      initialColumns[col].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+      if (col !== 'Metas') {
+        initialColumns[col].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+      }
     }
 
     setColumns(initialColumns);
-  }, [tasks]);
+
+    // Handle smart goals in Metas column
+    const metasColumn: SmartGoalColumns = { "Metas": smartGoals };
+    setSmartGoalColumns(metasColumn);
+  }, [tasks, smartGoals]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -104,26 +139,53 @@ const EventKanban = ({ events }: EventKanbanProps) => {
     const columnName = Object.keys(columns).find(key => columns[key].some(t => t.id === taskId));
     return columnName || null;
   };
+
+  const findSmartGoalColumn = (goalId: string) => {
+    if (!goalId) return null;
+    return Object.keys(smartGoalColumns).find(key => smartGoalColumns[key].some(g => g.id === goalId)) || null;
+  };
   
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const task = tasks.find(t => t.id === active.id);
-    setActiveTask(task || null);
+    const smartGoal = smartGoals.find(g => g.id === active.id);
+    
+    if (task) {
+      setActiveTask(task);
+    } else if (smartGoal) {
+      setActiveSmartGoal(smartGoal);
+    }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveTask(null);
+    setActiveSmartGoal(null);
 
     if (!over) return;
 
     const activeId = active.id.toString();
     const overId = over.id.toString();
 
-    const activeColumn = findColumn(activeId);
-    const overColumn = findColumn(overId) || (KANBAN_COLUMNS.includes(overId) ? overId : null);
+    // Handle smart goal dragging
+    const activeSmartGoalColumn = findSmartGoalColumn(activeId);
+    if (activeSmartGoalColumn) {
+      // Smart goals can only be reordered within Metas column
+      if (overId === 'Metas' || smartGoals.find(g => g.id === overId)) {
+        const oldIndex = smartGoals.findIndex(g => g.id === activeId);
+        const newIndex = smartGoals.findIndex(g => g.id === overId);
+        if (oldIndex !== -1 && newIndex !== -1) {
+          setSmartGoals(prev => arrayMove(prev, oldIndex, newIndex));
+        }
+      }
+      return;
+    }
 
-    if (!activeColumn || !overColumn) {
+    // Handle task dragging (existing logic)
+    const activeColumn = findColumn(activeId);
+    const overColumn = findColumn(overId) || (KANBAN_COLUMNS.includes(overId) && overId !== 'Metas' ? overId : null);
+
+    if (!activeColumn || !overColumn || overColumn === 'Metas') {
       return;
     }
 
@@ -151,13 +213,23 @@ const EventKanban = ({ events }: EventKanbanProps) => {
   };
 
   const handleQuickAdd = (columnName: string) => {
-    setEditingTask(null);
-    setShowTaskModal(true);
+    if (columnName === 'Metas') {
+      setEditingSmartGoal(null);
+      setShowSmartGoalModal(true);
+    } else {
+      setEditingTask(null);
+      setShowTaskModal(true);
+    }
   };
 
   const handleEditTask = (task: EventTask) => {
     setEditingTask(task);
     setShowTaskModal(true);
+  };
+
+  const handleEditSmartGoal = (goal: EventSmartGoal) => {
+    setEditingSmartGoal(goal);
+    setShowSmartGoalModal(true);
   };
 
   const handleTaskSave = (taskData: Partial<EventTask>) => {
@@ -189,6 +261,36 @@ const EventKanban = ({ events }: EventKanbanProps) => {
     setEditingTask(null);
   };
 
+  const handleSmartGoalSave = (goalData: Partial<EventSmartGoal>) => {
+    if (editingSmartGoal) {
+      setSmartGoals(prev => prev.map(goal => 
+        goal.id === editingSmartGoal.id 
+          ? { ...goal, ...goalData, updated_at: new Date().toISOString() }
+          : goal
+      ));
+    } else {
+      const newSmartGoal: EventSmartGoal = {
+        id: Date.now().toString(),
+        title: goalData.title || '',
+        specific: goalData.specific || '',
+        measurable: goalData.measurable || '',
+        achievable: goalData.achievable || '',
+        relevant: goalData.relevant || '',
+        timeBound: goalData.timeBound || '',
+        deadline: goalData.deadline || '',
+        responsible: goalData.responsible || '',
+        progress: goalData.progress || 0,
+        eventId: goalData.eventId || '',
+        projectId: goalData.projectId || '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setSmartGoals(prev => [...prev, newSmartGoal]);
+    }
+    setShowSmartGoalModal(false);
+    setEditingSmartGoal(null);
+  };
+
   return (
     <div className="bg-gradient-to-br from-white to-red-50 min-h-screen p-1 relative overflow-hidden">
       {/* Background pattern for 99Tattoo identity */}
@@ -216,6 +318,13 @@ const EventKanban = ({ events }: EventKanbanProps) => {
         {/* Botões de Ação Principais */}
         <div className="flex flex-wrap gap-4 mt-6">
           <Button
+            onClick={() => handleQuickAdd('Metas')}
+            className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white font-bold shadow-2xl shadow-purple-500/30 border border-purple-400/30 backdrop-blur-sm hover:scale-105 transition-all duration-300"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Adicionar Nova Meta SMART
+          </Button>
+          <Button
             onClick={() => handleQuickAdd('Planejamento Inicial / Ideação')}
             className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold shadow-2xl shadow-red-500/30 border border-red-400/30 backdrop-blur-sm hover:scale-105 transition-all duration-300"
           >
@@ -240,9 +349,12 @@ const EventKanban = ({ events }: EventKanbanProps) => {
                   key={columnName}
                   id={columnName}
                   title={columnName}
-                  tasks={columns[columnName] || []}
+                  tasks={columnName === 'Metas' ? [] : (columns[columnName] || [])}
+                  smartGoals={columnName === 'Metas' ? (smartGoalColumns[columnName] || []) : []}
                   onQuickAdd={() => handleQuickAdd(columnName)}
                   onEditTask={handleEditTask}
+                  onEditSmartGoal={handleEditSmartGoal}
+                  isMetas={columnName === 'Metas'}
                 />
               ))}
             </div>
@@ -252,6 +364,13 @@ const EventKanban = ({ events }: EventKanbanProps) => {
                   <EventTaskCard 
                     task={activeTask} 
                     onEdit={handleEditTask}
+                  />
+                </div>
+              ) : activeSmartGoal ? (
+                <div className="rotate-3 scale-110 opacity-95 transform transition-all duration-300 shadow-2xl shadow-purple-500/50">
+                  <EventSmartGoalCard 
+                    smartGoal={activeSmartGoal} 
+                    onEdit={handleEditSmartGoal}
                   />
                 </div>
               ) : null}
@@ -271,7 +390,20 @@ const EventKanban = ({ events }: EventKanbanProps) => {
         editingTask={editingTask}
         events={events}
         projects={safeProjects}
-        smartGoals={safeSmartGoals}
+        smartGoals={safeProjectSmartGoals}
+      />
+
+      {/* Smart Goal Modal */}
+      <EventSmartGoalModal
+        isOpen={showSmartGoalModal}
+        onClose={() => {
+          setShowSmartGoalModal(false);
+          setEditingSmartGoal(null);
+        }}
+        onSave={handleSmartGoalSave}
+        editingSmartGoal={editingSmartGoal}
+        events={events}
+        projects={safeProjects}
       />
     </div>
   );
