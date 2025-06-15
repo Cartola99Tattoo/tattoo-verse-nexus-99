@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -15,7 +14,7 @@ interface EventTask {
   description: string;
   responsible: string;
   deadline: string;
-  status: EventTask['status'];
+  status: 'Planejamento Inicial / Ideação' | 'Pré-Produção / Logística' | 'Marketing / Promoção' | 'Execução / Durante o Evento' | 'Pós-Evento / Análise';
   eventId: string;
   checklist: string[];
   priority: 'low' | 'medium' | 'high';
