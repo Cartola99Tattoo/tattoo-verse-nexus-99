@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Calendar, MapPin, Search, Filter, Edit, Trash2, Users, Target, ShoppingCart, TrendingUp, BarChart3, CheckCircle2, Maximize2, Minimize2, Activity } from "lucide-react";
+import { Plus, Calendar, MapPin, Search, Filter, Edit, Trash2, Users, Target, ShoppingCart, TrendingUp, BarChart3, CheckCircle2, Maximize2, Minimize2, Activity, Globe, ExternalLink } from "lucide-react";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getEventService, getProjectService } from "@/services/serviceFactory";
 import { IEvent } from "@/services/interfaces/IEventService";
@@ -15,11 +15,13 @@ import { IProject, IProjectSmartGoal } from "@/services/interfaces/IProjectServi
 import EventForm from "@/components/admin/EventForm";
 import EventKanban from "@/components/admin/EventKanban";
 import EventDashboard from "@/components/admin/EventDashboard";
+import EventLandingPageModal from "@/components/admin/EventLandingPageModal";
 import { toast } from "@/hooks/use-toast";
 
 const Events = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<IEvent | null>(null);
+  const [selectedEventForLanding, setSelectedEventForLanding] = useState<IEvent | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -57,6 +59,10 @@ const Events = () => {
   const handleEditEvent = (event: IEvent) => {
     setEditingEvent(event);
     setShowCreateForm(true);
+  };
+
+  const handleViewLandingPage = (event: IEvent) => {
+    setSelectedEventForLanding(event);
   };
 
   const handleDeleteEvent = async (eventId: string) => {
@@ -466,6 +472,15 @@ const Events = () => {
                           <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => handleViewLandingPage(event)}
+                            className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                            title="Ver Landing Page"
+                          >
+                            <Globe className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleEditEvent(event)}
                             className="border-red-200 text-red-700 hover:bg-red-50"
                           >
@@ -511,6 +526,15 @@ const Events = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Landing Page Modal */}
+      {selectedEventForLanding && (
+        <EventLandingPageModal
+          event={selectedEventForLanding}
+          isOpen={!!selectedEventForLanding}
+          onClose={() => setSelectedEventForLanding(null)}
+        />
+      )}
     </div>
   );
 };
