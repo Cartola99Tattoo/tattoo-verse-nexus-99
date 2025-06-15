@@ -1,22 +1,13 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Package2, AlertTriangle, TrendingDown, TrendingUp, Minus, Edit, Trash, Package } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Plus, Search, Package2, AlertTriangle, TrendingDown, TrendingUp, Minus, Edit, Trash, Package, ShoppingCart, Image as ImageIcon, ArrowDown, ArrowUp } from "lucide-react";
 import StockItemForm from "@/components/admin/StockItemForm";
 import StockMovementForm from "@/components/admin/StockMovementForm";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 
 interface StockItem {
@@ -90,6 +81,7 @@ const Stock = () => {
   const [showItemForm, setShowItemForm] = useState(false);
   const [showMovementForm, setShowMovementForm] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showShoppingListDialog, setShowShoppingListDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
 
   const getStatusBadge = (status: string) => {
@@ -116,6 +108,24 @@ const Stock = () => {
   const lowStockItems = stockItems.filter(item => item.status === 'low');
 
   const totalValue = stockItems.reduce((sum, item) => sum + (item.currentQuantity * item.averageCost), 0);
+
+  const generateShoppingList = () => {
+    const lowStockItems = stockItems.filter(item => item.currentQuantity <= item.minimumStock);
+    const criticalItems = stockItems.filter(item => item.status === 'critical');
+    
+    return {
+      critical: criticalItems,
+      lowStock: lowStockItems.filter(item => !criticalItems.includes(item)),
+      suggested: stockItems.filter(item => 
+        item.currentQuantity <= item.minimumStock * 2 && 
+        !lowStockItems.includes(item)
+      ).slice(0, 3)
+    };
+  };
+
+  const handleShoppingListGeneration = () => {
+    setShowShoppingListDialog(true);
+  };
 
   const handleSaveItem = (itemData: any) => {
     if (selectedItem) {
@@ -208,17 +218,27 @@ const Stock = () => {
           </h1>
           <p className="text-gray-600 mt-2">Gerencie todos os materiais e suprimentos do estúdio</p>
         </div>
-        <Button 
-          onClick={() => {
-            setSelectedItem(null);
-            setShowItemForm(true);
-          }}
-          variant="tattoo"
-          className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-        >
-          <Plus className="h-4 w-4" />
-          Adicionar Item
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleShoppingListGeneration}
+            variant="tattooSecondary"
+            className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            Fazer Lista de Compras
+          </Button>
+          <Button 
+            onClick={() => {
+              setSelectedItem(null);
+              setShowItemForm(true);
+            }}
+            variant="tattoo"
+            className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            <Plus className="h-4 w-4" />
+            Adicionar Item
+          </Button>
+        </div>
       </div>
 
       {/* Header Stats */}
@@ -301,103 +321,257 @@ const Stock = () => {
         </CardContent>
       </Card>
 
-      {/* Stock Items Table */}
-      <Card variant="tattooRed" className="shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-red-50 to-red-100 rounded-t-lg">
-          <CardTitle className="text-red-800 font-black">Itens em Estoque</CardTitle>
-          <CardDescription className="text-red-600">
-            Gerencie todos os suprimentos do seu estúdio de tatuagem
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          {filteredItems.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="mx-auto h-12 w-12 text-red-400" />
-              <h2 className="mt-4 text-lg font-black text-red-800">Nenhum item encontrado</h2>
-              <p className="mt-2 text-red-600">
-                {searchTerm ? "Tente ajustar sua busca." : "Comece adicionando seu primeiro item ao estoque."}
-              </p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gradient-to-r from-red-100 to-red-200">
-                  <TableHead className="font-black text-red-800">Item</TableHead>
-                  <TableHead className="font-black text-red-800">SKU</TableHead>
-                  <TableHead className="font-black text-red-800">Categoria</TableHead>
-                  <TableHead className="font-black text-red-800">Quantidade</TableHead>
-                  <TableHead className="font-black text-red-800">Custo Médio</TableHead>
-                  <TableHead className="font-black text-red-800">Status</TableHead>
-                  <TableHead className="font-black text-red-800">Localização</TableHead>
-                  <TableHead className="font-black text-red-800 text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredItems.map((item) => (
-                  <TableRow key={item.id} className="hover:bg-red-50 transition-colors duration-200">
-                    <TableCell>
-                      <div>
-                        <div className="font-black text-red-800">{item.name}</div>
-                        <div className="text-sm text-red-600">{item.brand}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium text-red-700">{item.sku}</TableCell>
-                    <TableCell className="text-red-700">{item.category}</TableCell>
-                    <TableCell>
-                      <div className="font-black text-red-800">
+      {/* Stock Items Cards */}
+      {filteredItems.length === 0 ? (
+        <div className="text-center py-12">
+          <Package className="mx-auto h-12 w-12 text-red-400" />
+          <h2 className="mt-4 text-lg font-black text-red-800">Nenhum item encontrado</h2>
+          <p className="mt-2 text-red-600">
+            {searchTerm ? "Tente ajustar sua busca." : "Comece adicionando seu primeiro item ao estoque."}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredItems.map((item) => (
+            <Card 
+              key={item.id} 
+              variant="tattooRed" 
+              className="group cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            >
+              <CardHeader className="p-0">
+                {/* Image Container */}
+                <div className="relative h-32 overflow-hidden rounded-t-lg bg-gradient-to-br from-red-100 to-red-200">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon className="h-12 w-12 text-red-400" />
+                    </div>
+                  )}
+                  
+                  {/* Status Badge */}
+                  <div className="absolute top-2 right-2">
+                    {getStatusBadge(item.status)}
+                  </div>
+
+                  {/* Recent Movement Indicator */}
+                  <div className="absolute top-2 left-2">
+                    <Badge className="bg-blue-100 text-blue-800 border-blue-300 flex items-center gap-1">
+                      <ArrowDown size={12} />
+                      Saída
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {/* Item Name and Brand */}
+                  <div>
+                    <h3 className="font-black text-red-800 text-lg leading-tight line-clamp-1">
+                      {item.name}
+                    </h3>
+                    <p className="text-sm text-red-600">{item.brand}</p>
+                  </div>
+
+                  {/* SKU and Category */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-red-500">
+                      <strong>SKU:</strong> {item.sku}
+                    </p>
+                    <p className="text-xs text-red-500">
+                      <strong>Categoria:</strong> {item.category}
+                    </p>
+                  </div>
+
+                  {/* Quantity Info */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-bold text-red-700">Quantidade:</span>
+                      <span className="text-lg font-black text-red-800">
                         {item.currentQuantity} {item.unit}
+                      </span>
+                    </div>
+                    <div className="text-xs text-red-500">
+                      Mín: {item.minimumStock} {item.unit}
+                    </div>
+                  </div>
+
+                  {/* Cost and Location */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-red-500">
+                      <strong>Custo:</strong> R$ {item.averageCost.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-red-500">
+                      <strong>Local:</strong> {item.location}
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-between gap-1 pt-2 border-t border-red-200">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => quickDeduct(item)}
+                      className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700"
+                      title="Descontar Item"
+                    >
+                      <Minus size={14} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setShowItemForm(true);
+                      }}
+                      className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700"
+                      title="Editar Item"
+                    >
+                      <Edit size={14} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setShowDeleteDialog(true);
+                      }}
+                      className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700"
+                      title="Excluir Item"
+                    >
+                      <Trash size={14} />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Shopping List Dialog */}
+      <Dialog open={showShoppingListDialog} onOpenChange={setShowShoppingListDialog}>
+        <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-white to-red-50 border-red-200">
+          <DialogHeader>
+            <DialogTitle className="text-red-800 font-black flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              Lista de Compras Sugerida
+            </DialogTitle>
+            <DialogDescription className="text-red-600">
+              Itens que precisam ser reabastecidos baseado no estoque atual
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="max-h-96 overflow-y-auto space-y-4">
+            {(() => {
+              const shoppingList = generateShoppingList();
+              return (
+                <>
+                  {shoppingList.critical.length > 0 && (
+                    <div>
+                      <h3 className="font-bold text-red-800 mb-2 flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4" />
+                        Crítico (Acabando)
+                      </h3>
+                      <div className="space-y-2">
+                        {shoppingList.critical.map((item) => (
+                          <div key={item.id} className="flex justify-between items-center p-2 bg-red-100 rounded border-red-300">
+                            <div>
+                              <span className="font-medium text-red-800">{item.name}</span>
+                              <p className="text-xs text-red-600">{item.brand} - {item.currentQuantity} {item.unit} restante(s)</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-bold text-red-700">
+                                Sugerido: {item.minimumStock * 3} {item.unit}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div className="text-xs text-red-500">
-                        Mín: {item.minimumStock} {item.unit}
+                    </div>
+                  )}
+
+                  {shoppingList.lowStock.length > 0 && (
+                    <div>
+                      <h3 className="font-bold text-yellow-700 mb-2 flex items-center gap-2">
+                        <TrendingDown className="h-4 w-4" />
+                        Estoque Baixo
+                      </h3>
+                      <div className="space-y-2">
+                        {shoppingList.lowStock.map((item) => (
+                          <div key={item.id} className="flex justify-between items-center p-2 bg-yellow-100 rounded border-yellow-300">
+                            <div>
+                              <span className="font-medium text-yellow-800">{item.name}</span>
+                              <p className="text-xs text-yellow-600">{item.brand} - {item.currentQuantity} {item.unit}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-bold text-yellow-700">
+                                Sugerido: {item.minimumStock * 2} {item.unit}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </TableCell>
-                    <TableCell className="font-medium text-red-700">R$ {item.averageCost.toFixed(2)}</TableCell>
-                    <TableCell>{getStatusBadge(item.status)}</TableCell>
-                    <TableCell className="text-sm text-red-600">{item.location}</TableCell>
-                    <TableCell>
-                      <div className="flex justify-end space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => quickDeduct(item)}
-                          className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700"
-                          title="Descontar Item"
-                        >
-                          <Minus size={14} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedItem(item);
-                            setShowItemForm(true);
-                          }}
-                          className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700"
-                          title="Editar Item"
-                        >
-                          <Edit size={14} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedItem(item);
-                            setShowDeleteDialog(true);
-                          }}
-                          className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700"
-                          title="Excluir Item"
-                        >
-                          <Trash size={14} />
-                        </Button>
+                    </div>
+                  )}
+
+                  {shoppingList.suggested.length > 0 && (
+                    <div>
+                      <h3 className="font-bold text-blue-700 mb-2 flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        Sugestões Adicionais
+                      </h3>
+                      <div className="space-y-2">
+                        {shoppingList.suggested.map((item) => (
+                          <div key={item.id} className="flex justify-between items-center p-2 bg-blue-100 rounded border-blue-300">
+                            <div>
+                              <span className="font-medium text-blue-800">{item.name}</span>
+                              <p className="text-xs text-blue-600">{item.brand} - {item.currentQuantity} {item.unit}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-bold text-blue-700">
+                                Sugerido: {item.minimumStock} {item.unit}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+
+          <div className="flex justify-end gap-4 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowShoppingListDialog(false)}
+              className="border-red-200 text-red-600 hover:bg-red-50"
+            >
+              Fechar
+            </Button>
+            <Button 
+              variant="tattoo"
+              onClick={() => {
+                toast({
+                  title: "Lista exportada",
+                  description: "Lista de compras foi gerada com sucesso!",
+                });
+                setShowShoppingListDialog(false);
+              }}
+              className="shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Exportar Lista
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Modals */}
       {showItemForm && (

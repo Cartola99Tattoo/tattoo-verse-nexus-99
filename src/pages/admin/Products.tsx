@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Package, Search, Plus, Edit, Trash, Loader, Palette, ShoppingBag, Heart, Image as ImageIcon } from "lucide-react";
+import { Package, Search, Plus, Edit, Trash, Loader, Palette, ShoppingBag, Heart, Image as ImageIcon, TrendingUp, TrendingDown, Star, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
@@ -130,6 +129,18 @@ export default function Products() {
     } else {
       return <Badge className="bg-blue-100 text-blue-800 border-blue-300">Produto</Badge>;
     }
+  };
+
+  // Mock dashboard data - in a real app, this would come from the service
+  const dashboardStats = {
+    totalTattoos: products.filter(p => p.style_tags || p.body_locations || p.average_time).length,
+    totalProducts: products.filter(p => !p.style_tags && !p.body_locations && !p.average_time && !p.category_id?.includes('digital')).length,
+    totalServices: products.filter(p => p.category_id?.includes('digital') || p.category_id?.includes('apoio')).length,
+    availableTattoos: products.filter(p => (p.style_tags || p.body_locations) && p.status === 'available').length,
+    soldTattoos: products.filter(p => (p.style_tags || p.body_locations) && p.status === 'unavailable').length,
+    popularTattoo: products.find(p => p.style_tags && p.name.includes('Tradicional')) || products[0],
+    topProduct: products.find(p => !p.style_tags && p.name.includes('Produto')) || products[0],
+    activeServices: products.filter(p => p.category_id?.includes('digital') && p.status === 'available').length
   };
 
   // Handler for adding a new tattoo
@@ -299,6 +310,126 @@ export default function Products() {
             <span>Adicionar Serviço</span>
           </Button>
         </div>
+      </div>
+
+      {/* Dashboard Section */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-black text-red-800 mb-4">Dashboard de Produtos</h2>
+        
+        {/* Overview Cards */}
+        <div className="grid gap-4 md:grid-cols-3 mb-6">
+          <Card variant="tattooRed" className="hover:shadow-xl transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-red-800">Total de Tatuagens</CardTitle>
+              <Palette className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-black text-red-800">{dashboardStats.totalTattoos}</div>
+              <p className="text-xs text-red-500">
+                {dashboardStats.availableTattoos} disponíveis, {dashboardStats.soldTattoos} vendidas
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="tattooRed" className="hover:shadow-xl transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-red-800">Total de Produtos</CardTitle>
+              <ShoppingBag className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-black text-red-800">{dashboardStats.totalProducts}</div>
+              <p className="text-xs text-red-500">
+                Merchandising e cuidados
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="tattooRed" className="hover:shadow-xl transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-red-800">Total de Serviços</CardTitle>
+              <Heart className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-black text-red-800">{dashboardStats.totalServices}</div>
+              <p className="text-xs text-red-500">
+                {dashboardStats.activeServices} ativos
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Insights Cards */}
+        <div className="grid gap-4 md:grid-cols-2 mb-6">
+          <Card variant="tattooRed" className="hover:shadow-xl transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="text-red-800 font-black flex items-center gap-2">
+                <Star className="h-5 w-5" />
+                Tatuagem Popular
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {dashboardStats.popularTattoo && (
+                <div className="space-y-2">
+                  <p className="font-bold text-red-800">{dashboardStats.popularTattoo.name}</p>
+                  <p className="text-sm text-red-600">{formatCurrency(dashboardStats.popularTattoo.price)}</p>
+                  <Badge className="bg-green-100 text-green-800 border-green-300">
+                    {dashboardStats.popularTattoo.status === 'available' ? 'Disponível' : 'Vendida'}
+                  </Badge>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card variant="tattooRed" className="hover:shadow-xl transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="text-red-800 font-black flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Produto Destaque
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {dashboardStats.topProduct && (
+                <div className="space-y-2">
+                  <p className="font-bold text-red-800">{dashboardStats.topProduct.name}</p>
+                  <p className="text-sm text-red-600">{formatCurrency(dashboardStats.topProduct.price)}</p>
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                    Mais vendido
+                  </Badge>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Stats */}
+        <Card variant="tattooRed" className="hover:shadow-xl transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="text-red-800 font-black flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Insights Rápidos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="text-center">
+                <div className="text-xl font-black text-red-800">{products.length}</div>
+                <p className="text-sm text-red-600">Total de Itens</p>
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-black text-green-600">
+                  {products.filter(p => p.status === 'available').length}
+                </div>
+                <p className="text-sm text-red-600">Itens Disponíveis</p>
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-black text-yellow-600">
+                  {products.filter(p => p.status === 'limited').length}
+                </div>
+                <p className="text-sm text-red-600">Itens Limitados</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filter Card with enhanced styling */}
