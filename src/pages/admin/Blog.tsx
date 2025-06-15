@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Edit, Trash2, Eye, Filter, Users, Target, Lightbulb, Calendar, BarChart3 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Eye, Filter, Users, Target, Lightbulb, Calendar, BarChart3, FileText, TrendingUp, Clock, CheckCircle2 } from "lucide-react";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getBlogService } from "@/services/serviceFactory";
 import { BlogQueryParams } from "@/services/interfaces/IBlogService";
@@ -13,7 +13,6 @@ import BlogPostForm from "@/components/admin/BlogPostForm";
 import BlogCategoryManager from "@/components/admin/BlogCategoryManager";
 import PersonaManager from "@/components/admin/PersonaManager";
 import JourneyManager from "@/components/admin/JourneyManager";
-import ContentIdeaManager from "@/components/admin/ContentIdeaManager";
 import ContentProductionKanban from "@/components/admin/ContentProductionKanban";
 import { ContentIdea, CreateContentIdeaData } from "@/types/contentIdea";
 
@@ -22,7 +21,7 @@ const Blog = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPost, setEditingPost] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState("production");
   const [ideas, setIdeas] = useState<ContentIdea[]>([]);
 
   const blogService = getBlogService();
@@ -124,11 +123,39 @@ const Blog = () => {
     }
   };
 
+  // Calcular métricas do dashboard de progresso
+  const getDashboardMetrics = () => {
+    const statusCounts = ideas.reduce((acc, idea) => {
+      acc[idea.status] = (acc[idea.status] || 0) + 1;
+      return acc;
+    }, {} as { [key: string]: number });
+
+    const publishedThisMonth = ideas.filter(idea => 
+      idea.status === 'Publicado' && 
+      new Date(idea.updated_at).getMonth() === new Date().getMonth()
+    ).length;
+
+    const wellDevelopedDrafts = ideas.filter(idea => {
+      const draftCount = [idea.draftTitle, idea.draftSummary, idea.draftContent].filter(Boolean).length;
+      return draftCount >= 2;
+    }).length;
+
+    return {
+      statusCounts,
+      publishedThisMonth,
+      wellDevelopedDrafts,
+      totalIdeas: ideas.length
+    };
+  };
+
+  const metrics = getDashboardMetrics();
+
   if (showCreateForm || editingPost) {
     return (
       <BlogPostForm
         post={editingPost}
         categories={categories || []}
+        personas={personas || []}
         onSave={() => {
           setShowCreateForm(false);
           setEditingPost(null);
@@ -144,39 +171,128 @@ const Blog = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header with Action Buttons */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tattoo-title-gradient">Blog & Produção de Conteúdo</h1>
-        <Button onClick={() => setShowCreateForm(true)} variant="tattoo" className="tattoo-button-primary">
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Artigo
-        </Button>
+        <h1 className="text-4xl font-black tattoo-title-gradient bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+          Centro de Produção de Conteúdo 99Tattoo
+        </h1>
+        <div className="flex gap-4">
+          <Button 
+            onClick={() => setShowCreateForm(true)} 
+            className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 font-bold"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Novo Artigo
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6 bg-gradient-to-r from-red-50 to-red-100 border-red-200">
-          <TabsTrigger value="posts" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white">
+        <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-lg">
+          <TabsTrigger 
+            value="production" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold"
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Produção Central
+          </TabsTrigger>
+          <TabsTrigger 
+            value="posts" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold"
+          >
+            <FileText className="h-4 w-4 mr-1" />
             Artigos
           </TabsTrigger>
-          <TabsTrigger value="categories" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white">
+          <TabsTrigger 
+            value="categories" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold"
+          >
             Categorias
           </TabsTrigger>
-          <TabsTrigger value="personas" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white">
+          <TabsTrigger 
+            value="personas" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold"
+          >
             <Users className="h-4 w-4 mr-1" />
             Personas
           </TabsTrigger>
-          <TabsTrigger value="journey" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white">
+          <TabsTrigger 
+            value="journey" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white font-bold"
+          >
             <Target className="h-4 w-4 mr-1" />
             Jornada
           </TabsTrigger>
-          <TabsTrigger value="ideas" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white">
-            <Lightbulb className="h-4 w-4 mr-1" />
-            Ideias
-          </TabsTrigger>
-          <TabsTrigger value="production" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-800 data-[state=active]:text-white">
-            <BarChart3 className="h-4 w-4 mr-1" />
-            Produção
-          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="production" className="space-y-6">
+          {/* Dashboard de Progresso Visual */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-red-700 flex items-center gap-2 text-lg font-bold">
+                  <Lightbulb className="h-5 w-5" />
+                  Total de Ideias
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-black text-red-600">{metrics.totalIdeas}</div>
+                <p className="text-sm text-gray-600 mt-1">Cards no Kanban</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-white to-green-50 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-green-700 flex items-center gap-2 text-lg font-bold">
+                  <CheckCircle2 className="h-5 w-5" />
+                  Rascunhos Desenvolvidos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-black text-green-600">{metrics.wellDevelopedDrafts}</div>
+                <p className="text-sm text-gray-600 mt-1">Prontos para transformar</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-blue-700 flex items-center gap-2 text-lg font-bold">
+                  <TrendingUp className="h-5 w-5" />
+                  Publicados Este Mês
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-black text-blue-600">{metrics.publishedThisMonth}</div>
+                <p className="text-sm text-gray-600 mt-1">Meta: 8 artigos/mês</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-white to-purple-50 border-purple-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-purple-700 flex items-center gap-2 text-lg font-bold">
+                  <Clock className="h-5 w-5" />
+                  Em Produção
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-black text-purple-600">
+                  {(metrics.statusCounts['Em Produção'] || 0) + (metrics.statusCounts['Em Revisão'] || 0)}
+                </div>
+                <p className="text-sm text-gray-600 mt-1">Cards ativos</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Kanban Unificado de Produção */}
+          <ContentProductionKanban 
+            ideas={ideas} 
+            personas={personas || []}
+            categories={categories || []}
+            onIdeaStatusUpdate={handleIdeaStatusUpdate}
+            onIdeaCreate={handleCreateIdea}
+            onIdeaUpdate={handleUpdateIdea}
+          />
+        </TabsContent>
 
         <TabsContent value="posts" className="space-y-6">
           {/* Filtros */}
@@ -316,26 +432,6 @@ const Blog = () => {
 
         <TabsContent value="journey">
           <JourneyManager personas={personas || []} />
-        </TabsContent>
-
-        <TabsContent value="ideas">
-          <ContentIdeaManager 
-            personas={personas || []}
-            ideas={ideas}
-            onIdeaCreate={handleCreateIdea}
-            onIdeaUpdate={handleUpdateIdea}
-          />
-        </TabsContent>
-
-        <TabsContent value="production">
-          <ContentProductionKanban 
-            ideas={ideas} 
-            personas={personas || []}
-            categories={categories || []}
-            onIdeaStatusUpdate={handleIdeaStatusUpdate}
-            onIdeaCreate={handleCreateIdea}
-            onIdeaUpdate={handleUpdateIdea}
-          />
         </TabsContent>
       </Tabs>
     </div>
