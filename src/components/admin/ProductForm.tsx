@@ -1,615 +1,319 @@
 
-import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Clock, Tag, Trash, Upload, Image } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-// Predefined options for checkboxes and selects
-const sizeOptions = [
-  { id: "pequeno", label: "Pequeno" },
-  { id: "medio", label: "Médio" },
-  { id: "grande", label: "Grande" },
-  { id: "personalizado", label: "Personalizado" },
-];
-
-const bodyLocationOptions = [
-  { id: "braco", label: "Braço" },
-  { id: "perna", label: "Perna" },
-  { id: "costas", label: "Costas" },
-  { id: "peito", label: "Peito" },
-  { id: "pescoco", label: "Pescoço" },
-  { id: "mao", label: "Mão" },
-  { id: "pe", label: "Pé" },
-  { id: "rosto", label: "Rosto" },
-  { id: "outro", label: "Outro" },
-];
-
-const styleTags = [
-  "PopUp", "Old School", "New School", "Tribal", "Aquarela", 
-  "Blackwork", "Tradicional", "Realista", "Minimalista", "Geométrico"
-];
-
-// Product status options
-const statusOptions = [
-  { value: "available", label: "Disponível" },
-  { value: "unavailable", label: "Indisponível" },
-  { value: "limited", label: "Limitado" },
-];
-
-// Schema for product form validation
-const productSchema = z.object({
-  name: z.string().min(3, { message: "Nome deve ter pelo menos 3 caracteres" }),
-  description: z.string().optional(),
-  price: z.coerce.number().positive({ message: "Preço deve ser um valor positivo" }),
-  category_id: z.string().optional(),
-  artist_id: z.string().optional(),
-  status: z.string({ required_error: "Selecione um status" }),
-  images: z.array(z.string()).optional(),
-  average_time: z.string().optional(),
-  sizes: z.array(z.string()).optional().default([]),
-  body_locations: z.array(z.string()).optional().default([]),
-  style_tags: z.array(z.string()).optional().default([]),
-});
-
-type ProductFormValues = z.infer<typeof productSchema>;
+import { Plus, X, Upload, Loader } from "lucide-react";
 
 interface ProductFormProps {
-  initialData?: Partial<ProductFormValues>;
-  onSubmit: (data: ProductFormValues) => void;
+  initialData?: any;
+  onSubmit: (data: any) => void;
   onCancel: () => void;
-  categories: { id: string; name: string }[];
-  artists: { id: string; first_name: string; last_name: string }[];
+  categories: Array<{ id: string; name: string; }>;
+  artists: Array<{ id: string; first_name: string; last_name: string; }>;
   isSubmitting: boolean;
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({
+export default function ProductForm({
   initialData,
   onSubmit,
   onCancel,
   categories,
   artists,
   isSubmitting
-}) => {
-  // Local state for image handling
-  const [newTag, setNewTag] = useState("");
-  const [previewImages, setPreviewImages] = useState<string[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>(initialData?.images || []);
-
-  // Initialize the form with default values or initial data for editing
-  const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
-    defaultValues: {
-      name: initialData?.name || "",
-      description: initialData?.description || "",
-      price: initialData?.price || 0,
-      status: initialData?.status || "available",
-      category_id: initialData?.category_id || "",
-      artist_id: initialData?.artist_id || "",
-      images: initialData?.images || [],
-      average_time: initialData?.average_time || "",
-      sizes: initialData?.sizes || [],
-      body_locations: initialData?.body_locations || [],
-      style_tags: initialData?.style_tags || [],
-    },
+}: ProductFormProps) {
+  const [formData, setFormData] = useState({
+    name: initialData?.name || "",
+    description: initialData?.description || "",
+    price: initialData?.price || "",
+    stock_quantity: initialData?.stock_quantity || "",
+    category_id: initialData?.category_id || "",
+    size_specs: initialData?.size_specs || "",
+    weight: initialData?.weight || "",
+    shipping_options: initialData?.shipping_options || [],
+    status: initialData?.status || "available",
+    images: initialData?.images || []
   });
 
-  // Update form when initialData changes
-  useEffect(() => {
-    if (initialData?.images) {
-      setImageUrls(initialData.images);
+  const [newShippingOption, setNewShippingOption] = useState("");
+
+  const productCategories = [
+    { id: "vestuario", name: "Vestuário" },
+    { id: "acessorios", name: "Acessórios" },
+    { id: "pos-cuidado", name: "Pós-Cuidado" },
+    { id: "materiais", name: "Materiais de Desenho" },
+    { id: "decoracao", name: "Decoração" },
+    { id: "livros", name: "Livros e Revistas" }
+  ];
+
+  const statusOptions = [
+    { value: "available", label: "Disponível" },
+    { value: "out_of_stock", label: "Esgotado" },
+    { value: "featured", label: "Em Destaque" }
+  ];
+
+  const commonShippingOptions = [
+    "Retirada na Loja",
+    "Correios - PAC",
+    "Correios - SEDEX",
+    "Delivery Local",
+    "Motoboy"
+  ];
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const addShippingOption = (option: string) => {
+    if (option.trim() && !formData.shipping_options.includes(option.trim())) {
+      handleInputChange("shipping_options", [...formData.shipping_options, option.trim()]);
+      setNewShippingOption("");
     }
-  }, [initialData]);
-
-  // Handle image file selection
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    
-    const files = Array.from(e.target.files);
-    const maxFiles = 5 - (imageUrls.length + previewImages.length);
-    const filesToProcess = files.slice(0, maxFiles);
-    
-    if (filesToProcess.length < files.length) {
-      alert(`Apenas ${maxFiles} imagens adicionais podem ser carregadas. O limite é de 5 imagens.`);
-    }
-    
-    filesToProcess.forEach(file => {
-      if (!file.type.startsWith('image/')) {
-        alert('Por favor, selecione apenas arquivos de imagem');
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setPreviewImages(prev => [...prev, event.target!.result as string]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
   };
 
-  // Remove preview image
-  const removePreviewImage = (index: number) => {
-    setPreviewImages(prev => prev.filter((_, i) => i !== index));
+  const removeShippingOption = (index: number) => {
+    const newOptions = [...formData.shipping_options];
+    newOptions.splice(index, 1);
+    handleInputChange("shipping_options", newOptions);
   };
 
-  // Remove URL image
-  const removeUrlImage = (index: number) => {
-    const newImageUrls = [...imageUrls];
-    newImageUrls.splice(index, 1);
-    setImageUrls(newImageUrls);
-    form.setValue("images", newImageUrls);
-  };
-
-  // Add URL image
-  const addUrlImage = (url: string) => {
-    if (imageUrls.length + previewImages.length >= 5) {
-      alert("Não é possível adicionar mais de 5 imagens");
-      return;
-    }
-    
-    if (url.trim() === "") return;
-    
-    const newImageUrls = [...imageUrls, url];
-    setImageUrls(newImageUrls);
-    form.setValue("images", newImageUrls);
-  };
-
-  // Handle tag input
-  const handleAddTag = () => {
-    if (!newTag.trim()) return;
-    
-    const currentTags = form.getValues("style_tags") || [];
-    if (currentTags.includes(newTag)) {
-      setNewTag("");
-      return;
-    }
-    
-    form.setValue("style_tags", [...currentTags, newTag]);
-    setNewTag("");
-  };
-
-  // Remove a tag
-  const removeTag = (tag: string) => {
-    const currentTags = form.getValues("style_tags") || [];
-    form.setValue(
-      "style_tags", 
-      currentTags.filter(t => t !== tag)
-    );
-  };
-
-  // Handle form submission
-  const handleSubmit = (values: ProductFormValues) => {
-    // Combine URL and preview images
-    // In a real app, you'd upload the preview images first
-    onSubmit({
-      ...values,
-      images: imageUrls,
-    });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
   };
 
   return (
-    <ScrollArea className="max-h-[70vh]">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 px-1 py-2">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome do Produto</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nome do produto" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <div className="max-h-[80vh] overflow-y-auto p-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Informações Básicas */}
+        <Card className="border-red-200 bg-gradient-to-br from-white to-red-50">
+          <CardContent className="p-4 space-y-4">
+            <h3 className="font-black text-red-800 text-lg">Informações Básicas</h3>
+            
+            <div>
+              <Label htmlFor="name" className="text-red-700 font-bold">Título do Produto</Label>
+              <Input
+                id="name"
+                variant="tattoo"
+                value={formData.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
+                placeholder="Nome do produto"
+                required
+              />
+            </div>
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descrição</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Descrição do produto"
-                    className="min-h-[100px]"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <div>
+              <Label htmlFor="description" className="text-red-700 font-bold">Descrição</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => handleInputChange("description", e.target.value)}
+                placeholder="Descrição detalhada do produto"
+                className="border-red-200 focus:border-red-600 focus:ring-red-200"
+                rows={3}
+                required
+              />
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Preço (R$)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="price" className="text-red-700 font-bold">Preço (R$)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  variant="tattoo"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange("price", parseFloat(e.target.value) || 0)}
+                  placeholder="0,00"
+                  required
+                />
+              </div>
 
-            <FormField
-              control={form.control}
-              name="average_time"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tempo Médio</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Clock className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-                      <Input 
-                        placeholder="Ex: 2 horas, 30 min" 
-                        className="pl-8"
-                        {...field}
-                        value={field.value || ""}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormDescription>
-                    Tempo médio para realizar a tatuagem
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+              <div>
+                <Label htmlFor="stock" className="text-red-700 font-bold">Quantidade em Estoque</Label>
+                <Input
+                  id="stock"
+                  type="number"
+                  variant="tattoo"
+                  value={formData.stock_quantity}
+                  onChange={(e) => handleInputChange("stock_quantity", parseInt(e.target.value) || 0)}
+                  placeholder="0"
+                  required
+                />
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Categoria</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma categoria" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="artist_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Artista</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um artista" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {artists.map((artist) => (
-                        <SelectItem key={artist.id} value={artist.id}>
-                          {`${artist.first_name} ${artist.last_name}`.trim()}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o status" />
-                    </SelectTrigger>
-                  </FormControl>
+              <div>
+                <Label htmlFor="category" className="text-red-700 font-bold">Categoria</Label>
+                <Select value={formData.category_id} onValueChange={(value) => handleInputChange("category_id", value)}>
+                  <SelectTrigger className="border-red-200 focus:border-red-600 focus:ring-red-200">
+                    <SelectValue placeholder="Selecione a categoria" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {statusOptions.map((status) => (
-                      <SelectItem key={status.value} value={status.value}>
-                        {status.label}
+                    {productCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              </div>
+            </div>
 
-          {/* Tamanhos */}
-          <FormField
-            control={form.control}
-            name="sizes"
-            render={() => (
-              <FormItem>
-                <FormLabel>Tamanhos</FormLabel>
-                <div className="flex flex-wrap gap-2">
-                  {sizeOptions.map((option) => (
-                    <FormField
-                      key={option.id}
-                      control={form.control}
-                      name="sizes"
-                      render={({ field }) => {
-                        return (
-                          <FormItem
-                            key={option.id}
-                            className="flex flex-row items-center space-x-1 space-y-0 rounded-md border p-2"
-                          >
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(option.id)}
-                                onCheckedChange={(checked) => {
-                                  const currentValue = field.value || [];
-                                  return checked
-                                    ? field.onChange([...currentValue, option.id])
-                                    : field.onChange(
-                                        currentValue.filter((value) => value !== option.id)
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="text-sm font-normal cursor-pointer">
-                              {option.label}
-                            </FormLabel>
-                          </FormItem>
-                        );
-                      }}
-                    />
+            <div>
+              <Label htmlFor="status" className="text-red-700 font-bold">Status</Label>
+              <Select value={formData.status} onValueChange={(value) => handleInputChange("status", value)}>
+                <SelectTrigger className="border-red-200 focus:border-red-600 focus:ring-red-200">
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
                   ))}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Locais do corpo recomendados */}
-          <FormField
-            control={form.control}
-            name="body_locations"
-            render={() => (
-              <FormItem>
-                <FormLabel>Locais do corpo recomendados</FormLabel>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {bodyLocationOptions.map((option) => (
-                    <FormField
-                      key={option.id}
-                      control={form.control}
-                      name="body_locations"
-                      render={({ field }) => {
-                        return (
-                          <FormItem
-                            key={option.id}
-                            className="flex flex-row items-center space-x-1 space-y-0 rounded-md border p-2"
-                          >
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(option.id)}
-                                onCheckedChange={(checked) => {
-                                  const currentValue = field.value || [];
-                                  return checked
-                                    ? field.onChange([...currentValue, option.id])
-                                    : field.onChange(
-                                        currentValue.filter((value) => value !== option.id)
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="text-sm font-normal cursor-pointer">
-                              {option.label}
-                            </FormLabel>
-                          </FormItem>
-                        );
-                      }}
-                    />
-                  ))}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Tags de estilos */}
-          <FormField
-            control={form.control}
-            name="style_tags"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tags de estilos</FormLabel>
-                <div className="space-y-3">
-                  {/* Input para adicionar tags */}
-                  <div className="flex space-x-2">
-                    <div className="relative flex-1">
-                      <Tag className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Adicionar tag de estilo..."
-                        className="pl-8"
-                        value={newTag}
-                        onChange={(e) => setNewTag(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddTag();
-                          }
-                        }}
-                        list="style-suggestions"
-                      />
-                      <datalist id="style-suggestions">
-                        {styleTags.map((tag) => (
-                          <option key={tag} value={tag} />
-                        ))}
-                      </datalist>
-                    </div>
-                    <Button type="button" onClick={handleAddTag}>Adicionar</Button>
-                  </div>
-
-                  {/* Tags selecionadas */}
-                  <div className="flex flex-wrap gap-2">
-                    {field.value?.map((tag) => (
-                      <Badge key={tag} className="px-3 py-1.5 cursor-pointer" onClick={() => removeTag(tag)}>
-                        {tag} <Trash className="ml-1 h-3 w-3" />
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Imagens */}
-          <FormItem>
-            <FormLabel>Imagens</FormLabel>
-            <div className="space-y-3">
-              {/* Upload de arquivo */}
-              <div className="border-2 border-dashed rounded-md p-6 text-center">
-                <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center justify-center">
-                  <Upload className="h-10 w-10 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500">Arraste e solte imagens aqui ou clique para selecionar</p>
-                  <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF até 5MB (máximo 5 imagens)</p>
-                  <input
-                    id="image-upload"
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageUpload}
-                  />
-                </label>
+        {/* Especificações Físicas */}
+        <Card className="border-red-200 bg-gradient-to-br from-white to-red-50">
+          <CardContent className="p-4 space-y-4">
+            <h3 className="font-black text-red-800 text-lg">Especificações Físicas</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="size_specs" className="text-red-700 font-bold">Regras de Tamanho</Label>
+                <Input
+                  id="size_specs"
+                  variant="tattoo"
+                  value={formData.size_specs}
+                  onChange={(e) => handleInputChange("size_specs", e.target.value)}
+                  placeholder="Ex: Altura: 20cm, Largura: 15cm"
+                />
               </div>
 
-              {/* URL de imagem */}
-              <div className="flex space-x-2">
-                <div className="relative flex-1">
-                  <Image className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Ou insira URL da imagem..."
-                    className="pl-8"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addUrlImage((e.target as HTMLInputElement).value);
-                        (e.target as HTMLInputElement).value = '';
-                      }
-                    }}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  onClick={(e) => {
-                    const input = e.currentTarget.previousElementSibling?.querySelector('input');
-                    if (input) {
-                      addUrlImage(input.value);
-                      input.value = '';
-                    }
-                  }}
+              <div>
+                <Label htmlFor="weight" className="text-red-700 font-bold">Peso (gramas)</Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  variant="tattoo"
+                  value={formData.weight}
+                  onChange={(e) => handleInputChange("weight", parseFloat(e.target.value) || 0)}
+                  placeholder="Ex: 250"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Opções de Envio */}
+        <Card className="border-red-200 bg-gradient-to-br from-white to-red-50">
+          <CardContent className="p-4 space-y-4">
+            <h3 className="font-black text-red-800 text-lg">Opções de Envio</h3>
+            
+            <div>
+              <Label className="text-red-700 font-bold">Opções de Envio Disponíveis</Label>
+              <div className="flex gap-2 mt-2">
+                <Select value={newShippingOption} onValueChange={setNewShippingOption}>
+                  <SelectTrigger className="border-red-200 focus:border-red-600 focus:ring-red-200 flex-1">
+                    <SelectValue placeholder="Selecione uma opção de envio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {commonShippingOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  type="button" 
+                  variant="tattooOutline"
+                  size="icon"
+                  onClick={() => addShippingOption(newShippingOption)}
                 >
-                  Adicionar
+                  <Plus size={16} />
                 </Button>
               </div>
-
-              {/* Visualização das imagens */}
-              <div className="grid grid-cols-3 gap-2">
-                {/* Imagens da URL */}
-                {imageUrls.map((url, index) => (
-                  <div key={`url-${index}`} className="relative aspect-square rounded-md overflow-hidden border">
-                    <img src={url} alt={`Imagem ${index + 1}`} className="w-full h-full object-cover" />
-                    <Button
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.shipping_options.map((option: string, index: number) => (
+                  <Badge key={index} variant="outline" className="bg-red-100 text-red-700 border-red-300">
+                    {option}
+                    <button
                       type="button"
-                      size="icon"
-                      variant="destructive"
-                      className="absolute top-1 right-1 h-6 w-6 rounded-full"
-                      onClick={() => removeUrlImage(index)}
+                      onClick={() => removeShippingOption(index)}
+                      className="ml-2 text-red-500 hover:text-red-700"
                     >
-                      <Trash className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
-                
-                {/* Previews das imagens carregadas */}
-                {previewImages.map((preview, index) => (
-                  <div key={`preview-${index}`} className="relative aspect-square rounded-md overflow-hidden border">
-                    <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="destructive"
-                      className="absolute top-1 right-1 h-6 w-6 rounded-full"
-                      onClick={() => removePreviewImage(index)}
-                    >
-                      <Trash className="h-3 w-3" />
-                    </Button>
-                  </div>
+                      <X size={12} />
+                    </button>
+                  </Badge>
                 ))}
               </div>
             </div>
-            <FormMessage />
-          </FormItem>
+          </CardContent>
+        </Card>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Salvando..." : initialData ? "Atualizar" : "Adicionar"}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </ScrollArea>
+        {/* Upload de Imagens */}
+        <Card className="border-red-200 bg-gradient-to-br from-white to-red-50">
+          <CardContent className="p-4 space-y-4">
+            <h3 className="font-black text-red-800 text-lg">Imagens do Produto</h3>
+            
+            <div>
+              <Label className="text-red-700 font-bold">Imagens do Produto</Label>
+              <div className="border-2 border-dashed border-red-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors">
+                <Upload className="mx-auto h-12 w-12 text-red-400" />
+                <p className="mt-2 text-sm text-red-600">
+                  Arraste e solte imagens aqui ou clique para selecionar
+                </p>
+                <p className="text-xs text-red-500 mt-1">
+                  PNG, JPG, GIF até 10MB cada
+                </p>
+              </div>
+              <p className="text-xs text-red-600 mt-2">
+                Adicione múltiplas imagens do produto em diferentes ângulos
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Buttons */}
+        <div className="flex justify-end gap-4 pt-4">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="border-red-200 text-red-600 hover:bg-red-50"
+          >
+            Cancelar
+          </Button>
+          <Button 
+            type="submit" 
+            variant="tattoo"
+            disabled={isSubmitting}
+            className="shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              "Salvar Produto"
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
-};
-
-export default ProductForm;
+}
