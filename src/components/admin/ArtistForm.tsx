@@ -1,506 +1,497 @@
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Minus, Save, X, Camera, MapPin } from "lucide-react";
+import { User, Shield } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import ArtistPortfolioManager from "./ArtistPortfolioManager";
-import ArtistPricingManager from "./ArtistPricingManager";
-import ArtistScheduleManager from "./ArtistScheduleManager";
-import ArtistDocumentsManager from "./ArtistDocumentsManager";
-import ArtistPermissionsManager from "./ArtistPermissionsManager";
-import LocationManager from "./LocationManager";
-import ImageUploadField from "./ImageUploadField";
-import { 
-  Artist, 
-  PortfolioItem, 
-  ArtistPricing, 
-  WeeklySchedule, 
-  UnavailablePeriod 
-} from "@/services/interfaces/IArtistsService";
+import { Artist } from "@/services/interfaces/IArtistsService";
+import ArtistPermissionsManager from './ArtistPermissionsManager';
 
-interface ArtistFormProps {
+const formSchema = z.object({
+  first_name: z.string().min(2, {
+    message: "Nome deve ter pelo menos 2 caracteres.",
+  }),
+  last_name: z.string().min(2, {
+    message: "Sobrenome deve ter pelo menos 2 caracteres.",
+  }),
+  email: z.string().email({
+    message: "Email inválido.",
+  }),
+  phone: z.string().optional(),
+  bio: z.string().optional(),
+  avatar_url: z.string().url({
+    message: "URL da imagem inválida.",
+  }).optional(),
+  specialties: z.array(z.string()).optional(),
+  style: z.string().optional(),
+  commission_percentage: z.number().min(0).max(100).default(0),
+  status: z.enum(['active', 'inactive']).default('active'),
+  contact: z.object({
+    instagram: z.string().optional(),
+    facebook: z.string().optional(),
+    tiktok: z.string().optional(),
+  }).optional(),
+  locations: z.array(z.string()).optional(),
+  permissions: z.any().optional(),
+});
+
+interface Props {
   artist?: Artist;
-  onSave: (artistData: Partial<Artist>) => Promise<void>;
+  onSave: (data: any) => void;
   onCancel: () => void;
 }
 
-const ArtistForm = ({ artist, onSave, onCancel }: ArtistFormProps) => {
-  const [formData, setFormData] = useState<Partial<Artist>>({
-    first_name: artist?.first_name || "",
-    last_name: artist?.last_name || "",
-    email: artist?.email || "",
-    phone: artist?.phone || "",
-    bio: artist?.bio || "",
-    avatar_url: artist?.avatar_url || "",
-    specialties: artist?.specialties || [],
-    style: artist?.style || "",
-    contact: artist?.contact || {
-      phone: "",
-      email: "",
-      instagram: "",
-      facebook: "",
-      tiktok: "",
-    },
-    status: artist?.status || "active",
-    commission_percentage: artist?.commission_percentage || 0,
-    availability_description: artist?.availability_description || "",
-    internal_notes: artist?.internal_notes || "",
-    pricing: artist?.pricing || {
-      base_price_per_hour: 0,
-      minimum_session_price: 0,
-      hourly_rate: 0,
-      pricing_items: [],
-      additional_costs: {
-        consultation: 0,
-        design: 0,
-        touch_up: 0,
-      },
-      payment_methods: [],
-      pricing_notes: "",
-      services: [],
-    },
-    work_schedule: artist?.work_schedule || {},
-    unavailable_periods: artist?.unavailable_periods || [],
-    documents: artist?.documents || [],
-    permissions: artist?.permissions || {},
+type FormData = z.infer<typeof formSchema>;
+
+const ArtistForm = ({ artist, onSave, onCancel }: Props) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<FormData>(
+    artist ? {
+      first_name: artist.first_name,
+      last_name: artist.last_name,
+      email: artist.email,
+      phone: artist.phone || '',
+      bio: artist.bio || '',
+      avatar_url: artist.avatar_url || '',
+      specialties: artist.specialties || [],
+      style: artist.style || '',
+      commission_percentage: artist.commission_percentage,
+      status: artist.status,
+      contact: artist.contact || { instagram: '', facebook: '', tiktok: '' },
+      locations: artist.locations || [],
+      permissions: artist.permissions || {},
+    } : {
+      first_name: '',
+      last_name: '',
+      email: '',
+      phone: '',
+      bio: '',
+      avatar_url: '',
+      specialties: [],
+      style: '',
+      commission_percentage: 0,
+      status: 'active',
+      contact: { instagram: '', facebook: '', tiktok: '' },
+      locations: [],
+      permissions: {},
+    }
+  );
+
+  const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: formData,
+    mode: "onChange"
   });
 
-  const [locations, setLocations] = useState<string[]>(artist?.locations || []);
-  const [portfolio, setPortfolio] = useState<PortfolioItem[]>(artist?.portfolio || []);
-  const [activeTab, setActiveTab] = useState("basic");
-  const [newSpecialty, setNewSpecialty] = useState("");
-
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleContactChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      contact: {
-        ...prev.contact,
-        [field]: value
-      }
-    }));
-  };
-
-  const addSpecialty = () => {
-    if (newSpecialty.trim()) {
-      handleInputChange("specialties", [...(formData.specialties || []), newSpecialty.trim()]);
-      setNewSpecialty("");
+  useEffect(() => {
+    if (artist) {
+      Object.keys(artist).forEach(key => {
+        setValue(key as keyof FormData, artist[key as keyof Artist]);
+      });
     }
-  };
+  }, [artist, setValue]);
 
-  const removeSpecialty = (index: number) => {
-    const updatedSpecialties = formData.specialties?.filter((_, i) => i !== index) || [];
-    handleInputChange("specialties", updatedSpecialties);
-  };
+  const avatarUrl = watch("avatar_url");
 
-  const handleSubmit = async () => {
+  const onSubmit = async (data: FormData) => {
+    setIsSubmitting(true);
     try {
-      const artistData = {
-        ...formData,
-        portfolio,
-        locations,
-      };
-      await onSave(artistData);
+      await onSave(data);
       toast({
         title: "Sucesso",
-        description: artist ? "Tatuador atualizado com sucesso!" : "Tatuador criado com sucesso!",
+        description: "Dados do tatuador salvos com sucesso!",
       });
     } catch (error) {
       toast({
         title: "Erro",
-        description: "Erro ao salvar tatuador",
-        variant: "destructive"
+        description: "Erro ao salvar dados do tatuador. Tente novamente.",
+        variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handlePortfolioUpdate = (items: PortfolioItem[]) => {
-    setPortfolio(items);
+  const handleCancel = () => {
+    onCancel();
   };
 
-  const handlePricingUpdate = (pricing: ArtistPricing) => {
-    handleInputChange("pricing", pricing);
+  const handleSpecialtiesChange = (value: string[]) => {
+    setValue("specialties", value);
   };
 
-  const handleScheduleUpdate = (schedule: WeeklySchedule) => {
-    handleInputChange("work_schedule", schedule);
-  };
-
-  const handleUnavailablePeriodsUpdate = (periods: UnavailablePeriod[]) => {
-    handleInputChange("unavailable_periods", periods);
-  };
-
-  const handleDocumentsUpdate = (documents: any[]) => {
-    handleInputChange("documents", documents);
+  const handleLocationsChange = (value: string[]) => {
+    setValue("locations", value);
   };
 
   const handlePermissionsUpdate = (permissions: any) => {
-    handleInputChange("permissions", permissions);
+    setFormData(prev => ({
+      ...prev,
+      permissions: permissions
+    }));
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tattoo-title-gradient">
-          {artist ? "Editar Tatuador" : "Novo Tatuador"}
-        </h1>
-        <div className="flex gap-2">
-          <Button onClick={onCancel} variant="outline" className="tattoo-button-secondary">
-            <X className="h-4 w-4 mr-2" />
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmit} variant="tattoo" className="tattoo-button-primary">
-            <Save className="h-4 w-4 mr-2" />
-            Salvar
-          </Button>
-        </div>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="basic">Dados Básicos</TabsTrigger>
-          <TabsTrigger value="portfolio">Portfólio</TabsTrigger>
-          <TabsTrigger value="pricing">Preços</TabsTrigger>
-          <TabsTrigger value="schedule">Horários</TabsTrigger>
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
-          <TabsTrigger value="advanced">Avançado</TabsTrigger>
+    <div className="space-y-8">
+      <Tabs defaultValue="basic" className="w-full">
+        <TabsList className="grid w-full grid-cols-6 bg-gradient-to-r from-red-100 to-red-200 p-1 rounded-lg shadow-lg">
+          <TabsTrigger 
+            value="basic" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+          >
+            <User className="h-4 w-4 mr-2" />
+            Básico
+          </TabsTrigger>
+          <TabsTrigger 
+            value="contact" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+          >
+            Contato
+          </TabsTrigger>
+          <TabsTrigger 
+            value="details" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+          >
+            Detalhes
+          </TabsTrigger>
+          <TabsTrigger 
+            value="specialties" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+          >
+            Especialidades
+          </TabsTrigger>
+          <TabsTrigger 
+            value="locations" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+          >
+            Localizações
+          </TabsTrigger>
+          <TabsTrigger 
+            value="permissions" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+          >
+            <Shield className="h-4 w-4 mr-2" />
+            Permissões
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="basic" className="space-y-6">
-          <Card variant="tattooRed" className="tattoo-card-enhanced">
-            <CardHeader variant="red">
-              <CardTitle className="tattoo-title-red">Dados Pessoais</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Upload de Foto - Fixed props */}
-              <div className="space-y-2">
-                <Label>Foto de Perfil</Label>
-                <div className="flex items-center gap-4">
-                  <div className="h-20 w-20 border-2 border-red-200 rounded-full overflow-hidden bg-gray-100">
-                    {formData.avatar_url ? (
-                      <img src={formData.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Camera className="h-8 w-8 text-gray-400" />
-                      </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <TabsContent value="basic" className="space-y-4">
+            <Card className="shadow-lg bg-gradient-to-br from-white to-red-50 border-red-200">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium">Informações Básicas</CardTitle>
+                <CardDescription>Dados pessoais do tatuador</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="first_name">Nome</Label>
+                    <Controller
+                      control={control}
+                      name="first_name"
+                      render={({ field }) => (
+                        <Input id="first_name" placeholder="Nome" {...field} />
+                      )}
+                    />
+                    {errors.first_name && (
+                      <p className="text-red-500 text-sm">{errors.first_name.message}</p>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <Input
-                      placeholder="URL da imagem"
-                      value={formData.avatar_url || ""}
-                      onChange={(e) => handleInputChange("avatar_url", e.target.value)}
-                      className="tattoo-input-enhanced"
+                  <div>
+                    <Label htmlFor="last_name">Sobrenome</Label>
+                    <Controller
+                      control={control}
+                      name="last_name"
+                      render={({ field }) => (
+                        <Input id="last_name" placeholder="Sobrenome" {...field} />
+                      )}
+                    />
+                    {errors.last_name && (
+                      <p className="text-red-500 text-sm">{errors.last_name.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Controller
+                    control={control}
+                    name="email"
+                    render={({ field }) => (
+                      <Input id="email" placeholder="Email" type="email" {...field} />
+                    )}
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm">{errors.email.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="avatar_url">URL do Avatar</Label>
+                  <Controller
+                    control={control}
+                    name="avatar_url"
+                    render={({ field }) => (
+                      <Input id="avatar_url" placeholder="URL do Avatar" {...field} />
+                    )}
+                  />
+                  {errors.avatar_url && (
+                    <p className="text-red-500 text-sm">{errors.avatar_url.message}</p>
+                  )}
+                  {avatarUrl && (
+                    <Avatar className="h-16 w-16 mt-2">
+                      <AvatarImage src={avatarUrl} alt="Avatar" />
+                      <AvatarFallback>{formData.first_name.charAt(0)}{formData.last_name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="contact" className="space-y-4">
+            <Card className="shadow-lg bg-gradient-to-br from-white to-red-50 border-red-200">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium">Informações de Contato</CardTitle>
+                <CardDescription>Detalhes de contato do tatuador</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                <div>
+                  <Label htmlFor="phone">Telefone</Label>
+                  <Controller
+                    control={control}
+                    name="phone"
+                    render={({ field }) => (
+                      <Input id="phone" placeholder="Telefone" {...field} />
+                    )}
+                  />
+                  {errors.phone && (
+                    <p className="text-red-500 text-sm">{errors.phone.message}</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="contact.instagram">Instagram</Label>
+                    <Controller
+                      control={control}
+                      name="contact.instagram"
+                      render={({ field }) => (
+                        <Input id="contact.instagram" placeholder="Instagram" {...field} />
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contact.facebook">Facebook</Label>
+                    <Controller
+                      control={control}
+                      name="contact.facebook"
+                      render={({ field }) => (
+                        <Input id="contact.facebook" placeholder="Facebook" {...field} />
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contact.tiktok">TikTok</Label>
+                    <Controller
+                      control={control}
+                      name="contact.tiktok"
+                      render={({ field }) => (
+                        <Input id="contact.tiktok" placeholder="TikTok" {...field} />
+                      )}
                     />
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="first_name">Nome *</Label>
-                  <Input
-                    id="first_name"
-                    value={formData.first_name}
-                    onChange={(e) => handleInputChange("first_name", e.target.value)}
-                    className="tattoo-input-enhanced"
-                    required
+          <TabsContent value="details" className="space-y-4">
+            <Card className="shadow-lg bg-gradient-to-br from-white to-red-50 border-red-200">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium">Detalhes Adicionais</CardTitle>
+                <CardDescription>Informações adicionais sobre o tatuador</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                <div>
+                  <Label htmlFor="bio">Bio</Label>
+                  <Controller
+                    control={control}
+                    name="bio"
+                    render={({ field }) => (
+                      <Textarea id="bio" placeholder="Bio" {...field} />
+                    )}
                   />
+                  {errors.bio && (
+                    <p className="text-red-500 text-sm">{errors.bio.message}</p>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="last_name">Sobrenome *</Label>
-                  <Input
-                    id="last_name"
-                    value={formData.last_name}
-                    onChange={(e) => handleInputChange("last_name", e.target.value)}
-                    className="tattoo-input-enhanced"
-                    required
+
+                <div>
+                  <Label htmlFor="style">Estilo</Label>
+                  <Controller
+                    control={control}
+                    name="style"
+                    render={({ field }) => (
+                      <Input id="style" placeholder="Estilo" {...field} />
+                    )}
                   />
+                  {errors.style && (
+                    <p className="text-red-500 text-sm">{errors.style.message}</p>
+                  )}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="tattoo-input-enhanced"
-                    required
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="commission_percentage">Comissão (%)</Label>
+                    <Controller
+                      control={control}
+                      name="commission_percentage"
+                      render={({ field }) => (
+                        <Input
+                          id="commission_percentage"
+                          type="number"
+                          placeholder="Comissão (%)"
+                          {...field}
+                          onChange={(e) => {
+                            const value = Math.max(0, Math.min(100, Number(e.target.value)));
+                            field.onChange(value);
+                          }}
+                        />
+                      )}
+                    />
+                    {errors.commission_percentage && (
+                      <p className="text-red-500 text-sm">{errors.commission_percentage.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="status">Status</Label>
+                    <Controller
+                      control={control}
+                      name="status"
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger className="border-red-200 focus:border-red-500">
+                            <SelectValue placeholder="Selecione o status" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-red-200">
+                            <SelectItem value="active">Ativo</SelectItem>
+                            <SelectItem value="inactive">Inativo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.status && (
+                      <p className="text-red-500 text-sm">{errors.status.message}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Telefone</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className="tattoo-input-enhanced"
-                  />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="specialties" className="space-y-4">
+            <Card className="shadow-lg bg-gradient-to-br from-white to-red-50 border-red-200">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium">Especialidades</CardTitle>
+                <CardDescription>Defina as especialidades do tatuador</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                {/* Implement multi-select or tag input here */}
+                <div>
+                  <Label>Especialidades</Label>
+                  {/* Mock multi-select */}
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleSpecialtiesChange([...(watch("specialties") || []), "Realismo"])}>
+                      Realismo
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleSpecialtiesChange([...(watch("specialties") || []), "Old School"])}>
+                      Old School
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleSpecialtiesChange([...(watch("specialties") || []), "New School"])}>
+                      New School
+                    </Button>
+                  </div>
+                  <div className="mt-2">
+                    <Label>Especialidades Selecionadas:</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {(watch("specialties") || []).map((specialty, index) => (
+                        <Badge key={index} variant="secondary">{specialty}</Badge>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <div className="space-y-2">
-                <Label htmlFor="bio">Biografia</Label>
-                <Textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={(e) => handleInputChange("bio", e.target.value)}
-                  className="tattoo-input-enhanced"
-                  rows={4}
-                  placeholder="Conte um pouco sobre o tatuador..."
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Especialidades e Estilo */}
-          <Card variant="tattooRed" className="tattoo-card-enhanced">
-            <CardHeader variant="red">
-              <CardTitle className="tattoo-title-red">Especialidades e Estilo</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="style">Estilo Principal</Label>
-                <Input
-                  id="style"
-                  value={formData.style}
-                  onChange={(e) => handleInputChange("style", e.target.value)}
-                  className="tattoo-input-enhanced"
-                  placeholder="Ex: Realismo, Blackwork, Aquarela..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Especialidades</Label>
-                <div className="flex gap-2">
-                  <Input
-                    value={newSpecialty}
-                    onChange={(e) => setNewSpecialty(e.target.value)}
-                    className="tattoo-input-enhanced"
-                    placeholder="Nova especialidade"
-                    onKeyPress={(e) => e.key === 'Enter' && addSpecialty()}
-                  />
-                  <Button 
-                    onClick={addSpecialty} 
-                    variant="tattoo"
-                    className="tattoo-button-primary"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
+          <TabsContent value="locations" className="space-y-4">
+            <Card className="shadow-lg bg-gradient-to-br from-white to-red-50 border-red-200">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium">Localizações</CardTitle>
+                <CardDescription>Defina as localizações de atendimento do tatuador</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                {/* Implement multi-select or tag input here */}
+                <div>
+                  <Label>Localizações</Label>
+                  {/* Mock multi-select */}
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleLocationsChange([...(watch("locations") || []), "São Paulo"])}>
+                      São Paulo
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleLocationsChange([...(watch("locations") || []), "Rio de Janeiro"])}>
+                      Rio de Janeiro
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleLocationsChange([...(watch("locations") || []), "Belo Horizonte"])}>
+                      Belo Horizonte
+                    </Button>
+                  </div>
+                  <div className="mt-2">
+                    <Label>Localizações Selecionadas:</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {(watch("locations") || []).map((location, index) => (
+                        <Badge key={index} variant="secondary">{location}</Badge>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {formData.specialties?.map((specialty, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="secondary" 
-                      className="bg-gradient-to-r from-red-100 to-red-200 text-red-800 hover:from-red-200 hover:to-red-300"
-                    >
-                      {specialty}
-                      <button
-                        onClick={() => removeSpecialty(index)}
-                        className="ml-2 hover:text-red-600"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          {/* Local de Atendimento - Fixed props */}
-          <Card variant="tattooRed" className="tattoo-card-enhanced">
-            <CardHeader variant="red">
-              <CardTitle className="tattoo-title-red flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Local de Atendimento
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <LocationManager
-                locations={locations}
-                onLocationsUpdate={setLocations}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Informações de Contato */}
-          <Card variant="tattooRed" className="tattoo-card-enhanced">
-            <CardHeader variant="red">
-              <CardTitle className="tattoo-title-red">Redes Sociais e Contato</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="contact_phone">Telefone de Contato</Label>
-                  <Input
-                    id="contact_phone"
-                    value={formData.contact?.phone || ""}
-                    onChange={(e) => handleContactChange("phone", e.target.value)}
-                    className="tattoo-input-enhanced"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contact_email">Email de Contato</Label>
-                  <Input
-                    id="contact_email"
-                    type="email"
-                    value={formData.contact?.email || ""}
-                    onChange={(e) => handleContactChange("email", e.target.value)}
-                    className="tattoo-input-enhanced"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="instagram">Instagram</Label>
-                  <Input
-                    id="instagram"
-                    value={formData.contact?.instagram || ""}
-                    onChange={(e) => handleContactChange("instagram", e.target.value)}
-                    className="tattoo-input-enhanced"
-                    placeholder="@username"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="facebook">Facebook</Label>
-                  <Input
-                    id="facebook"
-                    value={formData.contact?.facebook || ""}
-                    onChange={(e) => handleContactChange("facebook", e.target.value)}
-                    className="tattoo-input-enhanced"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tiktok">TikTok</Label>
-                  <Input
-                    id="tiktok"
-                    value={formData.contact?.tiktok || ""}
-                    onChange={(e) => handleContactChange("tiktok", e.target.value)}
-                    className="tattoo-input-enhanced"
-                    placeholder="@username"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Informações Administrativas */}
-          <Card variant="tattooRed" className="tattoo-card-enhanced">
-            <CardHeader variant="red">
-              <CardTitle className="tattoo-title-red">Informações Administrativas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <select
-                    id="status"
-                    value={formData.status}
-                    onChange={(e) => handleInputChange("status", e.target.value)}
-                    className="w-full p-2 border border-red-200 rounded-md tattoo-input-enhanced"
-                  >
-                    <option value="active">Ativo</option>
-                    <option value="inactive">Inativo</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="commission">Percentual de Comissão (%)</Label>
-                  <Input
-                    id="commission"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.commission_percentage}
-                    onChange={(e) => handleInputChange("commission_percentage", parseFloat(e.target.value) || 0)}
-                    className="tattoo-input-enhanced"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="availability">Descrição de Disponibilidade</Label>
-                <Textarea
-                  id="availability"
-                  value={formData.availability_description}
-                  onChange={(e) => handleInputChange("availability_description", e.target.value)}
-                  className="tattoo-input-enhanced"
-                  rows={3}
-                  placeholder="Ex: Disponível de segunda a sexta, das 9h às 18h..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="notes">Notas Internas</Label>
-                <Textarea
-                  id="notes"
-                  value={formData.internal_notes}
-                  onChange={(e) => handleInputChange("internal_notes", e.target.value)}
-                  className="tattoo-input-enhanced"
-                  rows={3}
-                  placeholder="Notas internas sobre o tatuador..."
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="portfolio">
-          <ArtistPortfolioManager
-            portfolioItems={portfolio}
-            onItemsChange={handlePortfolioUpdate}
-          />
-        </TabsContent>
-
-        <TabsContent value="pricing">
-          <ArtistPricingManager
-            pricing={formData.pricing}
-            onPricingChange={handlePricingUpdate}
-          />
-        </TabsContent>
-
-        <TabsContent value="schedule">
-          <ArtistScheduleManager
-            schedule={formData.work_schedule}
-            unavailablePeriods={formData.unavailable_periods || []}
-            onScheduleChange={handleScheduleUpdate}
-            onUnavailablePeriodsChange={handleUnavailablePeriodsUpdate}
-          />
-        </TabsContent>
-
-        <TabsContent value="documents">
-          <ArtistDocumentsManager
-            documents={formData.documents || []}
-            onDocumentsChange={handleDocumentsUpdate}
-          />
-        </TabsContent>
-
-        <TabsContent value="advanced">
-          <div className="space-y-6">
+        <TabsContent value="permissions" className="space-y-6">
+          {artist ? (
             <ArtistPermissionsManager
-              permissions={formData.permissions}
-              onPermissionsChange={handlePermissionsUpdate}
+              artist={artist}
+              onPermissionsUpdate={handlePermissionsUpdate}
             />
-          </div>
+          ) : (
+            <div className="p-8 text-center text-gray-500">
+              <Shield className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <p>Salve o artista primeiro para configurar permissões</p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
+
+      <div className="flex justify-end space-x-2">
+        <Button variant="ghost" onClick={handleCancel}>Cancelar</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Salvando..." : "Salvar"}
+        </Button>
+      </div>
+    </form>
     </div>
   );
 };

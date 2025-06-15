@@ -1,4 +1,3 @@
-
 /**
  * Artist interface
  */
@@ -33,7 +32,16 @@ export interface Artist {
   unavailable_periods?: UnavailablePeriod[];
   locations?: string[];
   documents?: any[];
-  permissions?: any;
+  permissions?: {
+    canViewOwnAppointments: boolean;
+    canEditOwnAppointments: boolean;
+    canViewClients: boolean;
+    canAddClients: boolean;
+    canEditOwnPortfolio: boolean;
+    canViewFinancialSummary: boolean;
+    canAccessShop: boolean;
+    canViewReports: boolean;
+  };
   
   created_at?: string;
   updated_at?: string;
