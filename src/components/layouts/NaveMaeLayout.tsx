@@ -14,7 +14,10 @@ import {
   Globe,
   Shield,
   Zap,
-  UserCheck
+  UserCheck,
+  Calendar,
+  ShoppingBag,
+  DollarSign
 } from "lucide-react";
 
 interface NaveMaeLayoutProps {
@@ -28,13 +31,16 @@ const NaveMaeLayout = ({ children }: NaveMaeLayoutProps) => {
   const navigationItems = [
     { href: "/nave-mae-da-tatuagem", icon: Home, label: "Central de Comando", exact: true },
     { href: "/nave-mae-da-tatuagem/clients", icon: UserCheck, label: "CRM Central" },
+    { href: "/nave-mae-da-tatuagem/appointments", icon: Calendar, label: "Agendamentos" },
+    { href: "/nave-mae-da-tatuagem/artists", icon: Users, label: "Rede de Tatuadores" },
+    { href: "/nave-mae-da-tatuagem/products", icon: ShoppingBag, label: "Produtos & Serviços" },
+    { href: "/nave-mae-da-tatuagem/financial", icon: DollarSign, label: "Financeiro Central" },
     { href: "/nave-mae-da-tatuagem/estudios", icon: Building, label: "Gestão de Estúdios" },
-    { href: "/nave-mae-da-tatuagem/tatuadores", icon: Users, label: "Rede de Tatuadores" },
     { href: "/nave-mae-da-tatuagem/plataformas", icon: Globe, label: "Plataformas Digitais" },
     { href: "/nave-mae-da-tatuagem/analytics", icon: BarChart3, label: "Analytics Global" },
     { href: "/nave-mae-da-tatuagem/automacao", icon: Zap, label: "Automações" },
     { href: "/nave-mae-da-tatuagem/seguranca", icon: Shield, label: "Segurança" },
-    { href: "/nave-mae-da-tatuagem/configuracoes", icon: Settings, label: "Configurações" },
+    { href: "/nave-mae-da-tatuagem/settings", icon: Settings, label: "Configurações" },
   ];
 
   const isActive = (href: string, exact = false) => {

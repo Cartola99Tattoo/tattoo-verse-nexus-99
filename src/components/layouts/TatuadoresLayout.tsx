@@ -14,7 +14,8 @@ import {
   LogOut,
   Palette,
   TrendingUp,
-  ShoppingBag
+  ShoppingBag,
+  CalendarDays
 } from "lucide-react";
 
 interface TatuadoresLayoutProps {
@@ -28,10 +29,11 @@ const TatuadoresLayout = ({ children }: TatuadoresLayoutProps) => {
   const navigationItems = [
     { href: "/tatuadores-da-nova-era", icon: Home, label: "Início", exact: true },
     { href: "/tatuadores-da-nova-era/perfil", icon: User, label: "Meu Perfil" },
-    { href: "/tatuadores-da-nova-era/agenda", icon: Calendar, label: "Agenda" },
     { href: "/tatuadores-da-nova-era/portfolio", icon: Image, label: "Portfólio" },
+    { href: "/tatuadores-da-nova-era/agenda", icon: Calendar, label: "Agenda" },
     { href: "/tatuadores-da-nova-era/blog", icon: BookOpen, label: "Blog & Conteúdo" },
     { href: "/tatuadores-da-nova-era/shop", icon: ShoppingBag, label: "Loja Profissional" },
+    { href: "/tatuadores-da-nova-era/eventos", icon: CalendarDays, label: "Eventos" },
     { href: "/tatuadores-da-nova-era/evolucao", icon: TrendingUp, label: "Evolução" },
     { href: "/tatuadores-da-nova-era/mensagens", icon: MessageCircle, label: "Mensagens" },
     { href: "/tatuadores-da-nova-era/configuracoes", icon: Settings, label: "Configurações" },

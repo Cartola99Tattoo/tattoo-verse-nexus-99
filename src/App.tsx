@@ -27,10 +27,18 @@ import TatuadoresBlog from "@/pages/tatuadores-da-nova-era/blog/index";
 import TatuadoresBlogPost from "@/pages/tatuadores-da-nova-era/blog/[id]";
 import TatuadoresShop from "@/pages/tatuadores-da-nova-era/shop/index";
 import TatuadoresShopProduct from "@/pages/tatuadores-da-nova-era/shop/[id]";
+import TatuadoresEventos from "@/pages/tatuadores-da-nova-era/eventos";
+import TatuadoresEventDetail from "@/pages/tatuadores-da-nova-era/eventos/[id]";
+import TatuadoresPortfolio from "@/pages/tatuadores-da-nova-era/portfolio";
 
 // Nave-Mãe da Tatuagem pages
 import NaveMaeIndex from "@/pages/nave-mae-da-tatuagem/index";
 import NaveMaeClients from "@/pages/nave-mae-da-tatuagem/clients";
+import NaveMaeAppointments from "@/pages/nave-mae-da-tatuagem/appointments";
+import NaveMaeArtists from "@/pages/nave-mae-da-tatuagem/artists";
+import NaveMaeProducts from "@/pages/nave-mae-da-tatuagem/products";
+import NaveMaeFinancial from "@/pages/nave-mae-da-tatuagem/financial";
+import NaveMaeSettings from "@/pages/nave-mae-da-tatuagem/settings";
 
 // Other pages
 import Shop from "@/pages/Shop";
@@ -187,6 +195,30 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              <Route 
+                path="/tatuadores-da-nova-era/eventos" 
+                element={
+                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                    <TatuadoresEventos />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/tatuadores-da-nova-era/eventos/:id" 
+                element={
+                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                    <TatuadoresEventDetail />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/tatuadores-da-nova-era/portfolio" 
+                element={
+                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                    <TatuadoresPortfolio />
+                  </ProtectedRoute>
+                } 
+              />
 
               {/* Nave-Mãe da Tatuagem routes */}
               <Route 
@@ -202,6 +234,46 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
                     <NaveMaeClients />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/nave-mae-da-tatuagem/appointments" 
+                element={
+                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                    <NaveMaeAppointments />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/nave-mae-da-tatuagem/artists" 
+                element={
+                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                    <NaveMaeArtists />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/nave-mae-da-tatuagem/products" 
+                element={
+                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                    <NaveMaeProducts />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/nave-mae-da-tatuagem/financial" 
+                element={
+                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                    <NaveMaeFinancial />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/nave-mae-da-tatuagem/settings" 
+                element={
+                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                    <NaveMaeSettings />
                   </ProtectedRoute>
                 } 
               />
