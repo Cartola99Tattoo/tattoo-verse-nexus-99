@@ -2,8 +2,10 @@
 import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
+import TatuadoresLayout from './components/layouts/TatuadoresLayout';
+import NaveMaeLayout from './components/layouts/NaveMaeLayout';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -20,7 +22,7 @@ const Artists = lazy(() => import('./pages/Artists'));
 const ArtistDetail = lazy(() => import('./pages/ArtistDetail'));
 const Shop = lazy(() => import('./pages/Shop'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
-const TattooEvents = lazy(() => import('./pages/TattooEvents')); // Nova página de eventos
+const TattooEvents = lazy(() => import('./pages/TattooEvents'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Auth = lazy(() => import('./pages/Auth'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
@@ -28,7 +30,7 @@ const Checkout = lazy(() => import('./pages/Checkout'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
 const TattooConsultancy = lazy(() => import('./pages/TattooConsultancy'));
 
-// Lazy load páginas administrativas
+// Lazy load páginas administrativas existentes
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminArtists = lazy(() => import('./pages/admin/AdminArtists'));
@@ -48,6 +50,10 @@ const Projects = lazy(() => import('./pages/admin/Projects'));
 const AdminEvents = lazy(() => import('./pages/admin/Events'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+
+// Lazy load páginas das novas plataformas
+const TatuadoresDashboard = lazy(() => import('./pages/tatuadores-da-nova-era/index'));
+const NaveMaeDashboard = lazy(() => import('./pages/nave-mae-da-tatuagem/index'));
 
 function App() {
   return (
@@ -74,11 +80,35 @@ function App() {
                 <Route path="/user-profile" element={<Layout><LazyLoader><UserProfile /></LazyLoader></Layout>} />
                 <Route path="/invite" element={<InviteAcceptance />} />
 
-                {/* Admin routes with AdminLayout */}
+                {/* Plataforma Tatuadores da Nova Era */}
+                <Route path="/tatuadores-da-nova-era/*" element={
+                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                    <TatuadoresLayout>
+                      <Routes>
+                        <Route index element={<LazyLoader><TatuadoresDashboard /></LazyLoader>} />
+                        {/* Adicionar mais rotas aqui conforme necessário */}
+                      </Routes>
+                    </TatuadoresLayout>
+                  </ProtectedRoute>
+                } />
+
+                {/* Plataforma Nave-Mãe da Tatuagem */}
+                <Route path="/nave-mae-da-tatuagem/*" element={
+                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/auth">
+                    <NaveMaeLayout>
+                      <Routes>
+                        <Route index element={<LazyLoader><NaveMaeDashboard /></LazyLoader>} />
+                        {/* Adicionar mais rotas aqui conforme necessário */}
+                      </Routes>
+                    </NaveMaeLayout>
+                  </ProtectedRoute>
+                } />
+
+                {/* Admin routes (mantidos para compatibilidade) */}
                 <Route
                   path="/admin/*"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["admin_estudio"]} redirectTo="/auth">
                       <LazyLoader>
                         <AdminLayout />
                       </LazyLoader>
