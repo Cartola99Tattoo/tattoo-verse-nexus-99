@@ -13,7 +13,8 @@ import {
   Rocket,
   Globe,
   Shield,
-  Zap
+  Zap,
+  UserCheck
 } from "lucide-react";
 
 interface NaveMaeLayoutProps {
@@ -26,6 +27,7 @@ const NaveMaeLayout = ({ children }: NaveMaeLayoutProps) => {
 
   const navigationItems = [
     { href: "/nave-mae-da-tatuagem", icon: Home, label: "Central de Comando", exact: true },
+    { href: "/nave-mae-da-tatuagem/clients", icon: UserCheck, label: "CRM Central" },
     { href: "/nave-mae-da-tatuagem/estudios", icon: Building, label: "Gestão de Estúdios" },
     { href: "/nave-mae-da-tatuagem/tatuadores", icon: Users, label: "Rede de Tatuadores" },
     { href: "/nave-mae-da-tatuagem/plataformas", icon: Globe, label: "Plataformas Digitais" },
@@ -102,10 +104,8 @@ const NaveMaeLayout = ({ children }: NaveMaeLayoutProps) => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
-          <div className="bg-white rounded-lg shadow-xl min-h-full">
-            {children}
-          </div>
+        <main className="flex-1">
+          {children}
         </main>
       </div>
     </div>

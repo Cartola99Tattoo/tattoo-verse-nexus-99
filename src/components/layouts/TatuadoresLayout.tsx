@@ -13,7 +13,8 @@ import {
   Settings,
   LogOut,
   Palette,
-  TrendingUp
+  TrendingUp,
+  ShoppingBag
 } from "lucide-react";
 
 interface TatuadoresLayoutProps {
@@ -30,6 +31,7 @@ const TatuadoresLayout = ({ children }: TatuadoresLayoutProps) => {
     { href: "/tatuadores-da-nova-era/agenda", icon: Calendar, label: "Agenda" },
     { href: "/tatuadores-da-nova-era/portfolio", icon: Image, label: "Portfólio" },
     { href: "/tatuadores-da-nova-era/blog", icon: BookOpen, label: "Blog & Conteúdo" },
+    { href: "/tatuadores-da-nova-era/shop", icon: ShoppingBag, label: "Loja Profissional" },
     { href: "/tatuadores-da-nova-era/evolucao", icon: TrendingUp, label: "Evolução" },
     { href: "/tatuadores-da-nova-era/mensagens", icon: MessageCircle, label: "Mensagens" },
     { href: "/tatuadores-da-nova-era/configuracoes", icon: Settings, label: "Configurações" },
@@ -102,7 +104,7 @@ const TatuadoresLayout = ({ children }: TatuadoresLayoutProps) => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1">
           {children}
         </main>
       </div>
