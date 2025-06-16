@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
@@ -87,6 +86,16 @@ function App() {
               {/* Admin routes (Estúdio Virtual) - DESENVOLVIMENTO: ACESSO IRRESTRITO */}
               <Route 
                 path="/admin" 
+                element={
+                  <ProtectedRoute allowPublic={true}>
+                    <AdminLayout>
+                      <Dashboard />
+                    </AdminLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/dashboard" 
                 element={
                   <ProtectedRoute allowPublic={true}>
                     <AdminLayout>
@@ -279,9 +288,6 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-
-              {/* DESENVOLVIMENTO: Rota fallback comentada para evitar redirecionamentos indevidos */}
-              {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
             </Routes>
             <Toaster />
             {/* Simulador de usuário apenas em desenvolvimento */}

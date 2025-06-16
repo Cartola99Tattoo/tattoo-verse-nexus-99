@@ -4,12 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  allowPublic?: boolean;
 }
 
 // Component that renders children without additional layout wrapping
 // Mantido para compatibilidade com o sistema existente
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+const ProtectedRoute = ({ children, allowPublic = true }: ProtectedRouteProps) => {
+  const { loading } = useAuth();
 
   if (loading) {
     return (
@@ -20,16 +21,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   // DESENVOLVIMENTO: Permitir acesso irrestrito durante desenvolvimento
-  // Remover verificações de autenticação para permitir navegação livre
   console.log("ProtectedRoute (compatibility): Development mode - allowing unrestricted access");
   return <>{children}</>;
-
-  // Código de proteção comentado para referência futura
-  /*
-  // Para manter compatibilidade, sempre renderiza os filhos
-  // A validação real de permissões está em src/components/auth/ProtectedRoute.tsx
-  return <>{children}</>;
-  */
 };
 
 export default ProtectedRoute;
