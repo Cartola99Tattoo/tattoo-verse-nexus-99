@@ -3,22 +3,22 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 // Public pages
-import Index from "@/pages/Index";
+import Index from "@/pages/index";
 import Auth from "@/pages/Auth";
 import AdminAuth from "@/pages/AdminAuth";
-import AdminSetup from "@/pages/AdminSetup";
+import AdminSetup from "@/pages/AdminUserSetup";
 
 // Admin pages (estúdio virtual)
-import AdminLayout from "@/components/layout/AdminLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 import Clients from "@/pages/admin/Clients";
 import Appointments from "@/pages/admin/Appointments";
-import Artists from "@/pages/admin/Artists";
+import AdminArtists from "@/pages/admin/AdminArtists";
 import Products from "@/pages/admin/Products";
-import Finances from "@/pages/admin/Finances";
+import Financial from "@/pages/admin/Financial";
 import Settings from "@/pages/admin/Settings";
 
 // Tatuadores da Nova Era pages
@@ -34,16 +34,11 @@ import NaveMaeClients from "@/pages/nave-mae-da-tatuagem/clients";
 
 // Other pages
 import Shop from "@/pages/Shop";
-import ShopProduct from "@/pages/ShopProduct";
-import Cart from "@/pages/Cart";
+import ProductDetail from "@/pages/ProductDetail";
 import Checkout from "@/pages/Checkout";
-import OrderSuccess from "@/pages/OrderSuccess";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
 import Contact from "@/pages/Contact";
-import AboutUs from "@/pages/AboutUs";
-import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import TermsOfService from "@/pages/TermsOfService";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,10 +64,8 @@ function App() {
               
               {/* Shop routes */}
               <Route path="/shop" element={<Shop />} />
-              <Route path="/shop/:id" element={<ShopProduct />} />
-              <Route path="/cart" element={<Cart />} />
+              <Route path="/shop/:id" element={<ProductDetail />} />
               <Route path="/checkout" element={<Checkout />} />
-              <Route path="/order-success" element={<OrderSuccess />} />
               
               {/* Blog routes */}
               <Route path="/blog" element={<Blog />} />
@@ -80,9 +73,6 @@ function App() {
               
               {/* Other public routes */}
               <Route path="/contact" element={<Contact />} />
-              <Route path="/about-us" element={<AboutUs />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-of-service" element={<TermsOfService />} />
 
               {/* Admin routes (Estúdio Virtual) */}
               <Route 
@@ -120,7 +110,7 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin_estudio"]} redirectTo="/admin-auth">
                     <AdminLayout>
-                      <Artists />
+                      <AdminArtists />
                     </AdminLayout>
                   </ProtectedRoute>
                 } 
@@ -140,7 +130,7 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin_estudio"]} redirectTo="/admin-auth">
                     <AdminLayout>
-                      <Finances />
+                      <Financial />
                     </AdminLayout>
                   </ProtectedRoute>
                 } 
