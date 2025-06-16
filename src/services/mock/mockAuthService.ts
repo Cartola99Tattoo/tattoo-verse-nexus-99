@@ -4,7 +4,7 @@ import { UserProfile } from "@/contexts/AuthContext";
 import { IAuthService } from "../interfaces/IAuthService";
 import { simulateNetworkDelay, simulateError } from "./mockUtils";
 
-// Mock user data - updated with new role types
+// Mock user data
 const mockUsers = [
   {
     id: "1",
@@ -17,7 +17,7 @@ const mockUsers = [
       avatar_url: null,
       phone: "555-1234",
       email: "admin@example.com",
-      role: "admin_estudio" as const
+      role: "admin" as const
     }
   },
   {
@@ -31,7 +31,7 @@ const mockUsers = [
       avatar_url: null,
       phone: "555-5678",
       email: "artist@example.com",
-      role: "tatuador_da_nova_era" as const
+      role: "artista" as const
     }
   },
   {
@@ -46,20 +46,6 @@ const mockUsers = [
       phone: "555-9012",
       email: "client@example.com",
       role: "cliente" as const
-    }
-  },
-  {
-    id: "4",
-    email: "navemae@example.com",
-    password: "navemae123",
-    profile: {
-      id: "4",
-      first_name: "Nave-Mãe",
-      last_name: "Admin",
-      avatar_url: null,
-      phone: "555-0000",
-      email: "navemae@example.com",
-      role: "admin_nave_mae" as const
     }
   }
 ];
