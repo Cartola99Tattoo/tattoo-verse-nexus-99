@@ -20,13 +20,24 @@ const Artists = lazy(() => import('./pages/Artists'));
 const ArtistDetail = lazy(() => import('./pages/ArtistDetail'));
 const Shop = lazy(() => import('./pages/Shop'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
-const TattooEvents = lazy(() => import('./pages/TattooEvents')); // Nova página de eventos
+const TattooEvents = lazy(() => import('./pages/TattooEvents'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Auth = lazy(() => import('./pages/Auth'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
 const TattooConsultancy = lazy(() => import('./pages/TattooConsultancy'));
+
+// Lazy load páginas dos tatuadores
+const TattooArtistsLanding = lazy(() => import('./pages/tattoo-artists/TattooArtistsLanding'));
+const TattooArtistsBlog = lazy(() => import('./pages/tattoo-artists/TattooArtistsBlog'));
+const TattooArtistsShop = lazy(() => import('./pages/tattoo-artists/TattooArtistsShop'));
+const TattooArtistsServices = lazy(() => import('./pages/tattoo-artists/TattooArtistsServices'));
+const TattooArtistsPortfolio = lazy(() => import('./pages/tattoo-artists/TattooArtistsPortfolio'));
+const TattooArtistsContact = lazy(() => import('./pages/tattoo-artists/TattooArtistsContact'));
+
+// Lazy load páginas da nave mãe
+const NaveMaeLanding = lazy(() => import('./pages/nave-mae/NaveMaeLanding'));
 
 // Lazy load páginas administrativas
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
@@ -74,6 +85,17 @@ function App() {
                 <Route path="/user-profile" element={<Layout><LazyLoader><UserProfile /></LazyLoader></Layout>} />
                 <Route path="/invite" element={<InviteAcceptance />} />
 
+                {/* Tatuadores da Nova Era routes */}
+                <Route path="/tatuadores-da-nova-era" element={<LazyLoader><TattooArtistsLanding /></LazyLoader>} />
+                <Route path="/tatuadores-da-nova-era/blog" element={<LazyLoader><TattooArtistsBlog /></LazyLoader>} />
+                <Route path="/tatuadores-da-nova-era/shop" element={<LazyLoader><TattooArtistsShop /></LazyLoader>} />
+                <Route path="/tatuadores-da-nova-era/services" element={<LazyLoader><TattooArtistsServices /></LazyLoader>} />
+                <Route path="/tatuadores-da-nova-era/portfolio" element={<LazyLoader><TattooArtistsPortfolio /></LazyLoader>} />
+                <Route path="/tatuadores-da-nova-era/contact" element={<LazyLoader><TattooArtistsContact /></LazyLoader>} />
+
+                {/* Nave Mãe routes */}
+                <Route path="/nave-mae-da-tatuagem" element={<LazyLoader><NaveMaeLanding /></LazyLoader>} />
+
                 {/* Admin routes with AdminLayout */}
                 <Route
                   path="/admin/*"
@@ -107,8 +129,8 @@ function App() {
                 <Route path="/admin/auth" element={<LazyLoader><AdminAuth /></LazyLoader>} />
                 <Route path="/admin/setup" element={<LazyLoader><AdminUserSetup /></LazyLoader>} />
 
-                {/* 404 */}
-                <Route path="*" element={<Layout><LazyLoader><NotFound /></LazyLoader></Layout>} />
+                {/* 404 - Commented out to avoid redirects during development */}
+                {/* <Route path="*" element={<Layout><LazyLoader><NotFound /></LazyLoader></Layout>} /> */}
               </Routes>
               <Toaster />
             </div>
