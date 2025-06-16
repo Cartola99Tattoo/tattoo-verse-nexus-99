@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
@@ -36,11 +35,12 @@ const AdminAuth = () => {
   const navigate = useNavigate();
   const adminEmail = "adm99tattoo@gmail.com";
 
-  // Se o usuário já estiver autenticado e for admin, redirecione para a página do admin
+  // Se o usuário já estiver autenticado e for admin, redirecione para a página correta
   useEffect(() => {
-    if (user && profile?.role === "admin") {
+    if (user && profile && (profile.role === "admin_estudio" || profile.role === "admin_nave_mae")) {
       console.log("AdminAuth: Usuário já autenticado como administrador, redirecionando...");
-      navigate("/admin");
+      const redirectPath = profile.role === "admin_nave_mae" ? "/nave-mae-da-tatuagem" : "/admin";
+      navigate(redirectPath);
     }
   }, [user, profile, navigate]);
 

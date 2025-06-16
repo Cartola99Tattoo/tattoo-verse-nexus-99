@@ -14,7 +14,7 @@ export interface UserPermissions {
 }
 
 export interface UserRole {
-  role: 'admin' | 'tatuador';
+  role: 'admin_nave_mae' | 'admin_estudio' | 'tatuador_da_nova_era' | 'cliente';
   permissions?: UserPermissions;
 }
 
@@ -47,18 +47,32 @@ export const usePermissions = () => {
 
   useEffect(() => {
     if (profile) {
-      // Para o usuário admin simulado
-      if (profile.role === 'admin') {
+      // Para administradores (nave-mãe e estúdio)
+      if (profile.role === 'admin_nave_mae' || profile.role === 'admin_estudio') {
         setUserRole({
-          role: 'admin',
+          role: profile.role,
           permissions: defaultAdminPermissions
         });
-      } else if (profile.role === 'artista') {
+      } else if (profile.role === 'tatuador_da_nova_era') {
         // Simula buscar permissões específicas do tatuador
         // Em produção, isso viria do backend/Firestore
         setUserRole({
-          role: 'tatuador',
+          role: 'tatuador_da_nova_era',
           permissions: defaultTatuadorPermissions
+        });
+      } else if (profile.role === 'cliente') {
+        setUserRole({
+          role: 'cliente',
+          permissions: {
+            canViewOwnAppointments: true,
+            canEditOwnAppointments: false,
+            canViewClients: false,
+            canAddClients: false,
+            canEditOwnPortfolio: false,
+            canViewFinancialSummary: false,
+            canAccessShop: true,
+            canViewReports: false,
+          }
         });
       }
       setIsLoading(false);
@@ -68,19 +82,19 @@ export const usePermissions = () => {
   const hasPermission = (permission: keyof UserPermissions): boolean => {
     if (!userRole) return false;
     
-    // Admin sempre tem todas as permissões
-    if (userRole.role === 'admin') return true;
+    // Admins sempre têm todas as permissões
+    if (userRole.role === 'admin_nave_mae' || userRole.role === 'admin_estudio') return true;
     
-    // Verifica permissão específica para tatuador
+    // Verifica permissão específica para outros tipos
     return userRole.permissions?.[permission] || false;
   };
 
   const isAdmin = (): boolean => {
-    return userRole?.role === 'admin' || false;
+    return userRole?.role === 'admin_nave_mae' || userRole?.role === 'admin_estudio' || false;
   };
 
   const isTatuador = (): boolean => {
-    return userRole?.role === 'tatuador' || false;
+    return userRole?.role === 'tatuador_da_nova_era' || false;
   };
 
   return {
