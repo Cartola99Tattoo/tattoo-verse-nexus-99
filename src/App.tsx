@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
@@ -84,11 +84,11 @@ function App() {
               {/* Other public routes */}
               <Route path="/contact" element={<Contact />} />
 
-              {/* Admin routes (Estúdio Virtual) - PRESERVADOS */}
+              {/* Admin routes (Estúdio Virtual) - DESENVOLVIMENTO: ACESSO IRRESTRITO */}
               <Route 
                 path="/admin" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_estudio"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <AdminLayout>
                       <Dashboard />
                     </AdminLayout>
@@ -98,7 +98,7 @@ function App() {
               <Route 
                 path="/admin/clients" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_estudio"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <AdminLayout>
                       <Clients />
                     </AdminLayout>
@@ -108,7 +108,7 @@ function App() {
               <Route 
                 path="/admin/appointments" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_estudio"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <AdminLayout>
                       <Appointments />
                     </AdminLayout>
@@ -118,7 +118,7 @@ function App() {
               <Route 
                 path="/admin/artists" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_estudio"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <AdminLayout>
                       <AdminArtists />
                     </AdminLayout>
@@ -128,7 +128,7 @@ function App() {
               <Route 
                 path="/admin/products" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_estudio"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <AdminLayout>
                       <Products />
                     </AdminLayout>
@@ -138,7 +138,7 @@ function App() {
               <Route 
                 path="/admin/finances" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_estudio"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <AdminLayout>
                       <Financial />
                     </AdminLayout>
@@ -148,7 +148,7 @@ function App() {
               <Route 
                 path="/admin/settings" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_estudio"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <AdminLayout>
                       <Settings />
                     </AdminLayout>
@@ -156,7 +156,7 @@ function App() {
                 } 
               />
 
-              {/* Tatuadores da Nova Era routes - ACESSO MAIS FLEXÍVEL */}
+              {/* Tatuadores da Nova Era routes - DESENVOLVIMENTO: ACESSO IRRESTRITO */}
               <Route 
                 path="/tatuadores-da-nova-era" 
                 element={
@@ -216,17 +216,17 @@ function App() {
               <Route 
                 path="/tatuadores-da-nova-era/portfolio" 
                 element={
-                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                  <ProtectedRoute allowPublic={true}>
                     <TatuadoresPortfolio />
                   </ProtectedRoute>
                 } 
               />
 
-              {/* Nave-Mãe da Tatuagem routes - EXCLUSIVO PARA ADMIN INTERNO */}
+              {/* Nave-Mãe da Tatuagem routes - DESENVOLVIMENTO: ACESSO IRRESTRITO */}
               <Route 
                 path="/nave-mae-da-tatuagem" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <NaveMaeIndex />
                   </ProtectedRoute>
                 } 
@@ -234,7 +234,7 @@ function App() {
               <Route 
                 path="/nave-mae-da-tatuagem/clients" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <NaveMaeClients />
                   </ProtectedRoute>
                 } 
@@ -242,7 +242,7 @@ function App() {
               <Route 
                 path="/nave-mae-da-tatuagem/appointments" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <NaveMaeAppointments />
                   </ProtectedRoute>
                 } 
@@ -250,7 +250,7 @@ function App() {
               <Route 
                 path="/nave-mae-da-tatuagem/artists" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <NaveMaeArtists />
                   </ProtectedRoute>
                 } 
@@ -258,7 +258,7 @@ function App() {
               <Route 
                 path="/nave-mae-da-tatuagem/products" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <NaveMaeProducts />
                   </ProtectedRoute>
                 } 
@@ -266,7 +266,7 @@ function App() {
               <Route 
                 path="/nave-mae-da-tatuagem/financial" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <NaveMaeFinancial />
                   </ProtectedRoute>
                 } 
@@ -274,14 +274,14 @@ function App() {
               <Route 
                 path="/nave-mae-da-tatuagem/settings" 
                 element={
-                  <ProtectedRoute allowedRoles={["admin_nave_mae"]} redirectTo="/admin-auth">
+                  <ProtectedRoute allowPublic={true}>
                     <NaveMaeSettings />
                   </ProtectedRoute>
                 } 
               />
 
-              {/* Fallback route */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+              {/* DESENVOLVIMENTO: Rota fallback comentada para evitar redirecionamentos indevidos */}
+              {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
             </Routes>
             <Toaster />
             {/* Simulador de usuário apenas em desenvolvimento */}

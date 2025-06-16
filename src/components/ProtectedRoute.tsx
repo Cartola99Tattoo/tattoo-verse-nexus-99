@@ -19,9 +19,17 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
+  // DESENVOLVIMENTO: Permitir acesso irrestrito durante desenvolvimento
+  // Remover verificações de autenticação para permitir navegação livre
+  console.log("ProtectedRoute (compatibility): Development mode - allowing unrestricted access");
+  return <>{children}</>;
+
+  // Código de proteção comentado para referência futura
+  /*
   // Para manter compatibilidade, sempre renderiza os filhos
   // A validação real de permissões está em src/components/auth/ProtectedRoute.tsx
   return <>{children}</>;
+  */
 };
 
 export default ProtectedRoute;
