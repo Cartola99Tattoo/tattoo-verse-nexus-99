@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Navigate, useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,12 +69,15 @@ const Auth = () => {
     },
   });
 
+  // DESENVOLVIMENTO: Comentar redirecionamento automático para permitir acesso à página de auth
   // NOW we can do conditional logic and early returns AFTER all hooks are called
   // Se o usuário já estiver autenticado, redirecione para a página inicial
+  /*
   if (user) {
     console.log("Auth: Usuário já autenticado, redirecionando...", user);
     return <Navigate to="/" />;
   }
+  */
 
   // Função para fazer login
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {

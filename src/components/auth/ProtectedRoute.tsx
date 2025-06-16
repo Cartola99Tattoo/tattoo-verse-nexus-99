@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
   children: ReactNode;
   allowedRoles?: Array<"admin_nave_mae" | "admin_estudio" | "tatuador_da_nova_era" | "cliente">;
   redirectTo?: string;
-  allowPublic?: boolean; // Nova prop para permitir acesso público
+  allowPublic?: boolean;
 }
 
 const ProtectedRoute = ({ 
@@ -26,6 +26,13 @@ const ProtectedRoute = ({
     );
   }
 
+  // DESENVOLVIMENTO: Permitir acesso irrestrito durante desenvolvimento
+  // Remover verificações de autenticação para permitir navegação livre
+  console.log("ProtectedRoute: Development mode - allowing unrestricted access");
+  return <>{children}</>;
+
+  // Código de proteção comentado para referência futura
+  /*
   // Se permite acesso público, renderiza sem verificação
   if (allowPublic) {
     console.log("ProtectedRoute: Public access allowed");
@@ -46,6 +53,7 @@ const ProtectedRoute = ({
 
   console.log("ProtectedRoute: Access granted", { userRole: profile?.role, allowedRoles });
   return <>{children}</>;
+  */
 };
 
 export default ProtectedRoute;
