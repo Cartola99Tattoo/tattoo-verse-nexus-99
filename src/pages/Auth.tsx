@@ -33,6 +33,7 @@ const forgotPasswordSchema = z.object({
 });
 
 const Auth = () => {
+  // ALL HOOKS MUST BE CALLED FIRST, BEFORE ANY CONDITIONAL LOGIC
   const { user, signIn, signUp, resetPassword } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
   const [loginError, setLoginError] = useState("");
@@ -40,12 +41,6 @@ const Auth = () => {
   const [forgotError, setForgotError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-
-  // Se o usuário já estiver autenticado, redirecione para a página inicial
-  if (user) {
-    console.log("Auth: Usuário já autenticado, redirecionando...", user);
-    return <Navigate to="/" />;
-  }
 
   // Form para login
   const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -74,6 +69,13 @@ const Auth = () => {
       email: "",
     },
   });
+
+  // NOW we can do conditional logic and early returns AFTER all hooks are called
+  // Se o usuário já estiver autenticado, redirecione para a página inicial
+  if (user) {
+    console.log("Auth: Usuário já autenticado, redirecionando...", user);
+    return <Navigate to="/" />;
+  }
 
   // Função para fazer login
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {
