@@ -7,12 +7,14 @@ interface ProtectedRouteProps {
   children: ReactNode;
   allowedRoles?: Array<"admin_nave_mae" | "admin_estudio" | "tatuador_da_nova_era" | "cliente">;
   redirectTo?: string;
+  allowPublic?: boolean; // Nova prop para permitir acesso público
 }
 
 const ProtectedRoute = ({ 
   children, 
   allowedRoles = [], 
-  redirectTo = "/" 
+  redirectTo = "/",
+  allowPublic = false
 }: ProtectedRouteProps) => {
   const { user, profile, loading } = useAuth();
 
@@ -24,16 +26,25 @@ const ProtectedRoute = ({
     );
   }
 
+  // Se permite acesso público, renderiza sem verificação
+  if (allowPublic) {
+    console.log("ProtectedRoute: Public access allowed");
+    return <>{children}</>;
+  }
+
   // Se não há usuário autenticado, redireciona para login
   if (!user) {
+    console.log("ProtectedRoute: No user, redirecting to auth");
     return <Navigate to="/auth" replace />;
   }
 
   // Se há roles específicos permitidos e o usuário não tem acesso
   if (allowedRoles.length > 0 && profile && !allowedRoles.includes(profile.role)) {
+    console.log("ProtectedRoute: User role not allowed", { userRole: profile.role, allowedRoles, redirectTo });
     return <Navigate to={redirectTo} replace />;
   }
 
+  console.log("ProtectedRoute: Access granted", { userRole: profile?.role, allowedRoles });
   return <>{children}</>;
 };
 

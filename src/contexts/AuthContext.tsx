@@ -26,40 +26,88 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updateProfile: (profile: Partial<UserProfile>) => Promise<{ error: any }>;
-  simulateAdminSession: () => void;
+  simulateUserRole: (role: UserProfile["role"]) => void;
   getRedirectPath: () => string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // Simulando diferentes tipos de usuários para demonstração
-  const [currentUserType, setCurrentUserType] = useState<"admin_nave_mae" | "admin_estudio" | "tatuador_da_nova_era" | "cliente">("admin_nave_mae");
-  
-  const [user] = useState<User | null>({
-    id: "auto-admin-user",
-    email: "admin@99tattoo.com",
-    aud: "authenticated",
-    role: "authenticated",
-  } as User);
-  
-  const [profile] = useState<UserProfile | null>({
-    id: "auto-admin-user",
+// Usuários mock para simulação
+const mockUsers = {
+  admin_nave_mae: {
+    id: "nave-mae-user",
+    email: "navemae@99tattoo.com",
     first_name: "Admin",
-    last_name: "99Tattoo",
-    avatar_url: null,
-    phone: null,
-    email: "admin@99tattoo.com",
-    role: currentUserType,
-    tattoo_preferences: null
+    last_name: "Nave-Mãe",
+    role: "admin_nave_mae" as const
+  },
+  admin_estudio: {
+    id: "estudio-user", 
+    email: "estudio@99tattoo.com",
+    first_name: "Admin",
+    last_name: "Estúdio",
+    role: "admin_estudio" as const
+  },
+  tatuador_da_nova_era: {
+    id: "tatuador-user",
+    email: "tatuador@99tattoo.com", 
+    first_name: "Tatuador",
+    last_name: "Nova Era",
+    role: "tatuador_da_nova_era" as const
+  },
+  cliente: {
+    id: "cliente-user",
+    email: "cliente@99tattoo.com",
+    first_name: "Cliente",
+    last_name: "Final", 
+    role: "cliente" as const
+  }
+};
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // Estado dinâmico baseado em localStorage para persistir durante desenvolvimento
+  const [currentRole, setCurrentRole] = useState<UserProfile["role"]>(() => {
+    const stored = localStorage.getItem("99tattoo_dev_role");
+    return (stored as UserProfile["role"]) || "admin_nave_mae";
   });
   
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Atualizar usuário quando o role muda
+  useEffect(() => {
+    const mockUser = mockUsers[currentRole];
+    console.log("AuthContext: Changing user role to:", currentRole, mockUser);
+    
+    setUser({
+      id: mockUser.id,
+      email: mockUser.email,
+      aud: "authenticated",
+      role: "authenticated",
+    } as User);
+
+    setProfile({
+      id: mockUser.id,
+      first_name: mockUser.first_name,
+      last_name: mockUser.last_name,
+      avatar_url: null,
+      phone: null,
+      email: mockUser.email,
+      role: mockUser.role,
+      tattoo_preferences: null
+    });
+
+    // Persistir role no localStorage
+    localStorage.setItem("99tattoo_dev_role", currentRole);
+  }, [currentRole]);
 
   // Função para determinar o caminho de redirecionamento baseado no role
   const getRedirectPath = (): string => {
     if (!profile) return "/";
+    
+    console.log("AuthContext: Getting redirect path for role:", profile.role);
     
     switch (profile.role) {
       case "admin_nave_mae":
@@ -74,19 +122,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // No-op functions since authentication is removed for now
+  // Função para simular mudança de role (apenas para desenvolvimento)
+  const simulateUserRole = (role: UserProfile["role"]) => {
+    console.log("AuthContext: Simulating user role change to:", role);
+    setCurrentRole(role);
+    toast({
+      title: "Role simulado alterado",
+      description: `Agora você está logado como: ${role}`,
+    });
+  };
+
+  // No-op functions para manter compatibilidade
   const signIn = async () => ({ error: null });
   const signUp = async () => ({ error: null });
-  const signOut = async () => {};
+  const signOut = async () => {
+    console.log("AuthContext: Signing out");
+    // Reset para role padrão
+    setCurrentRole("cliente");
+  };
   const resetPassword = async () => ({ error: null });
   const updateProfile = async () => ({ error: null });
-  const simulateAdminSession = () => {
-    // Cycle through different user types for testing
-    const types: Array<typeof currentUserType> = ["admin_nave_mae", "admin_estudio", "tatuador_da_nova_era", "cliente"];
-    const currentIndex = types.indexOf(currentUserType);
-    const nextIndex = (currentIndex + 1) % types.length;
-    setCurrentUserType(types[nextIndex]);
-  };
 
   return (
     <AuthContext.Provider
@@ -100,7 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         resetPassword,
         updateProfile,
-        simulateAdminSession,
+        simulateUserRole,
         getRedirectPath,
       }}
     >

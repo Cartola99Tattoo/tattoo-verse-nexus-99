@@ -1,9 +1,11 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import UserRoleSimulator from "@/components/dev/UserRoleSimulator";
 
 // Public pages
 import Index from "@/pages/index";
@@ -82,7 +84,7 @@ function App() {
               {/* Other public routes */}
               <Route path="/contact" element={<Contact />} />
 
-              {/* Admin routes (Estúdio Virtual) */}
+              {/* Admin routes (Estúdio Virtual) - PRESERVADOS */}
               <Route 
                 path="/admin" 
                 element={
@@ -154,11 +156,11 @@ function App() {
                 } 
               />
 
-              {/* Tatuadores da Nova Era routes */}
+              {/* Tatuadores da Nova Era routes - ACESSO MAIS FLEXÍVEL */}
               <Route 
                 path="/tatuadores-da-nova-era" 
                 element={
-                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                  <ProtectedRoute allowPublic={true}>
                     <TatuadoresIndex />
                   </ProtectedRoute>
                 } 
@@ -166,7 +168,7 @@ function App() {
               <Route 
                 path="/tatuadores-da-nova-era/blog" 
                 element={
-                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                  <ProtectedRoute allowPublic={true}>
                     <TatuadoresBlog />
                   </ProtectedRoute>
                 } 
@@ -174,7 +176,7 @@ function App() {
               <Route 
                 path="/tatuadores-da-nova-era/blog/:id" 
                 element={
-                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                  <ProtectedRoute allowPublic={true}>
                     <TatuadoresBlogPost />
                   </ProtectedRoute>
                 } 
@@ -182,7 +184,7 @@ function App() {
               <Route 
                 path="/tatuadores-da-nova-era/shop" 
                 element={
-                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                  <ProtectedRoute allowPublic={true}>
                     <TatuadoresShop />
                   </ProtectedRoute>
                 } 
@@ -190,7 +192,7 @@ function App() {
               <Route 
                 path="/tatuadores-da-nova-era/shop/:id" 
                 element={
-                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                  <ProtectedRoute allowPublic={true}>
                     <TatuadoresShopProduct />
                   </ProtectedRoute>
                 } 
@@ -198,7 +200,7 @@ function App() {
               <Route 
                 path="/tatuadores-da-nova-era/eventos" 
                 element={
-                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                  <ProtectedRoute allowPublic={true}>
                     <TatuadoresEventos />
                   </ProtectedRoute>
                 } 
@@ -206,7 +208,7 @@ function App() {
               <Route 
                 path="/tatuadores-da-nova-era/eventos/:id" 
                 element={
-                  <ProtectedRoute allowedRoles={["tatuador_da_nova_era"]} redirectTo="/auth">
+                  <ProtectedRoute allowPublic={true}>
                     <TatuadoresEventDetail />
                   </ProtectedRoute>
                 } 
@@ -220,7 +222,7 @@ function App() {
                 } 
               />
 
-              {/* Nave-Mãe da Tatuagem routes */}
+              {/* Nave-Mãe da Tatuagem routes - EXCLUSIVO PARA ADMIN INTERNO */}
               <Route 
                 path="/nave-mae-da-tatuagem" 
                 element={
@@ -282,6 +284,8 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <Toaster />
+            {/* Simulador de usuário apenas em desenvolvimento */}
+            {process.env.NODE_ENV === 'development' && <UserRoleSimulator />}
           </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
