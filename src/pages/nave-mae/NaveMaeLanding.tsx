@@ -2,26 +2,11 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Settings, Users, BarChart3, Database, Zap } from "lucide-react";
+import NaveMaeLayout from "@/components/layouts/NaveMaeLayout";
 
 const NaveMaeLanding = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900">
-      {/* Header */}
-      <header className="bg-black/80 backdrop-blur-sm border-b border-purple-500/20">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">99</span>
-              </div>
-              <span className="text-xl font-bold text-white">Tattoo</span>
-              <span className="text-purple-400 text-sm ml-2">Nave Mãe</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Content */}
+    <NaveMaeLayout>
       <div className="container mx-auto px-4 py-20">
         <div className="text-center text-white mb-16">
           <h1 className="text-6xl font-bold mb-6">
@@ -92,7 +77,7 @@ const NaveMaeLanding = () => {
           </Card>
         </div>
       </div>
-    </div>
+    </NaveMaeLayout>
   );
 };
 

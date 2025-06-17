@@ -1,291 +1,223 @@
 
 import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Palette, Users, Calendar, TrendingUp, CheckCircle, Star } from "lucide-react";
-
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Nome é obrigatório" }),
-  studioName: z.string().optional(),
-  email: z.string().email({ message: "Email inválido" }),
-  phone: z.string().min(10, { message: "Telefone inválido" }),
-  message: z.string().optional(),
-});
+import { Palette, TrendingUp, Users, Zap, CheckCircle } from "lucide-react";
+import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
 
 const TattooArtistsLanding = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      studioName: "",
-      email: "",
-      phone: "",
-      message: "",
-    },
+  const [formData, setFormData] = useState({
+    name: "",
+    studioName: "",
+    email: "",
+    phone: "",
+    message: ""
   });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsSubmitting(true);
-    
-    try {
-      console.log("Dados do formulário de tatuadores:", values);
-      
-      // Simular envio
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      form.reset();
-      
-      toast({
-        title: "Obrigado! 🎨",
-        description: "Entraremos em contato em breve para digitalizar seu estúdio!",
-      });
-    } catch (error) {
-      console.error("Erro ao enviar formulário:", error);
-      toast({
-        title: "Erro ao enviar",
-        description: "Ocorreu um erro. Por favor, tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const benefits = [
-    {
-      icon: <Users className="h-8 w-8 text-red-500" />,
-      title: "Mais Clientes Qualificados",
-      description: "Atraia clientes que realmente valorizam sua arte através de nossa plataforma especializada."
-    },
-    {
-      icon: <Calendar className="h-8 w-8 text-red-500" />,
-      title: "Agendamentos Otimizados",
-      description: "Sistema inteligente de agendamentos que organiza sua agenda e reduz no-shows."
-    },
-    {
-      icon: <TrendingUp className="h-8 w-8 text-red-500" />,
-      title: "Faturamento Aumentado",
-      description: "Ferramentas para precificar melhor seus trabalhos e aumentar sua receita mensal."
-    },
-    {
-      icon: <Palette className="h-8 w-8 text-red-500" />,
-      title: "Foco na Arte",
-      description: "Automatize a parte administrativa e dedique mais tempo ao que você ama: tatuar."
-    }
-  ];
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form data:", formData);
+    setIsSubmitted(true);
+    
+    // Reset form after 3 seconds
+    setTimeout(() => {
+      setIsSubmitted(false);
+      setFormData({
+        name: "",
+        studioName: "",
+        email: "",
+        phone: "",
+        message: ""
+      });
+    }, 3000);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-red-900">
-      {/* Header */}
-      <header className="bg-black/80 backdrop-blur-sm border-b border-red-500/20">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">99</span>
-              </div>
-              <span className="text-xl font-bold text-white">Tattoo</span>
-              <span className="text-red-400 text-sm ml-2">Para Tatuadores</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto max-w-7xl">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Content */}
-            <div className="text-white space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                  Digitalize Seu Estúdio de Tatuagem para a 
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-red-600"> Nova Era!</span>
-                </h1>
-                <p className="text-xl text-gray-300 leading-relaxed">
-                  Atraia clientes qualificados, otimize agendamentos e foque no que você faz de melhor: criar arte na pele. 
-                  Nossa plataforma conecta tatuadores excepcionais com clientes que valorizam qualidade.
-                </p>
-              </div>
-
-              {/* Benefits Grid */}
-              <div className="grid md:grid-cols-2 gap-6">
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      {benefit.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white mb-1">{benefit.title}</h3>
-                      <p className="text-sm text-gray-400">{benefit.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Social Proof */}
-              <div className="flex items-center space-x-6 pt-6 border-t border-gray-700">
-                <div className="flex items-center space-x-1">
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span className="text-sm text-gray-300 ml-2">5.0 • +200 Estúdios</span>
-                </div>
-                <div className="text-sm text-gray-400">
-                  <CheckCircle className="h-4 w-4 text-green-400 inline mr-1" />
-                  Resultado em 30 dias
-                </div>
-              </div>
-            </div>
-
-            {/* Form */}
-            <div className="lg:pl-8">
-              <Card className="bg-white/95 backdrop-blur-sm shadow-2xl border-0">
-                <CardHeader className="text-center pb-6">
-                  <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-                    Comece Sua Transformação Digital
-                  </CardTitle>
-                  <p className="text-gray-600">
-                    Preencha os dados e receba um plano personalizado para seu estúdio
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-900 font-semibold">Nome Completo *</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Seu nome completo" 
-                                className="h-12 border-gray-300 focus:border-red-500 focus:ring-red-500"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="studioName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-900 font-semibold">Nome do Estúdio</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Nome do seu estúdio (opcional)" 
-                                className="h-12 border-gray-300 focus:border-red-500 focus:ring-red-500"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-900 font-semibold">E-mail *</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="email" 
-                                placeholder="seu@email.com" 
-                                className="h-12 border-gray-300 focus:border-red-500 focus:ring-red-500"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-900 font-semibold">Telefone (WhatsApp) *</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="(11) 99999-9999" 
-                                className="h-12 border-gray-300 focus:border-red-500 focus:ring-red-500"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="message"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-900 font-semibold">Mensagem</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Conte-nos um pouco sobre seu estúdio e o que você busca..." 
-                                className="border-gray-300 focus:border-red-500 focus:ring-red-500 min-h-[100px]"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full h-12 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold text-lg shadow-lg transition-all duration-300 transform hover:scale-105"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Enviando..." : "🚀 Quero Digitalizar Meu Estúdio!"}
-                      </Button>
-                    </form>
-                  </Form>
-                  
-                  <div className="text-center pt-4 border-t border-gray-200">
-                    <p className="text-sm text-gray-500">
-                      <CheckCircle className="h-4 w-4 text-green-500 inline mr-1" />
-                      Resposta em até 24h • Consultoria gratuita
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-black/90 border-t border-red-500/20 py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-400">
-            © 2024 99Tattoo - Plataforma para Tatuadores da Nova Era
+    <TattooArtistLayout>
+      <div className="container mx-auto px-4 py-16">
+        {/* Hero Section */}
+        <div className="text-center text-white mb-16">
+          <h1 className="text-6xl font-bold mb-6">
+            Digitalize Seu Estúdio de Tatuagem para a 
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-red-600"> Nova Era!</span>
+          </h1>
+          <p className="text-xl text-gray-300 max-w-4xl mx-auto mb-8">
+            Atraia clientes qualificados, otimize agendamentos e foque no que você faz de melhor: criar arte na pele. 
+            Transforme seu estúdio com nossa plataforma completa de digitalização.
           </p>
         </div>
-      </footer>
-    </div>
+
+        <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
+          {/* Benefits Section */}
+          <div className="space-y-8">
+            <h2 className="text-3xl font-bold text-white mb-8">Por que digitalizar seu estúdio?</h2>
+            
+            <div className="grid gap-6">
+              {[
+                {
+                  icon: <Users className="h-8 w-8 text-red-400" />,
+                  title: "Mais Clientes Qualificados",
+                  description: "Atraia pessoas que realmente valorizam seu trabalho através de nossa plataforma"
+                },
+                {
+                  icon: <TrendingUp className="h-8 w-8 text-red-400" />,
+                  title: "Agendamentos Otimizados",
+                  description: "Sistema inteligente que maximiza sua agenda e reduz tempo ocioso"
+                },
+                {
+                  icon: <Palette className="h-8 w-8 text-red-400" />,
+                  title: "Foco na sua Arte",
+                  description: "Menos tempo com burocracia, mais tempo criando tatuagens incríveis"
+                },
+                {
+                  icon: <Zap className="h-8 w-8 text-red-400" />,
+                  title: "Presença Digital Profissional",
+                  description: "Portfólio online, redes sociais integradas e muito mais"
+                }
+              ].map((benefit, index) => (
+                <Card key={index} className="bg-white/10 backdrop-blur-sm border-red-500/20 hover:bg-white/15 transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-start space-x-4">
+                      <div className="flex-shrink-0">
+                        {benefit.icon}
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-white mb-2">{benefit.title}</h3>
+                        <p className="text-gray-300">{benefit.description}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact Form */}
+          <div>
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+              <CardHeader className="text-center">
+                <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
+                  Quero Digitalizar Meu Estúdio!
+                </CardTitle>
+                <p className="text-gray-600">
+                  Preencha o formulário e nossa equipe entrará em contato
+                </p>
+              </CardHeader>
+              <CardContent className="p-8">
+                {isSubmitted ? (
+                  <div className="text-center py-8">
+                    <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                    <h3 className="text-2xl font-bold text-green-600 mb-2">Obrigado!</h3>
+                    <p className="text-gray-600">
+                      Recebemos seu contato e nossa equipe entrará em contato em breve!
+                    </p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div>
+                      <Label htmlFor="name" className="text-gray-700 font-semibold">
+                        Nome Completo *
+                      </Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className="mt-2 border-gray-300 focus:border-red-500"
+                        placeholder="Seu nome completo"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="studioName" className="text-gray-700 font-semibold">
+                        Nome do Estúdio
+                      </Label>
+                      <Input
+                        id="studioName"
+                        name="studioName"
+                        type="text"
+                        value={formData.studioName}
+                        onChange={handleInputChange}
+                        className="mt-2 border-gray-300 focus:border-red-500"
+                        placeholder="Nome do seu estúdio (opcional)"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="email" className="text-gray-700 font-semibold">
+                        E-mail *
+                      </Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="mt-2 border-gray-300 focus:border-red-500"
+                        placeholder="seu@email.com"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="phone" className="text-gray-700 font-semibold">
+                        Telefone (WhatsApp) *
+                      </Label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        required
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="mt-2 border-gray-300 focus:border-red-500"
+                        placeholder="(11) 99999-9999"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="message" className="text-gray-700 font-semibold">
+                        Conte-nos sobre seu estúdio
+                      </Label>
+                      <Textarea
+                        id="message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleInputChange}
+                        className="mt-2 border-gray-300 focus:border-red-500"
+                        placeholder="Conte-nos um pouco sobre seu estúdio e o que você busca..."
+                        rows={4}
+                      />
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 text-lg"
+                    >
+                      Quero Digitalizar Meu Estúdio!
+                    </Button>
+                  </form>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </TattooArtistLayout>
   );
 };
 
