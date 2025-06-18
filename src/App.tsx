@@ -40,6 +40,7 @@ const TattooArtistsContact = lazy(() => import('./pages/tattoo-artists/TattooArt
 const NaveMaeLanding = lazy(() => import('./pages/nave-mae/NaveMaeLanding'));
 const NaveMaeDashboard = lazy(() => import('./pages/nave-mae/NaveMaeDashboard'));
 const MultiTenantTests = lazy(() => import('./pages/nave-mae/MultiTenantTests'));
+const StudioManagement = lazy(() => import('./pages/nave-mae/StudioManagement'));
 
 // Lazy load páginas administrativas
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
@@ -98,6 +99,7 @@ function App() {
               <Route path="/nave-mae-da-tatuagem" element={<LazyLoader><NaveMaeLanding /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/dashboard" element={<LazyLoader><NaveMaeDashboard /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/tests" element={<LazyLoader><MultiTenantTests /></LazyLoader>} />
+              <Route path="/nave-mae-da-tatuagem/studios" element={<LazyLoader><StudioManagement /></LazyLoader>} />
 
               {/* Admin routes with AdminLayout */}
               <Route
