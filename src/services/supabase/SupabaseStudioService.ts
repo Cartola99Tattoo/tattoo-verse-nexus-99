@@ -234,8 +234,18 @@ export class SupabaseStudioService {
 
     if (error) throw error;
     
-    // Correctly extract studios - each item.studios is a single Studio object
-    const studios = data?.map(item => item.studios).filter(Boolean) as Studio[] || [];
+    // Handle the case where studios might be null or the structure is different
+    const studios: Studio[] = [];
+    
+    if (data) {
+      for (const item of data) {
+        if (item.studios) {
+          // item.studios should be a single Studio object, not an array
+          studios.push(item.studios as Studio);
+        }
+      }
+    }
+    
     return studios;
   }
 }
