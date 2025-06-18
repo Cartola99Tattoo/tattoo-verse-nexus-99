@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,8 @@ const NaveMaeArtists = () => {
   const artists = Array.isArray(artistsData) ? artistsData : (artistsData?.artists || []);
 
   const filteredArtists = artists.filter(artist => {
-    const matchesSearch = artist.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const fullName = `${artist.first_name} ${artist.last_name}`;
+    const matchesSearch = fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          artist.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || artist.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -33,7 +35,8 @@ const NaveMaeArtists = () => {
   const totalArtists = artists.length;
   const activeArtists = artists.filter(a => a.status === 'active').length;
   const inactiveArtists = artists.filter(a => a.status === 'inactive').length;
-  const featuredArtists = artists.filter(a => a.featured).length;
+  // Since 'featured' doesn't exist in Artist interface, we'll use a placeholder or remove this metric
+  const featuredArtists = 0; // Placeholder since featured property doesn't exist
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -161,19 +164,13 @@ const NaveMaeArtists = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-lg font-bold">{artist.name}</CardTitle>
+                      <CardTitle className="text-lg font-bold">{`${artist.first_name} ${artist.last_name}`}</CardTitle>
                       <p className="text-sm text-gray-500">{artist.email}</p>
                     </div>
                     <div className="flex gap-2">
                       <Badge className={`text-xs ${getStatusColor(artist.status)}`}>
                         {artist.status === 'active' ? 'Ativo' : 'Inativo'}
                       </Badge>
-                      {artist.featured && (
-                        <Badge className="text-xs bg-yellow-100 text-yellow-800">
-                          <Star className="h-3 w-3 mr-1" />
-                          Destaque
-                        </Badge>
-                      )}
                     </div>
                   </div>
                 </CardHeader>
@@ -190,7 +187,7 @@ const NaveMaeArtists = () => {
                       <strong>Avaliação:</strong> ⭐ {artist.rating?.toFixed(1) || 'N/A'}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <strong>Projetos concluídos:</strong> {artist.completed_projects || 0}
+                      <strong>Estilo:</strong> {artist.style}
                     </p>
                   </div>
                   
