@@ -234,7 +234,7 @@ export class SupabaseStudioService {
 
     if (error) throw error;
     
-    // Corrigir o retorno para extrair corretamente os studios
+    // Correctly extract studios - each item.studios is a single Studio object
     const studios = data?.map(item => item.studios).filter(Boolean) as Studio[] || [];
     return studios;
   }
