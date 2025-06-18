@@ -1,3 +1,4 @@
+
 import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
@@ -64,8 +65,8 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <QueryClient>
+      <Router>
+        <QueryClientProvider client={queryClient}>
           <CartProvider>
             <Routes>
               {/* Public routes with Layout wrapper */}
@@ -135,8 +136,8 @@ function App() {
             </Routes>
             <Toaster />
           </CartProvider>
-        </QueryClient>
-      </BrowserRouter>
+        </QueryClientProvider>
+      </Router>
     </AuthProvider>
   );
 }
