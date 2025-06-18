@@ -30,6 +30,8 @@ import { mockBedService } from './mock/mockBedService';
 import mockEventService from './mock/mockEventService';
 import { mockUserProfileService } from "./mock/mockUserProfileService";
 import { mockTattooArtistService } from './mock/mockTattooArtistService';
+import { mockStudioService } from './mock/mockStudioService';
+import { mockNaveMaeService } from './mock/mockNaveMaeService';
 
 // Supabase services
 import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
@@ -192,8 +194,7 @@ export const getTattooArtistService = (): ITattooArtistService => {
 export const getStudioService = () => {
   if (appConfig.dataSource.useMockData || !isSupabaseConnected()) {
     console.log("Using mock studio service");
-    // TODO: Create mockStudioService
-    throw new Error('Mock studio service not implemented yet');
+    return mockStudioService;
   }
   
   console.log("Using Supabase studio service");
@@ -204,8 +205,7 @@ export const getStudioService = () => {
 export const getNaveMaeService = () => {
   if (appConfig.dataSource.useMockData || !isSupabaseConnected()) {
     console.log("Using mock nave mae service");
-    // TODO: Create mockNaveMaeService
-    throw new Error('Mock nave mae service not implemented yet');
+    return mockNaveMaeService;
   }
   
   console.log("Using Supabase nave mae service");
