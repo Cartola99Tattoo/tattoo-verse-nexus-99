@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ const StudioManagement = () => {
   const studioService = getStudioService();
   const naveMaeService = getNaveMaeService();
 
-  const { data: studiosData, loading, refetch } = useDataQuery(
+  const { data: studiosData, loading, refresh } = useDataQuery(
     () => studioService.fetchStudios(),
     []
   );
@@ -30,7 +29,12 @@ const StudioManagement = () => {
   );
 
   const studios = studiosData || [];
-  const metrics = metricsData || {};
+  const metrics = metricsData || {
+    totalStudios: 0,
+    totalArtists: 0,
+    totalAppointments: 0,
+    totalRevenue: 0
+  };
 
   const filteredStudios = studios.filter(studio => {
     const matchesSearch = studio.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

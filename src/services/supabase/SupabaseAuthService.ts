@@ -5,7 +5,7 @@ import { IAuthService } from '../interfaces/IAuthService';
 import { UserProfile } from "@/contexts/AuthContext";
 
 export interface UserRole {
-  CLIENT: 'client';
+  CLIENT: 'cliente';
   ADMIN_ESTUDIO: 'admin_estudio';
   TATUADOR_DA_NOVA_ERA: 'tatuador_da_nova_era';
   ADMIN_NAVE_MAE: 'admin_nave_mae';
@@ -61,7 +61,7 @@ export class SupabaseAuthService implements IAuthService {
         first_name: firstName,
         last_name: lastName,
         email,
-        role: 'client' // Default role
+        role: 'cliente' // Default role corrigido
       });
     }
     

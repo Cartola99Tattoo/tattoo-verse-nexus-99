@@ -233,7 +233,10 @@ export class SupabaseStudioService {
       .eq('status', 'active');
 
     if (error) throw error;
-    return data?.map(item => item.studios).filter(Boolean) || [];
+    
+    // Corrigir o retorno para extrair corretamente os studios
+    const studios = data?.map(item => item.studios).filter(Boolean) as Studio[] || [];
+    return studios;
   }
 }
 
