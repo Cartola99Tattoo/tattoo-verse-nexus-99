@@ -23,12 +23,15 @@ const TattooArtistsShop = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("todos");
 
-  const { data: products = [], loading } = useDataQuery(
+  const { data: productsData, loading } = useDataQuery(
     () => getTattooArtistService().getProfessionalProducts(
       selectedCategory === 'todos' ? undefined : selectedCategory
     ),
     [selectedCategory]
   );
+
+  // Safely handle the products data
+  const products = productsData || [];
 
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
