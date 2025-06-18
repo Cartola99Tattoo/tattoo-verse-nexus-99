@@ -234,13 +234,13 @@ export class SupabaseStudioService {
 
     if (error) throw error;
     
-    // Handle the case where studios might be null or the structure is different
+    // Handle the joined data properly - studios is a single object per row
     const studios: Studio[] = [];
     
     if (data) {
       for (const item of data) {
-        if (item.studios) {
-          // item.studios should be a single Studio object, not an array
+        // item.studios is the joined studio data - it should be a single Studio object
+        if (item.studios && typeof item.studios === 'object' && !Array.isArray(item.studios)) {
           studios.push(item.studios as Studio);
         }
       }
