@@ -1,3 +1,4 @@
+
 import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
@@ -39,6 +40,7 @@ const TattooArtistsContact = lazy(() => import('./pages/tattoo-artists/TattooArt
 const NaveMaeLanding = lazy(() => import('./pages/nave-mae/NaveMaeLanding'));
 const NaveMaeDashboard = lazy(() => import('./pages/nave-mae/NaveMaeDashboard'));
 const NaveMaeClients = lazy(() => import('./pages/nave-mae/NaveMaeClients'));
+const NaveMaeArtists = lazy(() => import('./pages/nave-mae/NaveMaeArtists'));
 const MultiTenantTests = lazy(() => import('./pages/nave-mae/MultiTenantTests'));
 const StudioManagement = lazy(() => import('./pages/nave-mae/StudioManagement'));
 

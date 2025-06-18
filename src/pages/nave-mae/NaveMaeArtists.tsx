@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,10 +20,11 @@ const NaveMaeArtists = () => {
     []
   );
 
-  const artists = artistsData || [];
+  // Extract artists array from the response data structure
+  const artists = Array.isArray(artistsData) ? artistsData : (artistsData?.artists || []);
 
   const filteredArtists = artists.filter(artist => {
-    const matchesSearch = artist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = artist.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          artist.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || artist.status === statusFilter;
     return matchesSearch && matchesStatus;
