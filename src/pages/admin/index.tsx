@@ -1,3 +1,4 @@
+
 export { default as AdminArtists } from './AdminArtists';
 export { default as AdminAuth } from '../AdminAuth';
 export { default as AdminUserSetup } from '../AdminUserSetup';
@@ -14,3 +15,4 @@ export { default as Security } from './Security';
 export { default as AdminBlog } from './Blog';
 export { default as Projects } from './Projects';
 export { default as Events } from './Events';
+export { default as MultiTenantTests } from './MultiTenantTests';
