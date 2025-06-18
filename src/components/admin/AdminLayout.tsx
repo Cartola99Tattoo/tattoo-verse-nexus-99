@@ -1,3 +1,4 @@
+
 import React, { ReactNode, useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
@@ -56,8 +57,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       <div className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="p-6">
           <div className="bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-r-lg shadow-lg">
-            <p className="font-bold">Acesso Administrativo Irrestrito</p>
-            <p>Este site está em modo de desenvolvimento com acesso administrativo irrestrito. Todo o conteúdo está disponível sem necessidade de login.</p>
+            <p className="font-bold">Acesso Administrativo - Estúdio</p>
+            <p>Painel administrativo para gestão do estúdio de tatuagem.</p>
           </div>
 
           <div className="mb-6">
