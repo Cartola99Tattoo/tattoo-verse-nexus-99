@@ -179,10 +179,10 @@ const NaveMaeClients = () => {
                       <strong>Telefone:</strong> {client.phone}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <strong>Última visita:</strong> {new Date(client.lastVisit).toLocaleDateString()}
+                      <strong>Última atividade:</strong> {client.last_activity ? new Date(client.last_activity).toLocaleDateString() : 'N/A'}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <strong>Total gasto:</strong> R$ {client.totalSpent?.toLocaleString() || '0'}
+                      <strong>Total gasto:</strong> R$ {client.total_spent?.toLocaleString() || '0'}
                     </p>
                   </div>
                   
