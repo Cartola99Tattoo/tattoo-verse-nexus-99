@@ -35,6 +35,15 @@ export const generateId = (): string => {
   return generateMockId();
 };
 
+// Helper to create mock timestamps - ADDED THIS MISSING FUNCTION
+export const createMockTimestamps = () => {
+  const now = new Date().toISOString();
+  return {
+    created_at: now,
+    updated_at: now
+  };
+};
+
 // Export default object for convenience
 export const mockUtils = {
   simulateNetworkDelay,
@@ -42,5 +51,6 @@ export const mockUtils = {
   generateMockId,
   delay,
   simulateDelay,
-  generateId
+  generateId,
+  createMockTimestamps
 };

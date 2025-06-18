@@ -1,4 +1,3 @@
-
 import { ITattooArtistService, TattooArtistPortfolioItem, TattooArtistBlogPost, ProfessionalProduct, ConsultingService } from '../interfaces/ITattooArtistService';
 import { generateMockId, createMockTimestamps } from './mockUtils';
 
@@ -120,23 +119,35 @@ class MockTattooArtistService implements ITattooArtistService {
   ];
 
   async getAll(): Promise<any[]> {
+    await new Promise(resolve => setTimeout(resolve, 300));
     return [];
   }
 
   async getById(id: string): Promise<any | null> {
+    await new Promise(resolve => setTimeout(resolve, 300));
     return null;
   }
 
+  async fetchAll(): Promise<any[]> {
+    return this.getAll();
+  }
+
+  async fetchById(id: string): Promise<any | null> {
+    return this.getById(id);
+  }
+
   async create(data: any): Promise<any> {
-    return data;
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { ...data, id: generateMockId(), ...createMockTimestamps() };
   }
 
   async update(id: string, data: any): Promise<any> {
-    return data;
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { ...data, id, updated_at: new Date().toISOString() };
   }
 
-  async delete(id: string): Promise<boolean> {
-    return true;
+  async delete(id: string): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 300));
   }
 
   async getPortfolioItems(artistId: string): Promise<TattooArtistPortfolioItem[]> {
