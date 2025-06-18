@@ -1,4 +1,3 @@
-
 import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
@@ -39,6 +38,7 @@ const TattooArtistsContact = lazy(() => import('./pages/tattoo-artists/TattooArt
 // Lazy load páginas da nave mãe
 const NaveMaeLanding = lazy(() => import('./pages/nave-mae/NaveMaeLanding'));
 const NaveMaeDashboard = lazy(() => import('./pages/nave-mae/NaveMaeDashboard'));
+const NaveMaeClients = lazy(() => import('./pages/nave-mae/NaveMaeClients'));
 const MultiTenantTests = lazy(() => import('./pages/nave-mae/MultiTenantTests'));
 const StudioManagement = lazy(() => import('./pages/nave-mae/StudioManagement'));
 
@@ -98,33 +98,39 @@ function App() {
               {/* Nave Mãe routes */}
               <Route path="/nave-mae-da-tatuagem" element={<LazyLoader><NaveMaeLanding /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/dashboard" element={<LazyLoader><NaveMaeDashboard /></LazyLoader>} />
+              <Route path="/nave-mae-da-tatuagem/clients" element={<LazyLoader><NaveMaeClients /></LazyLoader>} />
+              <Route path="/nave-mae-da-tatuagem/artists" element={<LazyLoader><NaveMaeArtists /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/tests" element={<LazyLoader><MultiTenantTests /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/studios" element={<LazyLoader><StudioManagement /></LazyLoader>} />
 
-              {/* Admin routes with AdminLayout */}
+              {/* Admin routes with AdminLayout wrapper */}
               <Route
                 path="/admin/*"
                 element={
                   <ProtectedRoute>
-                    <Routes>
-                      <Route index element={<Navigate to="dashboard" replace />} />
-                      <Route path="dashboard" element={<LazyLoader><Dashboard /></LazyLoader>} />
-                      <Route path="artists" element={<LazyLoader><AdminArtists /></LazyLoader>} />
-                      <Route path="blog" element={<LazyLoader><AdminBlog /></LazyLoader>} />
-                      <Route path="appointments" element={<LazyLoader><Appointments /></LazyLoader>} />
-                      <Route path="clients" element={<LazyLoader><Clients /></LazyLoader>} />
-                      <Route path="clients/:id" element={<LazyLoader><ClientDetail /></LazyLoader>} />
-                      <Route path="products" element={<LazyLoader><Products /></LazyLoader>} />
-                      <Route path="stock" element={<LazyLoader><Stock /></LazyLoader>} />
-                      <Route path="projects" element={<LazyLoader><Projects /></LazyLoader>} />
-                      <Route path="events" element={<LazyLoader><AdminEvents /></LazyLoader>} />
-                      <Route path="financial" element={<LazyLoader><Financial /></LazyLoader>} />
-                      <Route path="analytics" element={<LazyLoader><Analytics /></LazyLoader>} />
-                      <Route path="loyalty" element={<LazyLoader><Loyalty /></LazyLoader>} />
-                      <Route path="settings" element={<LazyLoader><Settings /></LazyLoader>} />
-                      <Route path="security" element={<LazyLoader><Security /></LazyLoader>} />
-                      <Route path="tests" element={<LazyLoader><MultiTenantTests /></LazyLoader>} />
-                    </Routes>
+                    <LazyLoader>
+                      <AdminLayout>
+                        <Routes>
+                          <Route index element={<Navigate to="dashboard" replace />} />
+                          <Route path="dashboard" element={<Dashboard />} />
+                          <Route path="artists" element={<AdminArtists />} />
+                          <Route path="blog" element={<AdminBlog />} />
+                          <Route path="appointments" element={<Appointments />} />
+                          <Route path="clients" element={<Clients />} />
+                          <Route path="clients/:id" element={<ClientDetail />} />
+                          <Route path="products" element={<Products />} />
+                          <Route path="stock" element={<Stock />} />
+                          <Route path="projects" element={<Projects />} />
+                          <Route path="events" element={<AdminEvents />} />
+                          <Route path="financial" element={<Financial />} />
+                          <Route path="analytics" element={<Analytics />} />
+                          <Route path="loyalty" element={<Loyalty />} />
+                          <Route path="settings" element={<Settings />} />
+                          <Route path="security" element={<Security />} />
+                          <Route path="tests" element={<MultiTenantTests />} />
+                        </Routes>
+                      </AdminLayout>
+                    </LazyLoader>
                   </ProtectedRoute>
                 }
               />
