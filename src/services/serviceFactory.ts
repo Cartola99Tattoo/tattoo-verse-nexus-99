@@ -13,6 +13,7 @@ import { IClientService } from './interfaces/IClientService';
 import { IProjectService } from './interfaces/IProjectService';
 import { IBedService } from './interfaces/IBedService';
 import { IEventService } from './interfaces/IEventService';
+import { ITattooArtistService } from './interfaces/ITattooArtistService';
 
 // Mock services
 import { mockBlogService } from "./mock/mockBlogService";
@@ -27,6 +28,7 @@ import { mockProjectService } from './mock/mockProjectService';
 import { mockBedService } from './mock/mockBedService';
 import mockEventService from './mock/mockEventService';
 import { mockUserProfileService } from "./mock/mockUserProfileService";
+import { mockTattooArtistService } from './mock/mockTattooArtistService';
 
 // Supabase services
 import { supabaseFinancialService } from './supabase/SupabaseFinancialService';
@@ -157,4 +159,13 @@ export const getEventService = (): IEventService => {
 
 export const getUserProfileService = () => {
   return mockUserProfileService;
+};
+
+export const getTattooArtistService = (): ITattooArtistService => {
+  if (appConfig.dataSource.useMockData) {
+    return mockTattooArtistService;
+  }
+  
+  // Future Supabase implementation
+  throw new Error('Supabase TattooArtistService not implemented yet');
 };
