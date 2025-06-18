@@ -24,10 +24,13 @@ const TattooArtistsBlog = () => {
   // Mock artist ID - em produção viria do contexto de autenticação
   const currentArtistId = "artist_1";
 
-  const { data: blogPosts = [], loading } = useDataQuery(
+  const { data: blogPostsData, loading } = useDataQuery(
     () => getTattooArtistService().getBlogPosts(currentArtistId),
     [currentArtistId]
   );
+
+  // Safely handle the blog posts data
+  const blogPosts = blogPostsData || [];
 
   const filteredPosts = blogPosts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
