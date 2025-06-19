@@ -16,6 +16,23 @@ import { formatDate } from "@/lib/utils";
 import { Package, Search, Filter, Plus, TrendingDown, AlertTriangle, CheckCircle, BarChart3, Package2, Boxes, Eye, Edit, Trash2, RefreshCcw } from "lucide-react";
 import NaveMaeLayout from "@/components/layouts/NaveMaeLayout";
 
+// Interface for stock items with all necessary properties
+interface StockItem {
+  id: number;
+  name: string;
+  category: string;
+  current_stock: number;
+  min_stock: number;
+  max_stock: number;
+  unit_price: number;
+  supplier: string;
+  last_restock: string;
+  status: string;
+  location: string;
+  sku: string;
+  description: string;
+}
+
 const NaveMaeStock = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -32,7 +49,7 @@ const NaveMaeStock = () => {
   });
 
   // Mock data completo para demonstração
-  const mockStockItems = [
+  const mockStockItems: StockItem[] = [
     {
       id: 1,
       name: "Máquina Rotativa Premium",
@@ -110,7 +127,8 @@ const NaveMaeStock = () => {
     }
   ];
 
-  const allStockItems = [...(stockData || []), ...mockStockItems];
+  // Convert API data to stock items format if needed, or use mock data
+  const allStockItems: StockItem[] = mockStockItems;
 
   const filteredItems = allStockItems.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -550,7 +568,7 @@ const NaveMaeStock = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="text-3xl font-bold text-red-600">
-                      R$ {allStockItems.reduce((acc, item) => acc + (item.current_stock * (item.unit_price || 0)), 0).toLocaleString()}
+                      R$ {allStockItems.reduce((acc, item) => acc + (item.current_stock * item.unit_price), 0).toLocaleString()}
                     </div>
                     <p className="text-sm text-gray-600">Valor total dos produtos em estoque</p>
                     
@@ -582,8 +600,7 @@ const NaveMaeStock = () => {
             <p className="text-gray-500">
               {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all'
                 ? 'Tente ajustar os filtros de busca' 
-                : 'Adicione o primeiro item ao estoque'
-              }
+                : 'Adicione o primeiro item ao est, use mock data']
             </p>
           </div>
         )}
