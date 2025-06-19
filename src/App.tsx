@@ -96,7 +96,7 @@ function App() {
               <Route path="/user-profile" element={<Layout><LazyLoader><UserProfile /></LazyLoader></Layout>} />
               <Route path="/invite" element={<InviteAcceptance />} />
 
-              {/* Tatuadores da Nova Era routes */}
+              {/* Tatuadores da Nova Era routes - COMPLETA */}
               <Route path="/tatuadores-da-nova-era" element={<LazyLoader><TattooArtistsLanding /></LazyLoader>} />
               <Route path="/tatuadores-da-nova-era/blog" element={<LazyLoader><TattooArtistsBlog /></LazyLoader>} />
               <Route path="/tatuadores-da-nova-era/shop" element={<LazyLoader><TattooArtistsShop /></LazyLoader>} />
@@ -106,7 +106,7 @@ function App() {
               <Route path="/tatuadores-da-nova-era/eventos" element={<LazyLoader><TattooArtistsEvents /></LazyLoader>} />
               <Route path="/tatuadores-da-nova-era/portfolio-management" element={<LazyLoader><TattooArtistsPortfolioManagement /></LazyLoader>} />
 
-              {/* Nave Mãe routes */}
+              {/* Nave Mãe routes - DUPLICAÇÃO COMPLETA DO /admin/ */}
               <Route path="/nave-mae-da-tatuagem" element={<LazyLoader><NaveMaeLanding /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/dashboard" element={<LazyLoader><NaveMaeDashboard /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/clients" element={<LazyLoader><NaveMaeClients /></LazyLoader>} />
@@ -120,7 +120,7 @@ function App() {
               <Route path="/nave-mae-da-tatuagem/tests" element={<LazyLoader><MultiTenantTests /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/studios" element={<LazyLoader><StudioManagement /></LazyLoader>} />
 
-              {/* Admin routes with AdminLayout wrapper */}
+              {/* Admin routes - MANTÉM INTACTO PARA CLIENTES DOS ESTÚDIOS */}
               <Route
                 path="/admin/*"
                 element={
@@ -136,7 +136,7 @@ function App() {
                           <Route path="clients" element={<Clients />} />
                           <Route path="clients/:id" element={<ClientDetail />} />
                           <Route path="products" element={<Products />} />
-                          <Route path="stock" element={<Stock />} />
+                          <Route path="stock" element={<Stock />} />  
                           <Route path="projects" element={<Projects />} />
                           <Route path="events" element={<AdminEvents />} />
                           <Route path="financial" element={<Financial />} />
