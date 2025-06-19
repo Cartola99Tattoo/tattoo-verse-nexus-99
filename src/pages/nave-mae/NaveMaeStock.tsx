@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -600,7 +599,8 @@ const NaveMaeStock = () => {
             <p className="text-gray-500">
               {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all'
                 ? 'Tente ajustar os filtros de busca' 
-                : 'Adicione o primeiro item ao est, use mock data']
+                : 'Adicione o primeiro item ao estoque'
+              }
             </p>
           </div>
         )}
