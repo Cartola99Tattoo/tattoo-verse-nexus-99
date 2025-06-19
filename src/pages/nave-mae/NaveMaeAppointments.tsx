@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -127,7 +126,7 @@ const NaveMaeAppointments = () => {
                   <p className="text-yellow-600 text-sm font-medium">Pendentes</p>
                   <p className="text-3xl font-bold text-yellow-800">{pendingAppointments}</p>
                 </div>
-                <Alert className="h-8 w-8 text-yellow-600" />
+                <AlertCircle className="h-8 w-8 text-yellow-600" />
               </div>
             </CardContent>
           </Card>
