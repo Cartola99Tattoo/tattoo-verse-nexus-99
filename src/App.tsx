@@ -1,4 +1,3 @@
-
 import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
@@ -35,12 +34,20 @@ const TattooArtistsShop = lazy(() => import('./pages/tattoo-artists/TattooArtist
 const TattooArtistsServices = lazy(() => import('./pages/tattoo-artists/TattooArtistsServices'));
 const TattooArtistsPortfolio = lazy(() => import('./pages/tattoo-artists/TattooArtistsPortfolio'));
 const TattooArtistsContact = lazy(() => import('./pages/tattoo-artists/TattooArtistsContact'));
+const TattooArtistsEvents = lazy(() => import('./pages/tattoo-artists/TattooArtistsEvents'));
+const TattooArtistsPortfolioManagement = lazy(() => import('./pages/tattoo-artists/TattooArtistsPortfolioManagement'));
 
 // Lazy load páginas da nave mãe
 const NaveMaeLanding = lazy(() => import('./pages/nave-mae/NaveMaeLanding'));
 const NaveMaeDashboard = lazy(() => import('./pages/nave-mae/NaveMaeDashboard'));
 const NaveMaeClients = lazy(() => import('./pages/nave-mae/NaveMaeClients'));
 const NaveMaeArtists = lazy(() => import('./pages/nave-mae/NaveMaeArtists'));
+const NaveMaeAppointments = lazy(() => import('./pages/nave-mae/NaveMaeAppointments'));
+const NaveMaeProducts = lazy(() => import('./pages/nave-mae/NaveMaeProducts'));
+const NaveMaeStock = lazy(() => import('./pages/nave-mae/NaveMaeStock'));
+const NaveMaeFinancial = lazy(() => import('./pages/nave-mae/NaveMaeFinancial'));
+const NaveMaeLoyalty = lazy(() => import('./pages/nave-mae/NaveMaeLoyalty'));
+const NaveMaeSettings = lazy(() => import('./pages/nave-mae/NaveMaeSettings'));
 const MultiTenantTests = lazy(() => import('./pages/nave-mae/MultiTenantTests'));
 const StudioManagement = lazy(() => import('./pages/nave-mae/StudioManagement'));
 
@@ -96,12 +103,20 @@ function App() {
               <Route path="/tatuadores-da-nova-era/services" element={<LazyLoader><TattooArtistsServices /></LazyLoader>} />
               <Route path="/tatuadores-da-nova-era/portfolio" element={<LazyLoader><TattooArtistsPortfolio /></LazyLoader>} />
               <Route path="/tatuadores-da-nova-era/contact" element={<LazyLoader><TattooArtistsContact /></LazyLoader>} />
+              <Route path="/tatuadores-da-nova-era/eventos" element={<LazyLoader><TattooArtistsEvents /></LazyLoader>} />
+              <Route path="/tatuadores-da-nova-era/portfolio-management" element={<LazyLoader><TattooArtistsPortfolioManagement /></LazyLoader>} />
 
               {/* Nave Mãe routes */}
               <Route path="/nave-mae-da-tatuagem" element={<LazyLoader><NaveMaeLanding /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/dashboard" element={<LazyLoader><NaveMaeDashboard /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/clients" element={<LazyLoader><NaveMaeClients /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/artists" element={<LazyLoader><NaveMaeArtists /></LazyLoader>} />
+              <Route path="/nave-mae-da-tatuagem/appointments" element={<LazyLoader><NaveMaeAppointments /></LazyLoader>} />
+              <Route path="/nave-mae-da-tatuagem/products" element={<LazyLoader><NaveMaeProducts /></LazyLoader>} />
+              <Route path="/nave-mae-da-tatuagem/stock" element={<LazyLoader><NaveMaeStock /></LazyLoader>} />
+              <Route path="/nave-mae-da-tatuagem/financial" element={<LazyLoader><NaveMaeFinancial /></LazyLoader>} />
+              <Route path="/nave-mae-da-tatuagem/loyalty" element={<LazyLoader><NaveMaeLoyalty /></LazyLoader>} />
+              <Route path="/nave-mae-da-tatuagem/settings" element={<LazyLoader><NaveMaeSettings /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/tests" element={<LazyLoader><MultiTenantTests /></LazyLoader>} />
               <Route path="/nave-mae-da-tatuagem/studios" element={<LazyLoader><StudioManagement /></LazyLoader>} />
 
