@@ -1,5 +1,5 @@
-
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -128,6 +128,7 @@ const mockProducts = [
 ];
 
 const TattooArtistsShop = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("relevance");
@@ -173,6 +174,10 @@ const TattooArtistsShop = () => {
   const totalProducts = mockProducts.length;
   const avgRating = totalProducts > 0 ? mockProducts.reduce((acc, p) => acc + p.rating, 0) / totalProducts : 0;
 
+  const handleProductClick = (productId) => {
+    navigate(`/tatuadores-da-nova-era/shop/${productId}`);
+  };
+
   const addToCart = (product) => {
     setCart([...cart, product]);
   };
@@ -194,7 +199,7 @@ const TattooArtistsShop = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            {product?.images?.length > 1 && (
+            {(product?.images?.length || 0) > 1 && (
               <div className="flex gap-2">
                 {product.images.map((img, index) => (
                   <div key={index} className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
@@ -222,7 +227,7 @@ const TattooArtistsShop = () => {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-3xl font-bold text-red-600">R$ {product?.price?.toFixed(2)}</span>
-                {(product?.originalPrice || 0) > (product?.price || 0) && (
+                {((product?.originalPrice || 0) > (product?.price || 0)) && (
                   <>
                     <span className="text-lg text-gray-500 line-through">R$ {product?.originalPrice?.toFixed(2)}</span>
                     <Badge className="bg-red-100 text-red-800">-{product?.discount}%</Badge>
@@ -438,10 +443,10 @@ const TattooArtistsShop = () => {
                     variant="outline" 
                     size="sm" 
                     className="flex-1"
-                    onClick={() => setSelectedProduct(product)}
+                    onClick={() => handleProductClick(product.id)}
                   >
                     <Eye className="h-3 w-3 mr-1" />
-                    Ver
+                    Ver Detalhes
                   </Button>
                   <Button 
                     size="sm" 

@@ -35,6 +35,9 @@ const TattooArtistLayout = ({ children }: TattooArtistLayoutProps) => {
               <Link to="/tatuadores-da-nova-era/portfolio" className="text-white hover:text-red-400 transition-colors">
                 Portfólio
               </Link>
+              <Link to="/tatuadores-da-nova-era/eventos" className="text-white hover:text-red-400 transition-colors">
+                Eventos
+              </Link>
               <Link to="/tatuadores-da-nova-era/services" className="text-white hover:text-red-400 transition-colors">
                 Serviços
               </Link>

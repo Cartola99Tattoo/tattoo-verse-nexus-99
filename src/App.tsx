@@ -1,3 +1,4 @@
+
 import React, { lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LazyLoader from './components/common/LazyLoader';
@@ -31,6 +32,7 @@ const TattooConsultancy = lazy(() => import('./pages/TattooConsultancy'));
 const TattooArtistsLanding = lazy(() => import('./pages/tattoo-artists/TattooArtistsLanding'));
 const TattooArtistsBlog = lazy(() => import('./pages/tattoo-artists/TattooArtistsBlog'));
 const TattooArtistsShop = lazy(() => import('./pages/tattoo-artists/TattooArtistsShop'));
+const TattooArtistsProductDetail = lazy(() => import('./pages/tattoo-artists/TattooArtistsProductDetail'));
 const TattooArtistsServices = lazy(() => import('./pages/tattoo-artists/TattooArtistsServices'));
 const TattooArtistsPortfolio = lazy(() => import('./pages/tattoo-artists/TattooArtistsPortfolio'));
 const TattooArtistsContact = lazy(() => import('./pages/tattoo-artists/TattooArtistsContact'));
@@ -100,6 +102,7 @@ function App() {
               <Route path="/tatuadores-da-nova-era" element={<LazyLoader><TattooArtistsLanding /></LazyLoader>} />
               <Route path="/tatuadores-da-nova-era/blog" element={<LazyLoader><TattooArtistsBlog /></LazyLoader>} />
               <Route path="/tatuadores-da-nova-era/shop" element={<LazyLoader><TattooArtistsShop /></LazyLoader>} />
+              <Route path="/tatuadores-da-nova-era/shop/:id" element={<LazyLoader><TattooArtistsProductDetail /></LazyLoader>} />
               <Route path="/tatuadores-da-nova-era/services" element={<LazyLoader><TattooArtistsServices /></LazyLoader>} />
               <Route path="/tatuadores-da-nova-era/portfolio" element={<LazyLoader><TattooArtistsPortfolio /></LazyLoader>} />
               <Route path="/tatuadores-da-nova-era/contact" element={<LazyLoader><TattooArtistsContact /></LazyLoader>} />
