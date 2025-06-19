@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DateRange } from "react-day-picker";
 import { CalendarDateRangePicker } from "@/components/ui/calendar-date-range-picker";
-import { getStockService } from "@/services/serviceFactory";
+import { getProductService } from "@/services/serviceFactory";
 import { formatDate } from "@/lib/utils";
 import { Package, Search, Filter, Plus, TrendingDown, AlertTriangle, CheckCircle, BarChart3, Package2, Boxes, Eye, Edit, Trash2, RefreshCcw } from "lucide-react";
 import NaveMaeLayout from "@/components/layouts/NaveMaeLayout";
@@ -25,10 +25,10 @@ const NaveMaeStock = () => {
     to: new Date(),
   });
 
-  const stockService = getStockService();
-  const { data: stockData, loading } = useQuery({
+  const stockService = getProductService();
+  const { data: stockData, isLoading } = useQuery({
     queryKey: ['stock', categoryFilter, statusFilter, searchTerm],
-    queryFn: () => stockService.fetchStock(),
+    queryFn: () => stockService.fetchProducts(),
   });
 
   // Mock data completo para demonstração

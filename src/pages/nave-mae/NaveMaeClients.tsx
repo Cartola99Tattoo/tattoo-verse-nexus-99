@@ -25,7 +25,7 @@ const NaveMaeClients = () => {
   });
 
   const clientService = getClientService();
-  const { data: clientsData, loading } = useQuery({
+  const { data: clientsData, isLoading } = useQuery({
     queryKey: ['clients', statusFilter, searchTerm],
     queryFn: () => clientService.fetchClients(),
   });
@@ -257,28 +257,28 @@ const NaveMaeClients = () => {
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <MapPin className="h-4 w-4" />
-                        {client.address || 'Endereço não informado'}
+                        {(client as any).address || 'Endereço não informado'}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Calendar className="h-4 w-4" />
-                        Última atividade: {client.last_activity ? new Date(client.last_activity).toLocaleDateString() : 'N/A'}
+                        Última atividade: {(client as any).last_activity ? new Date((client as any).last_activity).toLocaleDateString() : 'N/A'}
                       </div>
                     </div>
 
                     <div className="bg-red-50 rounded-lg p-3 space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Total gasto:</span>
-                        <span className="font-bold text-red-600">R$ {client.total_spent?.toLocaleString() || '0'}</span>
+                        <span className="font-bold text-red-600">R$ {(client as any).total_spent?.toLocaleString() || '0'}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Agendamentos:</span>
-                        <span className="font-medium">{client.appointments_count || 0}</span>
+                        <span className="font-medium">{(client as any).appointments_count || 0}</span>
                       </div>
                     </div>
 
-                    {client.notes && (
+                    {(client as any).notes && (
                       <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                        <strong>Observações:</strong> {client.notes}
+                        <strong>Observações:</strong> {(client as any).notes}
                       </div>
                     )}
                     
@@ -305,10 +305,10 @@ const NaveMaeClients = () => {
                               <strong>Telefone:</strong> {client.phone}
                             </div>
                             <div>
-                              <strong>Endereço:</strong> {client.address}
+                              <strong>Endereço:</strong> {(client as any).address}
                             </div>
                             <div>
-                              <strong>Data de Nascimento:</strong> {client.birth_date ? new Date(client.birth_date).toLocaleDateString() : 'N/A'}
+                              <strong>Data de Nascimento:</strong> {(client as any).birth_date ? new Date((client as any).birth_date).toLocaleDateString() : 'N/A'}
                             </div>
                           </div>
                         </DialogContent>
@@ -353,11 +353,11 @@ const NaveMaeClients = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="font-bold text-red-600">
-                          R$ {client.total_spent?.toLocaleString() || '0'}
+                          R$ {(client as any).total_spent?.toLocaleString() || '0'}
                         </TableCell>
-                        <TableCell>{client.appointments_count || 0}</TableCell>
+                        <TableCell>{(client as any).appointments_count || 0}</TableCell>
                         <TableCell>
-                          {client.last_activity ? new Date(client.last_activity).toLocaleDateString() : 'N/A'}
+                          {(client as any).last_activity ? new Date((client as any).last_activity).toLocaleDateString() : 'N/A'}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">

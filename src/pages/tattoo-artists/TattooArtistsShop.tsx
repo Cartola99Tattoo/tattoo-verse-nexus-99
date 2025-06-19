@@ -164,14 +164,14 @@ const TattooArtistsShop = () => {
       case 'price_asc': return a.price - b.price;
       case 'price_desc': return b.price - a.price;
       case 'rating': return b.rating - a.rating;
-      case 'newest': return new Date(b.id) - new Date(a.id);
+      case 'newest': return b.id - a.id;
       default: return 0;
     }
   });
 
   const bestsellers = mockProducts.filter(p => p.bestseller);
   const totalProducts = mockProducts.length;
-  const avgRating = mockProducts.reduce((acc, p) => acc + p.rating, 0) / totalProducts;
+  const avgRating = totalProducts > 0 ? mockProducts.reduce((acc, p) => acc + p.rating, 0) / totalProducts : 0;
 
   const addToCart = (product) => {
     setCart([...cart, product]);
@@ -210,7 +210,7 @@ const TattooArtistsShop = () => {
               <div className="flex items-center gap-2">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`h-4 w-4 ${i < Math.floor(product?.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                    <Star key={i} className={`h-4 w-4 ${i < Math.floor(product?.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
                   ))}
                 </div>
                 <span className="text-sm text-gray-600">({product?.reviews} avaliações)</span>
@@ -222,7 +222,7 @@ const TattooArtistsShop = () => {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-3xl font-bold text-red-600">R$ {product?.price?.toFixed(2)}</span>
-                {product?.originalPrice > product?.price && (
+                {(product?.originalPrice || 0) > (product?.price || 0) && (
                   <>
                     <span className="text-lg text-gray-500 line-through">R$ {product?.originalPrice?.toFixed(2)}</span>
                     <Badge className="bg-red-100 text-red-800">-{product?.discount}%</Badge>
