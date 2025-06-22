@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -249,7 +248,6 @@ const EnhancedMonthlyCalendar: React.FC<EnhancedMonthlyCalendarProps> = ({
               setShowAppointmentModal(false);
               setSelectedDate(null);
             }}
-            initialDate={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
           />
         </DialogContent>
       </Dialog>
