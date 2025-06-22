@@ -235,17 +235,17 @@ const EnhancedMonthlyCalendar: React.FC<EnhancedMonthlyCalendarProps> = ({
           </DialogHeader>
           
           <AppointmentForm
-            onSubmit={(data) => {
+            clients={clients}
+            onSuccess={() => {
               if (selectedDate) {
                 onCreateAppointment({
-                  ...data,
                   date: format(selectedDate, 'yyyy-MM-dd')
                 });
               }
               setShowAppointmentModal(false);
               setSelectedDate(null);
             }}
-            onCancel={() => {
+            onClose={() => {
               setShowAppointmentModal(false);
               setSelectedDate(null);
             }}

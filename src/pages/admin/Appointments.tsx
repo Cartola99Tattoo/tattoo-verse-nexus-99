@@ -13,6 +13,7 @@ import WeeklyAppointmentsKanban from "@/components/admin/WeeklyAppointmentsKanba
 import EnhancedMonthlyCalendar from "@/components/admin/EnhancedMonthlyCalendar";
 import EnhancedWeeklyView from "@/components/admin/EnhancedWeeklyView";
 import { format } from "date-fns";
+import { Appointment, Client } from "@/services/interfaces/IClientService";
 
 const Appointments = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -20,8 +21,8 @@ const Appointments = () => {
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
-  // Mock appointments data with enhanced variety
-  const mockAppointments = [
+  // Mock appointments data with enhanced variety and complete properties
+  const mockAppointments: Appointment[] = [
     {
       id: "1",
       client_id: "1",
@@ -29,10 +30,13 @@ const Appointments = () => {
       date: "2024-12-21",
       time: "09:00",
       duration_minutes: 120,
-      status: "confirmed" as const,
+      service_type: "tattoo",
+      status: "confirmed",
       service_description: "Tatuagem Realista - Braço",
       estimated_price: 800,
-      notes: "Primeira sessão"
+      notes: "Primeira sessão",
+      created_at: "2024-12-20T10:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z"
     },
     {
       id: "2",
@@ -41,10 +45,13 @@ const Appointments = () => {
       date: "2024-12-21",
       time: "11:30",
       duration_minutes: 90,
-      status: "scheduled" as const,
+      service_type: "tattoo",
+      status: "scheduled",
       service_description: "Tatuagem Blackwork - Perna",
       estimated_price: 600,
-      notes: "Cliente regular"
+      notes: "Cliente regular",
+      created_at: "2024-12-20T10:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z"
     },
     {
       id: "3",
@@ -53,10 +60,13 @@ const Appointments = () => {
       date: "2024-12-21",
       time: "14:00",
       duration_minutes: 180,
-      status: "confirmed" as const,
+      service_type: "tattoo",
+      status: "confirmed",
       service_description: "Tatuagem Colorida - Costas",
       estimated_price: 1200,
-      notes: "Sessão longa"
+      notes: "Sessão longa",
+      created_at: "2024-12-20T10:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z"
     },
     {
       id: "4",
@@ -65,10 +75,13 @@ const Appointments = () => {
       date: "2024-12-22",
       time: "10:00",
       duration_minutes: 60,
-      status: "pending" as const,
+      service_type: "tattoo",
+      status: "scheduled",
       service_description: "Retoque - Braço",
       estimated_price: 200,
-      notes: "Retoque gratuito"
+      notes: "Retoque gratuito",
+      created_at: "2024-12-20T10:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z"
     },
     {
       id: "5",
@@ -77,10 +90,13 @@ const Appointments = () => {
       date: "2024-12-22",
       time: "15:30",
       duration_minutes: 150,
-      status: "confirmed" as const,
+      service_type: "tattoo",
+      status: "confirmed",
       service_description: "Tatuagem Geométrica - Antebraço",
       estimated_price: 900,
-      notes: "Design personalizado"
+      notes: "Design personalizado",
+      created_at: "2024-12-20T10:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z"
     },
     {
       id: "6",
@@ -89,10 +105,13 @@ const Appointments = () => {
       date: "2024-12-23",
       time: "13:00",
       duration_minutes: 240,
-      status: "scheduled" as const,
+      service_type: "tattoo",
+      status: "scheduled",
       service_description: "Tatuagem Oriental - Braço Completo",
       estimated_price: 1500,
-      notes: "Sessão de fechamento"
+      notes: "Sessão de fechamento",
+      created_at: "2024-12-20T10:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z"
     },
     {
       id: "7",
@@ -101,10 +120,13 @@ const Appointments = () => {
       date: "2024-12-24",
       time: "09:30",
       duration_minutes: 90,
-      status: "confirmed" as const,
+      service_type: "tattoo",
+      status: "confirmed",
       service_description: "Tatuagem Minimalista - Pulso",
       estimated_price: 300,
-      notes: "Design delicado"
+      notes: "Design delicado",
+      created_at: "2024-12-20T10:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z"
     },
     {
       id: "8",
@@ -113,19 +135,72 @@ const Appointments = () => {
       date: "2024-12-24",
       time: "16:00",
       duration_minutes: 120,
-      status: "completed" as const,
+      service_type: "tattoo",
+      status: "completed",
       service_description: "Tatuagem Tradicional - Panturrilha",
       estimated_price: 700,
-      notes: "Estilo old school"
+      notes: "Estilo old school",
+      created_at: "2024-12-20T10:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z"
     }
   ];
 
-  const mockClients = [
-    { id: "1", name: "Maria Silva", phone: "(11) 99999-1234", email: "maria@email.com" },
-    { id: "2", name: "João Santos", phone: "(11) 88888-5678", email: "joao@email.com" },
-    { id: "3", name: "Ana Costa", phone: "(11) 77777-9012", email: "ana@email.com" },
-    { id: "4", name: "Pedro Oliveira", phone: "(11) 66666-3456", email: "pedro@email.com" },
-    { id: "5", name: "Carla Mendes", phone: "(11) 55555-7890", email: "carla@email.com" }
+  const mockClients: Client[] = [
+    { 
+      id: "1", 
+      name: "Maria Silva", 
+      phone: "(11) 99999-1234", 
+      email: "maria@email.com",
+      status: "active",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z",
+      total_spent: 2300,
+      total_orders: 3
+    },
+    { 
+      id: "2", 
+      name: "João Santos", 
+      phone: "(11) 88888-5678", 
+      email: "joao@email.com",
+      status: "active",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z",
+      total_spent: 900,
+      total_orders: 2
+    },
+    { 
+      id: "3", 
+      name: "Ana Costa", 
+      phone: "(11) 77777-9012", 
+      email: "ana@email.com",
+      status: "active",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z",
+      total_spent: 1900,
+      total_orders: 2
+    },
+    { 
+      id: "4", 
+      name: "Pedro Oliveira", 
+      phone: "(11) 66666-3456", 
+      email: "pedro@email.com",
+      status: "new",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z",
+      total_spent: 200,
+      total_orders: 1
+    },
+    { 
+      id: "5", 
+      name: "Carla Mendes", 
+      phone: "(11) 55555-7890", 
+      email: "carla@email.com",
+      status: "active",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-12-20T10:00:00Z",
+      total_spent: 1600,
+      total_orders: 2
+    }
   ];
 
   const { data: appointments = mockAppointments } = useQuery({
