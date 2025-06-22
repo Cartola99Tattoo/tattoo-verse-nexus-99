@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -631,7 +632,7 @@ const Appointments = () => {
     setShowAppointmentModal(true);
   };
 
-  // Wrapper function to handle WeeklyAppointmentsKanban's onCreateAppointment
+  // Wrapper function to handle WeeklyAppointmentsKanban's onCreateAppointment (expects Partial<Appointment>)
   const handleCreateAppointmentFromPartial = (appointment: Partial<Appointment>) => {
     if (appointment.date) {
       const date = new Date(appointment.date);
@@ -641,8 +642,8 @@ const Appointments = () => {
     }
   };
 
-  // Wrapper function to handle StudioDayByDay's onCreateAppointment
-  const handleCreateAppointmentFromDate = (date: Date, timeSlot?: string) => {
+  // Wrapper function to handle EnhancedWeeklyView's onCreateAppointment (expects Date)
+  const handleCreateAppointmentFromDate = (date: Date) => {
     handleOpenAppointmentModal(date);
   };
 
@@ -777,7 +778,7 @@ const Appointments = () => {
             currentDate={currentDate}
             onReschedule={handleReschedule}
             onDayClick={handleDayClick}
-            onCreateAppointment={handleOpenAppointmentModal}
+            onCreateAppointment={handleCreateAppointmentFromDate}
           />
         </TabsContent>
 
