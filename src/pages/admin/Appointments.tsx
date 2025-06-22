@@ -13,12 +13,15 @@ import WeeklyAppointmentsKanban from "@/components/admin/WeeklyAppointmentsKanba
 import EnhancedMonthlyCalendar from "@/components/admin/EnhancedMonthlyCalendar";
 import EnhancedWeeklyView from "@/components/admin/EnhancedWeeklyView";
 import StudioDayByDay from "@/components/admin/StudioDayByDay";
+import AppointmentModal from "@/components/admin/AppointmentModal";
 import { format } from "date-fns";
 import { Appointment, Client } from "@/services/interfaces/IClientService";
 
 const Appointments = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentDate] = useState(new Date());
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [modalSelectedDate, setModalSelectedDate] = useState<Date | undefined>();
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
@@ -623,17 +626,14 @@ const Appointments = () => {
     setSelectedDate(date);
   };
 
-  const handleCreateAppointmentForDate = (date: Date) => {
-    handleCreateAppointment({
-      date: format(date, 'yyyy-MM-dd'),
-      time: "10:00",
-      client_id: "1",
-      artist_id: "1",
-      duration_minutes: 60,
-      status: "scheduled",
-      service_description: "Nova tatuagem",
-      estimated_price: 500
-    });
+  const handleOpenAppointmentModal = (date?: Date) => {
+    setModalSelectedDate(date);
+    setShowAppointmentModal(true);
+  };
+
+  const handleCloseAppointmentModal = () => {
+    setShowAppointmentModal(false);
+    setModalSelectedDate(undefined);
   };
 
   // Calcular estatísticas
@@ -675,7 +675,7 @@ const Appointments = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-red-100 text-sm font-medium">Confirmados</p>
-                <p className="text-2xl font-black">{confirmedAppointments}</p>
+                <p className="text-2xl font-black">{confirmedApp ointments}</p>
               </div>
               <Clock className="h-6 w-6 text-green-300" />
             </div>
@@ -749,7 +749,7 @@ const Appointments = () => {
             appointments={appointments}
             clients={clients}
             currentDate={currentDate}
-            onCreateAppointment={handleCreateAppointment}
+            onCreateAppointment={handleOpenAppointmentModal}
             onDayClick={handleDayClick}
           />
         </TabsContent>
@@ -762,7 +762,7 @@ const Appointments = () => {
             currentDate={currentDate}
             onReschedule={handleReschedule}
             onDayClick={handleDayClick}
-            onCreateAppointment={handleCreateAppointmentForDate}
+            onCreateAppointment={handleOpenAppointmentModal}
           />
         </TabsContent>
 
@@ -774,7 +774,7 @@ const Appointments = () => {
             currentDate={currentDate}
             onReschedule={handleReschedule}
             onDayClick={handleDayClick}
-            onCreateAppointment={handleCreateAppointmentForDate}
+            onCreateAppointment={handleOpenAppointmentModal}
             onEditAppointment={(apt) => console.log('Edit appointment:', apt)}
             onDeleteAppointment={(id) => console.log('Delete appointment:', id)}
           />
@@ -809,6 +809,14 @@ const Appointments = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Modal de Novo Agendamento */}
+      <AppointmentModal
+        isOpen={showAppointmentModal}
+        onClose={handleCloseAppointmentModal}
+        selectedDate={modalSelectedDate}
+        onCreateAppointment={handleCreateAppointment}
+      />
 
       {/* Modal de Visualização Diária */}
       <DailyAppointmentsKanban

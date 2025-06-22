@@ -38,10 +38,17 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
     confirmed: dayAppointments.filter(apt => apt.status === 'confirmed').length
   };
 
-  // Escala de tempo para grid lines
+  // Escala de tempo para grid lines - ALINHAMENTO MATEMÁTICO PRECISO
   const timeScale = [];
-  for (let hour = 8; hour <= 20; hour++) {
-    timeScale.push({ hour, top: (hour - 8) * 80 });
+  const PIXELS_PER_HOUR = 80; // Constante para garantir alinhamento
+  const START_HOUR = 8;
+  
+  for (let hour = START_HOUR; hour <= 20; hour++) {
+    timeScale.push({ 
+      hour, 
+      top: (hour - START_HOUR) * PIXELS_PER_HOUR,
+      isCurrentHour: isToday && new Date().getHours() === hour
+    });
   }
 
   return (
@@ -131,7 +138,7 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
             </div>
           </div>
 
-          {/* Botão Adicionar Ultra-Refinado */}
+          {/* Botão Adicionar Ultra-Refinado - AGORA CONECTADO AO MODAL */}
           <Button
             onClick={() => onCreateAppointment(day)}
             className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 text-sm py-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-xl"
@@ -140,41 +147,41 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
             Novo Agendamento
           </Button>
 
-          {/* Área dos agendamentos com grid refinado */}
-          <div className="relative bg-gradient-to-b from-gray-50 to-white rounded-xl border-2 border-gray-200 shadow-inner" style={{ minHeight: '1040px' }}>
-            {/* Grid lines horizontais funcionais */}
-            {timeScale.map((time, index) => (
-              <div 
-                key={`${time.hour}-grid`}
-                className="absolute left-0 right-0 border-t transition-colors duration-300"
-                style={{ 
-                  top: `${time.top}px`, 
-                  height: '80px',
-                  borderColor: isToday && new Date().getHours() === time.hour 
-                    ? '#dc2626' 
-                    : '#e5e7eb'
-                }}
-              >
-                <span className={`
-                  absolute right-2 top-1 text-xs font-bold transition-colors duration-300
-                  ${isToday && new Date().getHours() === time.hour 
-                    ? 'text-red-600' 
-                    : 'text-gray-400'
-                  }
-                `}>
-                  {time.hour}h
-                </span>
-                
-                {/* Linha de meio (30min) */}
+          {/* Área dos agendamentos com grid refinado - ALINHAMENTO MATEMÁTICO PRECISO */}
+          <div 
+            className="relative bg-gradient-to-b from-gray-50 to-white rounded-xl border-2 border-gray-200 shadow-inner overflow-hidden" 
+            style={{ height: `${13 * PIXELS_PER_HOUR}px` }} // 13 horas * 80px = 1040px
+          >
+            {/* Grid lines horizontais MATEMATICAMENTE PRECISAS */}
+            {timeScale.map((time) => (
+              <div key={`${time.hour}-grid-container`}>
+                {/* Linha principal do horário */}
                 <div 
-                  className="absolute left-0 right-0 h-px bg-gray-200/40"
-                  style={{ top: '40px' }}
+                  className={`absolute left-0 right-0 border-t-2 transition-colors duration-300 z-10 ${
+                    time.isCurrentHour ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  style={{ top: `${time.top}px` }}
+                >
+                  {/* Label do horário - POSICIONAMENTO PRECISO */}
+                  <span className={`
+                    absolute right-2 -top-2 text-xs font-bold transition-colors duration-300 bg-white px-1 rounded z-20
+                    ${time.isCurrentHour ? 'text-red-600' : 'text-gray-500'}
+                  `}>
+                    {time.hour}h
+                  </span>
+                </div>
+                
+                {/* Linha de meio (30min) - ALINHAMENTO PERFEITO */}
+                <div 
+                  className="absolute left-4 right-4 h-px bg-gray-200/60 z-5"
+                  style={{ top: `${time.top + (PIXELS_PER_HOUR / 2)}px` }}
                 />
               </div>
             ))}
             
+            {/* Área dos blocos de agendamento */}
             <SortableContext items={dayAppointments.map(apt => apt.id)} strategy={verticalListSortingStrategy}>
-              <div className="relative h-full p-2" id={dayKey}>
+              <div className="relative h-full" id={dayKey} style={{ paddingTop: '2px', paddingLeft: '2px', paddingRight: '2px' }}>
                 {dayAppointments.map((appointment) => {
                   const client = clients.find(c => c.id === appointment.client_id);
                   return (
@@ -186,8 +193,9 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
                   );
                 })}
                 
+                {/* Estado vazio otimizado */}
                 {dayAppointments.length === 0 && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 pointer-events-none">
                     <CalendarIcon className="h-20 w-20 mb-4 opacity-20" />
                     <p className="text-sm font-bold">Dia Livre</p>
                     <p className="text-xs text-gray-500 mt-1">Sem agendamentos</p>

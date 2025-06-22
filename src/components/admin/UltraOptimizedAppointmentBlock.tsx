@@ -33,6 +33,11 @@ const UltraOptimizedAppointmentBlock: React.FC<UltraOptimizedAppointmentBlockPro
     transition: isDragging ? 'none' : transition,
   };
 
+  // CONSTANTES MATEMÁTICAS PARA ALINHAMENTO PERFEITO
+  const PIXELS_PER_HOUR = 80;
+  const START_HOUR = 8;
+  const BORDER_OFFSET = 2;
+
   // Paleta refinada 99Tattoo com cores sutis
   const artists = [
     { 
@@ -124,16 +129,15 @@ const UltraOptimizedAppointmentBlock: React.FC<UltraOptimizedAppointmentBlockPro
   const statusInfo = statusConfig[appointment.status as keyof typeof statusConfig] || statusConfig.scheduled;
   const ServiceIcon = serviceConfig.icon;
   
-  // Calcular altura e layout baseado na duração
+  // CÁLCULOS MATEMÁTICOS PRECISOS PARA POSICIONAMENTO
   const duration = appointment.duration_minutes || 60;
-  const pixelsPerHour = 80;
-  const height = Math.max(48, (duration / 60) * pixelsPerHour);
+  const height = Math.max(48, (duration / 60) * PIXELS_PER_HOUR);
   
-  // Calcular posição vertical ultra-precisa
+  // Calcular posição vertical ULTRA-PRECISA
   const [hours, minutes] = appointment.time.split(':').map(Number);
   const totalMinutes = hours * 60 + minutes;
-  const startHour = 8;
-  const topPosition = ((totalMinutes - startHour * 60) / 60) * pixelsPerHour;
+  const startHourMinutes = START_HOUR * 60;
+  const topPosition = ((totalMinutes - startHourMinutes) / 60) * PIXELS_PER_HOUR;
 
   // Calcular horário de fim
   const endMinutes = totalMinutes + duration;
@@ -160,8 +164,8 @@ const UltraOptimizedAppointmentBlock: React.FC<UltraOptimizedAppointmentBlockPro
       className={`
         relative h-full overflow-hidden rounded-lg border-l-[6px] border-r border-t border-b 
         bg-white shadow-sm hover:shadow-lg transition-all duration-300 cursor-grab active:cursor-grabbing
-        ${isDragging ? 'opacity-80 scale-[1.02] shadow-xl rotate-1' : ''}
-        ${isOverlay ? 'scale-105 shadow-2xl ring-2 ring-red-300' : ''}
+        ${isDragging ? 'opacity-80 scale-[1.02] shadow-xl rotate-1 z-50' : ''}
+        ${isOverlay ? 'scale-105 shadow-2xl ring-2 ring-red-300 z-50' : ''}
         group hover:scale-[1.01] hover:brightness-105
       `}
       style={{ 
@@ -183,7 +187,7 @@ const UltraOptimizedAppointmentBlock: React.FC<UltraOptimizedAppointmentBlockPro
       {/* Indicador de status pulsante para "Em Andamento" */}
       {statusInfo.pulse && (
         <div 
-          className="absolute left-0 top-0 bottom-0 w-1 opacity-70 animate-pulse"
+          className="absolute left-0 top-0 bottom-0 w-1 opacity-70 animate-pulse z-10"
           style={{ backgroundColor: statusInfo.dotColor }}
         />
       )}
@@ -334,8 +338,8 @@ const UltraOptimizedAppointmentBlock: React.FC<UltraOptimizedAppointmentBlockPro
         height: `${height}px`,
         top: `${Math.max(0, topPosition)}px`,
         position: 'absolute',
-        width: 'calc(100% - 4px)',
-        left: '2px',
+        width: `calc(100% - ${BORDER_OFFSET * 2}px)`,
+        left: `${BORDER_OFFSET}px`,
         zIndex: isDragging ? 1000 : 10
       }}
       {...attributes}
@@ -348,7 +352,7 @@ const UltraOptimizedAppointmentBlock: React.FC<UltraOptimizedAppointmentBlockPro
           </div>
         </HoverCardTrigger>
         <HoverCardContent 
-          className="w-80 p-6 bg-white border-2 border-red-200 shadow-2xl rounded-xl"
+          className="w-80 p-6 bg-white border-2 border-red-200 shadow-2xl rounded-xl z-50"
           sideOffset={10}
         >
           <div className="space-y-4">
