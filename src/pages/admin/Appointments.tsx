@@ -802,7 +802,6 @@ const Appointments = () => {
             clients={clients}
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
-            onCreateAppointment={handleCreateAppointmentFromDate}
           />
         </TabsContent>
 
