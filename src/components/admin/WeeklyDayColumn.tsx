@@ -69,12 +69,18 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
           <CardTitle className="text-center space-y-3">
             <div className="flex items-center justify-center gap-2">
               <CalendarIcon className="h-5 w-5" />
-              <span className="text-sm font-black tracking-wide uppercase">
+              {/* DESTAQUE VISUAL DOS DIAS DA SEMANA EM VERMELHO - IDENTIDADE 99TATTOO */}
+              <span className={`text-sm font-black tracking-wide uppercase ${
+                isToday ? 'text-white' : 'text-red-600'
+              }`}>
                 {format(day, 'EEEE', { locale: ptBR })}
               </span>
             </div>
             
-            <div className="text-3xl font-black tracking-tight">
+            {/* NÚMERO DO DIA EM VERMELHO - IDENTIDADE 99TATTOO */}
+            <div className={`text-3xl font-black tracking-tight ${
+              isToday ? 'text-white' : 'text-red-600'
+            }`}>
               {format(day, 'dd', { locale: ptBR })}
             </div>
             
@@ -140,13 +146,23 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
             </div>
           </div>
 
-          {/* Botão Adicionar AMPLIADO */}
+          {/* BOTÃO REDESENHADO: CÍRCULO VERMELHO COM RELÓGIO + PLUS - IDENTIDADE 99TATTOO */}
           <Button
             onClick={() => onCreateAppointment(day)}
-            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 text-sm py-4 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-xl"
+            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 text-sm py-6 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-xl relative overflow-hidden group"
           >
-            <Plus className="h-5 w-5 mr-2" />
-            🚀 Novo Agendamento
+            <div className="flex items-center justify-center gap-3 relative z-10">
+              {/* CÍRCULO VERMELHO COM ÍCONES - DESIGN MODERNO */}
+              <div className="bg-white/20 rounded-full p-2 flex items-center justify-center">
+                <div className="relative">
+                  <Clock className="h-4 w-4 text-white" />
+                  <Plus className="h-3 w-3 text-white absolute -top-1 -right-1" />
+                </div>
+              </div>
+              <span className="font-black text-sm">🚀 NOVO AGENDAMENTO</span>
+            </div>
+            {/* Efeito hover shimmer */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
           </Button>
 
           {/* ÁREA REVOLUCIONÁRIA DOS AGENDAMENTOS COM MARCADORES TEMPORAIS INTEGRADOS */}

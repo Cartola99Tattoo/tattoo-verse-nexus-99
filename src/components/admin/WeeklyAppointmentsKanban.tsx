@@ -205,9 +205,13 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                       <div className="space-y-1">
                         <div className="flex items-center justify-center gap-2">
                           <CalendarIcon className="h-4 w-4" />
-                          <span>{format(day, 'EEEE', { locale: ptBR })}</span>
+                          {/* DESTAQUE VISUAL DOS DIAS DA SEMANA EM VERMELHO - MANTÉM BRANCO NO HEADER */}
+                          <span className="text-white">
+                            {format(day, 'EEEE', { locale: ptBR })}
+                          </span>
                         </div>
-                        <div className="text-lg font-black">
+                        {/* NÚMERO DO DIA EM VERMELHO - MANTÉM BRANCO NO HEADER */}
+                        <div className="text-lg font-black text-white">
                           {format(day, 'dd', { locale: ptBR })}
                         </div>
                         {isToday && (
@@ -234,14 +238,23 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                       </div>
                     </div>
 
-                    {/* Botão Adicionar Agendamento */}
+                    {/* BOTÃO REDESENHADO: CÍRCULO VERMELHO COM RELÓGIO + PLUS - IDENTIDADE 99TATTOO */}
                     <Button
                       onClick={() => onCreateAppointment(day)}
-                      variant="outline"
-                      className="w-full text-red-600 border-red-200 hover:bg-red-50 transition-all duration-300 font-medium text-xs"
+                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 text-xs py-4 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-xl relative overflow-hidden group"
                     >
-                      <Plus className="h-3 w-3 mr-1" />
-                      Novo Agendamento
+                      <div className="flex items-center justify-center gap-2 relative z-10">
+                        {/* CÍRCULO VERMELHO COM ÍCONES - DESIGN MODERNO */}
+                        <div className="bg-white/20 rounded-full p-1 flex items-center justify-center">
+                          <div className="relative">
+                            <Clock className="h-3 w-3 text-white" />
+                            <Plus className="h-2 w-2 text-white absolute -top-0.5 -right-0.5" />
+                          </div>
+                        </div>
+                        <span className="font-black text-xs">NOVO</span>
+                      </div>
+                      {/* Efeito hover shimmer */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                     </Button>
 
                     {/* Lista de Agendamentos */}

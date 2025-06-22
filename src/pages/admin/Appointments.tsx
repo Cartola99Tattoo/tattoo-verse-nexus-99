@@ -24,7 +24,6 @@ const Appointments = () => {
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
-  // Mock appointments data with enhanced variety and complete properties - EXPANDED
   const mockAppointments: Appointment[] = [
     // Dias 21-24 (dados originais expandidos)
     {
