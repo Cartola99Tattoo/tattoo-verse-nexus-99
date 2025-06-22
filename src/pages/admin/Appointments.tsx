@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -155,9 +154,9 @@ const Appointments = () => {
       date: "2024-12-23",
       time: "09:30",
       duration_minutes: 90,
-      service_type: "removal",
+      service_type: "consultation",
       status: "confirmed",
-      service_description: "Remoção a Laser - Pulso",
+      service_description: "Consulta - Remoção a Laser",
       estimated_price: 400,
       notes: "Segunda sessão",
       created_at: "2024-12-20T10:00:00Z",
@@ -266,9 +265,9 @@ const Appointments = () => {
       date: "2024-12-16",
       time: "16:30",
       duration_minutes: 90,
-      service_type: "removal",
+      service_type: "consultation",
       status: "confirmed",
-      service_description: "Remoção a Laser - Antebraço",
+      service_description: "Consulta - Remoção a Laser",
       estimated_price: 500,
       notes: "Primeira sessão",
       created_at: "2024-12-15T10:00:00Z",
@@ -377,9 +376,9 @@ const Appointments = () => {
       date: "2024-12-19",
       time: "10:00",
       duration_minutes: 120,
-      service_type: "removal",
+      service_type: "consultation",
       status: "confirmed",
-      service_description: "Remoção a Laser - Ombro",
+      service_description: "Consulta - Remoção a Laser",
       estimated_price: 600,
       notes: "Terceira sessão",
       created_at: "2024-12-18T10:00:00Z",
