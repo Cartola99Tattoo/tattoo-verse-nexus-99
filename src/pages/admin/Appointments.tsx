@@ -675,7 +675,7 @@ const Appointments = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-red-100 text-sm font-medium">Confirmados</p>
-                <p className="text-2xl font-black">{confirmedApp ointments}</p>
+                <p className="text-2xl font-black">{confirmedAppointments}</p>
               </div>
               <Clock className="h-6 w-6 text-green-300" />
             </div>
