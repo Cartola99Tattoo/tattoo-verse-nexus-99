@@ -171,7 +171,7 @@ const UltraOptimizedAppointmentBlock: React.FC<UltraOptimizedAppointmentBlockPro
       }}
     >
       {/* Barra de progresso para "Em Andamento" */}
-      {statusInfo.showProgress && (
+      {statusInfo.showProgress && 'progress' in statusInfo && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gray-200 overflow-hidden z-10">
           <div 
             className={`h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-1000 ${statusInfo.pulse ? 'animate-pulse' : ''}`}
