@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -631,6 +632,16 @@ const Appointments = () => {
     setShowAppointmentModal(true);
   };
 
+  // Wrapper function for WeeklyAppointmentsKanban (expects Partial<Appointment>)
+  const handleCreateAppointmentFromPartial = (appointment: Partial<Appointment>) => {
+    if (appointment.date) {
+      const date = new Date(appointment.date);
+      handleOpenAppointmentModal(date);
+    } else {
+      handleOpenAppointmentModal();
+    }
+  };
+
   // Wrapper function for WeeklyAppointmentsKanban (expects Date and timeSlot)
   const handleCreateAppointmentFromDateAndTime = (date: Date, timeSlot?: string) => {
     handleOpenAppointmentModal(date);
@@ -784,7 +795,7 @@ const Appointments = () => {
             currentDate={currentDate}
             onReschedule={handleReschedule}
             onDayClick={handleDayClick}
-            onCreateAppointment={handleCreateAppointmentFromDateAndTime}
+            onCreateAppointment={handleCreateAppointmentFromPartial}
             onEditAppointment={(apt) => console.log('Edit appointment:', apt)}
             onDeleteAppointment={(id) => console.log('Delete appointment:', id)}
           />
