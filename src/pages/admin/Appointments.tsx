@@ -626,6 +626,7 @@ const Appointments = () => {
     setSelectedDate(date);
   };
 
+  // Função separada para abrir modal com data específica
   const handleOpenAppointmentModal = (date?: Date) => {
     setModalSelectedDate(date);
     setShowAppointmentModal(true);
