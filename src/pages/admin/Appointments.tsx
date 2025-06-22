@@ -1,16 +1,18 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, Users, TrendingUp, BarChart3, CalendarDays, Kanban } from "lucide-react";
+import { Calendar, Clock, Users, TrendingUp, BarChart3, CalendarDays, Kanban, Sun } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { getClientService } from "@/services/serviceFactory";
 import DailyAppointmentsKanban from "@/components/admin/DailyAppointmentsKanban";
 import WeeklyAppointmentsKanban from "@/components/admin/WeeklyAppointmentsKanban";
 import EnhancedMonthlyCalendar from "@/components/admin/EnhancedMonthlyCalendar";
 import EnhancedWeeklyView from "@/components/admin/EnhancedWeeklyView";
+import StudioDayByDay from "@/components/admin/StudioDayByDay";
 import { format } from "date-fns";
 import { Appointment, Client } from "@/services/interfaces/IClientService";
 
@@ -701,9 +703,9 @@ const Appointments = () => {
         </div>
       </div>
 
-      {/* Tabs de Visualização - LAYOUT ORIGINAL PRESERVADO */}
+      {/* Tabs de Visualização - LAYOUT ORIGINAL PRESERVADO COM NOVA TAB */}
       <Tabs defaultValue="monthly" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-200 rounded-xl p-2">
+        <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-200 rounded-xl p-2">
           <TabsTrigger 
             value="monthly" 
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white font-bold transition-all duration-300"
@@ -715,15 +717,22 @@ const Appointments = () => {
             value="weekly" 
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white font-bold transition-all duration-300"
           >
-            <Kanban className="h-4 w-4 mr-2" />
+            <BarChart3 className="h-4 w-4 mr-2" />
             Visão Semanal
           </TabsTrigger>
           <TabsTrigger 
             value="kanban" 
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white font-bold transition-all duration-300"
           >
-            <BarChart3 className="h-4 w-4 mr-2" />
+            <Kanban className="h-4 w-4 mr-2" />
             Kanban Semanal
+          </TabsTrigger>
+          <TabsTrigger 
+            value="studio-day" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white font-bold transition-all duration-300"
+          >
+            <Sun className="h-4 w-4 mr-2" />
+            Dia a Dia do Estúdio
           </TabsTrigger>
           <TabsTrigger 
             value="daily" 
@@ -745,7 +754,7 @@ const Appointments = () => {
           />
         </TabsContent>
 
-        {/* Visualização Semanal Gráfica e Fluida */}
+        {/* Visualização Semanal Gráfica e Fluida APRIMORADA */}
         <TabsContent value="weekly">
           <EnhancedWeeklyView
             appointments={appointments}
@@ -768,6 +777,16 @@ const Appointments = () => {
             onCreateAppointment={handleCreateAppointmentForDate}
             onEditAppointment={(apt) => console.log('Edit appointment:', apt)}
             onDeleteAppointment={(id) => console.log('Delete appointment:', id)}
+          />
+        </TabsContent>
+
+        {/* NOVA SEÇÃO: Dia a Dia do Estúdio */}
+        <TabsContent value="studio-day">
+          <StudioDayByDay
+            appointments={appointments}
+            clients={clients}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
           />
         </TabsContent>
 
