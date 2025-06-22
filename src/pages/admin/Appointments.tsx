@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -642,6 +641,11 @@ const Appointments = () => {
     }
   };
 
+  // Wrapper function to handle StudioDayByDay's onCreateAppointment (expects Date and timeSlot)
+  const handleCreateAppointmentFromDateAndTime = (date: Date, timeSlot?: string) => {
+    handleOpenAppointmentModal(date);
+  };
+
   // Wrapper function to handle EnhancedWeeklyView's onCreateAppointment (expects Date)
   const handleCreateAppointmentFromDate = (date: Date) => {
     handleOpenAppointmentModal(date);
@@ -790,7 +794,7 @@ const Appointments = () => {
             currentDate={currentDate}
             onReschedule={handleReschedule}
             onDayClick={handleDayClick}
-            onCreateAppointment={handleCreateAppointmentFromPartial}
+            onCreateAppointment={handleCreateAppointmentFromDateAndTime}
             onEditAppointment={(apt) => console.log('Edit appointment:', apt)}
             onDeleteAppointment={(id) => console.log('Delete appointment:', id)}
           />
