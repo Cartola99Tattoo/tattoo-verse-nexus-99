@@ -38,16 +38,18 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
     confirmed: dayAppointments.filter(apt => apt.status === 'confirmed').length
   };
 
-  // Escala de tempo para grid lines - ALINHAMENTO MATEMÁTICO PRECISO
-  const timeScale = [];
-  const PIXELS_PER_HOUR = 80; // Constante para garantir alinhamento
+  // SISTEMA DE MARCADORES TEMPORAIS INTEGRADOS - REVOLUÇÃO ESPACIAL
+  const timeMarkers = [];
+  const PIXELS_PER_HOUR = 80; // Constante matemática precisa
   const START_HOUR = 8;
+  const END_HOUR = 20;
   
-  for (let hour = START_HOUR; hour <= 20; hour++) {
-    timeScale.push({ 
+  for (let hour = START_HOUR; hour <= END_HOUR; hour++) {
+    timeMarkers.push({ 
       hour, 
       top: (hour - START_HOUR) * PIXELS_PER_HOUR,
-      isCurrentHour: isToday && new Date().getHours() === hour
+      isCurrentHour: isToday && new Date().getHours() === hour,
+      label: `${hour.toString().padStart(2, '0')}h`
     });
   }
 
@@ -58,7 +60,7 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
         ${isToday ? 'border-red-400 shadow-red-200 ring-2 ring-red-200' : 'border-gray-200'}
       `}>
         <CardHeader className={`
-          p-5 rounded-t-xl transition-all duration-300 
+          p-6 rounded-t-xl transition-all duration-300 
           ${isToday 
             ? 'bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white' 
             : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 hover:from-gray-200 hover:to-gray-300'
@@ -72,18 +74,18 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
               </span>
             </div>
             
-            <div className="text-2xl font-black tracking-tight">
+            <div className="text-3xl font-black tracking-tight">
               {format(day, 'dd', { locale: ptBR })}
             </div>
             
             {isToday && (
               <Badge className="bg-white text-red-700 font-black text-xs px-3 py-1 shadow-lg animate-pulse">
-                HOJE
+                🔥 HOJE
               </Badge>
             )}
 
-            {/* Indicadores dinâmicos */}
-            <div className="flex justify-center gap-2">
+            {/* Indicadores dinâmicos aprimorados */}
+            <div className="flex justify-center gap-2 flex-wrap">
               {stats.inProgress > 0 && (
                 <Badge className="bg-blue-500 text-white font-bold text-xs px-2 py-1 animate-pulse flex items-center gap-1">
                   <Activity className="h-3 w-3" />
@@ -93,7 +95,7 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
               
               {stats.confirmed > 0 && (
                 <Badge className="bg-green-500 text-white font-bold text-xs px-2 py-1">
-                  {stats.confirmed} CONFIRMADOS
+                  ✅ {stats.confirmed} CONFIRMADOS
                 </Badge>
               )}
             </div>
@@ -101,23 +103,23 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
         </CardHeader>
         
         <CardContent className="p-4 space-y-4">
-          {/* Dashboard mini refinado */}
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border-2 border-gray-200 shadow-inner">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="text-center space-y-1">
-                <div className="flex items-center justify-center gap-1">
-                  <CalendarIcon className="h-4 w-4 text-gray-600" />
-                  <div className="text-xl font-black text-gray-800">{stats.count}</div>
+          {/* Dashboard mini EXPANDIDO com mais espaço */}
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-5 rounded-xl border-2 border-gray-200 shadow-inner">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center space-y-2">
+                <div className="flex items-center justify-center gap-2">
+                  <CalendarIcon className="h-5 w-5 text-gray-600" />
+                  <div className="text-2xl font-black text-gray-800">{stats.count}</div>
                 </div>
                 <div className="text-xs font-bold text-gray-600 uppercase tracking-wide">Agendamentos</div>
               </div>
               
-              <div className="text-center space-y-1">
+              <div className="text-center space-y-2">
                 {stats.revenue > 0 ? (
                   <>
-                    <div className="flex items-center justify-center gap-1">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
-                      <div className="text-sm font-black text-green-700">
+                    <div className="flex items-center justify-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                      <div className="text-lg font-black text-green-700">
                         R$ {stats.revenue.toLocaleString()}
                       </div>
                     </div>
@@ -125,9 +127,9 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center justify-center gap-1">
-                      <Clock className="h-4 w-4 text-gray-600" />
-                      <div className="text-sm font-black text-gray-700">
+                    <div className="flex items-center justify-center gap-2">
+                      <Clock className="h-5 w-5 text-gray-600" />
+                      <div className="text-lg font-black text-gray-700">
                         {Math.round(stats.duration / 60)}h
                       </div>
                     </div>
@@ -138,50 +140,53 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
             </div>
           </div>
 
-          {/* Botão Adicionar Ultra-Refinado - AGORA CONECTADO AO MODAL */}
+          {/* Botão Adicionar AMPLIADO */}
           <Button
             onClick={() => onCreateAppointment(day)}
-            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 text-sm py-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-xl"
+            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 text-sm py-4 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-xl"
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Agendamento
+            <Plus className="h-5 w-5 mr-2" />
+            🚀 Novo Agendamento
           </Button>
 
-          {/* Área dos agendamentos com grid refinado - ALINHAMENTO MATEMÁTICO PRECISO */}
+          {/* ÁREA REVOLUCIONÁRIA DOS AGENDAMENTOS COM MARCADORES TEMPORAIS INTEGRADOS */}
           <div 
             className="relative bg-gradient-to-b from-gray-50 to-white rounded-xl border-2 border-gray-200 shadow-inner overflow-hidden" 
-            style={{ height: `${13 * PIXELS_PER_HOUR}px` }} // 13 horas * 80px = 1040px
+            style={{ height: `${13 * PIXELS_PER_HOUR}px` }}
           >
-            {/* Grid lines horizontais MATEMATICAMENTE PRECISAS */}
-            {timeScale.map((time) => (
-              <div key={`${time.hour}-grid-container`}>
-                {/* Linha principal do horário */}
+            {/* MARCADORES TEMPORAIS INTEGRADOS - SEM COLUNA DEDICADA */}
+            {timeMarkers.map((marker) => (
+              <div key={`${marker.hour}-integrated-time`}>
+                {/* Linha horizontal precisa */}
                 <div 
-                  className={`absolute left-0 right-0 border-t-2 transition-colors duration-300 z-10 ${
-                    time.isCurrentHour ? 'border-red-500' : 'border-gray-300'
+                  className={`absolute left-0 right-0 border-t transition-colors duration-300 z-10 ${
+                    marker.isCurrentHour ? 'border-red-500 border-t-2' : 'border-gray-300'
                   }`}
-                  style={{ top: `${time.top}px` }}
+                  style={{ top: `${marker.top}px` }}
                 >
-                  {/* Label do horário - POSICIONAMENTO PRECISO */}
+                  {/* Label do horário integrado na lateral */}
                   <span className={`
-                    absolute right-2 -top-2 text-xs font-bold transition-colors duration-300 bg-white px-1 rounded z-20
-                    ${time.isCurrentHour ? 'text-red-600' : 'text-gray-500'}
+                    absolute right-2 -top-3 text-xs font-bold transition-all duration-300 px-2 py-1 rounded-md z-20
+                    ${marker.isCurrentHour 
+                      ? 'bg-red-600 text-white shadow-lg' 
+                      : 'bg-gray-200 text-gray-600'
+                    }
                   `}>
-                    {time.hour}h
+                    {marker.label}
                   </span>
                 </div>
                 
-                {/* Linha de meio (30min) - ALINHAMENTO PERFEITO */}
+                {/* Linha de meio (30min) discreta */}
                 <div 
-                  className="absolute left-4 right-4 h-px bg-gray-200/60 z-5"
-                  style={{ top: `${time.top + (PIXELS_PER_HOUR / 2)}px` }}
+                  className="absolute left-6 right-6 h-px bg-gray-200/50 z-5"
+                  style={{ top: `${marker.top + (PIXELS_PER_HOUR / 2)}px` }}
                 />
               </div>
             ))}
             
-            {/* Área dos blocos de agendamento */}
+            {/* Área dos blocos de agendamento com mais espaço */}
             <SortableContext items={dayAppointments.map(apt => apt.id)} strategy={verticalListSortingStrategy}>
-              <div className="relative h-full" id={dayKey} style={{ paddingTop: '2px', paddingLeft: '2px', paddingRight: '2px' }}>
+              <div className="relative h-full" id={dayKey} style={{ paddingTop: '4px', paddingLeft: '4px', paddingRight: '4px' }}>
                 {dayAppointments.map((appointment) => {
                   const client = clients.find(c => c.id === appointment.client_id);
                   return (
@@ -196,23 +201,23 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
                 {/* Estado vazio otimizado */}
                 {dayAppointments.length === 0 && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 pointer-events-none">
-                    <CalendarIcon className="h-20 w-20 mb-4 opacity-20" />
-                    <p className="text-sm font-bold">Dia Livre</p>
-                    <p className="text-xs text-gray-500 mt-1">Sem agendamentos</p>
+                    <CalendarIcon className="h-24 w-24 mb-4 opacity-20" />
+                    <p className="text-lg font-bold">✨ Dia Livre</p>
+                    <p className="text-sm text-gray-500 mt-1">Mais espaço para criatividade</p>
                   </div>
                 )}
               </div>
             </SortableContext>
           </div>
 
-          {/* Botão Ver Detalhes Ultra-Refinado */}
+          {/* Botão Ver Detalhes AMPLIADO */}
           <Button
             onClick={() => onDayClick(day)}
             variant="outline"
-            className="w-full text-gray-700 border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 text-sm py-3 font-bold rounded-xl transform hover:scale-[1.02]"
+            className="w-full text-gray-700 border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 text-sm py-4 font-bold rounded-xl transform hover:scale-[1.02]"
           >
-            <Eye className="h-4 w-4 mr-2" />
-            Ver Detalhes
+            <Eye className="h-5 w-5 mr-2" />
+            👁️ Ver Detalhes Completos
           </Button>
         </CardContent>
       </Card>
