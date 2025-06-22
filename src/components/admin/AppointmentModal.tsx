@@ -21,8 +21,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   onCreateAppointment,
   clients,
 }) => {
-  const handleSubmit = (appointmentData: any) => {
-    onCreateAppointment(appointmentData);
+  const handleSuccess = () => {
     onClose();
   };
 
@@ -52,7 +51,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
           <AppointmentForm
             selectedSlot={selectedSlot}
             clients={clients}
-            onSuccess={handleSubmit}
+            onSuccess={handleSuccess}
             onClose={onClose}
           />
         </div>

@@ -71,6 +71,10 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast({
+        title: "Agendamento criado",
+        description: "O agendamento foi criado com sucesso.",
+      });
       onSuccess();
     },
     onError: (error) => {
