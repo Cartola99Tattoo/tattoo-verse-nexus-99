@@ -631,22 +631,12 @@ const Appointments = () => {
     setShowAppointmentModal(true);
   };
 
-  // Wrapper function to handle WeeklyAppointmentsKanban's onCreateAppointment (expects Partial<Appointment>)
-  const handleCreateAppointmentFromPartial = (appointment: Partial<Appointment>) => {
-    if (appointment.date) {
-      const date = new Date(appointment.date);
-      handleOpenAppointmentModal(date);
-    } else {
-      handleOpenAppointmentModal();
-    }
-  };
-
-  // Wrapper function to handle StudioDayByDay's onCreateAppointment (expects Date and timeSlot)
+  // Wrapper function for WeeklyAppointmentsKanban (expects Date and timeSlot)
   const handleCreateAppointmentFromDateAndTime = (date: Date, timeSlot?: string) => {
     handleOpenAppointmentModal(date);
   };
 
-  // Wrapper function to handle EnhancedWeeklyView's onCreateAppointment (expects Date)
+  // Wrapper function for EnhancedWeeklyView (expects Date)
   const handleCreateAppointmentFromDate = (date: Date) => {
     handleOpenAppointmentModal(date);
   };
