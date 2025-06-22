@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCorners } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -98,6 +97,9 @@ const OptimizedAppointmentBlock: React.FC<{
       ref={setNodeRef}
       style={{ 
         ...style, 
+        borderLeftColor: artist.color,
+        backgroundColor: artist.lightBg,
+        borderColor: artist.border,
         height: `${height}px`,
         top: `${Math.max(0, topPosition)}px`,
         position: 'absolute',
@@ -112,18 +114,6 @@ const OptimizedAppointmentBlock: React.FC<{
         ${isOverlay ? 'scale-110 shadow-xl' : ''}
         overflow-hidden group
       `}
-      style={{
-        ...style,
-        borderLeftColor: artist.color,
-        backgroundColor: artist.lightBg,
-        borderColor: artist.border,
-        height: `${height}px`,
-        top: `${Math.max(0, topPosition)}px`,
-        position: 'absolute',
-        width: 'calc(100% - 6px)',
-        left: '3px',
-        zIndex: isDragging ? 100 : 10
-      }}
       {...attributes}
       {...listeners}
       title={`${client?.name || 'Cliente'} - ${serviceConfig.name} - ${appointment.time} às ${endTime} - ${statusInfo.name}`}
