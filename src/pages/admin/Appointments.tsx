@@ -25,7 +25,6 @@ const Appointments = () => {
   const clientService = getClientService();
 
   const mockAppointments: Appointment[] = [
-    // Dias 21-24 (dados originais expandidos)
     {
       id: "1",
       client_id: "1",
@@ -101,8 +100,6 @@ const Appointments = () => {
       created_at: "2024-12-20T10:00:00Z",
       updated_at: "2024-12-20T10:00:00Z"
     },
-    
-    // Dia 22
     {
       id: "4",
       client_id: "4",
@@ -133,8 +130,6 @@ const Appointments = () => {
       created_at: "2024-12-20T10:00:00Z",
       updated_at: "2024-12-20T10:00:00Z"
     },
-    
-    // Dia 23 
     {
       id: "6",
       client_id: "1",
@@ -180,8 +175,6 @@ const Appointments = () => {
       created_at: "2024-12-20T10:00:00Z",
       updated_at: "2024-12-20T10:00:00Z"
     },
-    
-    // Dia 24
     {
       id: "7",
       client_id: "2",
@@ -212,10 +205,6 @@ const Appointments = () => {
       created_at: "2024-12-20T10:00:00Z",
       updated_at: "2024-12-20T10:00:00Z"
     },
-    
-    // NOVOS DIAS COM ABUNDANTE VARIEDADE
-    
-    // Dia 16 (segunda-feira movimentada)
     {
       id: "16a",
       client_id: "1",
@@ -291,8 +280,6 @@ const Appointments = () => {
       created_at: "2024-12-15T10:00:00Z",
       updated_at: "2024-12-15T10:00:00Z"
     },
-    
-    // Dia 17 (terça-feira moderada)
     {
       id: "17a",
       client_id: "1",
@@ -323,8 +310,6 @@ const Appointments = () => {
       created_at: "2024-12-16T10:00:00Z",
       updated_at: "2024-12-16T10:00:00Z"
     },
-    
-    // Dia 18 (quarta-feira intensa)
     {
       id: "18a",
       client_id: "2",
@@ -370,8 +355,6 @@ const Appointments = () => {
       created_at: "2024-12-17T10:00:00Z",
       updated_at: "2024-12-17T10:00:00Z"
     },
-    
-    // Dia 19 (quinta-feira focada)
     {
       id: "19a",
       client_id: "1",
@@ -402,8 +385,6 @@ const Appointments = () => {
       created_at: "2024-12-18T10:00:00Z",
       updated_at: "2024-12-18T10:00:00Z"
     },
-    
-    // Dia 20 (sexta-feira completa)
     {
       id: "20a",
       client_id: "2",
@@ -464,9 +445,6 @@ const Appointments = () => {
       created_at: "2024-12-19T10:00:00Z",
       updated_at: "2024-12-19T10:00:00Z"
     },
-    
-    // Mais dias para testar abundância
-    // Dia 25 (sábado especial)
     {
       id: "25a",
       client_id: "1",
@@ -482,8 +460,6 @@ const Appointments = () => {
       created_at: "2024-12-24T10:00:00Z",
       updated_at: "2024-12-24T10:00:00Z"
     },
-    
-    // Dia 26 (domingo relaxado)
     {
       id: "26a",
       client_id: "2",
@@ -630,16 +606,6 @@ const Appointments = () => {
     setShowAppointmentModal(true);
   };
 
-  // Wrapper function for WeeklyAppointmentsKanban (expects Partial<Appointment>)
-  const handleCreateAppointmentFromPartial = (appointment: Partial<Appointment>) => {
-    if (appointment.date) {
-      const date = new Date(appointment.date);
-      handleOpenAppointmentModal(date);
-    } else {
-      handleOpenAppointmentModal();
-    }
-  };
-
   // Wrapper function for WeeklyAppointmentsKanban (expects Date and timeSlot)
   const handleCreateAppointmentFromDateAndTime = (date: Date, timeSlot?: string) => {
     handleOpenAppointmentModal(date);
@@ -648,6 +614,16 @@ const Appointments = () => {
   // Wrapper function for EnhancedWeeklyView (expects Date)
   const handleCreateAppointmentFromDate = (date: Date) => {
     handleOpenAppointmentModal(date);
+  };
+
+  // Wrapper function for WeeklyAppointmentsKanban (expects Partial<Appointment>)
+  const handleCreateAppointmentFromPartial = (appointment: Partial<Appointment>) => {
+    if (appointment.date) {
+      const date = new Date(appointment.date);
+      handleOpenAppointmentModal(date);
+    } else {
+      handleOpenAppointmentModal();
+    }
   };
 
   const handleCloseAppointmentModal = () => {
@@ -793,7 +769,7 @@ const Appointments = () => {
             currentDate={currentDate}
             onReschedule={handleReschedule}
             onDayClick={handleDayClick}
-            onCreateAppointment={handleCreateAppointmentFromPartial}
+            onCreateAppointment={handleCreateAppointmentFromDateAndTime}
             onEditAppointment={(apt) => console.log('Edit appointment:', apt)}
             onDeleteAppointment={(id) => console.log('Delete appointment:', id)}
           />
