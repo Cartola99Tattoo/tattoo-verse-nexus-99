@@ -4,12 +4,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import AppointmentForm from './AppointmentForm';
 import { format } from 'date-fns';
 import { Calendar, Clock } from 'lucide-react';
+import { Client } from '@/services/interfaces/IClientService';
 
 interface AppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedDate?: Date;
   onCreateAppointment: (appointmentData: any) => void;
+  clients: Client[];
 }
 
 const AppointmentModal: React.FC<AppointmentModalProps> = ({
@@ -17,11 +19,18 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   onClose,
   selectedDate,
   onCreateAppointment,
+  clients,
 }) => {
   const handleSubmit = (appointmentData: any) => {
     onCreateAppointment(appointmentData);
     onClose();
   };
+
+  // Create selectedSlot from selectedDate for AppointmentForm
+  const selectedSlot = selectedDate ? {
+    start: selectedDate,
+    end: new Date(selectedDate.getTime() + 2 * 60 * 60 * 1000) // 2 hours later
+  } : undefined;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -41,9 +50,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
         
         <div className="p-2">
           <AppointmentForm
-            initialDate={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined}
-            onSubmit={handleSubmit}
-            onCancel={onClose}
+            selectedSlot={selectedSlot}
+            clients={clients}
+            onSuccess={handleSubmit}
+            onClose={onClose}
           />
         </div>
       </DialogContent>

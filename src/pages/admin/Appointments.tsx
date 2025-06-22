@@ -816,6 +816,7 @@ const Appointments = () => {
         onClose={handleCloseAppointmentModal}
         selectedDate={modalSelectedDate}
         onCreateAppointment={handleCreateAppointment}
+        clients={clients}
       />
 
       {/* Modal de Visualização Diária */}
