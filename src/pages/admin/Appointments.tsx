@@ -641,6 +641,11 @@ const Appointments = () => {
     }
   };
 
+  // Wrapper function to handle StudioDayByDay's onCreateAppointment
+  const handleCreateAppointmentFromDate = (date: Date, timeSlot?: string) => {
+    handleOpenAppointmentModal(date);
+  };
+
   const handleCloseAppointmentModal = () => {
     setShowAppointmentModal(false);
     setModalSelectedDate(undefined);
@@ -797,6 +802,7 @@ const Appointments = () => {
             clients={clients}
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
+            onCreateAppointment={handleCreateAppointmentFromDate}
           />
         </TabsContent>
 
