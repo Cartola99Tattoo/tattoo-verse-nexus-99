@@ -616,7 +616,7 @@ const Appointments = () => {
     handleOpenAppointmentModal(date);
   };
 
-  // Wrapper function for WeeklyAppointmentsKanban (expects Partial<Appointment>)
+  // Wrapper function for EnhancedMonthlyCalendar (expects Partial<Appointment>)
   const handleCreateAppointmentFromPartial = (appointment: Partial<Appointment>) => {
     if (appointment.date) {
       const date = new Date(appointment.date);
@@ -744,7 +744,7 @@ const Appointments = () => {
             appointments={appointments}
             clients={clients}
             currentDate={currentDate}
-            onCreateAppointment={handleOpenAppointmentModal}
+            onCreateAppointment={handleCreateAppointmentFromPartial}
             onDayClick={handleDayClick}
           />
         </TabsContent>
