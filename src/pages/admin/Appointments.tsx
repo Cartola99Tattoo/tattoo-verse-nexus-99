@@ -794,7 +794,7 @@ const Appointments = () => {
             currentDate={currentDate}
             onReschedule={handleReschedule}
             onDayClick={handleDayClick}
-            onCreateAppointment={handleCreateAppointmentFromPartial}
+            onCreateAppointment={handleCreateAppointmentFromDateAndTime}
             onEditAppointment={(apt) => console.log('Edit appointment:', apt)}
             onDeleteAppointment={(id) => console.log('Delete appointment:', id)}
           />
