@@ -214,6 +214,8 @@ const Appointments = () => {
       email: "joao@email.com",
       phone: "(11) 99999-0001",
       status: "vip",
+      total_spent: 2500,
+      total_orders: 3,
       created_at: "2024-01-01T00:00:00Z",
       updated_at: "2024-01-01T00:00:00Z"
     },
@@ -223,6 +225,8 @@ const Appointments = () => {
       email: "maria@email.com",
       phone: "(11) 99999-0002",
       status: "returning",
+      total_spent: 1800,
+      total_orders: 2,
       created_at: "2024-01-02T00:00:00Z",
       updated_at: "2024-01-02T00:00:00Z"
     },
@@ -232,6 +236,8 @@ const Appointments = () => {
       email: "pedro@email.com",
       phone: "(11) 99999-0003",
       status: "completed",
+      total_spent: 1200,
+      total_orders: 1,
       created_at: "2024-01-03T00:00:00Z",
       updated_at: "2024-01-03T00:00:00Z"
     },
@@ -241,6 +247,8 @@ const Appointments = () => {
       email: "ana@email.com",
       phone: "(11) 99999-0004",
       status: "interested",
+      total_spent: 0,
+      total_orders: 0,
       created_at: "2024-01-04T00:00:00Z",
       updated_at: "2024-01-04T00:00:00Z"
     },
@@ -250,6 +258,8 @@ const Appointments = () => {
       email: "carlos@email.com",
       phone: "(11) 99999-0005",
       status: "new",
+      total_spent: 0,
+      total_orders: 0,
       created_at: "2024-01-05T00:00:00Z",
       updated_at: "2024-01-05T00:00:00Z"
     }
@@ -358,7 +368,6 @@ const Appointments = () => {
           <StudioDayByDay
             appointments={mockAppointments}
             clients={mockClients}
-            onCreateAppointment={handleCreateAppointment}
           />
         </TabsContent>
 
@@ -416,13 +425,6 @@ const Appointments = () => {
         isOpen={showAppointmentModal}
         onClose={() => setShowAppointmentModal(false)}
         selectedDate={modalSelectedDate}
-        onSave={() => {
-          setShowAppointmentModal(false);
-          toast({
-            title: "Agendamento criado",
-            description: "Novo agendamento foi criado com sucesso!",
-          });
-        }}
       />
     </div>
   );
