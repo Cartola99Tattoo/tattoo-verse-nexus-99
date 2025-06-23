@@ -1,4 +1,5 @@
 
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -383,6 +384,7 @@ const Appointments = () => {
           <EnhancedMonthlyCalendar
             appointments={mockAppointments}
             clients={mockClients}
+            currentDate={currentDate}
             onDayClick={handleDayClick}
             onCreateAppointment={handleCreateAppointmentFromCalendar}
           />
@@ -460,3 +462,4 @@ const Appointments = () => {
 };
 
 export default Appointments;
+
