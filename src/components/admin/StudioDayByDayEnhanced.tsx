@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, User, X, Calendar as CalendarIcon, Play, CheckCircle, AlertCircle, Timer, Edit, Trash2, DollarSign } from 'lucide-react';
+import { Clock, User, X, Calendar as CalendarIcon, Play, CheckCircle, AlertCircle, Timer, Edit, Trash2, DollarSign, TrendingUp, Users, CalendarDays } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Appointment, Client } from '@/services/interfaces/IClientService';
@@ -103,7 +103,7 @@ const DraggableAppointmentCard: React.FC<DraggableAppointmentCardProps> = ({
       {...attributes}
       {...listeners}
       className={`
-        relative bg-white rounded-xl border-2 border-gray-200 p-4 shadow-lg hover:shadow-xl 
+        relative bg-white rounded-xl border-2 border-gray-200 p-3 shadow-lg hover:shadow-xl 
         transition-all duration-300 cursor-grab active:cursor-grabbing group
         ${isDragging ? 'opacity-70 scale-105 rotate-2 z-50' : ''}
         ${isOverlay ? 'scale-110 shadow-2xl ring-2 ring-red-300 z-50' : ''}
@@ -111,13 +111,13 @@ const DraggableAppointmentCard: React.FC<DraggableAppointmentCardProps> = ({
       `}
     >
       {/* Header do Card */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <div className={`w-3 h-3 rounded-full ${statusInfo.color}`} />
-          <span className="text-lg font-black text-gray-800">
+          <span className="text-base font-black text-gray-800">
             {client?.name || 'Cliente'}
           </span>
-          <span className="text-lg">{serviceConfig.icon}</span>
+          <span className="text-base">{serviceConfig.icon}</span>
         </div>
         
         {/* Botões de ação */}
@@ -151,7 +151,7 @@ const DraggableAppointmentCard: React.FC<DraggableAppointmentCardProps> = ({
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-gray-600" />
-          <span className="font-bold text-gray-700">
+          <span className="font-bold text-gray-700 text-sm">
             {appointment.time} ({appointment.duration_minutes}min)
           </span>
         </div>
@@ -163,7 +163,7 @@ const DraggableAppointmentCard: React.FC<DraggableAppointmentCardProps> = ({
         {appointment.estimated_price && (
           <div className="flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-green-600" />
-            <span className="font-bold text-green-700">
+            <span className="font-bold text-green-700 text-sm">
               R$ {appointment.estimated_price.toLocaleString()}
             </span>
           </div>
@@ -174,7 +174,7 @@ const DraggableAppointmentCard: React.FC<DraggableAppointmentCardProps> = ({
           <div className="bg-purple-50 border border-purple-200 p-2 rounded-lg">
             <div className="flex items-center gap-2">
               <Timer className="h-4 w-4 text-purple-600 animate-pulse" />
-              <span className="font-mono font-bold text-purple-700">
+              <span className="font-mono font-bold text-purple-700 text-sm">
                 {formatElapsedTime(timeElapsed)}
               </span>
             </div>
@@ -213,21 +213,21 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
   onDelete 
 }) => {
   return (
-    <div className="flex-1 min-h-[600px]">
+    <div className="flex-1 min-h-[550px]">
       <Card className={`h-full border-2 shadow-xl ${bgColor}`}>
-        <CardHeader className={`p-4 text-white ${bgColor.replace('bg-', 'bg-').replace('-50', '-600')}`}>
-          <CardTitle className="flex items-center gap-3 text-center justify-center">
+        <CardHeader className={`p-3 text-white ${bgColor.replace('bg-', 'bg-').replace('-50', '-600')}`}>
+          <CardTitle className="flex items-center gap-2 text-center justify-center">
             {icon}
-            <span className="font-black text-lg">{title}</span>
-            <Badge className="bg-white/20 text-white font-bold">
+            <span className="font-black text-base">{title}</span>
+            <Badge className="bg-white/20 text-white font-bold text-sm">
               {appointments.length}
             </Badge>
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <SortableContext items={appointments.map(apt => apt.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-4 min-h-[500px]" id={id}>
+            <div className="space-y-3 min-h-[450px]" id={id}>
               {appointments.map((appointment) => {
                 const client = clients.find(c => c.id === appointment.client_id);
                 return (
@@ -242,8 +242,8 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
               })}
               
               {appointments.length === 0 && (
-                <div className="text-center py-12 text-gray-400">
-                  <div className="text-4xl mb-4 opacity-30">{icon}</div>
+                <div className="text-center py-8 text-gray-400">
+                  <div className="text-3xl mb-3 opacity-30">{icon}</div>
                   <p className="font-medium">Nenhum agendamento</p>
                   <p className="text-sm text-gray-500 mt-1">Arraste cards para cá</p>
                 </div>
@@ -328,28 +328,16 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-hidden bg-gradient-to-br from-white to-red-50 border-red-200">
-        <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-6 rounded-lg -mx-6 -mt-6 mb-6">
+        <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-lg -mx-6 -mt-6 mb-4">
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="text-2xl font-black flex items-center gap-3">
-                <CalendarIcon className="h-6 w-6" />
+              <DialogTitle className="text-xl font-black flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5" />
                 Dia a Dia do Estúdio
               </DialogTitle>
-              <p className="text-red-100 font-medium text-lg">
+              <p className="text-red-100 font-medium text-base">
                 {format(selectedDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
               </p>
-            </div>
-            
-            {/* Estatísticas do Cabeçalho */}
-            <div className="flex gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-black">{dayStats.total}</div>
-                <div className="text-red-100 text-sm font-bold">Total</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl font-black">R$ {dayStats.revenue.toLocaleString()}</div>
-                <div className="text-red-100 text-sm font-bold">Receita</div>
-              </div>
             </div>
             
             <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
@@ -358,13 +346,67 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
           </div>
         </DialogHeader>
 
-        {/* Timeline Lateral */}
-        <div className="flex gap-6 overflow-auto max-h-[calc(95vh-250px)]">
+        {/* Dashboard de Resumo do Dia */}
+        <div className="bg-gradient-to-br from-white via-red-50/50 to-white rounded-2xl shadow-2xl border-2 border-red-200/50 p-4 mb-4">
+          <h3 className="text-lg font-black text-red-800 mb-3 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Dashboard do Dia
+          </h3>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* Total de Agendamentos */}
+            <div className="bg-gradient-to-br from-red-500 to-red-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <div className="flex items-center justify-between mb-2">
+                <CalendarDays className="h-6 w-6 text-white/80" />
+                <div className="text-2xl font-black">{dayStats.total}</div>
+              </div>
+              <div className="text-red-100 font-bold text-xs uppercase tracking-wide">
+                Total de Agendamentos
+              </div>
+            </div>
+
+            {/* Receita do Dia */}
+            <div className="bg-gradient-to-br from-green-500 to-green-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <div className="flex items-center justify-between mb-2">
+                <DollarSign className="h-6 w-6 text-white/80" />
+                <div className="text-lg font-black">R$ {dayStats.revenue.toLocaleString()}</div>
+              </div>
+              <div className="text-green-100 font-bold text-xs uppercase tracking-wide">
+                Receita do Dia
+              </div>
+            </div>
+
+            {/* Em Andamento */}
+            <div className="bg-gradient-to-br from-purple-500 to-purple-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <div className="flex items-center justify-between mb-2">
+                <Play className="h-6 w-6 text-white/80" />
+                <div className="text-2xl font-black">{dayStats.inProgress}</div>
+              </div>
+              <div className="text-purple-100 font-bold text-xs uppercase tracking-wide">
+                Em Andamento
+              </div>
+            </div>
+
+            {/* Concluídos */}
+            <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <div className="flex items-center justify-between mb-2">
+                <CheckCircle className="h-6 w-6 text-white/80" />
+                <div className="text-2xl font-black">{dayStats.completed}</div>
+              </div>
+              <div className="text-blue-100 font-bold text-xs uppercase tracking-wide">
+                Concluídos
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Timeline Lateral e Kanban de 3 Colunas */}
+        <div className="flex gap-4 overflow-auto max-h-[calc(95vh-300px)]">
           {/* Timeline de Horários */}
-          <div className="w-20 flex-shrink-0">
-            <div className="bg-gray-100 p-3 rounded-lg h-full">
-              <h3 className="text-xs font-bold text-gray-600 mb-4 text-center">Horários</h3>
-              <div className="space-y-3">
+          <div className="w-16 flex-shrink-0">
+            <div className="bg-gray-100 p-2 rounded-lg h-full">
+              <h3 className="text-xs font-bold text-gray-600 mb-3 text-center">Horários</h3>
+              <div className="space-y-2">
                 {timeSlots.map((time) => (
                   <div key={time} className="text-center">
                     <div className="text-xs font-bold text-gray-700 bg-white p-1 rounded border">
@@ -383,11 +425,11 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
               onDragEnd={handleDragEnd}
               collisionDetection={closestCorners}
             >
-              <div className="flex gap-6 h-full">
+              <div className="flex gap-4 h-full">
                 <KanbanColumn
                   id="scheduled"
                   title="Agendados"
-                  icon={<AlertCircle className="h-6 w-6" />}
+                  icon={<AlertCircle className="h-5 w-5" />}
                   appointments={scheduledAppointments}
                   clients={clients}
                   bgColor="bg-orange-50 border-orange-200"
@@ -398,7 +440,7 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
                 <KanbanColumn
                   id="in_progress"
                   title="Em Andamento"
-                  icon={<Play className="h-6 w-6" />}
+                  icon={<Play className="h-5 w-5" />}
                   appointments={inProgressAppointments}
                   clients={clients}
                   bgColor="bg-purple-50 border-purple-200"
@@ -409,7 +451,7 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
                 <KanbanColumn
                   id="completed"
                   title="Atendimento Realizado"
-                  icon={<CheckCircle className="h-6 w-6" />}
+                  icon={<CheckCircle className="h-5 w-5" />}
                   appointments={completedAppointments}
                   clients={clients}
                   bgColor="bg-green-50 border-green-200"
@@ -434,14 +476,14 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
         </div>
 
         {/* Footer com Resumo */}
-        <div className="flex justify-center gap-6 pt-4 border-t border-red-200 mt-4">
-          <Badge className="bg-orange-500 text-white px-4 py-2">
+        <div className="flex justify-center gap-4 pt-3 border-t border-red-200 mt-3">
+          <Badge className="bg-orange-500 text-white px-3 py-1 text-sm">
             Agendados: {dayStats.scheduled}
           </Badge>
-          <Badge className="bg-purple-500 text-white px-4 py-2">
+          <Badge className="bg-purple-500 text-white px-3 py-1 text-sm">
             Em Andamento: {dayStats.inProgress}
           </Badge>
-          <Badge className="bg-green-500 text-white px-4 py-2">
+          <Badge className="bg-green-500 text-white px-3 py-1 text-sm">
             Concluídos: {dayStats.completed}
           </Badge>
         </div>
