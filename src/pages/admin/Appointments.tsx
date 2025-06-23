@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,7 @@ const Appointments = () => {
   const [currentDate] = useState(new Date());
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [modalSelectedDate, setModalSelectedDate] = useState<Date | undefined>();
+  const [studioDayByDayDate, setStudioDayByDayDate] = useState<Date>(new Date());
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
@@ -277,6 +279,25 @@ const Appointments = () => {
     setShowAppointmentModal(true);
   };
 
+  // Handler specifically for calendar monthly view
+  const handleCreateAppointmentFromCalendar = (appointmentData: Partial<Appointment>) => {
+    console.log("Creating appointment from calendar:", appointmentData);
+    toast({
+      title: "Agendamento criado",
+      description: "Novo agendamento foi criado com sucesso!",
+    });
+  };
+
+  // Handler for appointment creation in modal
+  const handleAppointmentCreated = (appointmentData: any) => {
+    console.log("Appointment created:", appointmentData);
+    toast({
+      title: "Agendamento criado",
+      description: "Novo agendamento foi criado com sucesso!",
+    });
+    setShowAppointmentModal(false);
+  };
+
   const handleEditAppointment = (appointment: Appointment) => {
     toast({
       title: "Editar agendamento",
@@ -294,6 +315,10 @@ const Appointments = () => {
 
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
+  };
+
+  const handleStudioDayChange = (date: Date) => {
+    setStudioDayByDayDate(date);
   };
 
   return (
@@ -359,7 +384,7 @@ const Appointments = () => {
             appointments={mockAppointments}
             clients={mockClients}
             onDayClick={handleDayClick}
-            onCreateAppointment={handleCreateAppointment}
+            onCreateAppointment={handleCreateAppointmentFromCalendar}
           />
         </TabsContent>
 
@@ -368,6 +393,8 @@ const Appointments = () => {
           <StudioDayByDay
             appointments={mockAppointments}
             clients={mockClients}
+            selectedDate={studioDayByDayDate}
+            onDateChange={handleStudioDayChange}
           />
         </TabsContent>
 
@@ -425,6 +452,8 @@ const Appointments = () => {
         isOpen={showAppointmentModal}
         onClose={() => setShowAppointmentModal(false)}
         selectedDate={modalSelectedDate}
+        onCreateAppointment={handleAppointmentCreated}
+        clients={mockClients}
       />
     </div>
   );
