@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -14,7 +13,7 @@ interface UltraOptimizedAppointmentBlockProps {
   isOverlay?: boolean;
 }
 
-const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlockProps> = ({ 
+const UltraOptimizedAppointmentBlock: React.FC<UltraOptimizedAppointmentBlockProps> = ({ 
   appointment, 
   client, 
   isOverlay = false 
@@ -33,12 +32,10 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
     transition: isDragging ? 'none' : transition,
   };
 
-  // CONSTANTES MATEMÁTICAS PARA ALINHAMENTO PERFEITO
   const PIXELS_PER_HOUR = 80;
   const START_HOUR = 8;
   const BORDER_OFFSET = 2;
 
-  // Paleta refinada 99Tattoo com cores sutis
   const artists = [
     { 
       id: '1', 
@@ -82,14 +79,12 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
     },
   ];
 
-  // Tipos de serviço com ícones e cores
   const serviceTypes = {
     tattoo: { icon: Palette, name: 'Tattoo', color: '#dc2626', dot: '🎨' },
     piercing: { icon: Zap, name: 'Piercing', color: '#2563eb', dot: '⚡' },
     consultation: { icon: User, name: 'Consulta', color: '#059669', dot: '💬' },
   };
 
-  // Status com feedback visual
   const statusConfig = {
     scheduled: { 
       name: 'Agendado', 
@@ -122,22 +117,16 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
   const serviceConfig = serviceTypes[appointment.service_type as keyof typeof serviceTypes] || serviceTypes.tattoo;
   const statusInfo = statusConfig[appointment.status as keyof typeof statusConfig] || statusConfig.scheduled;
   
-  // CÁLCULOS MATEMÁTICOS PRECISOS PARA POSICIONAMENTO
   const duration = appointment.duration_minutes || 60;
   const height = Math.max(40, (duration / 60) * PIXELS_PER_HOUR);
   
-  // Calcular posição vertical ULTRA-PRECISA
   const [hours, minutes] = appointment.time.split(':').map(Number);
   const totalMinutes = hours * 60 + minutes;
   const startHourMinutes = START_HOUR * 60;
   const topPosition = ((totalMinutes - startHourMinutes) / 60) * PIXELS_PER_HOUR;
 
-  // Nome do cliente otimizado
   const clientName = client?.name || 'Cliente';
   const clientFirstName = clientName.split(' ')[0];
-  
-  // Layout adaptativo baseado na duração - INFORMAÇÕES ESSENCIAIS APENAS
-  const isShort = duration < 90;
 
   const AppointmentContent = () => (
     <div
@@ -154,17 +143,14 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
         borderColor: artist.borderColor,
       }}
     >
-      {/* Barra de progresso para "Em Andamento" */}
       {statusInfo.pulse && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gray-200 overflow-hidden z-10">
           <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 w-2/3 animate-pulse" />
         </div>
       )}
 
-      <div className="h-full flex flex-col justify-between p-2 relative z-20">
-        {/* INFORMAÇÕES ESSENCIAIS APENAS */}
+      <div className="h-full flex flex-col justify-center p-2 relative z-20">
         <div className="space-y-1">
-          {/* Horário - MÁXIMA PRIORIDADE */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3 flex-shrink-0" style={{ color: artist.primaryColor }} />
@@ -176,7 +162,6 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
               </span>
             </div>
             
-            {/* Status dot + Service dot */}
             <div className="flex items-center gap-1">
               <div 
                 className={`w-2 h-2 rounded-full ${statusInfo.pulse ? 'animate-pulse' : ''}`}
@@ -186,42 +171,19 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
             </div>
           </div>
 
-          {/* Cliente - SEGUNDA PRIORIDADE */}
-          <div className="flex items-center gap-1">
-            <User className="h-3 w-3 text-gray-500 flex-shrink-0" />
+          <div className="flex items-center justify-center">
             <span 
-              className="font-bold text-xs leading-none truncate" 
+              className="font-bold text-xs leading-none truncate text-center" 
               style={{ color: artist.textColor }}
             >
               {clientFirstName}
             </span>
           </div>
-
-          {/* Duração para blocos curtos */}
-          {isShort && (
-            <div className="text-center pt-1">
-              <span className="text-xs font-medium text-gray-500">
-                {duration}min
-              </span>
-            </div>
-          )}
         </div>
-
-        {/* Preço (apenas para blocos longos) */}
-        {!isShort && appointment.estimated_price && (
-          <div className="flex items-center gap-1 justify-center">
-            <DollarSign className="h-3 w-3 text-green-600 flex-shrink-0" />
-            <span className="text-xs font-bold text-green-700">
-              R$ {appointment.estimated_price.toLocaleString()}
-            </span>
-          </div>
-        )}
       </div>
 
-      {/* Hover overlay sutil */}
       <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-[0.02] transition-opacity duration-300 pointer-events-none rounded-lg" />
       
-      {/* Indicador de drag ativo */}
       {isDragging && (
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-red-600/5 rounded-lg border border-red-400/30" />
       )}
@@ -254,7 +216,6 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
           sideOffset={8}
         >
           <div className="space-y-4">
-            {/* Header do tooltip */}
             <div className="flex items-center justify-between border-b border-red-100 pb-3">
               <div className="flex items-center gap-2">
                 <div 
@@ -271,7 +232,6 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
               </Badge>
             </div>
 
-            {/* Informações completas do agendamento */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-red-600" />
@@ -304,7 +264,6 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
               )}
             </div>
 
-            {/* Descrição do serviço */}
             {appointment.service_description && (
               <div className="bg-red-50 p-3 rounded-lg border border-red-100">
                 <p className="text-sm text-gray-700 leading-relaxed">
@@ -313,7 +272,6 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
               </div>
             )}
 
-            {/* Contato do cliente */}
             {client && (
               <div className="border-t border-gray-100 pt-3 space-y-2">
                 <h4 className="font-semibold text-gray-800 text-sm">Contato:</h4>
@@ -330,7 +288,6 @@ const UltraOptimizedAppointmentBlock: React.FC<Ul​traOptimizedAppointmentBlock
               </div>
             )}
 
-            {/* Ações rápidas */}
             <div className="flex gap-2 pt-2 border-t border-gray-100">
               <Button size="sm" variant="tattoo" className="flex-1 text-xs py-1">
                 <Phone className="h-3 w-3 mr-1" />
