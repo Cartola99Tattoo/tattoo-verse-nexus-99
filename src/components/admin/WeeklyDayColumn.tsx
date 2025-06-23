@@ -110,22 +110,22 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
         
         <CardContent className="p-4 space-y-4">
           {/* Dashboard mini EXPANDIDO com mais espaço */}
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-5 rounded-xl border-2 border-gray-200 shadow-inner">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center space-y-2">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border-2 border-gray-200 shadow-inner">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="text-center space-y-1">
                 <div className="flex items-center justify-center gap-2">
-                  <CalendarIcon className="h-5 w-5 text-gray-600" />
-                  <div className="text-2xl font-black text-gray-800">{stats.count}</div>
+                  <CalendarIcon className="h-4 w-4 text-gray-600" />
+                  <div className="text-xl font-black text-gray-800">{stats.count}</div>
                 </div>
                 <div className="text-xs font-bold text-gray-600 uppercase tracking-wide">Agendamentos</div>
               </div>
               
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-1">
                 {stats.revenue > 0 ? (
                   <>
                     <div className="flex items-center justify-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-green-600" />
-                      <div className="text-lg font-black text-green-700">
+                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <div className="text-sm font-black text-green-700">
                         R$ {stats.revenue.toLocaleString()}
                       </div>
                     </div>
@@ -134,8 +134,8 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
                 ) : (
                   <>
                     <div className="flex items-center justify-center gap-2">
-                      <Clock className="h-5 w-5 text-gray-600" />
-                      <div className="text-lg font-black text-gray-700">
+                      <Clock className="h-4 w-4 text-gray-600" />
+                      <div className="text-sm font-black text-gray-700">
                         {Math.round(stats.duration / 60)}h
                       </div>
                     </div>
@@ -146,20 +146,16 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
             </div>
           </div>
 
-          {/* BOTÃO REDESENHADO: CÍRCULO VERMELHO COM RELÓGIO + PLUS - IDENTIDADE 99TATTOO */}
+          {/* BOTÃO SIMPLIFICADO: APENAS + LIMPO - IDENTIDADE 99TATTOO */}
           <Button
             onClick={() => onCreateAppointment(day)}
-            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 text-sm py-6 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-xl relative overflow-hidden group"
+            className="w-full h-16 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-xl relative overflow-hidden group border-0"
           >
-            <div className="flex items-center justify-center gap-3 relative z-10">
-              {/* CÍRCULO VERMELHO COM ÍCONES - DESIGN MODERNO */}
-              <div className="bg-white/20 rounded-full p-2 flex items-center justify-center">
-                <div className="relative">
-                  <Clock className="h-4 w-4 text-white" />
-                  <Plus className="h-3 w-3 text-white absolute -top-1 -right-1" />
-                </div>
+            <div className="flex items-center justify-center relative z-10">
+              {/* CÍRCULO VERMELHO COM APENAS + - DESIGN ULTRA-LIMPO */}
+              <div className="bg-white/20 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm">
+                <Plus className="h-8 w-8 text-white font-black" strokeWidth={3} />
               </div>
-              <span className="font-black text-sm">🚀 NOVO AGENDAMENTO</span>
             </div>
             {/* Efeito hover shimmer */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
@@ -217,23 +213,23 @@ const WeeklyDayColumn: React.FC<WeeklyDayColumnProps> = ({
                 {/* Estado vazio otimizado */}
                 {dayAppointments.length === 0 && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 pointer-events-none">
-                    <CalendarIcon className="h-24 w-24 mb-4 opacity-20" />
-                    <p className="text-lg font-bold">✨ Dia Livre</p>
-                    <p className="text-sm text-gray-500 mt-1">Mais espaço para criatividade</p>
+                    <CalendarIcon className="h-20 w-20 mb-3 opacity-20" />
+                    <p className="text-base font-bold">✨ Dia Livre</p>
+                    <p className="text-sm text-gray-500 mt-1">Espaço para criatividade</p>
                   </div>
                 )}
               </div>
             </SortableContext>
           </div>
 
-          {/* Botão Ver Detalhes AMPLIADO */}
+          {/* Botão Ver Detalhes SIMPLIFICADO */}
           <Button
             onClick={() => onDayClick(day)}
             variant="outline"
-            className="w-full text-gray-700 border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 text-sm py-4 font-bold rounded-xl transform hover:scale-[1.02]"
+            className="w-full text-gray-700 border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 text-sm py-3 font-bold rounded-xl transform hover:scale-[1.01]"
           >
-            <Eye className="h-5 w-5 mr-2" />
-            👁️ Ver Detalhes Completos
+            <Eye className="h-4 w-4 mr-2" />
+            Ver Detalhes
           </Button>
         </CardContent>
       </Card>

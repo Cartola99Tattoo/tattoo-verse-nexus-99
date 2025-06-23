@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCorners } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, Clock, User, Scissors, Eye, Plus, ChevronLeft, ChevronRight, Edit, Trash2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, Eye, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addWeeks, subWeeks, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Appointment, Client } from '@/services/interfaces/IClientService';
@@ -224,7 +223,7 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                   </CardHeader>
                   
                   <CardContent className="p-3 space-y-3">
-                    {/* Estatísticas do Dia */}
+                    {/* Estatísticas do Dia COMPACTAS */}
                     <div className="bg-red-50 p-2 rounded-lg border border-red-200">
                       <div className="text-center space-y-1">
                         <div className="text-xs text-red-600 font-medium">
@@ -238,20 +237,16 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                       </div>
                     </div>
 
-                    {/* BOTÃO REDESENHADO: CÍRCULO VERMELHO COM RELÓGIO + PLUS - IDENTIDADE 99TATTOO */}
+                    {/* BOTÃO SIMPLIFICADO: APENAS + LIMPO - IDENTIDADE 99TATTOO */}
                     <Button
                       onClick={() => onCreateAppointment(day)}
-                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 text-xs py-4 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-xl relative overflow-hidden group"
+                      className="w-full h-12 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-xl relative overflow-hidden group border-0"
                     >
-                      <div className="flex items-center justify-center gap-2 relative z-10">
-                        {/* CÍRCULO VERMELHO COM ÍCONES - DESIGN MODERNO */}
-                        <div className="bg-white/20 rounded-full p-1 flex items-center justify-center">
-                          <div className="relative">
-                            <Clock className="h-3 w-3 text-white" />
-                            <Plus className="h-2 w-2 text-white absolute -top-0.5 -right-0.5" />
-                          </div>
+                      <div className="flex items-center justify-center relative z-10">
+                        {/* CÍRCULO VERMELHO COM APENAS + - DESIGN ULTRA-LIMPO */}
+                        <div className="bg-white/20 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm">
+                          <Plus className="h-5 w-5 text-white font-black" strokeWidth={3} />
                         </div>
-                        <span className="font-black text-xs">NOVO</span>
                       </div>
                       {/* Efeito hover shimmer */}
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
@@ -273,23 +268,23 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                         })}
                         
                         {dayAppointments.length === 0 && (
-                          <div className="text-center py-8 text-gray-400">
-                            <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                            <p className="text-xs">Nenhum agendamento</p>
+                          <div className="text-center py-6 text-gray-400">
+                            <CalendarIcon className="h-6 w-6 mx-auto mb-2 opacity-30" />
+                            <p className="text-xs">Dia livre</p>
                           </div>
                         )}
                       </div>
                     </SortableContext>
 
-                    {/* Botão Ver Dia Completo */}
+                    {/* Botão Ver Dia Completo SIMPLIFICADO */}
                     <div className="pt-2 border-t border-red-200">
                       <Button
                         onClick={() => onDayClick(day)}
                         variant="outline"
-                        className="w-full text-red-600 border-red-200 hover:bg-red-50 transition-all duration-300 font-medium text-xs"
+                        className="w-full text-red-600 border-red-200 hover:bg-red-50 transition-all duration-300 font-medium text-xs py-2"
                       >
                         <Eye className="h-3 w-3 mr-1" />
-                        Ver Dia Detalhado
+                        Ver Detalhes
                       </Button>
                     </div>
                   </CardContent>
