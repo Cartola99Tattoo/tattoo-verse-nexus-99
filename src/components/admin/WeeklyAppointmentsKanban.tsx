@@ -5,7 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, Plus, Eye, Edit, Trash2, ChevronLeft, ChevronRight, TrendingUp, Clock, Users, CheckCircle, AlertCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, TrendingUp, Clock, Users, CheckCircle, AlertCircle } from 'lucide-react';
 import { format, addWeeks, subWeeks, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Appointment, Client } from '@/services/interfaces/IClientService';
@@ -256,34 +256,34 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
         </div>
       </div>
 
-      {/* Kanban Semanal */}
+      {/* Kanban Semanal - Otimizado */}
       <DndContext
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         collisionDetection={closestCorners}
       >
-        <div className="bg-gradient-to-br from-red-50/30 via-white to-red-50/30 p-8 rounded-3xl shadow-2xl border-2 border-red-100/50 overflow-hidden backdrop-blur-sm relative">
+        <div className="bg-gradient-to-br from-red-50/30 via-white to-red-50/30 p-6 rounded-3xl shadow-2xl border-2 border-red-100/50 overflow-hidden backdrop-blur-sm relative">
           {/* Elementos decorativos de fundo */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-red-100/20 rounded-full transform translate-x-32 -translate-y-32"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-100/30 rounded-full transform -translate-x-24 translate-y-24"></div>
           
-          <div className="grid grid-cols-7 gap-4 relative z-10">
+          <div className="grid grid-cols-7 gap-3 relative z-10">
             {weekDays.map((day) => {
               const dayKey = format(day, 'yyyy-MM-dd');
               const dayAppointments = appointmentsByDay[dayKey] || [];
               const isToday = isSameDay(day, new Date());
 
               return (
-                <div key={dayKey} className="min-h-[700px]">
+                <div key={dayKey} className="min-h-[650px]">
                   <Card className={`h-full bg-white border-2 shadow-xl hover:shadow-2xl transition-all duration-300 ${
                     isToday ? 'border-red-500 bg-red-50/30 ring-2 ring-red-200' : 'border-red-200'
                   }`}>
-                    <CardHeader className={`p-4 rounded-t-xl transition-all duration-300 ${
+                    <CardHeader className={`p-3 rounded-t-xl transition-all duration-300 ${
                       isToday 
                         ? 'bg-gradient-to-r from-red-700 to-red-800 text-white' 
                         : 'bg-gradient-to-r from-red-600 to-red-700 text-white'
                     }`}>
-                      <CardTitle className="text-center space-y-2">
+                      <CardTitle className="text-center space-y-1">
                         <div className="flex items-center justify-center gap-2">
                           <CalendarIcon className="h-4 w-4" />
                           <span className="text-white font-black text-sm uppercase tracking-wide">
@@ -301,37 +301,41 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                       </CardTitle>
                     </CardHeader>
                     
-                    <CardContent className="p-4 space-y-4">
-                      {/* Estatísticas do Dia */}
-                      <div className="bg-red-50 border-2 border-red-200 p-3 rounded-xl">
-                        <div className="text-center space-y-1">
-                          <div className="text-sm text-red-600 font-bold">
-                            {dayAppointments.length} agendamento{dayAppointments.length !== 1 ? 's' : ''}
-                          </div>
+                    <CardContent className="p-3 space-y-3">
+                      {/* Estatísticas do Dia - Otimizado com Ícones */}
+                      <div className="bg-red-50 border-2 border-red-200 p-2 rounded-xl">
+                        <div className="flex items-center justify-center gap-2">
+                          <CalendarIcon className="h-4 w-4 text-red-600" />
+                          <span className="text-sm text-red-600 font-bold">
+                            {dayAppointments.length}
+                          </span>
                           {dayAppointments.length > 0 && (
-                            <div className="text-xs text-green-600 font-bold">
-                              R$ {dayAppointments.reduce((sum, apt) => sum + (apt.estimated_price || 0), 0).toLocaleString()}
-                            </div>
+                            <>
+                              <span className="text-gray-400">•</span>
+                              <span className="text-xs text-green-600 font-bold">
+                                R$ {dayAppointments.reduce((sum, apt) => sum + (apt.estimated_price || 0), 0).toLocaleString()}
+                              </span>
+                            </>
                           )}
                         </div>
                       </div>
 
-                      {/* Botão Adicionar - Apenas + */}
+                      {/* Botão Adicionar - Otimizado */}
                       <Button
                         onClick={() => onCreateAppointment(day)}
-                        className="w-full h-14 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-[1.02] rounded-xl relative overflow-hidden group border-0"
+                        className="w-full h-12 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-[1.02] rounded-xl relative overflow-hidden group border-0"
                       >
                         <div className="flex items-center justify-center relative z-10">
-                          <div className="bg-white/20 rounded-full w-10 h-10 flex items-center justify-center backdrop-blur-sm">
-                            <Plus className="h-6 w-6 text-white font-black" strokeWidth={4} />
+                          <div className="bg-white/20 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm">
+                            <Plus className="h-5 w-5 text-white font-black" strokeWidth={4} />
                           </div>
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                       </Button>
 
-                      {/* Lista de Agendamentos */}
+                      {/* Lista de Agendamentos - Otimizada */}
                       <SortableContext items={dayAppointments.map(apt => apt.id)} strategy={verticalListSortingStrategy}>
-                        <div className="space-y-3 min-h-[400px]" id={dayKey}>
+                        <div className="space-y-2 min-h-[350px]" id={dayKey}>
                           {dayAppointments.map((appointment) => {
                             const client = clients.find(c => c.id === appointment.client_id);
                             return (
@@ -345,24 +349,23 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                           })}
                           
                           {dayAppointments.length === 0 && (
-                            <div className="text-center py-8 text-gray-400">
-                              <CalendarIcon className="h-8 w-8 mx-auto mb-3 opacity-30" />
-                              <p className="text-sm font-medium">Dia livre</p>
+                            <div className="text-center py-6 text-gray-400">
+                              <CalendarIcon className="h-6 w-6 mx-auto mb-2 opacity-30" />
+                              <p className="text-xs font-medium">Dia livre</p>
                               <p className="text-xs text-gray-500 mt-1">Espaço para criatividade</p>
                             </div>
                           )}
                         </div>
                       </SortableContext>
 
-                      {/* Botão Ver Dia Completo */}
-                      <div className="pt-3 border-t-2 border-red-200">
+                      {/* Botão Ver Detalhes - Apenas Ícone de Lupa */}
+                      <div className="pt-2 border-t-2 border-red-200">
                         <Button
                           onClick={() => onDayClick(day)}
                           variant="outline"
-                          className="w-full text-red-600 border-2 border-red-200 hover:bg-red-50 hover:border-red-400 transition-all duration-300 font-bold text-sm py-2 rounded-xl transform hover:scale-[1.01]"
+                          className="w-full text-red-600 border-2 border-red-200 hover:bg-red-50 hover:border-red-400 transition-all duration-300 font-bold text-sm py-2 rounded-xl transform hover:scale-[1.02] h-10"
                         >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Ver Detalhes
+                          <Search className="h-4 w-4" />
                         </Button>
                       </div>
                     </CardContent>
