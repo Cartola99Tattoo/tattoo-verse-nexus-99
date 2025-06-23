@@ -111,7 +111,7 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
         />
         
         {/* Botões de ação - aparecem no hover */}
-        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+        <div className="absolute top-0.5 right-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-0.5">
           <Button
             onClick={(e) => {
               e.stopPropagation();
@@ -119,9 +119,9 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
             }}
             variant="outline"
             size="sm"
-            className="h-5 w-5 p-0 bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
+            className="h-4 w-4 p-0 bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
           >
-            <Edit className="h-2.5 w-2.5" />
+            <Edit className="h-2 w-2" />
           </Button>
           <Button
             onClick={(e) => {
@@ -130,9 +130,9 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
             }}
             variant="outline"
             size="sm"
-            className="h-5 w-5 p-0 bg-white border-red-200 text-red-600 hover:bg-red-50"
+            className="h-4 w-4 p-0 bg-white border-red-200 text-red-600 hover:bg-red-50"
           >
-            <Trash2 className="h-2.5 w-2.5" />
+            <Trash2 className="h-2 w-2" />
           </Button>
         </div>
       </div>
@@ -140,69 +140,69 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
   };
 
   return (
-    <div className="space-y-4 bg-gradient-to-br from-gray-50 via-red-50/30 to-white min-h-screen px-2">
+    <div className="space-y-3 bg-gradient-to-br from-gray-50 via-red-50/30 to-white min-h-screen px-1">
       {/* Navegação da Semana */}
-      <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-2xl shadow-2xl border border-red-500/20">
+      <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-3 rounded-xl shadow-2xl border border-red-500/20">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Button
               onClick={() => navigateWeek('prev')}
               variant="ghost"
-              className="text-white hover:bg-white/20 transition-all duration-300 rounded-xl p-2"
+              className="text-white hover:bg-white/20 transition-all duration-300 rounded-lg p-1.5"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
             
             <div className="text-center">
-              <h2 className="text-xl font-black mb-1">
+              <h2 className="text-lg font-black mb-0.5">
                 {format(weekStart, "dd 'de' MMMM", { locale: ptBR })} - {format(weekEnd, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
               </h2>
-              <p className="text-red-100 font-medium text-sm">Kanban Semanal - Gestão Completa de Agendamentos</p>
+              <p className="text-red-100 font-medium text-xs">Kanban Semanal - Gestão Completa de Agendamentos</p>
             </div>
             
             <Button
               onClick={() => navigateWeek('next')}
               variant="ghost"
-              className="text-white hover:bg-white/20 transition-all duration-300 rounded-xl p-2"
+              className="text-white hover:bg-white/20 transition-all duration-300 rounded-lg p-1.5"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
           
           <Button
             onClick={goToToday}
-            className="bg-white text-red-700 hover:bg-red-50 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-bold px-4 py-2 rounded-xl"
+            className="bg-white text-red-700 hover:bg-red-50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-bold px-3 py-1.5 rounded-lg text-sm"
           >
-            <CalendarIcon className="h-4 w-4 mr-1" />
+            <CalendarIcon className="h-3 w-3 mr-1" />
             Hoje
           </Button>
         </div>
       </div>
 
-      {/* Dashboard Resumido da Semana - Compactado */}
-      <div className="bg-gradient-to-br from-white via-red-50/50 to-white rounded-2xl shadow-2xl border-2 border-red-200/50 p-4">
-        <h3 className="text-lg font-black text-red-800 mb-3 flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
+      {/* Dashboard Resumido da Semana - Mais Compacto */}
+      <div className="bg-gradient-to-br from-white via-red-50/50 to-white rounded-xl shadow-xl border-2 border-red-200/50 p-3">
+        <h3 className="text-base font-black text-red-800 mb-2 flex items-center gap-2">
+          <TrendingUp className="h-4 w-4" />
           Dashboard da Semana
         </h3>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {/* Total de Agendamentos */}
-          <div className="bg-gradient-to-br from-red-500 to-red-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-            <div className="flex items-center justify-between mb-2">
-              <CalendarIcon className="h-6 w-6 text-white/80" />
-              <div className="text-2xl font-black">{weeklyKPIs.totalAppointments}</div>
+          <div className="bg-gradient-to-br from-red-500 to-red-700 p-2 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="flex items-center justify-between mb-1">
+              <CalendarIcon className="h-4 w-4 text-white/80" />
+              <div className="text-lg font-black">{weeklyKPIs.totalAppointments}</div>
             </div>
             <div className="text-red-100 font-bold text-xs uppercase tracking-wide">
-              Total de Agendamentos
+              Total Agendamentos
             </div>
           </div>
 
           {/* Receita Estimada */}
-          <div className="bg-gradient-to-br from-green-500 to-green-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-            <div className="flex items-center justify-between mb-2">
-              <TrendingUp className="h-6 w-6 text-white/80" />
-              <div className="text-lg font-black">R$ {weeklyKPIs.estimatedRevenue.toLocaleString()}</div>
+          <div className="bg-gradient-to-br from-green-500 to-green-700 p-2 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="flex items-center justify-between mb-1">
+              <TrendingUp className="h-4 w-4 text-white/80" />
+              <div className="text-sm font-black">R$ {weeklyKPIs.estimatedRevenue.toLocaleString()}</div>
             </div>
             <div className="text-green-100 font-bold text-xs uppercase tracking-wide">
               Receita Estimada
@@ -210,10 +210,10 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
           </div>
 
           {/* Agendamentos Confirmados */}
-          <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-            <div className="flex items-center justify-between mb-2">
-              <CheckCircle className="h-6 w-6 text-white/80" />
-              <div className="text-2xl font-black">{weeklyKPIs.confirmedAppointments}</div>
+          <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-2 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="flex items-center justify-between mb-1">
+              <CheckCircle className="h-4 w-4 text-white/80" />
+              <div className="text-lg font-black">{weeklyKPIs.confirmedAppointments}</div>
             </div>
             <div className="text-blue-100 font-bold text-xs uppercase tracking-wide">
               Confirmados
@@ -221,34 +221,34 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
           </div>
 
           {/* Aguardando Confirmação */}
-          <div className="bg-gradient-to-br from-orange-500 to-orange-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-            <div className="flex items-center justify-between mb-2">
-              <AlertCircle className="h-6 w-6 text-white/80" />
-              <div className="text-2xl font-black">{weeklyKPIs.pendingConfirmation}</div>
+          <div className="bg-gradient-to-br from-orange-500 to-orange-700 p-2 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="flex items-center justify-between mb-1">
+              <AlertCircle className="h-4 w-4 text-white/80" />
+              <div className="text-lg font-black">{weeklyKPIs.pendingConfirmation}</div>
             </div>
             <div className="text-orange-100 font-bold text-xs uppercase tracking-wide">
-              Aguardando Confirmação
+              Aguardando
             </div>
           </div>
         </div>
 
-        {/* Indicadores Adicionais - Compactados */}
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <div className="bg-purple-50 border-2 border-purple-200 p-2 rounded-xl">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-purple-600" />
+        {/* Indicadores Adicionais - Mais Compactos */}
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="bg-purple-50 border border-purple-200 p-1.5 rounded-lg">
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-3 w-3 text-purple-600" />
               <div>
-                <div className="text-xl font-black text-purple-800">{weeklyKPIs.inProgress}</div>
+                <div className="text-lg font-black text-purple-800">{weeklyKPIs.inProgress}</div>
                 <div className="text-purple-600 font-bold text-xs">Em Andamento</div>
               </div>
             </div>
           </div>
           
-          <div className="bg-green-50 border-2 border-green-200 p-2 rounded-xl">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-green-600" />
+          <div className="bg-green-50 border border-green-200 p-1.5 rounded-lg">
+            <div className="flex items-center gap-1.5">
+              <Users className="h-3 w-3 text-green-600" />
               <div>
-                <div className="text-xl font-black text-green-800">{weeklyKPIs.completed}</div>
+                <div className="text-lg font-black text-green-800">{weeklyKPIs.completed}</div>
                 <div className="text-green-600 font-bold text-xs">Concluídos</div>
               </div>
             </div>
@@ -256,42 +256,42 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
         </div>
       </div>
 
-      {/* Kanban Semanal - Layout Otimizado para Espaço */}
+      {/* Kanban Semanal - Layout Otimizado para Espaço Reduzido */}
       <DndContext
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         collisionDetection={closestCorners}
       >
-        <div className="bg-gradient-to-br from-red-50/30 via-white to-red-50/30 p-3 rounded-3xl shadow-2xl border-2 border-red-100/50 overflow-hidden backdrop-blur-sm relative">
+        <div className="bg-gradient-to-br from-red-50/30 via-white to-red-50/30 p-2 rounded-2xl shadow-xl border border-red-100/50 overflow-hidden backdrop-blur-sm relative">
           {/* Elementos decorativos de fundo */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-100/20 rounded-full transform translate-x-16 -translate-y-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-100/30 rounded-full transform -translate-x-12 translate-y-12"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-red-100/20 rounded-full transform translate-x-12 -translate-y-12"></div>
+          <div className="absolute bottom-0 left-0 w-16 h-16 bg-red-100/30 rounded-full transform -translate-x-8 translate-y-8"></div>
           
           {/* Grid Otimizado - Espaçamento Reduzido */}
-          <div className="grid grid-cols-7 gap-1.5 relative z-10">
+          <div className="grid grid-cols-7 gap-1 relative z-10">
             {weekDays.map((day) => {
               const dayKey = format(day, 'yyyy-MM-dd');
               const dayAppointments = appointmentsByDay[dayKey] || [];
               const isToday = isSameDay(day, new Date());
 
               return (
-                <div key={dayKey} className="min-h-[600px]">
-                  <Card className={`h-full bg-white border-2 shadow-xl hover:shadow-2xl transition-all duration-300 ${
-                    isToday ? 'border-red-500 bg-red-50/30 ring-2 ring-red-200' : 'border-red-200'
+                <div key={dayKey} className="min-h-[650px]">
+                  <Card className={`h-full bg-white border shadow-lg hover:shadow-xl transition-all duration-300 ${
+                    isToday ? 'border-red-500 bg-red-50/30 ring-1 ring-red-200' : 'border-red-200'
                   }`}>
-                    <CardHeader className={`p-2 rounded-t-xl transition-all duration-300 ${
+                    <CardHeader className={`p-1.5 rounded-t-lg transition-all duration-300 ${
                       isToday 
                         ? 'bg-gradient-to-r from-red-700 to-red-800 text-white' 
                         : 'bg-gradient-to-r from-red-600 to-red-700 text-white'
                     }`}>
-                      <CardTitle className="text-center space-y-1">
-                        <div className="flex items-center justify-center gap-1">
-                          <CalendarIcon className="h-3 w-3" />
+                      <CardTitle className="text-center space-y-0.5">
+                        <div className="flex items-center justify-center gap-0.5">
+                          <CalendarIcon className="h-2.5 w-2.5" />
                           <span className="text-white font-black text-xs uppercase tracking-wide">
                             {format(day, 'EEEE', { locale: ptBR })}
                           </span>
                         </div>
-                        <div className="text-xl font-black text-white">
+                        <div className="text-lg font-black text-white">
                           {format(day, 'dd', { locale: ptBR })}
                         </div>
                         {isToday && (
@@ -302,12 +302,12 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                       </CardTitle>
                     </CardHeader>
                     
-                    <CardContent className="p-2 space-y-2">
-                      {/* Estatísticas do Dia - Otimizado com Ícones */}
-                      <div className="bg-red-50 border-2 border-red-200 p-1.5 rounded-xl">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <CalendarIcon className="h-3 w-3 text-red-600" />
-                          <span className="text-sm text-red-600 font-bold">
+                    <CardContent className="p-1.5 space-y-1.5">
+                      {/* Estatísticas do Dia - Otimizado */}
+                      <div className="bg-red-50 border border-red-200 p-1 rounded-lg">
+                        <div className="flex items-center justify-center gap-1">
+                          <CalendarIcon className="h-2.5 w-2.5 text-red-600" />
+                          <span className="text-xs text-red-600 font-bold">
                             {dayAppointments.length}
                           </span>
                           {dayAppointments.length > 0 && (
@@ -324,11 +324,11 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                       {/* Botão Adicionar - Otimizado */}
                       <Button
                         onClick={() => onCreateAppointment(day)}
-                        className="w-full h-10 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-[1.02] rounded-xl relative overflow-hidden group border-0"
+                        className="w-full h-8 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] rounded-lg relative overflow-hidden group border-0"
                       >
                         <div className="flex items-center justify-center relative z-10">
-                          <div className="bg-white/20 rounded-full w-6 h-6 flex items-center justify-center backdrop-blur-sm">
-                            <Plus className="h-4 w-4 text-white font-black" strokeWidth={4} />
+                          <div className="bg-white/20 rounded-full w-5 h-5 flex items-center justify-center backdrop-blur-sm">
+                            <Plus className="h-3 w-3 text-white font-black" strokeWidth={4} />
                           </div>
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
@@ -336,7 +336,7 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
 
                       {/* Lista de Agendamentos - Otimizada */}
                       <SortableContext items={dayAppointments.map(apt => apt.id)} strategy={verticalListSortingStrategy}>
-                        <div className="space-y-1.5 min-h-[320px]" id={dayKey}>
+                        <div className="space-y-1 min-h-[420px]" id={dayKey}>
                           {dayAppointments.map((appointment) => {
                             const client = clients.find(c => c.id === appointment.client_id);
                             return (
@@ -350,8 +350,8 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                           })}
                           
                           {dayAppointments.length === 0 && (
-                            <div className="text-center py-4 text-gray-400">
-                              <CalendarIcon className="h-5 w-5 mx-auto mb-1 opacity-30" />
+                            <div className="text-center py-8 text-gray-400">
+                              <CalendarIcon className="h-4 w-4 mx-auto mb-1 opacity-30" />
                               <p className="text-xs font-medium">Dia livre</p>
                               <p className="text-xs text-gray-500 mt-0.5">Espaço para criatividade</p>
                             </div>
@@ -359,14 +359,14 @@ const WeeklyAppointmentsKanban: React.FC<WeeklyAppointmentsKanbanProps> = ({
                         </div>
                       </SortableContext>
 
-                      {/* Botão Ver Detalhes - Ícone de Lupa Apenas */}
-                      <div className="pt-1.5 border-t-2 border-red-200">
+                      {/* Botão Ver Detalhes */}
+                      <div className="pt-1 border-t border-red-200">
                         <Button
                           onClick={() => onDayClick(day)}
                           variant="outline"
-                          className="w-full text-red-600 border-2 border-red-200 hover:bg-red-50 hover:border-red-400 transition-all duration-300 font-bold text-sm py-1.5 rounded-xl transform hover:scale-[1.02] h-8"
+                          className="w-full text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-400 transition-all duration-300 font-bold text-xs py-1 rounded-lg transform hover:scale-[1.02] h-6"
                         >
-                          <Search className="h-4 w-4" />
+                          <Search className="h-3 w-3" />
                         </Button>
                       </div>
                     </CardContent>

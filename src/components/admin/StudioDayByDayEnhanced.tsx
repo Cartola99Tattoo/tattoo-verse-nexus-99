@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCorners } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -79,14 +79,23 @@ const DraggableAppointmentCard: React.FC<DraggableAppointmentCardProps> = ({
 
   const [timeElapsed, setTimeElapsed] = useState(0);
 
-  // Simular cronômetro para agendamentos em andamento
-  React.useEffect(() => {
+  // Cronômetro funcional para agendamentos em andamento
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
     if (appointment.status === 'in_progress') {
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         setTimeElapsed(prev => prev + 1);
       }, 1000);
-      return () => clearInterval(interval);
+    } else {
+      setTimeElapsed(0);
     }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
   }, [appointment.status]);
 
   const formatElapsedTime = (seconds: number) => {
@@ -103,25 +112,25 @@ const DraggableAppointmentCard: React.FC<DraggableAppointmentCardProps> = ({
       {...attributes}
       {...listeners}
       className={`
-        relative bg-white rounded-xl border-2 border-gray-200 p-3 shadow-lg hover:shadow-xl 
+        relative bg-white rounded-lg border border-gray-200 p-2.5 shadow-md hover:shadow-lg 
         transition-all duration-300 cursor-grab active:cursor-grabbing group
-        ${isDragging ? 'opacity-70 scale-105 rotate-2 z-50' : ''}
-        ${isOverlay ? 'scale-110 shadow-2xl ring-2 ring-red-300 z-50' : ''}
+        ${isDragging ? 'opacity-70 scale-105 rotate-1 z-50' : ''}
+        ${isOverlay ? 'scale-110 shadow-xl ring-2 ring-red-300 z-50' : ''}
         hover:scale-[1.02] hover:border-red-300
       `}
     >
       {/* Header do Card */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${statusInfo.color}`} />
-          <span className="text-base font-black text-gray-800">
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center gap-1.5">
+          <div className={`w-2.5 h-2.5 rounded-full ${statusInfo.color}`} />
+          <span className="text-sm font-black text-gray-800">
             {client?.name || 'Cliente'}
           </span>
-          <span className="text-base">{serviceConfig.icon}</span>
+          <span className="text-sm">{serviceConfig.icon}</span>
         </div>
         
         {/* Botões de ação */}
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
             onClick={(e) => {
               e.stopPropagation();
@@ -129,9 +138,9 @@ const DraggableAppointmentCard: React.FC<DraggableAppointmentCardProps> = ({
             }}
             variant="outline"
             size="sm"
-            className="h-6 w-6 p-0 border-blue-200 text-blue-600 hover:bg-blue-50"
+            className="h-5 w-5 p-0 border-blue-200 text-blue-600 hover:bg-blue-50"
           >
-            <Edit className="h-3 w-3" />
+            <Edit className="h-2.5 w-2.5" />
           </Button>
           <Button
             onClick={(e) => {
@@ -140,30 +149,30 @@ const DraggableAppointmentCard: React.FC<DraggableAppointmentCardProps> = ({
             }}
             variant="outline"
             size="sm"
-            className="h-6 w-6 p-0 border-red-200 text-red-600 hover:bg-red-50"
+            className="h-5 w-5 p-0 border-red-200 text-red-600 hover:bg-red-50"
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-2.5 w-2.5" />
           </Button>
         </div>
       </div>
 
       {/* Informações do Agendamento */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-gray-600" />
-          <span className="font-bold text-gray-700 text-sm">
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-1.5">
+          <Clock className="h-3 w-3 text-gray-600" />
+          <span className="font-bold text-gray-700 text-xs">
             {appointment.time} ({appointment.duration_minutes}min)
           </span>
         </div>
 
-        <div className="text-sm text-gray-600 font-medium">
+        <div className="text-xs text-gray-600 font-medium line-clamp-2">
           {appointment.service_description}
         </div>
 
         {appointment.estimated_price && (
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-green-600" />
-            <span className="font-bold text-green-700 text-sm">
+          <div className="flex items-center gap-1.5">
+            <DollarSign className="h-3 w-3 text-green-600" />
+            <span className="font-bold text-green-700 text-xs">
               R$ {appointment.estimated_price.toLocaleString()}
             </span>
           </div>
@@ -171,10 +180,10 @@ const DraggableAppointmentCard: React.FC<DraggableAppointmentCardProps> = ({
 
         {/* Cronômetro para agendamentos em andamento */}
         {appointment.status === 'in_progress' && (
-          <div className="bg-purple-50 border border-purple-200 p-2 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Timer className="h-4 w-4 text-purple-600 animate-pulse" />
-              <span className="font-mono font-bold text-purple-700 text-sm">
+          <div className="bg-purple-50 border border-purple-200 p-1.5 rounded-md">
+            <div className="flex items-center gap-1.5">
+              <Timer className="h-3 w-3 text-purple-600 animate-pulse" />
+              <span className="font-mono font-bold text-purple-700 text-xs">
                 {formatElapsedTime(timeElapsed)}
               </span>
             </div>
@@ -214,20 +223,20 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
 }) => {
   return (
     <div className="flex-1 min-h-[550px]">
-      <Card className={`h-full border-2 shadow-xl ${bgColor}`}>
-        <CardHeader className={`p-3 text-white ${bgColor.replace('bg-', 'bg-').replace('-50', '-600')}`}>
+      <Card className={`h-full border shadow-lg ${bgColor}`}>
+        <CardHeader className={`p-2.5 text-white ${bgColor.replace('bg-', 'bg-').replace('-50', '-600')}`}>
           <CardTitle className="flex items-center gap-2 text-center justify-center">
             {icon}
-            <span className="font-black text-base">{title}</span>
-            <Badge className="bg-white/20 text-white font-bold text-sm">
+            <span className="font-black text-sm">{title}</span>
+            <Badge className="bg-white/20 text-white font-bold text-xs">
               {appointments.length}
             </Badge>
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="p-3">
+        <CardContent className="p-2.5">
           <SortableContext items={appointments.map(apt => apt.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-3 min-h-[450px]" id={id}>
+            <div className="space-y-2.5 min-h-[450px]" id={id}>
               {appointments.map((appointment) => {
                 const client = clients.find(c => c.id === appointment.client_id);
                 return (
@@ -243,9 +252,9 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
               
               {appointments.length === 0 && (
                 <div className="text-center py-8 text-gray-400">
-                  <div className="text-3xl mb-3 opacity-30">{icon}</div>
-                  <p className="font-medium">Nenhum agendamento</p>
-                  <p className="text-sm text-gray-500 mt-1">Arraste cards para cá</p>
+                  <div className="text-2xl mb-2 opacity-30">{icon}</div>
+                  <p className="font-medium text-sm">Nenhum agendamento</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Arraste cards para cá</p>
                 </div>
               )}
             </div>
@@ -328,48 +337,48 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-hidden bg-gradient-to-br from-white to-red-50 border-red-200">
-        <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-lg -mx-6 -mt-6 mb-4">
+        <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-3 rounded-lg -mx-6 -mt-6 mb-3">
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="text-xl font-black flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5" />
+              <DialogTitle className="text-lg font-black flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4" />
                 Dia a Dia do Estúdio
               </DialogTitle>
-              <p className="text-red-100 font-medium text-base">
+              <p className="text-red-100 font-medium text-sm">
                 {format(selectedDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
               </p>
             </div>
             
             <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </DialogHeader>
 
-        {/* Dashboard de Resumo do Dia */}
-        <div className="bg-gradient-to-br from-white via-red-50/50 to-white rounded-2xl shadow-2xl border-2 border-red-200/50 p-4 mb-4">
-          <h3 className="text-lg font-black text-red-800 mb-3 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
+        {/* Dashboard de Resumo do Dia - Otimizado */}
+        <div className="bg-gradient-to-br from-white via-red-50/50 to-white rounded-xl shadow-xl border border-red-200/50 p-3 mb-3">
+          <h3 className="text-base font-black text-red-800 mb-2 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
             Dashboard do Dia
           </h3>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {/* Total de Agendamentos */}
-            <div className="bg-gradient-to-br from-red-500 to-red-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <div className="flex items-center justify-between mb-2">
-                <CalendarDays className="h-6 w-6 text-white/80" />
-                <div className="text-2xl font-black">{dayStats.total}</div>
+            <div className="bg-gradient-to-br from-red-500 to-red-700 p-2 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <div className="flex items-center justify-between mb-1">
+                <CalendarDays className="h-4 w-4 text-white/80" />
+                <div className="text-lg font-black">{dayStats.total}</div>
               </div>
               <div className="text-red-100 font-bold text-xs uppercase tracking-wide">
-                Total de Agendamentos
+                Total Agendamentos
               </div>
             </div>
 
             {/* Receita do Dia */}
-            <div className="bg-gradient-to-br from-green-500 to-green-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <div className="flex items-center justify-between mb-2">
-                <DollarSign className="h-6 w-6 text-white/80" />
-                <div className="text-lg font-black">R$ {dayStats.revenue.toLocaleString()}</div>
+            <div className="bg-gradient-to-br from-green-500 to-green-700 p-2 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <div className="flex items-center justify-between mb-1">
+                <DollarSign className="h-4 w-4 text-white/80" />
+                <div className="text-sm font-black">R$ {dayStats.revenue.toLocaleString()}</div>
               </div>
               <div className="text-green-100 font-bold text-xs uppercase tracking-wide">
                 Receita do Dia
@@ -377,10 +386,10 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
             </div>
 
             {/* Em Andamento */}
-            <div className="bg-gradient-to-br from-purple-500 to-purple-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <div className="flex items-center justify-between mb-2">
-                <Play className="h-6 w-6 text-white/80" />
-                <div className="text-2xl font-black">{dayStats.inProgress}</div>
+            <div className="bg-gradient-to-br from-purple-500 to-purple-700 p-2 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <div className="flex items-center justify-between mb-1">
+                <Play className="h-4 w-4 text-white/80" />
+                <div className="text-lg font-black">{dayStats.inProgress}</div>
               </div>
               <div className="text-purple-100 font-bold text-xs uppercase tracking-wide">
                 Em Andamento
@@ -388,10 +397,10 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
             </div>
 
             {/* Concluídos */}
-            <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <div className="flex items-center justify-between mb-2">
-                <CheckCircle className="h-6 w-6 text-white/80" />
-                <div className="text-2xl font-black">{dayStats.completed}</div>
+            <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-2 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <div className="flex items-center justify-between mb-1">
+                <CheckCircle className="h-4 w-4 text-white/80" />
+                <div className="text-lg font-black">{dayStats.completed}</div>
               </div>
               <div className="text-blue-100 font-bold text-xs uppercase tracking-wide">
                 Concluídos
@@ -401,15 +410,15 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
         </div>
 
         {/* Timeline Lateral e Kanban de 3 Colunas */}
-        <div className="flex gap-4 overflow-auto max-h-[calc(95vh-300px)]">
-          {/* Timeline de Horários */}
-          <div className="w-16 flex-shrink-0">
-            <div className="bg-gray-100 p-2 rounded-lg h-full">
-              <h3 className="text-xs font-bold text-gray-600 mb-3 text-center">Horários</h3>
-              <div className="space-y-2">
+        <div className="flex gap-3 overflow-auto max-h-[calc(95vh-300px)]">
+          {/* Timeline de Horários - Otimizada */}
+          <div className="w-14 flex-shrink-0">
+            <div className="bg-gray-100 p-1.5 rounded-lg h-full">
+              <h3 className="text-xs font-bold text-gray-600 mb-2 text-center">Horários</h3>
+              <div className="space-y-1.5">
                 {timeSlots.map((time) => (
                   <div key={time} className="text-center">
-                    <div className="text-xs font-bold text-gray-700 bg-white p-1 rounded border">
+                    <div className="text-xs font-bold text-gray-700 bg-white p-0.5 rounded border">
                       {time}
                     </div>
                   </div>
@@ -425,11 +434,11 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
               onDragEnd={handleDragEnd}
               collisionDetection={closestCorners}
             >
-              <div className="flex gap-4 h-full">
+              <div className="flex gap-3 h-full">
                 <KanbanColumn
                   id="scheduled"
                   title="Agendados"
-                  icon={<AlertCircle className="h-5 w-5" />}
+                  icon={<AlertCircle className="h-4 w-4" />}
                   appointments={scheduledAppointments}
                   clients={clients}
                   bgColor="bg-orange-50 border-orange-200"
@@ -440,7 +449,7 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
                 <KanbanColumn
                   id="in_progress"
                   title="Em Andamento"
-                  icon={<Play className="h-5 w-5" />}
+                  icon={<Play className="h-4 w-4" />}
                   appointments={inProgressAppointments}
                   clients={clients}
                   bgColor="bg-purple-50 border-purple-200"
@@ -451,7 +460,7 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
                 <KanbanColumn
                   id="completed"
                   title="Atendimento Realizado"
-                  icon={<CheckCircle className="h-5 w-5" />}
+                  icon={<CheckCircle className="h-4 w-4" />}
                   appointments={completedAppointments}
                   clients={clients}
                   bgColor="bg-green-50 border-green-200"
@@ -475,15 +484,15 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
           </div>
         </div>
 
-        {/* Footer com Resumo */}
-        <div className="flex justify-center gap-4 pt-3 border-t border-red-200 mt-3">
-          <Badge className="bg-orange-500 text-white px-3 py-1 text-sm">
+        {/* Footer com Resumo - Otimizado */}
+        <div className="flex justify-center gap-3 pt-2 border-t border-red-200 mt-2">
+          <Badge className="bg-orange-500 text-white px-2 py-0.5 text-xs">
             Agendados: {dayStats.scheduled}
           </Badge>
-          <Badge className="bg-purple-500 text-white px-3 py-1 text-sm">
+          <Badge className="bg-purple-500 text-white px-2 py-0.5 text-xs">
             Em Andamento: {dayStats.inProgress}
           </Badge>
-          <Badge className="bg-green-500 text-white px-3 py-1 text-sm">
+          <Badge className="bg-green-500 text-white px-2 py-0.5 text-xs">
             Concluídos: {dayStats.completed}
           </Badge>
         </div>
