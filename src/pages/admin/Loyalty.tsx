@@ -1,12 +1,12 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Gift, Star, Users, Trophy, Search, Filter, Plus, Crown, Award, Target, Calendar, Phone, Mail, User, UserPlus } from "lucide-react";
+import { Gift, Star, Users, Trophy, Search, Filter, Plus, Crown, Award, Target, Calendar, Phone, Mail, User, UserPlus, Eye, Settings, Ticket, Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AddLoyaltyMemberModal from "@/components/admin/AddLoyaltyMemberModal";
 
@@ -163,6 +163,7 @@ const Loyalty = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [members, setMembers] = useState<LoyaltyMember[]>(mockLoyaltyMembers);
+  const [activeTab, setActiveTab] = useState("overview");
 
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -258,241 +259,623 @@ const Loyalty = () => {
         </div>
       </div>
 
-      {/* Métricas do Programa */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-red-600 text-sm font-bold">Total de Membros</p>
-                <p className="text-3xl font-black text-red-800">{totalMembers}</p>
-              </div>
-              <div className="bg-red-600 p-3 rounded-xl">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Sistema de Navegação por Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-200 shadow-xl rounded-xl p-2 h-auto">
+          <TabsTrigger 
+            value="overview" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white font-bold py-3 rounded-lg transition-all duration-300 hover:bg-red-200 flex items-center gap-2"
+          >
+            <Eye className="h-4 w-4" />
+            Visão Geral
+          </TabsTrigger>
+          <TabsTrigger 
+            value="programs" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white font-bold py-3 rounded-lg transition-all duration-300 hover:bg-red-200 flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            Programas
+          </TabsTrigger>
+          <TabsTrigger 
+            value="members" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white font-bold py-3 rounded-lg transition-all duration-300 hover:bg-red-200 flex items-center gap-2"
+          >
+            <Users className="h-4 w-4" />
+            Membros
+          </TabsTrigger>
+          <TabsTrigger 
+            value="rewards" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white font-bold py-3 rounded-lg transition-all duration-300 hover:bg-red-200 flex items-center gap-2"
+          >
+            <Gift className="h-4 w-4" />
+            Recompensas
+          </TabsTrigger>
+          <TabsTrigger 
+            value="coupons" 
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white font-bold py-3 rounded-lg transition-all duration-300 hover:bg-red-200 flex items-center gap-2"
+          >
+            <Ticket className="h-4 w-4" />
+            Cupons de Eventos
+          </TabsTrigger>
+        </TabsList>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-600 text-sm font-bold">Membros Ativos</p>
-                <p className="text-3xl font-black text-green-800">{activeMembers}</p>
-              </div>
-              <div className="bg-green-600 p-3 rounded-xl">
-                <Target className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Conteúdo da Aba Visão Geral */}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Métricas do Programa */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-red-600 text-sm font-bold">Total de Membros</p>
+                    <p className="text-3xl font-black text-red-800">{totalMembers}</p>
+                  </div>
+                  <div className="bg-red-600 p-3 rounded-xl">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-yellow-600 text-sm font-bold">Total de Pontos</p>
-                <p className="text-3xl font-black text-yellow-800">{totalPoints.toLocaleString()}</p>
-              </div>
-              <div className="bg-yellow-600 p-3 rounded-xl">
-                <Gift className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-green-600 text-sm font-bold">Membros Ativos</p>
+                    <p className="text-3xl font-black text-green-800">{activeMembers}</p>
+                  </div>
+                  <div className="bg-green-600 p-3 rounded-xl">
+                    <Target className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-600 text-sm font-bold">Média de Pontos</p>
-                <p className="text-3xl font-black text-blue-800">{avgPointsPerMember}</p>
-              </div>
-              <div className="bg-blue-600 p-3 rounded-xl">
-                <Star className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-yellow-600 text-sm font-bold">Total de Pontos</p>
+                    <p className="text-3xl font-black text-yellow-800">{totalPoints.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-yellow-600 p-3 rounded-xl">
+                    <Gift className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Filtros e Botão Adicionar Membro */}
-      <Card className="shadow-xl border-2 border-red-200/50">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="w-full md:w-96 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Buscar membros..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-red-200 focus:border-red-400 focus:ring-red-400"
-              />
-            </div>
-            
-            <div className="flex gap-4 items-center">
-              <Select value={tierFilter} onValueChange={setTierFilter}>
-                <SelectTrigger className="w-48 border-red-200 focus:border-red-400">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-red-200">
-                  <SelectItem value="all">Todos os Níveis</SelectItem>
-                  <SelectItem value="bronze">Bronze</SelectItem>
-                  <SelectItem value="silver">Silver</SelectItem>
-                  <SelectItem value="gold">Gold</SelectItem>
-                  <SelectItem value="platinum">Platinum</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48 border-red-200 focus:border-red-400">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-red-200">
-                  <SelectItem value="all">Todos os Status</SelectItem>
-                  <SelectItem value="active">Ativo</SelectItem>
-                  <SelectItem value="inactive">Inativo</SelectItem>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              {/* Botão Adicionar Novo Membro - Identidade 99Tattoo */}
-              <Button 
-                onClick={() => setShowAddMemberModal(true)}
-                className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white font-black px-6 py-3 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-0"
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Adicionar Novo Membro
-              </Button>
-            </div>
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-600 text-sm font-bold">Média de Pontos</p>
+                    <p className="text-3xl font-black text-blue-800">{avgPointsPerMember}</p>
+                  </div>
+                  <div className="bg-blue-600 p-3 rounded-xl">
+                    <Star className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Lista de Membros */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredMembers.map((member) => (
-          <Card key={member.id} className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-2 border-red-100 hover:border-red-300">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-lg font-black text-gray-900">{member.name}</CardTitle>
-                  <p className="text-sm text-gray-500 font-medium">{member.email}</p>
-                  <p className="text-sm text-gray-500 font-medium">{member.phone}</p>
-                </div>
-                <div className="flex gap-2 flex-col items-end">
-                  <Badge className={`text-xs font-bold ${getTierColor(member.tier)}`}>
-                    <div className="flex items-center gap-1">
-                      {getTierIcon(member.tier)}
-                      {member.tier.toUpperCase()}
-                    </div>
-                  </Badge>
-                  <Badge className={`text-xs font-bold ${getStatusColor(member.status)}`}>
-                    {getStatusText(member.status)}
-                  </Badge>
-                </div>
-              </div>
+          {/* Resumo do Programa */}
+          <Card className="shadow-xl border-2 border-red-200/50">
+            <CardHeader>
+              <CardTitle className="text-2xl font-black text-red-600 flex items-center gap-3">
+                <Eye className="h-6 w-6" />
+                Resumo do Programa de Fidelidade
+              </CardTitle>
             </CardHeader>
-            
-            <CardContent className="pt-0">
-              <div className="space-y-4">
-                <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
-                  <div className="text-center">
-                    <div className="text-2xl font-black text-red-600 mb-1">
-                      {member.points.toLocaleString()}
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-800">Status dos Membros</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-200">
+                      <span className="font-medium text-green-800">Membros Ativos</span>
+                      <Badge className="bg-green-600 text-white">{activeMembers}</Badge>
                     </div>
-                    <div className="text-sm text-red-700 font-bold">Pontos Acumulados</div>
-                  </div>
-                </div>
-
-                {member.primaryArtist && (
-                  <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-purple-600" />
-                      <div>
-                        <div className="text-sm font-bold text-purple-800">Tatuador Principal</div>
-                        <div className="text-xs text-purple-600">{member.primaryArtist}</div>
-                      </div>
+                    <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                      <span className="font-medium text-orange-800">Membros Pendentes</span>
+                      <Badge className="bg-orange-600 text-white">{members.filter(m => m.status === 'pending').length}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg border border-red-200">
+                      <span className="font-medium text-red-800">Membros Inativos</span>
+                      <Badge className="bg-red-600 text-white">{members.filter(m => m.status === 'inactive').length}</Badge>
                     </div>
                   </div>
-                )}
-
-                {member.birthDate && (
-                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-blue-600" />
-                      <div>
-                        <div className="text-sm font-bold text-blue-800">Aniversário</div>
-                        <div className="text-xs text-blue-600">
-                          {new Date(member.birthDate).toLocaleDateString('pt-BR')}
-                        </div>
-                      </div>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-800">Distribuição por Nível</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg border border-amber-200">
+                      <span className="font-medium text-amber-800 flex items-center gap-2">
+                        <Award className="h-4 w-4" />
+                        Bronze
+                      </span>
+                      <Badge className="bg-amber-600 text-white">{members.filter(m => m.tier === 'bronze').length}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <span className="font-medium text-gray-800 flex items-center gap-2">
+                        <Star className="h-4 w-4" />
+                        Silver
+                      </span>
+                      <Badge className="bg-gray-600 text-white">{members.filter(m => m.tier === 'silver').length}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <span className="font-medium text-yellow-800 flex items-center gap-2">
+                        <Crown className="h-4 w-4" />
+                        Gold
+                      </span>
+                      <Badge className="bg-yellow-600 text-white">{members.filter(m => m.tier === 'gold').length}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+                      <span className="font-medium text-purple-800 flex items-center gap-2">
+                        <Trophy className="h-4 w-4" />
+                        Platinum
+                      </span>
+                      <Badge className="bg-purple-600 text-white">{members.filter(m => m.tier === 'platinum').length}</Badge>
                     </div>
                   </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-lg font-black text-gray-900">{member.appointmentsCount}</div>
-                    <div className="text-xs text-gray-500 font-medium">Agendamentos</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-black text-gray-900">{member.referrals}</div>
-                    <div className="text-xs text-gray-500 font-medium">Indicações</div>
-                  </div>
                 </div>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 font-medium">Total gasto:</span>
-                    <span className="font-black text-gray-900">R$ {member.totalSpent.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 font-medium">Membro desde:</span>
-                    <span className="font-bold text-gray-900">{new Date(member.joinDate).toLocaleDateString('pt-BR')}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 font-medium">Última visita:</span>
-                    <span className="font-bold text-gray-900">{new Date(member.lastVisit).toLocaleDateString('pt-BR')}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-2 mt-4">
-                <Button size="sm" variant="outline" className="flex-1 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-400">
-                  Ver Histórico
-                </Button>
-                <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-bold">
-                  Editar
-                </Button>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+        </TabsContent>
 
-      {filteredMembers.length === 0 && (
-        <div className="text-center py-12">
-          <Gift className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-          <h3 className="text-xl font-black text-gray-900 mb-2">Nenhum membro encontrado</h3>
-          <p className="text-gray-500 font-medium">
-            {searchTerm || tierFilter !== 'all' || statusFilter !== 'all'
-              ? 'Tente ajustar os filtros de busca' 
-              : 'Adicione o primeiro membro ao programa de fidelidade'
-            }
-          </p>
-          {(!searchTerm && tierFilter === 'all' && statusFilter === 'all') && (
-            <Button 
-              onClick={() => setShowAddMemberModal(true)}
-              className="mt-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Adicionar Primeiro Membro
-            </Button>
+        {/* Conteúdo da Aba Programas */}
+        <TabsContent value="programs" className="space-y-6">
+          <Card className="shadow-xl border-2 border-red-200/50">
+            <CardHeader>
+              <CardTitle className="text-2xl font-black text-red-600 flex items-center gap-3">
+                <Settings className="h-6 w-6" />
+                Configuração dos Programas de Fidelidade
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold text-blue-800">Sistema de Pontos</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-blue-700">Pontos por R$ Gasto</label>
+                      <Input value="1 ponto = R$ 100" disabled className="bg-white/70" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-blue-700">Conversão de Pontos</label>
+                      <Input value="100 pontos = R$ 10" disabled className="bg-white/70" />
+                    </div>
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                      Configurar Sistema de Pontos
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold text-purple-800">Níveis do Programa</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-2 bg-white/70 rounded">
+                        <span className="font-medium">Bronze</span>
+                        <span className="text-sm text-gray-600">0-500 pts</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-white/70 rounded">
+                        <span className="font-medium">Silver</span>
+                        <span className="text-sm text-gray-600">501-1500 pts</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-white/70 rounded">
+                        <span className="font-medium">Gold</span>
+                        <span className="text-sm text-gray-600">1501-3000 pts</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-white/70 rounded">
+                        <span className="font-medium">Platinum</span>
+                        <span className="text-sm text-gray-600">3000+ pts</span>
+                      </div>
+                    </div>
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold">
+                      Editar Níveis
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100">
+                <CardHeader>
+                  <CardTitle className="text-lg font-bold text-green-800">Regras de Bonificação</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="p-4 bg-white/70 rounded-lg">
+                      <h4 className="font-bold text-green-700 mb-2">Indicação</h4>
+                      <p className="text-sm text-green-600">R$ 50 para ambos</p>
+                    </div>
+                    <div className="p-4 bg-white/70 rounded-lg">
+                      <h4 className="font-bold text-green-700 mb-2">Aniversário</h4>
+                      <p className="text-sm text-green-600">Flash grátis</p>
+                    </div>
+                    <div className="p-4 bg-white/70 rounded-lg">
+                      <h4 className="font-bold text-green-700 mb-2">Cashback</h4>
+                      <p className="text-sm text-green-600">5% em créditos</p>
+                    </div>
+                  </div>
+                  <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-bold">
+                    Configurar Bonificações
+                  </Button>
+                </CardContent>
+              </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Conteúdo da Aba Membros */}
+        <TabsContent value="members" className="space-y-6">
+          {/* Filtros e Botão Adicionar Membro */}
+          <Card className="shadow-xl border-2 border-red-200/50">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="w-full md:w-96 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Buscar membros..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-red-200 focus:border-red-400 focus:ring-red-400"
+                  />
+                </div>
+                
+                <div className="flex gap-4 items-center">
+                  <Select value={tierFilter} onValueChange={setTierFilter}>
+                    <SelectTrigger className="w-48 border-red-200 focus:border-red-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-red-200">
+                      <SelectItem value="all">Todos os Níveis</SelectItem>
+                      <SelectItem value="bronze">Bronze</SelectItem>
+                      <SelectItem value="silver">Silver</SelectItem>
+                      <SelectItem value="gold">Gold</SelectItem>
+                      <SelectItem value="platinum">Platinum</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-48 border-red-200 focus:border-red-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-red-200">
+                      <SelectItem value="all">Todos os Status</SelectItem>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="inactive">Inativo</SelectItem>
+                      <SelectItem value="pending">Pendente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button 
+                    onClick={() => setShowAddMemberModal(true)}
+                    className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:via-red-800 hover:to-red-900 text-white font-black px-6 py-3 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-0"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Adicionar Novo Membro
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Lista de Membros */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMembers.map((member) => (
+              <Card key={member.id} className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-2 border-red-100 hover:border-red-300">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg font-black text-gray-900">{member.name}</CardTitle>
+                      <p className="text-sm text-gray-500 font-medium">{member.email}</p>
+                      <p className="text-sm text-gray-500 font-medium">{member.phone}</p>
+                    </div>
+                    <div className="flex gap-2 flex-col items-end">
+                      <Badge className={`text-xs font-bold ${getTierColor(member.tier)}`}>
+                        <div className="flex items-center gap-1">
+                          {getTierIcon(member.tier)}
+                          {member.tier.toUpperCase()}
+                        </div>
+                      </Badge>
+                      <Badge className={`text-xs font-bold ${getStatusColor(member.status)}`}>
+                        {getStatusText(member.status)}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-0">
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
+                      <div className="text-center">
+                        <div className="text-2xl font-black text-red-600 mb-1">
+                          {member.points.toLocaleString()}
+                        </div>
+                        <div className="text-sm text-red-700 font-bold">Pontos Acumulados</div>
+                      </div>
+                    </div>
+
+                    {member.primaryArtist && (
+                      <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-purple-600" />
+                          <div>
+                            <div className="text-sm font-bold text-purple-800">Tatuador Principal</div>
+                            <div className="text-xs text-purple-600">{member.primaryArtist}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {member.birthDate && (
+                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-blue-600" />
+                          <div>
+                            <div className="text-sm font-bold text-blue-800">Aniversário</div>
+                            <div className="text-xs text-blue-600">
+                              {new Date(member.birthDate).toLocaleDateString('pt-BR')}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="text-lg font-black text-gray-900">{member.appointmentsCount}</div>
+                        <div className="text-xs text-gray-500 font-medium">Agendamentos</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-black text-gray-900">{member.referrals}</div>
+                        <div className="text-xs text-gray-500 font-medium">Indicações</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 font-medium">Total gasto:</span>
+                        <span className="font-black text-gray-900">R$ {member.totalSpent.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 font-medium">Membro desde:</span>
+                        <span className="font-bold text-gray-900">{new Date(member.joinDate).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 font-medium">Última visita:</span>
+                        <span className="font-bold text-gray-900">{new Date(member.lastVisit).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 mt-4">
+                    <Button size="sm" variant="outline" className="flex-1 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-400">
+                      Ver Histórico
+                    </Button>
+                    <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-bold">
+                      Editar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {filteredMembers.length === 0 && (
+            <div className="text-center py-12">
+              <Gift className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+              <h3 className="text-xl font-black text-gray-900 mb-2">Nenhum membro encontrado</h3>
+              <p className="text-gray-500 font-medium">
+                {searchTerm || tierFilter !== 'all' || statusFilter !== 'all'
+                  ? 'Tente ajustar os filtros de busca' 
+                  : 'Adicione o primeiro membro ao programa de fidelidade'
+                }
+              </p>
+              {(!searchTerm && tierFilter === 'all' && statusFilter === 'all') && (
+                <Button 
+                  onClick={() => setShowAddMemberModal(true)}
+                  className="mt-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Adicionar Primeiro Membro
+                </Button>
+              )}
+            </div>
           )}
-        </div>
-      )}
+        </TabsContent>
+
+        {/* Conteúdo da Aba Recompensas */}
+        <TabsContent value="rewards" className="space-y-6">
+          <Card className="shadow-xl border-2 border-red-200/50">
+            <CardHeader>
+              <CardTitle className="text-2xl font-black text-red-600 flex items-center gap-3">
+                <Gift className="h-6 w-6" />
+                Catálogo de Recompensas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex justify-between items-center">
+                <p className="text-gray-600">Gerencie as recompensas disponíveis no programa de fidelidade</p>
+                <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Recompensa
+                </Button>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-yellow-100">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold text-yellow-800 flex items-center gap-2">
+                      <Gift className="h-5 w-5" />
+                      Desconto 10%
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-yellow-700 font-medium">Desconto de 10% em qualquer tatuagem</p>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-yellow-600">Custo:</span>
+                        <span className="font-bold text-yellow-800">500 pontos</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-yellow-600">Status:</span>
+                        <Badge className="bg-green-600 text-white">Ativo</Badge>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" className="w-full mt-4 border-yellow-400 text-yellow-700 hover:bg-yellow-100">
+                      Editar
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold text-blue-800 flex items-center gap-2">
+                      <Zap className="h-5 w-5" />
+                      Flash Grátis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-blue-700 font-medium">Tatuagem flash grátis (até 5cm)</p>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-blue-600">Custo:</span>
+                        <span className="font-bold text-blue-800">1000 pontos</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-blue-600">Status:</span>
+                        <Badge className="bg-green-600 text-white">Ativo</Badge>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" className="w-full mt-4 border-blue-400 text-blue-700 hover:bg-blue-100">
+                      Editar
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold text-purple-800 flex items-center gap-2">
+                      <Star className="h-5 w-5" />
+                      Sessão Prioritária
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-purple-700 font-medium">Agendamento com prioridade</p>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-purple-600">Custo:</span>
+                        <span className="font-bold text-purple-800">200 pontos</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-purple-600">Status:</span>
+                        <Badge className="bg-green-600 text-white">Ativo</Badge>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" className="w-full mt-4 border-purple-400 text-purple-700 hover:bg-purple-100">
+                      Editar
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Conteúdo da Aba Cupons de Eventos */}
+        <TabsContent value="coupons" className="space-y-6">
+          <Card className="shadow-xl border-2 border-red-200/50">
+            <CardHeader>
+              <CardTitle className="text-2xl font-black text-red-600 flex items-center gap-3">
+                <Ticket className="h-6 w-6" />
+                Cupons de Eventos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex justify-between items-center">
+                <p className="text-gray-600">Gerencie cupons de desconto para eventos especiais</p>
+                <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Cupom
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-bold text-green-800">VERÃO2024</h3>
+                        <p className="text-green-700">Desconto de 20% em tatuagens coloridas</p>
+                        <div className="flex gap-4 text-sm">
+                          <span className="text-green-600">Válido até: 31/03/2024</span>
+                          <span className="text-green-600">Usos: 45/100</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className="bg-green-600 text-white">Ativo</Badge>
+                        <Button size="sm" variant="outline" className="border-green-400 text-green-700 hover:bg-green-100">
+                          Editar
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-bold text-red-800">FLASH15</h3>
+                        <p className="text-red-700">15% de desconto em flash tattoos</p>
+                        <div className="flex gap-4 text-sm">
+                          <span className="text-red-600">Válido até: 15/04/2024</span>
+                          <span className="text-red-600">Usos: 23/50</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className="bg-red-600 text-white">Ativo</Badge>
+                        <Button size="sm" variant="outline" className="border-red-400 text-red-700 hover:bg-red-100">
+                          Editar
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-bold text-gray-800">FIRST50</h3>
+                        <p className="text-gray-700">50% de desconto para primeira tatuagem</p>
+                        <div className="flex gap-4 text-sm">
+                          <span className="text-gray-600">Válido até: 01/02/2024</span>
+                          <span className="text-gray-600">Usos: 12/20</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className="bg-gray-600 text-white">Expirado</Badge>
+                        <Button size="sm" variant="outline" className="border-gray-400 text-gray-700 hover:bg-gray-100">
+                          Renovar
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Modal para Adicionar Novo Membro */}
       <AddLoyaltyMemberModal
