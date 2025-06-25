@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCorners } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -381,221 +380,206 @@ const StudioDayByDayEnhanced: React.FC<StudioDayByDayEnhancedProps> = ({
     totalDuration: dayAppointments.reduce((sum, apt) => sum + apt.duration_minutes, 0),
   };
 
+  // Renderizar como componente integrado se isOpen for true e não como modal
+  const content = (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full transform translate-x-10 -translate-y-10"></div>
+        <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full transform -translate-x-8 translate-y-8"></div>
+        
+        <div className="relative z-10">
+          <h2 className="text-xl font-black flex items-center gap-3 mb-1">
+            <div className="bg-white/20 rounded-full p-2 backdrop-blur-sm">
+              <CalendarIcon className="h-5 w-5" />
+            </div>
+            🏢 Cronograma Detalhado do Dia
+          </h2>
+          <p className="text-red-100 font-bold text-base">
+            {format(selectedDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          </p>
+        </div>
+      </div>
+
+      {/* Dashboard de Resumo do Dia */}
+      <div className="bg-gradient-to-br from-white via-red-50/50 to-white rounded-2xl shadow-2xl border-2 border-red-200/50 p-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-red-100/20 rounded-full transform translate-x-16 -translate-y-16"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-100/30 rounded-full transform -translate-x-12 translate-y-12"></div>
+        
+        <h3 className="text-lg font-black text-red-800 mb-3 flex items-center gap-3 relative z-10">
+          <TrendingUp className="h-5 w-5" />
+          📊 Dashboard do Dia
+        </h3>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 relative z-10">
+          <div className="bg-gradient-to-br from-red-500 via-red-600 to-red-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12"></div>
+            <div className="flex items-center justify-between mb-2 relative z-10">
+              <CalendarDays className="h-5 w-5 text-white/80" />
+              <div className="text-2xl font-black">{dayStats.total}</div>
+            </div>
+            <div className="text-red-100 font-black text-xs uppercase tracking-wide relative z-10">
+              📅 TOTAL AGENDAMENTOS
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-500 via-green-600 to-green-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12"></div>
+            <div className="flex items-center justify-between mb-2 relative z-10">
+              <DollarSign className="h-5 w-5 text-white/80" />
+              <div className="text-lg font-black">R$ {dayStats.revenue.toLocaleString()}</div>
+            </div>
+            <div className="text-green-100 font-black text-xs uppercase tracking-wide relative z-10">
+              💰 RECEITA DO DIA
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12"></div>
+            <div className="flex items-center justify-between mb-2 relative z-10">
+              <Play className="h-5 w-5 text-white/80 animate-pulse" />
+              <div className="text-2xl font-black">{dayStats.inProgress}</div>
+            </div>
+            <div className="text-purple-100 font-black text-xs uppercase tracking-wide relative z-10">
+              ⚡ EM ANDAMENTO
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12"></div>
+            <div className="flex items-center justify-between mb-2 relative z-10">
+              <CheckCircle className="h-5 w-5 text-white/80" />
+              <div className="text-2xl font-black">{dayStats.completed}</div>
+            </div>
+            <div className="text-blue-100 font-black text-xs uppercase tracking-wide relative z-10">
+              ✅ CONCLUÍDOS
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 relative z-10">
+          <div className="bg-orange-50 border-2 border-orange-200 p-3 rounded-xl">
+            <div className="flex items-center gap-2">
+              <Timer className="h-4 w-4 text-orange-600" />
+              <div>
+                <div className="text-lg font-black text-orange-800">{dayStats.totalDuration}min</div>
+                <div className="text-orange-600 font-bold text-xs">⏰ Tempo Total</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-indigo-50 border-2 border-indigo-200 p-3 rounded-xl">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-indigo-600" />
+              <div>
+                <div className="text-lg font-black text-indigo-800">R$ {dayStats.averagePrice.toFixed(0)}</div>
+                <div className="text-indigo-600 font-bold text-xs">💎 Ticket Médio</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Timeline Lateral e Kanban de 3 Colunas */}
+      <div className="flex gap-4 overflow-auto">
+        {/* Timeline de Horários */}
+        <div className="w-20 flex-shrink-0">
+          <div className="bg-gradient-to-b from-red-600 via-red-700 to-red-800 p-3 rounded-xl h-full shadow-xl text-white relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+            
+            <h3 className="text-xs font-black text-center mb-3 relative z-10">⏰ HORÁRIOS</h3>
+            <div className="space-y-2 relative z-10">
+              {timeSlots.map((time) => (
+                <div key={time} className="text-center">
+                  <div className="text-xs font-black text-white bg-white/20 p-1.5 rounded-lg border border-white/30 backdrop-blur-sm hover:bg-white/30 transition-all duration-200">
+                    {time}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Kanban de 3 Colunas */}
+        <div className="flex-1">
+          <DndContext
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            collisionDetection={closestCorners}
+          >
+            <div className="flex gap-4 h-full">
+              <KanbanColumn
+                id="scheduled"
+                title="📋 Agendados"
+                icon={<AlertCircle className="h-5 w-5" />}
+                appointments={scheduledAppointments}
+                clients={clients}
+                bgColor="bg-gradient-to-b from-orange-50 to-white border-orange-300"
+                headerColor="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700"
+                onEdit={onEditAppointment}
+                onDelete={onDeleteAppointment}
+              />
+              
+              <KanbanColumn
+                id="in_progress"
+                title="⚡ Em Andamento"
+                icon={<Play className="h-5 w-5" />}
+                appointments={inProgressAppointments}
+                clients={clients}
+                bgColor="bg-gradient-to-b from-purple-50 to-white border-purple-300"
+                headerColor="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700"
+                onEdit={onEditAppointment}
+                onDelete={onDeleteAppointment}
+              />
+              
+              <KanbanColumn
+                id="completed"
+                title="✅ Atendimento Realizado"
+                icon={<CheckCircle className="h-5 w-5" />}
+                appointments={completedAppointments}
+                clients={clients}
+                bgColor="bg-gradient-to-b from-green-50 to-white border-green-300"
+                headerColor="bg-gradient-to-r from-green-500 via-green-600 to-green-700"
+                onEdit={onEditAppointment}
+                onDelete={onDeleteAppointment}
+              />
+            </div>
+
+            <DragOverlay>
+              {activeAppointment && (
+                <DraggableAppointmentCard
+                  appointment={activeAppointment}
+                  client={clients.find(c => c.id === activeAppointment.client_id)}
+                  isOverlay
+                  onEdit={onEditAppointment}
+                  onDelete={onDeleteAppointment}
+                />
+              )}
+            </DragOverlay>
+          </DndContext>
+        </div>
+      </div>
+
+      {/* Footer com Resumo */}
+      <div className="flex justify-center gap-3 pt-3 border-t-2 border-red-200 bg-gradient-to-r from-red-50 via-white to-red-50 rounded-lg p-3">
+        <Badge className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 text-sm font-black rounded-full shadow-lg">
+          📋 Agendados: {dayStats.scheduled}
+        </Badge>
+        <Badge className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 text-sm font-black rounded-full shadow-lg">
+          ⚡ Em Andamento: {dayStats.inProgress}
+        </Badge>
+        <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 text-sm font-black rounded-full shadow-lg">
+          ✅ Concluídos: {dayStats.completed}
+        </Badge>
+      </div>
+    </div>
+  );
+
+  // Se não estiver aberto, não renderizar nada
   if (!isOpen) return null;
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[98vw] max-h-[98vh] overflow-hidden bg-gradient-to-br from-white via-red-50/30 to-white border-2 border-red-300 shadow-2xl">
-        <DialogHeader className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white p-4 rounded-xl -mx-6 -mt-6 mb-4 relative overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full transform translate-x-10 -translate-y-10"></div>
-          <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full transform -translate-x-8 translate-y-8"></div>
-          
-          <div className="flex items-center justify-between relative z-10">
-            <div>
-              <DialogTitle className="text-xl font-black flex items-center gap-3 mb-1">
-                <div className="bg-white/20 rounded-full p-2 backdrop-blur-sm">
-                  <CalendarIcon className="h-5 w-5" />
-                </div>
-                🏢 Cronograma Detalhado do Dia
-              </DialogTitle>
-              <p className="text-red-100 font-bold text-base">
-                {format(selectedDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-              </p>
-            </div>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onClose} 
-              className="text-white hover:bg-white/20 transition-all duration-300 rounded-lg p-2"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-        </DialogHeader>
-
-        {/* Dashboard de Resumo do Dia - APRIMORADO */}
-        <div className="bg-gradient-to-br from-white via-red-50/50 to-white rounded-2xl shadow-2xl border-2 border-red-200/50 p-4 mb-4 relative overflow-hidden">
-          {/* Decorative background */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-100/20 rounded-full transform translate-x-16 -translate-y-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-100/30 rounded-full transform -translate-x-12 translate-y-12"></div>
-          
-          <h3 className="text-lg font-black text-red-800 mb-3 flex items-center gap-3 relative z-10">
-            <TrendingUp className="h-5 w-5" />
-            📊 Dashboard do Dia
-          </h3>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 relative z-10">
-            {/* Total de Agendamentos */}
-            <div className="bg-gradient-to-br from-red-500 via-red-600 to-red-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12"></div>
-              <div className="flex items-center justify-between mb-2 relative z-10">
-                <CalendarDays className="h-5 w-5 text-white/80" />
-                <div className="text-2xl font-black">{dayStats.total}</div>
-              </div>
-              <div className="text-red-100 font-black text-xs uppercase tracking-wide relative z-10">
-                📅 TOTAL AGENDAMENTOS
-              </div>
-            </div>
-
-            {/* Receita do Dia */}
-            <div className="bg-gradient-to-br from-green-500 via-green-600 to-green-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12"></div>
-              <div className="flex items-center justify-between mb-2 relative z-10">
-                <DollarSign className="h-5 w-5 text-white/80" />
-                <div className="text-lg font-black">R$ {dayStats.revenue.toLocaleString()}</div>
-              </div>
-              <div className="text-green-100 font-black text-xs uppercase tracking-wide relative z-10">
-                💰 RECEITA DO DIA
-              </div>
-            </div>
-
-            {/* Em Andamento */}
-            <div className="bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12"></div>
-              <div className="flex items-center justify-between mb-2 relative z-10">
-                <Play className="h-5 w-5 text-white/80 animate-pulse" />
-                <div className="text-2xl font-black">{dayStats.inProgress}</div>
-              </div>
-              <div className="text-purple-100 font-black text-xs uppercase tracking-wide relative z-10">
-                ⚡ EM ANDAMENTO
-              </div>
-            </div>
-
-            {/* Concluídos */}
-            <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 p-3 rounded-xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12"></div>
-              <div className="flex items-center justify-between mb-2 relative z-10">
-                <CheckCircle className="h-5 w-5 text-white/80" />
-                <div className="text-2xl font-black">{dayStats.completed}</div>
-              </div>
-              <div className="text-blue-100 font-black text-xs uppercase tracking-wide relative z-10">
-                ✅ CONCLUÍDOS
-              </div>
-            </div>
-          </div>
-
-          {/* Métricas Adicionais */}
-          <div className="grid grid-cols-2 gap-3 relative z-10">
-            <div className="bg-orange-50 border-2 border-orange-200 p-3 rounded-xl">
-              <div className="flex items-center gap-2">
-                <Timer className="h-4 w-4 text-orange-600" />
-                <div>
-                  <div className="text-lg font-black text-orange-800">{dayStats.totalDuration}min</div>
-                  <div className="text-orange-600 font-bold text-xs">⏰ Tempo Total</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-indigo-50 border-2 border-indigo-200 p-3 rounded-xl">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-indigo-600" />
-                <div>
-                  <div className="text-lg font-black text-indigo-800">R$ {dayStats.averagePrice.toFixed(0)}</div>
-                  <div className="text-indigo-600 font-bold text-xs">💎 Ticket Médio</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Timeline Lateral e Kanban de 3 Colunas - APRIMORADO */}
-        <div className="flex gap-4 overflow-auto max-h-[calc(98vh-400px)]">
-          {/* Timeline de Horários - APRIMORADA */}
-          <div className="w-20 flex-shrink-0">
-            <div className="bg-gradient-to-b from-red-600 via-red-700 to-red-800 p-3 rounded-xl h-full shadow-xl text-white relative overflow-hidden">
-              {/* Decorative background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
-              
-              <h3 className="text-xs font-black text-center mb-3 relative z-10">⏰ HORÁRIOS</h3>
-              <div className="space-y-2 relative z-10">
-                {timeSlots.map((time) => (
-                  <div key={time} className="text-center">
-                    <div className="text-xs font-black text-white bg-white/20 p-1.5 rounded-lg border border-white/30 backdrop-blur-sm hover:bg-white/30 transition-all duration-200">
-                      {time}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Kanban de 3 Colunas - APRIMORADO */}
-          <div className="flex-1">
-            <DndContext
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              collisionDetection={closestCorners}
-            >
-              <div className="flex gap-4 h-full">
-                <KanbanColumn
-                  id="scheduled"
-                  title="📋 Agendados"
-                  icon={<AlertCircle className="h-5 w-5" />}
-                  appointments={scheduledAppointments}
-                  clients={clients}
-                  bgColor="bg-gradient-to-b from-orange-50 to-white border-orange-300"
-                  headerColor="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700"
-                  onEdit={onEditAppointment}
-                  onDelete={onDeleteAppointment}
-                />
-                
-                <KanbanColumn
-                  id="in_progress"
-                  title="⚡ Em Andamento"
-                  icon={<Play className="h-5 w-5" />}
-                  appointments={inProgressAppointments}
-                  clients={clients}
-                  bgColor="bg-gradient-to-b from-purple-50 to-white border-purple-300"
-                  headerColor="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700"
-                  onEdit={onEditAppointment}
-                  onDelete={onDeleteAppointment}
-                />
-                
-                <KanbanColumn
-                  id="completed"
-                  title="✅ Atendimento Realizado"
-                  icon={<CheckCircle className="h-5 w-5" />}
-                  appointments={completedAppointments}
-                  clients={clients}
-                  bgColor="bg-gradient-to-b from-green-50 to-white border-green-300"
-                  headerColor="bg-gradient-to-r from-green-500 via-green-600 to-green-700"
-                  onEdit={onEditAppointment}
-                  onDelete={onDeleteAppointment}
-                />
-              </div>
-
-              <DragOverlay>
-                {activeAppointment && (
-                  <DraggableAppointmentCard
-                    appointment={activeAppointment}
-                    client={clients.find(c => c.id === activeAppointment.client_id)}
-                    isOverlay
-                    onEdit={onEditAppointment}
-                    onDelete={onDeleteAppointment}
-                  />
-                )}
-              </DragOverlay>
-            </DndContext>
-          </div>
-        </div>
-
-        {/* Footer com Resumo - APRIMORADO */}
-        <div className="flex justify-center gap-3 pt-3 border-t-2 border-red-200 mt-3 bg-gradient-to-r from-red-50 via-white to-red-50 rounded-lg p-3">
-          <Badge className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 text-sm font-black rounded-full shadow-lg">
-            📋 Agendados: {dayStats.scheduled}
-          </Badge>
-          <Badge className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 text-sm font-black rounded-full shadow-lg">
-            ⚡ Em Andamento: {dayStats.inProgress}
-          </Badge>
-          <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 text-sm font-black rounded-full shadow-lg">
-            ✅ Concluídos: {dayStats.completed}
-          </Badge>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+  // Renderizar como componente integrado (não modal)
+  return content;
 };
 
 export default StudioDayByDayEnhanced;

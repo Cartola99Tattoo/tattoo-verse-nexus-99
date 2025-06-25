@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,8 +23,7 @@ const Appointments = () => {
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [modalSelectedDate, setModalSelectedDate] = useState<Date | undefined>();
   const [studioDayByDayDate, setStudioDayByDayDate] = useState<Date>(new Date());
-  const [showEnhancedDayView, setShowEnhancedDayView] = useState(false);
-  const [enhancedDayViewDate, setEnhancedDayViewDate] = useState<Date>(new Date());
+  const [activeTab, setActiveTab] = useState("estatisticas");
   const queryClient = useQueryClient();
   const clientService = getClientService();
 
@@ -669,10 +667,10 @@ const Appointments = () => {
     setSelectedDate(date);
   };
 
-  // Nova função para abrir o painel diário aprimorado
+  // Nova função para abrir a aba "Dia a Dia" com data específica
   const handleDayClickEnhanced = (date: Date) => {
-    setEnhancedDayViewDate(date);
-    setShowEnhancedDayView(true);
+    setStudioDayByDayDate(date);
+    setActiveTab("dia-a-dia");
   };
 
   const handleStudioDayChange = (date: Date) => {
@@ -697,15 +695,15 @@ const Appointments = () => {
         </div>
       </div>
 
-      {/* Tabs de Navegação */}
-      <Tabs defaultValue="kanban-semanal" className="w-full">
+      {/* Tabs de Navegação - NOVA ORDEM */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-white border-2 border-red-200 shadow-xl rounded-2xl p-2">
           <TabsTrigger 
-            value="kanban-semanal" 
+            value="estatisticas" 
             className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all duration-300 rounded-xl font-bold"
           >
-            <Kanban className="h-4 w-4" />
-            Kanban Semanal
+            <BarChart3 className="h-4 w-4" />
+            Estatísticas
           </TabsTrigger>
           <TabsTrigger 
             value="calendario" 
@@ -715,57 +713,22 @@ const Appointments = () => {
             Calendário
           </TabsTrigger>
           <TabsTrigger 
+            value="kanban-semanal" 
+            className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all duration-300 rounded-xl font-bold"
+          >
+            <Kanban className="h-4 w-4" />
+            Kanban Semanal
+          </TabsTrigger>
+          <TabsTrigger 
             value="dia-a-dia" 
             className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all duration-300 rounded-xl font-bold"
           >
             <Sun className="h-4 w-4" />
             Dia a Dia
           </TabsTrigger>
-          <TabsTrigger 
-            value="estatisticas" 
-            className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all duration-300 rounded-xl font-bold"
-          >
-            <BarChart3 className="h-4 w-4" />
-            Estatísticas
-          </TabsTrigger>
         </TabsList>
 
-        {/* Kanban Semanal - Painel Principal */}
-        <TabsContent value="kanban-semanal" className="mt-8">
-          <WeeklyAppointmentsKanban
-            appointments={mockAppointments}
-            clients={mockClients}
-            currentDate={currentDate}
-            onReschedule={handleReschedule}
-            onDayClick={handleDayClickEnhanced}
-            onCreateAppointment={handleCreateAppointment}
-            onEditAppointment={handleEditAppointment}
-            onDeleteAppointment={handleDeleteAppointment}
-          />
-        </TabsContent>
-
-        {/* Calendário Mensal */}
-        <TabsContent value="calendario" className="mt-8">
-          <EnhancedMonthlyCalendar
-            appointments={mockAppointments}
-            clients={mockClients}
-            currentDate={currentDate}
-            onDayClick={handleDayClick}
-            onCreateAppointment={handleCreateAppointmentFromCalendar}
-          />
-        </TabsContent>
-
-        {/* Visão Dia a Dia */}
-        <TabsContent value="dia-a-dia" className="mt-8">
-          <StudioDayByDay
-            appointments={mockAppointments}
-            clients={mockClients}
-            selectedDate={studioDayByDayDate}
-            onDateChange={handleStudioDayChange}
-          />
-        </TabsContent>
-
-        {/* Estatísticas */}
+        {/* Estatísticas - PRIMEIRO */}
         <TabsContent value="estatisticas" className="mt-8">
           <div className="grid gap-6">
             <Card className="bg-gradient-to-br from-white to-red-50 border-2 border-red-200 shadow-xl">
@@ -804,6 +767,47 @@ const Appointments = () => {
             </Card>
           </div>
         </TabsContent>
+
+        {/* Calendário Mensal - SEGUNDO */}
+        <TabsContent value="calendario" className="mt-8">
+          <EnhancedMonthlyCalendar
+            appointments={mockAppointments}
+            clients={mockClients}
+            currentDate={currentDate}
+            onDayClick={handleDayClickEnhanced}
+            onCreateAppointment={handleCreateAppointmentFromCalendar}
+          />
+        </TabsContent>
+
+        {/* Kanban Semanal - TERCEIRO */}
+        <TabsContent value="kanban-semanal" className="mt-8">
+          <WeeklyAppointmentsKanban
+            appointments={mockAppointments}
+            clients={mockClients}
+            currentDate={currentDate}
+            onReschedule={handleReschedule}
+            onDayClick={handleDayClickEnhanced}
+            onCreateAppointment={handleCreateAppointment}
+            onEditAppointment={handleEditAppointment}
+            onDeleteAppointment={handleDeleteAppointment}
+          />
+        </TabsContent>
+
+        {/* Dia a Dia - QUARTO (PAINEL PRINCIPAL INTEGRADO) */}
+        <TabsContent value="dia-a-dia" className="mt-8">
+          <div className="bg-gradient-to-br from-white via-red-50/30 to-white rounded-2xl shadow-2xl border-2 border-red-300 p-6">
+            <StudioDayByDayEnhanced
+              isOpen={true}
+              onClose={() => {}}
+              selectedDate={studioDayByDayDate}
+              appointments={mockAppointments}
+              clients={mockClients}
+              onStatusChange={handleAppointmentStatusChange}
+              onEditAppointment={handleEditAppointment}
+              onDeleteAppointment={handleDeleteAppointment}
+            />
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Modals */}
@@ -821,18 +825,6 @@ const Appointments = () => {
         selectedDate={modalSelectedDate}
         onCreateAppointment={handleAppointmentCreated}
         clients={mockClients}
-      />
-
-      {/* Novo Painel Diário Aprimorado */}
-      <StudioDayByDayEnhanced
-        isOpen={showEnhancedDayView}
-        onClose={() => setShowEnhancedDayView(false)}
-        selectedDate={enhancedDayViewDate}
-        appointments={mockAppointments}
-        clients={mockClients}
-        onStatusChange={handleAppointmentStatusChange}
-        onEditAppointment={handleEditAppointment}
-        onDeleteAppointment={handleDeleteAppointment}
       />
     </div>
   );
