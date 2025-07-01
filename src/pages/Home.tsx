@@ -19,48 +19,48 @@ const Home = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-red-900/10 via-black/5 to-red-800/10"></div>
         <Hero />
       </div>
-      
+
       {/* Services Section - Moved to be more prominent after Hero */}
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 shadow-inner">
         <ServicesSection />
       </div>
-      
+
       {/* About Section with Subtle Shadow */}
       <div className="shadow-lg bg-white relative z-10">
         <AboutSection />
       </div>
-      
+
       {/* Featured Tattoos with Enhanced Cards */}
       <div className="bg-white relative">
         <FeaturedTattoos />
       </div>
-      
+
       {/* Artists Section with Dark Gradient */}
       <div className="bg-gradient-to-b from-gray-900 to-black text-white shadow-2xl">
         <ArtistsSection />
       </div>
-      
+
       {/* Events with Red Accent */}
       <div className="bg-gradient-to-br from-red-50 to-white relative">
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-transparent"></div>
         <EventTattoos />
       </div>
-      
+
       {/* Testimonials with Elevated Design */}
       <div className="bg-white shadow-xl">
         <TestimonialsSection />
       </div>
-      
+
       {/* Blog Preview with Gradient */}
       <div className="bg-gradient-to-t from-gray-100 to-white">
         <BlogPreview />
       </div>
-      
+
       {/* CTA with Strong Red Gradient */}
       <div className="bg-gradient-to-r from-red-600 via-red-500 to-red-600 shadow-2xl">
         <CTASection />
       </div>
-      
+
       {/* Instagram Feed with Final Gradient */}
       <div className="bg-gradient-to-b from-gray-900 to-black">
         <InstagramFeed />
