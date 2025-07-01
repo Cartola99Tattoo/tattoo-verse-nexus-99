@@ -34,9 +34,9 @@ const Dashboard = () => {
   const clientService = getClientService();
   const productService = getProductService();
   const financialService = getFinancialService();
-  
+
   console.log('Dashboard: Initializing services');
-  
+
   // Dashboard stats
   const { data: stats, loading } = useDataQuery<IDashboardStats>(
     () => {
@@ -91,7 +91,7 @@ const Dashboard = () => {
   const today = new Date().toISOString().split('T')[0];
   const safeAppointments = Array.isArray(appointments) ? appointments : [];
   console.log('Dashboard: Safe appointments', safeAppointments);
-  
+
   const todayAppointments = safeAppointments.filter(apt => {
     console.log('Dashboard: Filtering appointment', apt);
     return apt && apt.date === today;
