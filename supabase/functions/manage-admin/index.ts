@@ -16,19 +16,19 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
-  
+
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { 
+      {
         auth: {
           autoRefreshToken: false,
           persistSession: false
         }
       }
     )
-    
+
     const { email, password, action } = await req.json()
 
     // Verificar se o email é realmente o adm99tattoo@gmail.com
@@ -42,14 +42,14 @@ serve(async (req) => {
     if (action === "check") {
       // Verificar se o usuário existe pela listagem de usuários
       const { data, error } = await supabaseClient.auth.admin.listUsers()
-      
+
       // Adicionar logs para depuração
       console.log("Check user results:", JSON.stringify({ data, error }))
-      
+
       // Verificar se o usuário administrador existe entre os usuários listados
       const adminUser = data?.users?.find(user => user.email === email)
       const userExists = !!adminUser
-      
+
       // Verificar se o usuário tem o papel de admin no perfil
       let isAdmin = false
       if (userExists && adminUser) {
@@ -58,13 +58,13 @@ serve(async (req) => {
           .select('role')
           .eq('id', adminUser.id)
           .single()
-        
+
         isAdmin = profileData?.role === 'admin'
         console.log(`Verificação de admin: ${isAdmin ? 'É admin' : 'Não é admin'}`, profileData)
       }
-      
+
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           exists: userExists,
           isAdmin,
           user: adminUser ? {
@@ -76,7 +76,7 @@ serve(async (req) => {
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       )
-    } 
+    }
     else if (action === "create") {
       // Criar usuário admin com confirmação de email
       const { data: userData, error: createError } = await supabaseClient.auth.admin.createUser({
@@ -110,8 +110,8 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ 
-          success: true, 
+        JSON.stringify({
+          success: true,
           message: "Administrador criado com sucesso",
           user: userData?.user ? {
             id: userData.user.id,
@@ -162,9 +162,9 @@ serve(async (req) => {
         }
 
         return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: "Administrador criado com sucesso", 
+          JSON.stringify({
+            success: true,
+            message: "Administrador criado com sucesso",
             created: true,
             user: newUserData?.user ? {
               id: newUserData.user.id,
@@ -192,14 +192,14 @@ serve(async (req) => {
         .select('role')
         .eq('id', adminUser.id)
         .single()
-      
+
       if (!profileData || profileData.role !== 'admin') {
         console.log("Atualizando perfil para administrador", profileData)
         const { error: roleError } = await supabaseClient
           .from('profiles')
           .update({ role: 'admin' })
           .eq('id', adminUser.id)
-        
+
         if (roleError) {
           console.log("Erro ao atualizar role para admin:", roleError)
         } else {
@@ -208,8 +208,8 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ 
-          success: true, 
+        JSON.stringify({
+          success: true,
           message: "Senha do administrador atualizada com sucesso",
           updated: true,
           user: {
