@@ -28,12 +28,17 @@ import TattooArtistsLanding from './pages/tattoo-artists/TattooArtistsLanding';
 import TattooArtistDirectory from './pages/tattoo-artists/TattooArtistDirectory';
 import TattooArtistProfile from './pages/tattoo-artists/TattooArtistProfile';
 import TattooArtistDashboard from './pages/tattoo-artists/TattooArtistDashboard';
+import Ecosistema from './pages/Ecosistema';
 
 // Login pages
 import ClienteLogin from './pages/login/ClienteLogin';
 import EstudioLogin from './pages/login/EstudioLogin';
 import AdminLogin from './pages/login/AdminLogin';
 import TatuadorLogin from './pages/login/TatuadorLogin';
+
+// Register pages
+import ClienteRegister from './pages/register/ClienteRegister';
+import EstudioRegister from './pages/register/EstudioRegister';
 
 function App() {
   return (
@@ -44,12 +49,19 @@ function App() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/shop" element={<Shop />} />
         
+        {/* Nova Landing Page do Ecossistema */}
+        <Route path="/ecosistema" element={<Ecosistema />} />
+        
         {/* Login Routes */}
         <Route path="/login/cliente" element={<ClienteLogin />} />
         <Route path="/login/estudio" element={<EstudioLogin />} />
         <Route path="/login/admin" element={<AdminLogin />} />
         <Route path="/login/tatuador" element={<TatuadorLogin />} />
         
+        {/* Register Routes */}
+        <Route path="/register/cliente" element={<ClienteRegister />} />
+        <Route path="/register/estudio" element={<EstudioRegister />} />
+
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminHome />} />
         <Route path="/admin/artists" element={<AdminArtists />} />
