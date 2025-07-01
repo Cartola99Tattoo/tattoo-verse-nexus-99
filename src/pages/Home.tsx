@@ -10,30 +10,7 @@ import CTASection from '@/components/home/CTASection';
 import AboutSection from '@/components/home/AboutSection';
 import EventTattoos from '@/components/home/EventTattoos';
 import InstagramFeed from '@/components/home/InstagramFeed';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-const Home = () => {
-  const [showSelector, setShowSelector] = useState(true); // início com a tela de seleção
-  const navigate = useNavigate();
-
-  if (showSelector) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white text-black">
-        <h1 className="text-3xl font-bold mb-6">Bem-vindo à 99Tattoo</h1>
-        <div className="space-y-4 w-full max-w-xs">
-          <button onClick={() => setShowSelector(false)} className="w-full px-6 py-3 bg-black text-white rounded hover:bg-gray-800 transition">Site Público / Loja</button>
-          <button onClick={() => navigate('/admin')} className="w-full px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 transition">Painel Admin</button>
-          <button onClick={() => navigate('/tatuadores-da-nova-era')} className="w-full px-6 py-3 bg-gray-800 text-white rounded hover:bg-gray-700 transition">Tatuadores</button>
-          <button onClick={() => navigate('/nave-mae-da-tatuagem')} className="w-full px-6 py-3 bg-gray-700 text-white rounded hover:bg-gray-600 transition">Nave Mãe</button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-100">
-      {/* resto do código atual... */}
 const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-100">
