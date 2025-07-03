@@ -27,17 +27,19 @@ const UnifiedLoginForm = () => {
         description: "Redirecionando para sua área..."
       });
       
-      // Buscar o usuário para determinar o redirecionamento
+      // Buscar o usuário logado para obter role e profileId
       const mockUsers = [
-        { email: "cliente@teste.com", role: "cliente" },
-        { email: "estudio@teste.com", role: "admin_estudio" },
-        { email: "tatuador@teste.com", role: "tatuador_da_nova_era" },
-        { email: "admin@teste.com", role: "admin_nave_mae" }
+        { email: "cliente@teste.com", role: "cliente", profileId: "cliente-1" },
+        { email: "estudio@teste.com", role: "admin_estudio", profileId: "estudio-1" },
+        { email: "tatuador@teste.com", role: "tatuador_da_nova_era", profileId: "1" },
+        { email: "tatuadora@teste.com", role: "tatuador_da_nova_era", profileId: "2" },
+        { email: "roberto@teste.com", role: "tatuador_cadastrado_admin", profileId: "3" },
+        { email: "admin@teste.com", role: "admin_nave_mae", profileId: "admin-1" }
       ];
       
       const user = mockUsers.find(u => u.email === formData.email);
       if (user) {
-        const redirectUrl = getRedirectUrlByRole(user.role as any);
+        const redirectUrl = getRedirectUrlByRole(user.role as any, user.profileId);
         setTimeout(() => navigate(redirectUrl), 1500);
       }
     } else {
@@ -127,7 +129,9 @@ const UnifiedLoginForm = () => {
         <p className="text-xs text-red-200 mb-2">Dados para teste:</p>
         <p className="text-xs text-red-100">Cliente: cliente@teste.com / 123456</p>
         <p className="text-xs text-red-100">Estúdio: estudio@teste.com / 123456</p>
-        <p className="text-xs text-red-100">Tatuador: tatuador@teste.com / 123456</p>
+        <p className="text-xs text-red-100">Tatuador Carlos: tatuador@teste.com / 123456</p>
+        <p className="text-xs text-red-100">Tatuadora Ana: tatuadora@teste.com / 123456</p>
+        <p className="text-xs text-red-100">Tatuador Roberto: roberto@teste.com / 123456</p>
       </div>
     </form>
   );

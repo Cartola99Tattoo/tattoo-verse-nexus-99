@@ -2,12 +2,13 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { mockUsers } from "@/data/ecosistemaBenefits";
 
-export type UserRole = "cliente" | "admin_estudio" | "tatuador_da_nova_era" | "admin_nave_mae";
+export type UserRole = "cliente" | "admin_estudio" | "tatuador_da_nova_era" | "admin_nave_mae" | "tatuador_cadastrado_admin";
 
 export interface EcosistemaUser {
   email: string;
   name: string;
   role: UserRole;
+  profileId: string;
 }
 
 interface EcosistemaAuthContextType {
@@ -35,7 +36,8 @@ export function EcosistemaAuthProvider({ children }: { children: ReactNode }) {
       setUser({
         email: foundUser.email,
         name: foundUser.name,
-        role: foundUser.role as UserRole
+        role: foundUser.role as UserRole,
+        profileId: foundUser.profileId
       });
       setIsLoading(false);
       return { success: true };
@@ -69,14 +71,16 @@ export function useEcosistemaAuth() {
   return context;
 }
 
-export function getRedirectUrlByRole(role: UserRole): string {
+export function getRedirectUrlByRole(role: UserRole, profileId?: string): string {
   switch (role) {
     case "cliente":
-      return "/";
+      return "/user-profile";
     case "admin_estudio":
       return "/admin";
     case "tatuador_da_nova_era":
-      return "/tatuadores-da-nova-era/dashboard";
+      return `/tatuadores-da-nova-era/perfil/${profileId}`;
+    case "tatuador_cadastrado_admin":
+      return "/admin";
     case "admin_nave_mae":
       return "/nave-mae-da-tatuagem";
     default:

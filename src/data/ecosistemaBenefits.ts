@@ -72,24 +72,42 @@ export const mockUsers = [
     email: "cliente@teste.com",
     password: "123456",
     role: "cliente",
-    name: "João Cliente"
+    name: "João Cliente",
+    profileId: "cliente-1"
   },
   {
     email: "estudio@teste.com",
     password: "123456",
     role: "admin_estudio",
-    name: "Estúdio Ink"
+    name: "Estúdio Ink",
+    profileId: "estudio-1"
   },
   {
     email: "tatuador@teste.com",
     password: "123456",
     role: "tatuador_da_nova_era",
-    name: "Maria Tatuadora"
+    name: "Carlos Silva",
+    profileId: "1"
+  },
+  {
+    email: "tatuadora@teste.com",
+    password: "123456",
+    role: "tatuador_da_nova_era",
+    name: "Ana Costa",
+    profileId: "2"
   },
   {
     email: "admin@teste.com",
     password: "123456",
     role: "admin_nave_mae",
-    name: "Admin Sistema"
+    name: "Admin Sistema",
+    profileId: "admin-1"
+  },
+  {
+    email: "roberto@teste.com",
+    password: "123456",
+    role: "tatuador_cadastrado_admin",
+    name: "Roberto Alves",
+    profileId: "3"
   }
 ];
