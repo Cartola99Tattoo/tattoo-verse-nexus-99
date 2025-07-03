@@ -195,6 +195,85 @@ const TattooArtistProfile = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* NOVA SEÇÃO: Preferências e Qualificação do Estúdio */}
+              <Card className="shadow-xl bg-gradient-to-br from-white to-blue-50 border-blue-200">
+                <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-200 rounded-t-lg">
+                  <CardTitle className="text-2xl font-black text-blue-600">Preferências e Qualificação do Estúdio</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <h4 className="font-bold text-gray-800">Estrutura de Equipe</h4>
+                      <p className="text-gray-600">Quantos tatuadores trabalham em seu estúdio?</p>
+                      <Badge className="bg-blue-100 text-blue-800">{artist.studioQualification.teamSize} tatuadores</Badge>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-bold text-gray-800">Gestão de Agendamentos</h4>
+                      <p className="text-gray-600">Como gerencia seus agendamentos atualmente?</p>
+                      <Badge className="bg-green-100 text-green-800">{artist.studioQualification.appointmentManagement}</Badge>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-bold text-gray-800">Canais de Divulgação</h4>
+                      <p className="text-gray-600">Principais canais de captação de clientes:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {artist.studioQualification.marketingChannels.map((channel, index) => (
+                          <Badge key={index} variant="outline" className="border-purple-300 text-purple-600">
+                            {channel}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-bold text-gray-800">Controle Financeiro</h4>
+                      <p className="text-gray-600">Como organiza o controle financeiro?</p>
+                      <Badge className="bg-yellow-100 text-yellow-800">{artist.studioQualification.financialControl}</Badge>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-bold text-gray-800">Controle de Estoque</h4>
+                      <p className="text-gray-600">Realiza controle de estoque de materiais?</p>
+                      <Badge className="bg-orange-100 text-orange-800">{artist.studioQualification.stockControl}</Badge>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-bold text-gray-800">Objetivos de Crescimento</h4>
+                      <p className="text-gray-600">Principal objetivo para os próximos 12 meses:</p>
+                      <Badge className="bg-red-100 text-red-800">{artist.studioQualification.growthGoals}</Badge>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-6">
+                    <div className="space-y-2">
+                      <h4 className="font-bold text-gray-800">Interesse em Digitalização</h4>
+                      <p className="text-gray-600">Nível de interesse em digitalizar processos do estúdio:</p>
+                      <div className="flex items-center gap-4">
+                        <Badge className={`
+                          ${artist.studioQualification.digitalizationInterest === 'Muito Alto' ? 'bg-green-500 text-white' : ''}
+                          ${artist.studioQualification.digitalizationInterest === 'Alto' ? 'bg-green-400 text-white' : ''}
+                          ${artist.studioQualification.digitalizationInterest === 'Médio' ? 'bg-yellow-400 text-white' : ''}
+                          ${artist.studioQualification.digitalizationInterest === 'Baixo' ? 'bg-red-400 text-white' : ''}
+                        `}>
+                          {artist.studioQualification.digitalizationInterest}
+                        </Badge>
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full ${
+                              artist.studioQualification.digitalizationInterest === 'Muito Alto' ? 'bg-green-500 w-full' :
+                              artist.studioQualification.digitalizationInterest === 'Alto' ? 'bg-green-400 w-3/4' :
+                              artist.studioQualification.digitalizationInterest === 'Médio' ? 'bg-yellow-400 w-1/2' :
+                              'bg-red-400 w-1/4'
+                            }`}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Sidebar - 1 coluna */}

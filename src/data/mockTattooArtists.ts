@@ -2,25 +2,34 @@
 export interface TattooArtist {
   id: string;
   name: string;
-  avatar: string;
   bio: string;
+  avatar: string;
   specialties: string[];
   location: {
     city: string;
     state: string;
-    studio?: string;
+    studio: string;
   };
-  portfolio: Array<{
-    id: string;
+  portfolio: {
+    id: number;
     title: string;
     description: string;
     image: string;
     style: string;
-  }>;
+  }[];
   contact: {
     whatsapp: string;
     instagram: string;
     email: string;
+  };
+  studioQualification: {
+    teamSize: string;
+    appointmentManagement: string;
+    marketingChannels: string[];
+    financialControl: string;
+    stockControl: string;
+    growthGoals: string;
+    digitalizationInterest: string;
   };
   stats: {
     experience: number;
@@ -31,12 +40,12 @@ export interface TattooArtist {
   isAvailable: boolean;
 }
 
-export const mockTattooArtists: TattooArtist[] = [
+const mockTattooArtists: TattooArtist[] = [
   {
-    id: "mariana-silva",
-    name: "Mariana Silva",
-    avatar: "https://images.unsplash.com/photo-1594736797933-d0589ba2fe65?q=80&w=200&h=200&fit=crop&crop=face",
-    bio: "Especialista em tatuagens realistas e retratos, com mais de 8 anos transformando memórias em arte permanente. Cada trabalho é uma história única contada através da pele.",
+    id: "1",
+    name: "Carlos Silva",
+    bio: "Especialista em realismo há mais de 10 anos. Meu trabalho é transformar memórias em arte permanente, capturando cada detalhe com precisão fotográfica. Acredito que cada tatuagem conta uma história única.",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
     specialties: ["Realismo", "Retrato", "Preto e Cinza", "Fine Line"],
     location: {
       city: "São Paulo",
@@ -45,417 +54,277 @@ export const mockTattooArtists: TattooArtist[] = [
     },
     portfolio: [
       {
-        id: "1",
-        title: "Retrato Realista Feminino",
-        description: "Retrato em preto e cinza com técnica de hiperrealismo",
-        image: "https://placehold.co/400x500/dc2626/ffffff?text=Retrato+Realista",
+        id: 1,
+        title: "Retrato Realista",
+        description: "Retrato em preto e cinza com técnica hiper-realista",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Retrato+Realista",
         style: "Realismo"
       },
       {
-        id: "2",
-        title: "Tatuagem Floral Delicada",
-        description: "Composição floral em fine line no antebraço",
-        image: "https://placehold.co/400x500/dc2626/ffffff?text=Floral+Fine+Line",
+        id: 2,
+        title: "Fine Line Floral",
+        description: "Desenho delicado com traços finos e detalhes florais",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Fine+Line+Floral",
         style: "Fine Line"
       },
       {
-        id: "3",
-        title: "Olho Realista",
-        description: "Detalhe em preto e cinza com técnica de sombreamento",
-        image: "https://placehold.co/400x500/dc2626/ffffff?text=Olho+Realista",
-        style: "Realismo"
-      },
-      {
-        id: "4",
+        id: 3,
         title: "Retrato Pet",
-        description: "Retrato de animal de estimação em memória",
-        image: "https://placehold.co/400x500/dc2626/ffffff?text=Retrato+Pet",
-        style: "Retrato"
-      },
-      {
-        id: "5",
-        title: "Mandala Geométrica",
-        description: "Padrão geométrico com linhas finas e precisas",
-        image: "https://placehold.co/400x500/dc2626/ffffff?text=Mandala+Geometrica",
-        style: "Fine Line"
-      },
-      {
-        id: "6",
-        title: "Paisagem Minimalista",
-        description: "Montanha em traços simples e elegantes",
-        image: "https://placehold.co/400x500/dc2626/ffffff?text=Paisagem+Minimal",
-        style: "Fine Line"
+        description: "Homenagem realista de animal de estimação",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Retrato+Pet",
+        style: "Realismo"
       }
     ],
     contact: {
-      whatsapp: "+55 11 99999-1234",
-      instagram: "@mariana_tattoo",
-      email: "mariana@99tattoo.com.br"
+      whatsapp: "(11) 99999-1001",
+      instagram: "@carlos_tattoo_sp",
+      email: "carlos@99tattoo.com.br"
+    },
+    studioQualification: {
+      teamSize: "2-5",
+      appointmentManagement: "Aplicativo de terceiros",
+      marketingChannels: ["Instagram", "Google Meu Negócio", "Indicações"],
+      financialControl: "Planilha Excel",
+      stockControl: "Sim, de forma manual",
+      growthGoals: "Aumentar valor por tatuagem",
+      digitalizationInterest: "Alto"
     },
     stats: {
-      experience: 8,
-      worksCompleted: 340,
+      experience: 10,
+      worksCompleted: 450,
       rating: 4.9,
-      reviews: 127
+      reviews: 89
     },
     isAvailable: true
   },
   {
-    id: "rodrigo-blackwork",
-    name: "Rodrigo Santos",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&h=200&fit=crop&crop=face",
-    bio: "Mestre em blackwork e geometric tattoos. Especializado em criar padrões únicos que combinam tradição e modernidade, sempre buscando a perfeição em cada traço.",
-    specialties: ["Blackwork", "Geometric", "Ornamental", "Dotwork"],
+    id: "2",
+    name: "Ana Costa",
+    bio: "Apaixonada por tatuagens geométricas e mandálicas. Cada desenho é uma meditação visual que busca o equilíbrio perfeito entre precisão matemática e beleza artística.",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b732?w=400&h=400&fit=crop&crop=face",
+    specialties: ["Geométrico", "Mandala", "Blackwork", "Dotwork"],
     location: {
       city: "Rio de Janeiro",
       state: "RJ",
-      studio: "Black Ocean Tattoo"
+      studio: "Sacred Geometry Tattoo"
     },
     portfolio: [
       {
-        id: "1",
-        title: "Mandala Blackwork",
-        description: "Mandala complexa em tinta preta sólida",
-        image: "https://placehold.co/400x500/000000/ffffff?text=Mandala+Blackwork",
+        id: 1,
+        title: "Mandala Complexa",
+        description: "Mandala intrincada com padrões geométricos simétricos",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Mandala+Complexa",
+        style: "Geométrico"
+      },
+      {
+        id: 2,
+        title: "Blackwork Tribal",
+        description: "Design tribal moderno em preto sólido",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Blackwork+Tribal",
         style: "Blackwork"
       },
       {
-        id: "2",
-        title: "Geometric Sleeve",
-        description: "Manga geométrica com padrões matemáticos",
-        image: "https://placehold.co/400x500/000000/ffffff?text=Geometric+Sleeve",
-        style: "Geometric"
-      },
-      {
-        id: "3",
-        title: "Ornamental Back",
-        description: "Padrão ornamental completo nas costas",
-        image: "https://placehold.co/400x500/000000/ffffff?text=Ornamental+Back",
-        style: "Ornamental"
-      },
-      {
-        id: "4",
-        title: "Dotwork Lotus",
-        description: "Flor de lótus em técnica pontilhismo",
-        image: "https://placehold.co/400x500/000000/ffffff?text=Dotwork+Lotus",
+        id: 3,
+        title: "Dotwork Floral",
+        description: "Flores criadas com técnica de pontilhismo",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Dotwork+Floral",
         style: "Dotwork"
-      },
-      {
-        id: "5",
-        title: "Sacred Geometry",
-        description: "Geometria sagrada em composição única",
-        image: "https://placehold.co/400x500/000000/ffffff?text=Sacred+Geometry",
-        style: "Geometric"
-      },
-      {
-        id: "6",
-        title: "Tribal Modern",
-        description: "Releitura moderna de padrões tribais",
-        image: "https://placehold.co/400x500/000000/ffffff?text=Tribal+Modern",
-        style: "Blackwork"
       }
     ],
     contact: {
-      whatsapp: "+55 21 99888-5678",
-      instagram: "@rodrigo_blackwork",
-      email: "rodrigo@99tattoo.com.br"
-    },
-    stats: {
-      experience: 12,
-      worksCompleted: 520,
-      rating: 4.8,
-      reviews: 203
-    },
-    isAvailable: true
-  },
-  {
-    id: "ana-oldschool",
-    name: "Ana Carolina",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&h=200&fit=crop&crop=face",
-    bio: "Apaixonada pelo old school tradicional americano. Cores vibrantes, contornos marcantes e designs clássicos que nunca saem de moda são minha especialidade.",
-    specialties: ["Old School", "Traditional", "Neo Traditional", "Colorido"],
-    location: {
-      city: "Belo Horizonte",
-      state: "MG",
-      studio: "Classic Ink BH"
-    },
-    portfolio: [
-      {
-        id: "1",
-        title: "Pin-up Clássica",
-        description: "Pin-up no estilo tradicional americano",
-        image: "https://placehold.co/400x500/fbbf24/000000?text=Pin-up+Classica",
-        style: "Old School"
-      },
-      {
-        id: "2",
-        title: "Águia Americana",
-        description: "Águia em estilo tradicional com bandeira",
-        image: "https://placehold.co/400x500/fbbf24/000000?text=Aguia+Americana",
-        style: "Traditional"
-      },
-      {
-        id: "3",
-        title: "Rosa Neo Traditional",
-        description: "Rosa estilizada com cores vibrantes",
-        image: "https://placehold.co/400x500/fbbf24/000000?text=Rosa+Neo+Trad",
-        style: "Neo Traditional"
-      },
-      {
-        id: "4",
-        title: "Swallow Vintage",
-        description: "Andorinha clássica em cores tradicionais",
-        image: "https://placehold.co/400x500/fbbf24/000000?text=Swallow+Vintage",
-        style: "Old School"
-      },
-      {
-        id: "5",
-        title: "Caveira Mexicana",
-        description: "Caveira colorida estilo Día de los Muertos",
-        image: "https://placehold.co/400x500/fbbf24/000000?text=Caveira+Mexicana",
-        style: "Colorido"
-      },
-      {
-        id: "6",
-        title: "Pantera Flash",
-        description: "Pantera em estilo flash tradicional",
-        image: "https://placehold.co/400x500/fbbf24/000000?text=Pantera+Flash",
-        style: "Traditional"
-      }
-    ],
-    contact: {
-      whatsapp: "+55 31 99777-9012",
-      instagram: "@ana_oldschool",
+      whatsapp: "(21) 99999-2002",
+      instagram: "@ana_geometric_tattoo",
       email: "ana@99tattoo.com.br"
     },
+    studioQualification: {
+      teamSize: "1",
+      appointmentManagement: "Sistema próprio",
+      marketingChannels: ["Instagram", "TikTok", "Site Próprio"],
+      financialControl: "Software financeiro",
+      stockControl: "Sim, com software",
+      growthGoals: "Otimizar gestão",
+      digitalizationInterest: "Muito Alto"
+    },
     stats: {
-      experience: 6,
-      worksCompleted: 280,
-      rating: 4.7,
-      reviews: 89
+      experience: 7,
+      worksCompleted: 320,
+      rating: 4.8,
+      reviews: 64
     },
     isAvailable: false
   },
   {
-    id: "carlos-oriental",
-    name: "Carlos Tanaka",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&h=200&fit=crop&crop=face",
-    bio: "Especialista em tatuagens orientais tradicionais japonesas. Estudo há anos a arte do irezumi, trazendo autenticidade e respeito cultural para cada peça.",
-    specialties: ["Oriental", "Japonês", "Irezumi", "Dragões"],
+    id: "3",
+    name: "Roberto Alves",
+    bio: "Veterano do Old School com 15 anos de experiência. Mantenho viva a tradição da tatuagem americana clássica, sempre com cores vibrantes e traços marcantes que resistem ao tempo.",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+    specialties: ["Old School", "Tradicional Americana", "Neo-Tradicional", "Colorido"],
     location: {
-      city: "Curitiba",
-      state: "PR",
-      studio: "Sakura Tattoo"
+      city: "Belo Horizonte",
+      state: "MG",
+      studio: "Classic Ink Parlor"
     },
     portfolio: [
       {
-        id: "1",
-        title: "Dragão Japonês",
-        description: "Dragão tradicional japonês em manga completa",
-        image: "https://placehold.co/400x500/ef4444/ffffff?text=Dragao+Japones",
-        style: "Oriental"
+        id: 1,
+        title: "Pin-up Clássica",
+        description: "Pin-up no estilo tradicional americano com cores vibrantes",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Pin-up+Classica",
+        style: "Old School"
       },
       {
-        id: "2",
-        title: "Carpa Koi",
-        description: "Carpa nadando entre ondas e flores de cerejeira",
-        image: "https://placehold.co/400x500/ef4444/ffffff?text=Carpa+Koi",
-        style: "Japonês"
+        id: 2,
+        title: "Âncora Marinheiro",
+        description: "Design clássico de âncora com banner e rosas",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Ancora+Marinheiro",
+        style: "Tradicional Americana"
       },
       {
-        id: "3",
-        title: "Oni Mask",
-        description: "Máscara oni tradicional com detalhes precisos",
-        image: "https://placehold.co/400x500/ef4444/ffffff?text=Oni+Mask",
-        style: "Irezumi"
-      },
-      {
-        id: "4",
-        title: "Samurai Warrior",
-        description: "Guerreiro samurai em composição épica",
-        image: "https://placehold.co/400x500/ef4444/ffffff?text=Samurai+Warrior",
-        style: "Oriental"
-      },
-      {
-        id: "5",
-        title: "Sakura Branch",
-        description: "Galho de cerejeira com pétalas caindo",
-        image: "https://placehold.co/400x500/ef4444/ffffff?text=Sakura+Branch",
-        style: "Japonês"
-      },
-      {
-        id: "6",
-        title: "Phoenix Rising",
-        description: "Fênix renascendo das cinzas",
-        image: "https://placehold.co/400x500/ef4444/ffffff?text=Phoenix+Rising",
-        style: "Oriental"
+        id: 3,
+        title: "Rosa Neo-Tradicional",
+        description: "Rosa com técnica neo-tradicional e sombreamento moderno",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Rosa+Neo-Tradicional",
+        style: "Neo-Tradicional"
       }
     ],
     contact: {
-      whatsapp: "+55 41 99666-3456",
-      instagram: "@carlos_oriental",
-      email: "carlos@99tattoo.com.br"
+      whatsapp: "(31) 99999-3003",
+      instagram: "@roberto_oldschool",
+      email: "roberto@99tattoo.com.br"
+    },
+    studioQualification: {
+      teamSize: "6-10",
+      appointmentManagement: "Planilha Excel",
+      marketingChannels: ["Instagram", "Indicações", "Google Meu Negócio"],
+      financialControl: "Contador externo",
+      stockControl: "Sim, de forma manual",
+      growthGoals: "Expandir equipe",
+      digitalizationInterest: "Médio"
     },
     stats: {
       experience: 15,
       worksCompleted: 780,
-      rating: 5.0,
-      reviews: 342
+      rating: 4.7,
+      reviews: 156
     },
     isAvailable: true
   },
   {
-    id: "lucia-aquarela",
-    name: "Lúcia Fernandes",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&h=200&fit=crop&crop=face",
-    bio: "Artista especializada em aquarela e estilos artísticos. Transformo a pele em tela, criando obras únicas que parecem pinturas em movimento.",
-    specialties: ["Aquarela", "Artístico", "Sketch", "Abstrato"],
+    id: "4",
+    name: "Marina Santos",
+    bio: "Especialista em aquarela e técnicas delicadas. Transformo a pele em uma tela para criar obras de arte únicas, inspiradas na natureza e nas emoções mais profundas.",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+    specialties: ["Aquarela", "Fine Line", "Minimalista", "Natureza"],
     location: {
-      city: "Salvador",
-      state: "BA",
-      studio: "Arte & Pele Studio"
+      city: "Florianópolis",
+      state: "SC",
+      studio: "Watercolor Dreams"
     },
     portfolio: [
       {
-        id: "1",
-        title: "Flor Aquarela",
-        description: "Flor em técnica de aquarela com respingos",
-        image: "https://placehold.co/400x500/3b82f6/ffffff?text=Flor+Aquarela",
+        id: 1,
+        title: "Flores Aquarela",
+        description: "Buquê de flores com técnica de aquarela",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Flores+Aquarela",
         style: "Aquarela"
       },
       {
-        id: "2",
-        title: "Beija-flor Sketch",
-        description: "Beija-flor em estilo sketch artístico",
-        image: "https://placehold.co/400x500/3b82f6/ffffff?text=Beija-flor+Sketch",
-        style: "Sketch"
+        id: 2,
+        title: "Pássaro Minimalista",
+        description: "Silhueta de pássaro com traços delicados",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Passaro+Minimalista",
+        style: "Minimalista"
       },
       {
-        id: "3",
-        title: "Splash Colorido",
-        description: "Composição abstrata com explosão de cores",
-        image: "https://placehold.co/400x500/3b82f6/ffffff?text=Splash+Colorido",
-        style: "Abstrato"
-      },
-      {
-        id: "4",
-        title: "Borboleta Artística",
-        description: "Borboleta em estilo watercolor delicado",
-        image: "https://placehold.co/400x500/3b82f6/ffffff?text=Borboleta+Art",
-        style: "Artístico"
-      },
-      {
-        id: "5",
-        title: "Paisagem Dreamy",
-        description: "Paisagem onírica em tons pastel",
-        image: "https://placehold.co/400x500/3b82f6/ffffff?text=Paisagem+Dreamy",
+        id: 3,
+        title: "Paisagem Aquarela",
+        description: "Montanhas com efeito de aquarela e degradê",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Paisagem+Aquarela",
         style: "Aquarela"
-      },
-      {
-        id: "6",
-        title: "Retrato Sketch",
-        description: "Retrato feminino em traços soltos",
-        image: "https://placehold.co/400x500/3b82f6/ffffff?text=Retrato+Sketch",
-        style: "Sketch"
       }
     ],
     contact: {
-      whatsapp: "+55 71 99555-7890",
-      instagram: "@lucia_aquarela",
-      email: "lucia@99tattoo.com.br"
+      whatsapp: "(48) 99999-4004",
+      instagram: "@marina_watercolor",
+      email: "marina@99tattoo.com.br"
+    },
+    studioQualification: {
+      teamSize: "2-5",
+      appointmentManagement: "Aplicativo de terceiros",
+      marketingChannels: ["Instagram", "TikTok"],
+      financialControl: "Planilha Excel",
+      stockControl: "Não",
+      growthGoals: "Aumentar número de clientes",
+      digitalizationInterest: "Alto"
     },
     stats: {
-      experience: 7,
-      worksCompleted: 195,
-      rating: 4.8,
-      reviews: 76
-    },
-    isAvailable: true
-  },
-  {
-    id: "felipe-biomech",
-    name: "Felipe Cyborg",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&h=200&fit=crop&crop=face",
-    bio: "Especialista em biomecânico e cyberpunk. Crio tatuagens que parecem integrar tecnologia à anatomia humana, explorando os limites entre orgânico e artificial.",
-    specialties: ["Biomecânico", "Cyberpunk", "Sci-Fi", "3D"],
-    location: {
-      city: "Brasília",
-      state: "DF",
-      studio: "Future Ink DF"
-    },
-    portfolio: [
-      {
-        id: "1",
-        title: "Braço Biomecânico",
-        description: "Braço com engrenagens e circuitos integrados",
-        image: "https://placehold.co/400x500/6b7280/ffffff?text=Braco+Biomech",
-        style: "Biomecânico"
-      },
-      {
-        id: "2",
-        title: "Olho Cyborg",
-        description: "Olho cibernético com interface digital",
-        image: "https://placehold.co/400x500/6b7280/ffffff?text=Olho+Cyborg",
-        style: "Cyberpunk"
-      },
-      {
-        id: "3",
-        title: "Spine Matrix",
-        description: "Coluna vertebral com implantes tecnológicos",
-        image: "https://placehold.co/400x500/6b7280/ffffff?text=Spine+Matrix",
-        style: "Sci-Fi"
-      },
-      {
-        id: "4",
-        title: "Gear Heart",
-        description: "Coração mecânico com engrenagens",
-        image: "https://placehold.co/400x500/6b7280/ffffff?text=Gear+Heart",
-        style: "Biomecânico"
-      },
-      {
-        id: "5",
-        title: "Neural Network",
-        description: "Rede neural em 3D realístico",
-        image: "https://placehold.co/400x500/6b7280/ffffff?text=Neural+Network",
-        style: "3D"
-      },
-      {
-        id: "6",
-        title: "Robot Hand",
-        description: "Mão robótica ultrarrealista",
-        image: "https://placehold.co/400x500/6b7280/ffffff?text=Robot+Hand",
-        style: "Cyberpunk"
-      }
-    ],
-    contact: {
-      whatsapp: "+55 61 99444-2468",
-      instagram: "@felipe_cyborg",
-      email: "felipe@99tattoo.com.br"
-    },
-    stats: {
-      experience: 9,
-      worksCompleted: 156,
+      experience: 5,
+      worksCompleted: 180,
       rating: 4.9,
-      reviews: 94
+      reviews: 42
     },
     isAvailable: true
+  },
+  {
+    id: "5",
+    name: "Lucas Ferreira",
+    bio: "Especialista em biomecânico e ficção científica. Cada peça é uma jornada futurística, mesclando elementos orgânicos e mecânicos em composições que desafiam a realidade.",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face",
+    specialties: ["Biomecânico", "Ficção Científica", "3D", "Preto e Cinza"],
+    location: {
+      city: "Porto Alegre",
+      state: "RS",
+      studio: "Cyber Ink Studio"
+    },
+    portfolio: [
+      {
+        id: 1,
+        title: "Braço Biomecânico",
+        description: "Braço com elementos mecânicos integrados à pele",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Braco+Biomecanico",
+        style: "Biomecânico"
+      },
+      {
+        id: 2,
+        title: "Olho Robótico",
+        description: "Olho com circuitos e elementos futuristas",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Olho+Robotico",
+        style: "Ficção Científica"
+      },
+      {
+        id: 3,
+        title: "Coração Mecânico",
+        description: "Coração anatômico com partes mecânicas",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Coracao+Mecanico",
+        style: "Biomecânico"
+      }
+    ],
+    contact: {
+      whatsapp: "(51) 99999-5005",
+      instagram: "@lucas_biomech",
+      email: "lucas@99tattoo.com.br"
+    },
+    studioQualification: {
+      teamSize: "2-5",
+      appointmentManagement: "Sistema próprio",
+      marketingChannels: ["Instagram", "Site Próprio", "Indicações"],
+      financialControl: "Software financeiro",
+      stockControl: "Sim, com software",
+      growthGoals: "Aumentar valor por tatuagem",
+      digitalizationInterest: "Muito Alto"
+    },
+    stats: {
+      experience: 8,
+      worksCompleted: 340,
+      rating: 4.8,
+      reviews: 73
+    },
+    isAvailable: false
   }
 ];
 
+export const getAllTattooArtists = (): TattooArtist[] => mockTattooArtists;
+
 export const getTattooArtistById = (id: string): TattooArtist | undefined => {
   return mockTattooArtists.find(artist => artist.id === id);
-};
-
-export const getAllTattooArtists = (): TattooArtist[] => {
-  return mockTattooArtists;
-};
-
-export const getTattooArtistsBySpecialty = (specialty: string): TattooArtist[] => {
-  return mockTattooArtists.filter(artist => 
-    artist.specialties.some(s => s.toLowerCase().includes(specialty.toLowerCase()))
-  );
-};
-
-export const getAvailableTattooArtists = (): TattooArtist[] => {
-  return mockTattooArtists.filter(artist => artist.isAvailable);
 };
