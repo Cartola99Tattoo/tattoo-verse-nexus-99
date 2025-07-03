@@ -5,27 +5,60 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Users, BookOpen, Building, ArrowRight, CheckCircle } from "lucide-react";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
-import { useDataQuery } from "@/hooks/useDataQuery";
-import { getTattooArtistService } from "@/services/serviceFactory";
+
+const mockServices = [
+  {
+    id: 1,
+    title: "Consultoria em Digitalização",
+    description: "Ajudamos seu estúdio a migrar para o mundo digital com estratégias personalizadas",
+    type: "consultoria",
+    duration: "2-4 horas",
+    price: 299,
+    requirements: [
+      "Informações básicas do estúdio",
+      "Objetivos de crescimento definidos",
+      "Disponibilidade para implementação"
+    ]
+  },
+  {
+    id: 2,
+    title: "Treinamento em Gestão Digital",
+    description: "Capacitação completa para uso eficiente das ferramentas digitais",
+    type: "treinamento",
+    duration: "1 dia completo",
+    price: 450,
+    requirements: [
+      "Equipe disponível para treinamento",
+      "Computador ou tablet para cada participante",
+      "Conexão com internet estável"
+    ]
+  },
+  {
+    id: 3,
+    title: "Workshop de Marketing Digital",
+    description: "Estratégias avançadas de marketing digital específicas para tatuadores",
+    type: "workshop",
+    duration: "4 horas",
+    price: 180,
+    requirements: [
+      "Conhecimento básico de redes sociais",
+      "Portfólio de trabalhos disponível",
+      "Perfis nas principais plataformas"
+    ]
+  }
+];
 
 const TattooArtistsServices = () => {
-  const { data: services = [], loading } = useDataQuery(
-    () => getTattooArtistService().getConsultingServices(),
-    []
-  );
-
   const serviceIcons = {
     consultoria: Building,
     treinamento: Users,
-    workshop: BookOpen,
-    digitalizacao: Building
+    workshop: BookOpen
   };
 
   const serviceColors = {
     consultoria: 'from-blue-500 to-blue-600',
     treinamento: 'from-green-500 to-green-600',
-    workshop: 'from-purple-500 to-purple-600',
-    digitalizacao: 'from-orange-500 to-orange-600'
+    workshop: 'from-purple-500 to-purple-600'
   };
 
   return (
@@ -41,85 +74,70 @@ const TattooArtistsServices = () => {
           </p>
         </div>
 
-        {loading ? (
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {[...Array(4)].map((_, index) => (
-              <Card key={index} className="bg-white/95 backdrop-blur-sm animate-pulse">
-                <CardContent className="p-8">
-                  <div className="h-12 w-12 bg-gray-200 rounded-lg mb-4"></div>
-                  <div className="h-6 bg-gray-200 rounded mb-4"></div>
-                  <div className="h-16 bg-gray-200 rounded mb-6"></div>
-                  <div className="h-10 bg-gray-200 rounded"></div>
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-16">
+          {mockServices.map((service) => {
+            const IconComponent = serviceIcons[service.type as keyof typeof serviceIcons];
+            const colorClass = serviceColors[service.type as keyof typeof serviceColors];
+            
+            return (
+              <Card key={service.id} className="bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:scale-105 group">
+                <CardHeader className="pb-4">
+                  <div className={`w-12 h-12 bg-gradient-to-r ${colorClass} rounded-lg flex items-center justify-center mb-4`}>
+                    <IconComponent className="h-6 w-6 text-white" />
+                  </div>
+                  <CardTitle className="text-2xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                    {service.title}
+                  </CardTitle>
+                  <Badge className={`w-fit bg-gradient-to-r ${colorClass} text-white text-sm font-medium`}>
+                    {service.type.charAt(0).toUpperCase() + service.type.slice(1)}
+                  </Badge>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700 mb-6 leading-relaxed">{service.description}</p>
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center text-gray-600">
+                      <Clock className="h-4 w-4 mr-2 text-red-500" />
+                      <span className="font-medium">Duração:</span>
+                      <span className="ml-2">{service.duration}</span>
+                    </div>
+                    
+                    {service.requirements && service.requirements.length > 0 && (
+                      <div>
+                        <div className="font-medium text-gray-700 mb-2">Requisitos:</div>
+                        <ul className="space-y-1">
+                          {service.requirements.map((req, index) => (
+                            <li key={index} className="flex items-start text-sm text-gray-600">
+                              <CheckCircle className="h-4 w-4 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
+                              {req}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <div className="text-2xl font-bold text-red-600">R$ {service.price}</div>
+                        <div className="text-sm text-gray-500">Investimento</div>
+                      </div>
+                      <Badge variant="outline" className="text-green-600 border-green-300">
+                        Disponível
+                      </Badge>
+                    </div>
+                    
+                    <Button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold">
+                      Solicitar Serviço
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-16">
-            {services.map((service) => {
-              const IconComponent = serviceIcons[service.type as keyof typeof serviceIcons];
-              const colorClass = serviceColors[service.type as keyof typeof serviceColors];
-              
-              return (
-                <Card key={service.id} className="bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:scale-105 group">
-                  <CardHeader className="pb-4">
-                    <div className={`w-12 h-12 bg-gradient-to-r ${colorClass} rounded-lg flex items-center justify-center mb-4`}>
-                      <IconComponent className="h-6 w-6 text-white" />
-                    </div>
-                    <CardTitle className="text-2xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
-                      {service.title}
-                    </CardTitle>
-                    <Badge className={`w-fit bg-gradient-to-r ${colorClass} text-white text-sm font-medium`}>
-                      {service.type.charAt(0).toUpperCase() + service.type.slice(1)}
-                    </Badge>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 mb-6 leading-relaxed">{service.description}</p>
-                    
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center text-gray-600">
-                        <Clock className="h-4 w-4 mr-2 text-red-500" />
-                        <span className="font-medium">Duração:</span>
-                        <span className="ml-2">{service.duration}</span>
-                      </div>
-                      
-                      {service.requirements && service.requirements.length > 0 && (
-                        <div>
-                          <div className="font-medium text-gray-700 mb-2">Requisitos:</div>
-                          <ul className="space-y-1">
-                            {service.requirements.map((req, index) => (
-                              <li key={index} className="flex items-start text-sm text-gray-600">
-                                <CheckCircle className="h-4 w-4 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
-                                {req}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="border-t pt-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <div className="text-2xl font-bold text-red-600">R$ {service.price}</div>
-                          <div className="text-sm text-gray-500">Investimento</div>
-                        </div>
-                        <Badge variant="outline" className="text-green-600 border-green-300">
-                          {service.available_slots?.length || 0} vagas disponíveis
-                        </Badge>
-                      </div>
-                      
-                      <Button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold">
-                        Solicitar Consultoria
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+            );
+          })}
+        </div>
 
         {/* Seção de Benefícios */}
         <div className="mb-16">

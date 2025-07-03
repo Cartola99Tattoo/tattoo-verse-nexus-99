@@ -28,6 +28,12 @@ import TattooArtistsLanding from './pages/tattoo-artists/TattooArtistsLanding';
 import TattooArtistDirectory from './pages/tattoo-artists/TattooArtistDirectory';
 import TattooArtistProfile from './pages/tattoo-artists/TattooArtistProfile';
 import TattooArtistDashboard from './pages/tattoo-artists/TattooArtistDashboard';
+import TattooArtistsBlog from './pages/tattoo-artists/TattooArtistsBlog';
+import TattooArtistsShop from './pages/tattoo-artists/TattooArtistsShop';
+import TattooArtistsPortfolio from './pages/tattoo-artists/TattooArtistsPortfolio';
+import TattooArtistsServices from './pages/tattoo-artists/TattooArtistsServices';
+import TattooArtistsContact from './pages/tattoo-artists/TattooArtistsContact';
+import TattooArtistsEvents from './pages/tattoo-artists/TattooArtistsEvents';
 import Ecosistema from './pages/Ecosistema';
 
 // Login pages
@@ -88,6 +94,12 @@ function App() {
         <Route path="/tatuadores-da-nova-era/artistas" element={<TattooArtistDirectory />} />
         <Route path="/tatuadores-da-nova-era/perfil/:id" element={<TattooArtistProfile />} />
         <Route path="/tatuadores-da-nova-era/dashboard" element={<TattooArtistDashboard />} />
+        <Route path="/tatuadores-da-nova-era/blog" element={<TattooArtistsBlog />} />
+        <Route path="/tatuadores-da-nova-era/shop" element={<TattooArtistsShop />} />
+        <Route path="/tatuadores-da-nova-era/portfolio" element={<TattooArtistsPortfolio />} />
+        <Route path="/tatuadores-da-nova-era/eventos" element={<TattooArtistsEvents />} />
+        <Route path="/tatuadores-da-nova-era/services" element={<TattooArtistsServices />} />
+        <Route path="/tatuadores-da-nova-era/contact" element={<TattooArtistsContact />} />
         
         <Route path="*" element={<NotFound />} />
       </Routes>
