@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Star, Instagram, MessageCircle, Mail, Calendar, Award, Clock, Phone, Eye, Heart, Users, BarChart3, Target, Zap } from "lucide-react";
+import { ArrowLeft, MapPin, Star, Instagram, MessageCircle, Mail, Calendar, Award, Clock, Phone, Eye, Heart, Users, BarChart3, Target, Zap, Home, ChevronRight, Building2, CreditCard, Package, TrendingUp } from "lucide-react";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
 import { getTattooArtistById } from "@/data/mockTattooArtists";
 
@@ -16,6 +16,7 @@ const TattooArtistProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const portfolioTabRef = useRef<HTMLButtonElement>(null);
   
   const artist = id ? getTattooArtistById(id) : null;
 
@@ -50,10 +51,53 @@ const TattooArtistProfile = () => {
     }
   };
 
+  // Get qualification category icon
+  const getCategoryIcon = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'gestão do estúdio': return <Building2 className="h-5 w-5" />;
+      case 'marketing e divulgação': return <Target className="h-5 w-5" />;
+      case 'infraestrutura financeira': return <CreditCard className="h-5 w-5" />;
+      case 'controle de estoque': return <Package className="h-5 w-5" />;
+      case 'metas futuras': return <TrendingUp className="h-5 w-5" />;
+      default: return <BarChart3 className="h-5 w-5" />;
+    }
+  };
+
   return (
     <TattooArtistLayout>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-        {/* Hero Header - Similar to user-profile */}
+        {/* Breadcrumbs */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="container mx-auto px-4 py-3">
+            <nav className="flex items-center space-x-2 text-sm text-gray-600">
+              <button 
+                onClick={() => navigate('/')}
+                className="hover:text-red-600 transition-colors flex items-center"
+              >
+                <Home className="h-4 w-4 mr-1" />
+                Home
+              </button>
+              <ChevronRight className="h-4 w-4" />
+              <button 
+                onClick={() => navigate('/tatuadores-da-nova-era')}
+                className="hover:text-red-600 transition-colors"
+              >
+                Tatuadores da Nova Era
+              </button>
+              <ChevronRight className="h-4 w-4" />
+              <button 
+                onClick={() => navigate('/tatuadores-da-nova-era/artistas')}
+                className="hover:text-red-600 transition-colors"
+              >
+                Artistas
+              </button>
+              <ChevronRight className="h-4 w-4" />
+              <span className="text-red-600 font-medium">{artist.name}</span>
+            </nav>
+          </div>
+        </div>
+
+        {/* Hero Header */}
         <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white py-16">
           <div className="container mx-auto px-4">
             <Button
@@ -99,7 +143,7 @@ const TattooArtistProfile = () => {
                   </div>
                 </div>
 
-                {/* Stats Grid - Similar to user-profile */}
+                {/* Enhanced Stats Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4 text-center">
                     <div className="text-3xl font-black text-white">{artist.stats.experience}</div>
@@ -110,8 +154,8 @@ const TattooArtistProfile = () => {
                     <div className="text-red-200 text-sm">Trabalhos</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4 text-center">
-                    <div className="text-3xl font-black text-white">{artist.stats.reviews}</div>
-                    <div className="text-red-200 text-sm">Avaliações</div>
+                    <div className="text-3xl font-black text-white">{artist.portfolio.length}</div>
+                    <div className="text-red-200 text-sm">Portfólio</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4 text-center">
                     <div className={`text-3xl font-black ${artist.isAvailable ? 'text-green-400' : 'text-orange-400'}`}>
@@ -135,12 +179,12 @@ const TattooArtistProfile = () => {
           </div>
         </div>
 
-        {/* Content with Tabs - Similar to user-profile */}
+        {/* Content with Tabs */}
         <div className="container mx-auto px-4 py-12">
           <Tabs defaultValue="overview" className="space-y-8">
             <TabsList className="grid w-full grid-cols-4 lg:w-fit">
               <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-              <TabsTrigger value="portfolio">Portfólio</TabsTrigger>
+              <TabsTrigger value="portfolio" ref={portfolioTabRef}>Portfólio</TabsTrigger>
               <TabsTrigger value="qualification">Qualificação</TabsTrigger>
               <TabsTrigger value="contact">Contato</TabsTrigger>
             </TabsList>
@@ -186,7 +230,7 @@ const TattooArtistProfile = () => {
                       <div className="mt-4 text-center">
                         <Button 
                           variant="outline" 
-                          onClick={() => document.querySelector('[value="portfolio"]')?.click()}
+                          onClick={() => portfolioTabRef.current?.click()}
                           className="border-red-300 text-red-600 hover:bg-red-50"
                         >
                           Ver Portfólio Completo ({artist.portfolio.length} trabalhos)
@@ -341,40 +385,53 @@ const TattooArtistProfile = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-8 space-y-8">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Team Structure */}
-                    <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-                      <CardHeader>
-                        <CardTitle className="text-lg font-black text-purple-700 flex items-center">
-                          <Users className="h-5 w-5 mr-2" />
-                          Estrutura de Equipe
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-600 mb-3">Quantos tatuadores trabalham em seu estúdio?</p>
-                        <Badge className="bg-purple-500 text-white px-4 py-2 text-lg">
-                          {artist.studioQualification.teamSize}
-                        </Badge>
-                      </CardContent>
-                    </Card>
+                  {/* Gestão do Estúdio */}
+                  <div className="space-y-6">
+                    <h3 className="text-2xl font-black text-blue-700 flex items-center mb-4">
+                      {getCategoryIcon('gestão do estúdio')}
+                      <span className="ml-2">Gestão do Estúdio</span>
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                        <CardHeader>
+                          <CardTitle className="text-lg font-black text-purple-700 flex items-center">
+                            <Users className="h-5 w-5 mr-2" />
+                            Estrutura de Equipe
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-gray-600 mb-3">Quantos tatuadores trabalham em seu estúdio?</p>
+                          <Badge className="bg-purple-500 text-white px-4 py-2 text-lg">
+                            {artist.studioQualification.teamSize}
+                          </Badge>
+                        </CardContent>
+                      </Card>
 
-                    {/* Appointment Management */}
-                    <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-                      <CardHeader>
-                        <CardTitle className="text-lg font-black text-green-700 flex items-center">
-                          <Calendar className="h-5 w-5 mr-2" />
-                          Gestão de Agendamentos
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-600 mb-3">Como gerencia seus agendamentos atualmente?</p>
-                        <Badge className="bg-green-500 text-white px-4 py-2 text-lg">
-                          {artist.studioQualification.appointmentManagement}
-                        </Badge>
-                      </CardContent>
-                    </Card>
+                      <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                        <CardHeader>
+                          <CardTitle className="text-lg font-black text-green-700 flex items-center">
+                            <Calendar className="h-5 w-5 mr-2" />
+                            Gestão de Agendamentos
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-gray-600 mb-3">Como gerencia seus agendamentos atualmente?</p>
+                          <Badge className="bg-green-500 text-white px-4 py-2 text-lg">
+                            {artist.studioQualification.appointmentManagement}
+                          </Badge>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
 
-                    {/* Marketing Channels */}
+                  {/* Marketing e Divulgação */}
+                  <div className="space-y-6">
+                    <h3 className="text-2xl font-black text-pink-700 flex items-center mb-4">
+                      {getCategoryIcon('marketing e divulgação')}
+                      <span className="ml-2">Marketing e Divulgação</span>
+                    </h3>
+                    
                     <Card className="bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200">
                       <CardHeader>
                         <CardTitle className="text-lg font-black text-pink-700 flex items-center">
@@ -393,37 +450,59 @@ const TattooArtistProfile = () => {
                         </div>
                       </CardContent>
                     </Card>
+                  </div>
 
-                    {/* Financial Control */}
-                    <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-                      <CardHeader>
-                        <CardTitle className="text-lg font-black text-yellow-700 flex items-center">
-                          <BarChart3 className="h-5 w-5 mr-2" />
-                          Controle Financeiro
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-600 mb-3">Como organiza o controle financeiro?</p>
-                        <Badge className="bg-yellow-500 text-white px-4 py-2 text-lg">
-                          {artist.studioQualification.financialControl}
-                        </Badge>
-                      </CardContent>
-                    </Card>
+                  {/* Infraestrutura Financeira */}
+                  <div className="space-y-6">
+                    <h3 className="text-2xl font-black text-yellow-700 flex items-center mb-4">
+                      {getCategoryIcon('infraestrutura financeira')}
+                      <span className="ml-2">Infraestrutura Financeira</span>
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
+                        <CardHeader>
+                          <CardTitle className="text-lg font-black text-yellow-700 flex items-center">
+                            <BarChart3 className="h-5 w-5 mr-2" />
+                            Controle Financeiro
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-gray-600 mb-3">Como organiza o controle financeiro?</p>
+                          <Badge className="bg-yellow-500 text-white px-4 py-2 text-lg">
+                            {artist.studioQualification.financialControl}
+                          </Badge>
+                          {artist.studioQualification.financialControl === "Planilha Excel" && (
+                            <div className="mt-3">
+                              <Button size="sm" className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+                                💡 Oferecer Consultoria Financeira
+                              </Button>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
 
-                    {/* Stock Control */}
-                    <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-                      <CardHeader>
-                        <CardTitle className="text-lg font-black text-orange-700">Controle de Estoque</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-600 mb-3">Realiza controle de estoque de materiais?</p>
-                        <Badge className="bg-orange-500 text-white px-4 py-2 text-lg">
-                          {artist.studioQualification.stockControl}
-                        </Badge>
-                      </CardContent>
-                    </Card>
+                      <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                        <CardHeader>
+                          <CardTitle className="text-lg font-black text-orange-700">Controle de Estoque</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-gray-600 mb-3">Realiza controle de estoque de materiais?</p>
+                          <Badge className="bg-orange-500 text-white px-4 py-2 text-lg">
+                            {artist.studioQualification.stockControl}
+                          </Badge>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
 
-                    {/* Growth Goals */}
+                  {/* Metas Futuras */}
+                  <div className="space-y-6">
+                    <h3 className="text-2xl font-black text-red-700 flex items-center mb-4">
+                      {getCategoryIcon('metas futuras')}
+                      <span className="ml-2">Metas Futuras</span>
+                    </h3>
+                    
                     <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
                       <CardHeader>
                         <CardTitle className="text-lg font-black text-red-700">Objetivos de Crescimento</CardTitle>
@@ -482,6 +561,24 @@ const TattooArtistProfile = () => {
                           <p className="text-green-800 font-medium">
                             🎯 <strong>Alto Potencial:</strong> Este tatuador demonstra grande interesse em soluções digitais e pode ser um excelente cliente para os produtos e serviços da 99Tattoo.
                           </p>
+                          <div className="mt-3">
+                            <Button className="bg-gradient-to-r from-green-600 to-green-800 text-white">
+                              📞 Agendar Demonstração
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {getDigitalizationProgress(artist.studioQualification.digitalizationInterest) >= 50 && getDigitalizationProgress(artist.studioQualification.digitalizationInterest) < 75 && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <p className="text-blue-800 font-medium">
+                            💡 <strong>Potencial Moderado:</strong> Este tatuador mostra interesse em digitalização e pode se beneficiar de nossas soluções.
+                          </p>
+                          <div className="mt-3">
+                            <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50">
+                              📋 Apresentar Soluções de Gestão
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </CardContent>

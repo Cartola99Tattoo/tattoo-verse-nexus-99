@@ -80,6 +80,20 @@ const mockTattooArtists: TattooArtist[] = [
         description: "Olho humano com reflexos e texturas ultra-realistas",
         image: "https://placehold.co/400x400/000000/FFFFFF?text=Olho+Realista",
         style: "Realismo"
+      },
+      {
+        id: 5,
+        title: "Paisagem Montanha Realista",
+        description: "Paisagem detalhada de montanhas com névoa matinal",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Paisagem+Montanha",
+        style: "Realismo"
+      },
+      {
+        id: 6,
+        title: "Retrato Casal Vintage",
+        description: "Retrato nostálgico de casal dos anos 50",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Retrato+Casal+Vintage",
+        style: "Realismo"
       }
     ],
     contact: {
@@ -150,6 +164,20 @@ const mockTattooArtists: TattooArtist[] = [
         description: "Mandala gigante cobrindo todas as costas com detalhes únicos",
         image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Mandala+Costas+Completa",
         style: "Mandala"
+      },
+      {
+        id: 6,
+        title: "Padrão Geométrico Perna",
+        description: "Design geométrico complexo envolvendo toda a perna",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Padrao+Geometrico+Perna",
+        style: "Geométrico"
+      },
+      {
+        id: 7,
+        title: "Ornamental Dotwork Braço",
+        description: "Arte ornamental criada inteiramente com pontos",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Ornamental+Dotwork",
+        style: "Dotwork"
       }
     ],
     contact: {
@@ -227,6 +255,20 @@ const mockTattooArtists: TattooArtist[] = [
         description: "Sereia clássica com elementos marinhos tradicionais",
         image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Sereia+Old+School",
         style: "Old School"
+      },
+      {
+        id: 7,
+        title: "Leão Traditional Peito",
+        description: "Leão majestoso no estilo tradicional americano",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Leao+Traditional",
+        style: "Tradicional Americana"
+      },
+      {
+        id: 8,
+        title: "Swallow Traditional Dupla",
+        description: "Par de andorinhas clássicas com banner",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Swallow+Traditional",
+        style: "Old School"
       }
     ],
     contact: {
@@ -289,6 +331,20 @@ const mockTattooArtists: TattooArtist[] = [
         title: "Borboleta Aquarela Ombro",
         description: "Borboleta com asas em aquarela colorida",
         image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Borboleta+Aquarela",
+        style: "Aquarela"
+      },
+      {
+        id: 5,
+        title: "Fine Line Constelação",
+        description: "Constelação delicada com pontos conectados",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Fine+Line+Constelacao",
+        style: "Fine Line"
+      },
+      {
+        id: 6,
+        title: "Galhos Aquarela Antebraço",
+        description: "Galhos floridos com técnica de aquarela",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Galhos+Aquarela",
         style: "Aquarela"
       }
     ],
@@ -360,6 +416,20 @@ const mockTattooArtists: TattooArtist[] = [
         description: "Criatura extraterrestre com elementos orgânicos e mecânicos",
         image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Alien+Biomecanico",
         style: "Ficção Científica"
+      },
+      {
+        id: 6,
+        title: "Espinha Cibernética",
+        description: "Coluna vertebral com implantes tecnológicos",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Espinha+Cibernetica",
+        style: "Biomecânico"
+      },
+      {
+        id: 7,
+        title: "Interface Neural",
+        description: "Circuitos neurais conectados ao cérebro",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Interface+Neural",
+        style: "Ficção Científica"
       }
     ],
     contact: {
@@ -422,6 +492,20 @@ const mockTattooArtists: TattooArtist[] = [
         title: "Orquídea Fine Line",
         description: "Orquídea detalhada em traços finos no ombro",
         image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Orquidea+Fine+Line",
+        style: "Fine Line"
+      },
+      {
+        id: 5,
+        title: "Buquê Vintage Aquarela",
+        description: "Buquê de flores vintage com técnica aquarela",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Buque+Vintage+Aquarela",
+        style: "Aquarela"
+      },
+      {
+        id: 6,
+        title: "Girassol Fine Line Feminino",
+        description: "Girassol delicado com elementos femininos",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Girassol+Fine+Line",
         style: "Fine Line"
       }
     ],
@@ -486,6 +570,13 @@ const mockTattooArtists: TattooArtist[] = [
         description: "Data em algarismos romanos minimalista",
         image: "https://placehold.co/400x400/000000/FFFFFF?text=Data+Especial+Pulso",
         style: "Tipografia"
+      },
+      {
+        id: 5,
+        title: "Poesia Lettering Braço",
+        description: "Trecho de poesia em lettering artístico",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Poesia+Lettering",
+        style: "Lettering"
       }
     ],
     contact: {
@@ -549,6 +640,20 @@ const mockTattooArtists: TattooArtist[] = [
         description: "Criatura fantástica colorida nas costas",
         image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Ilustracao+Fantasia",
         style: "Ilustrativo"
+      },
+      {
+        id: 5,
+        title: "Super-herói Pop Art",
+        description: "Super-herói clássico em estilo pop art",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Super-heroi+Pop+Art",
+        style: "Pop Art"
+      },
+      {
+        id: 6,
+        title: "Anime Waifu Colorida",
+        description: "Personagem feminina de anime com cores vibrantes",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Anime+Waifu",
+        style: "Anime"
       }
     ],
     contact: {
@@ -570,6 +675,321 @@ const mockTattooArtists: TattooArtist[] = [
       worksCompleted: 290,
       rating: 4.7,
       reviews: 58
+    },
+    isAvailable: true
+  },
+  {
+    id: "9",
+    name: "Diego Monteiro",
+    bio: "Mestre em técnicas orientais e blackwork. Especializo-me em designs japoneses tradicionais e contemporâneos, combinando tradição milenar com inovação artística moderna.",
+    avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=400&h=400&fit=crop&crop=face",
+    specialties: ["Oriental", "Japonês", "Blackwork", "Irezumi", "Dragões"],
+    location: {
+      city: "Brasília",
+      state: "DF",
+      studio: "Rising Sun Tattoo"
+    },
+    portfolio: [
+      {
+        id: 1,
+        title: "Dragão Japonês Braço Completo",
+        description: "Dragão tradicional japonês cobrindo todo o braço com nuvens e ondas",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Dragao+Japones+Braco",
+        style: "Oriental"
+      },
+      {
+        id: 2,
+        title: "Carpa Koi Colorida",
+        description: "Carpa koi nadando em águas turbulentas com flores de cerejeira",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Carpa+Koi+Colorida",
+        style: "Japonês"
+      },
+      {
+        id: 3,
+        title: "Samurai Guerreiro",
+        description: "Samurai em posição de combate com armadura detalhada",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Samurai+Guerreiro",
+        style: "Oriental"
+      },
+      {
+        id: 4,
+        title: "Máscara Hannya",
+        description: "Máscara japonesa tradicional com expressão demoníaca",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Mascara+Hannya",
+        style: "Japonês"
+      },
+      {
+        id: 5,
+        title: "Phoenix Oriental",
+        description: "Fênix renascendo das cinzas em estilo oriental",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Phoenix+Oriental",
+        style: "Oriental"
+      },
+      {
+        id: 6,
+        title: "Blackwork Geométrico Oriental",
+        description: "Padrões geométricos inspirados na arte oriental",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Blackwork+Oriental",
+        style: "Blackwork"
+      },
+      {
+        id: 7,
+        title: "Cerejeira Sakura",
+        description: "Galhos de cerejeira com flores em plena florada",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Cerejeira+Sakura",
+        style: "Japonês"
+      },
+      {
+        id: 8,
+        title: "Tigre Oriental Feroz",
+        description: "Tigre em estilo oriental com bambus e névoa",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Tigre+Oriental",
+        style: "Oriental"
+      }
+    ],
+    contact: {
+      whatsapp: "(61) 99999-9009",
+      instagram: "@diego_oriental_ink",
+      email: "diego@99tattoo.com.br"
+    },
+    studioQualification: {
+      teamSize: "2-5 tatuadores",
+      appointmentManagement: "Sistema próprio (CRM customizado)",
+      marketingChannels: ["Instagram", "Site Próprio", "Convenções", "Indicações"],
+      financialControl: "Software financeiro (QuickBooks Pro)",
+      stockControl: "Sim, com sistema integrado",
+      growthGoals: "Especializar em arte oriental e expandir internationally",
+      digitalizationInterest: "Muito Alto"
+    },
+    stats: {
+      experience: 12,
+      worksCompleted: 520,
+      rating: 4.9,
+      reviews: 98
+    },
+    isAvailable: true
+  },
+  {
+    id: "10",
+    name: "Camila Rodrigues",
+    bio: "Especialista em trash polka e estilos abstratos. Minha arte desafia convenções, misturando elementos realistas com abstratos para criar composições únicas e impactantes.",
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop&crop=face",
+    specialties: ["Trash Polka", "Abstrato", "Experimental", "Mixed Media", "Arte Conceitual"],
+    location: {
+      city: "Goiânia",
+      state: "GO",
+      studio: "Rebel Art Collective"
+    },
+    portfolio: [
+      {
+        id: 1,
+        title: "Trash Polka Urbano",
+        description: "Composição trash polka com elementos urbanos e abstratos",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Trash+Polka+Urbano",
+        style: "Trash Polka"
+      },
+      {
+        id: 2,
+        title: "Abstrato Experimental",
+        description: "Design abstrato experimental com formas orgânicas",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Abstrato+Experimental",
+        style: "Abstrato"
+      },
+      {
+        id: 3,
+        title: "Mixed Media Collage",
+        description: "Colagem artística misturando técnicas e estilos",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Mixed+Media+Collage",
+        style: "Mixed Media"
+      },
+      {
+        id: 4,
+        title: "Conceitual Futurista",
+        description: "Arte conceitual com visão futurista da humanidade",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Conceitual+Futurista",
+        style: "Arte Conceitual"
+      },
+      {
+        id: 5,
+        title: "Trash Polka Portrait",
+        description: "Retrato fragmentado em estilo trash polka",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Trash+Polka+Portrait",
+        style: "Trash Polka"
+      },
+      {
+        id: 6,
+        title: "Experimental Orgânico",
+        description: "Formas orgânicas experimentais em movimento",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Experimental+Organico",
+        style: "Experimental"
+      }
+    ],
+    contact: {
+      whatsapp: "(62) 99999-1010",
+      instagram: "@camila_rebel_art",
+      email: "camila@99tattoo.com.br"
+    },
+    studioQualification: {
+      teamSize: "2-5 tatuadores",
+      appointmentManagement: "Calendário online integrado",
+      marketingChannels: ["Instagram", "Behance", "Exposições", "Arte Galerias"],
+      financialControl: "Software financeiro personalizado",
+      stockControl: "Sim, sistema automatizado",
+      growthGoals: "Expandir para arte contemporânea e galerias",
+      digitalizationInterest: "Muito Alto"
+    },
+    stats: {
+      experience: 9,
+      worksCompleted: 380,
+      rating: 4.8,
+      reviews: 71
+    },
+    isAvailable: false
+  },
+  {
+    id: "11",
+    name: "Fernando Costa",
+    bio: "Veterano em tatuagens tribais e polynesian. Com mais de 18 anos de experiência, mantenho vivas as tradições ancestrais enquanto adapto para o mundo moderno.",
+    avatar: "https://images.unsplash.com/photo-1507038732509-8b1a3f92228b?w=400&h=400&fit=crop&crop=face",
+    specialties: ["Tribal", "Polynesian", "Maori", "Tradicional", "Cultural"],
+    location: {
+      city: "Vitória",
+      state: "ES",
+      studio: "Tribal Legacy Ink"
+    },
+    portfolio: [
+      {
+        id: 1,
+        title: "Tribal Polynesian Completo",
+        description: "Design polynesian tradicional cobrindo ombro e braço",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Tribal+Polynesian",
+        style: "Polynesian"
+      },
+      {
+        id: 2,
+        title: "Maori Tradicional Perna",
+        description: "Padrões maori autênticos na perna com significados ancestrais",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Maori+Tradicional",
+        style: "Maori"
+      },
+      {
+        id: 3,
+        title: "Tribal Moderno Peito",
+        description: "Adaptação moderna de tribal clássico no peito",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Tribal+Moderno",
+        style: "Tribal"
+      },
+      {
+        id: 4,
+        title: "Polynesian Feminino",
+        description: "Design polynesian adaptado para o público feminino",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Polynesian+Feminino",
+        style: "Polynesian"
+      },
+      {
+        id: 5,
+        title: "Tribal Celta Braço",
+        description: "Padrões celtas entrelaçados no antebraço",
+        image: "https://placehold.co/400x400/000000/FFFFFF?text=Tribal+Celta",
+        style: "Tribal"
+      }
+    ],
+    contact: {
+      whatsapp: "(27) 99999-1111",
+      instagram: "@fernando_tribal_legacy",
+      email: "fernando@99tattoo.com.br"
+    },
+    studioQualification: {
+      teamSize: "2-5 tatuadores",
+      appointmentManagement: "Agenda física tradicional",
+      marketingChannels: ["Instagram", "Indicações", "Convenções"],
+      financialControl: "Planilha Excel avançada",
+      stockControl: "Sim, de forma manual detalhada",
+      growthGoals: "Preservar tradições e formar novos artistas",
+      digitalizationInterest: "Baixo"
+    },
+    stats: {
+      experience: 18,
+      worksCompleted: 950,
+      rating: 4.8,
+      reviews: 187
+    },
+    isAvailable: true
+  },
+  {
+    id: "12",
+    name: "Isabela Nunes",
+    bio: "Especialista em neo-tradicional e new school. Combino a técnica clássica com cores vibrantes e elementos contemporâneos para criar peças modernas e atemporais.",
+    avatar: "https://images.unsplash.com/photo-1534751516642-a1af1ef26a56?w=400&h=400&fit=crop&crop=face",
+    specialties: ["Neo-Tradicional", "New School", "Colorido", "Cartoon", "Ilustrativo"],
+    location: {
+      city: "Fortaleza",
+      state: "CE",
+      studio: "New Wave Tattoo"
+    },
+    portfolio: [
+      {
+        id: 1,
+        title: "Neo-Tradicional Feminino",
+        description: "Mulher em estilo neo-tradicional com flores e elementos decorativos",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Neo-Tradicional+Feminino",
+        style: "Neo-Tradicional"
+      },
+      {
+        id: 2,
+        title: "New School Cartoon",
+        description: "Personagem cartoon em estilo new school colorido",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=New+School+Cartoon",
+        style: "New School"
+      },
+      {
+        id: 3,
+        title: "Animal Neo-Tradicional",
+        description: "Lobo em estilo neo-tradicional com elementos decorativos",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Animal+Neo-Tradicional",
+        style: "Neo-Tradicional"
+      },
+      {
+        id: 4,
+        title: "Ilustração Colorida",
+        description: "Ilustração moderna com cores vibrantes e contrastes",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Ilustracao+Colorida",
+        style: "Ilustrativo"
+      },
+      {
+        id: 5,
+        title: "New School Gaming",
+        description: "Elementos de videogame em estilo new school",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=New+School+Gaming",
+        style: "New School"
+      },
+      {
+        id: 6,
+        title: "Neo-Tradicional Natureza",
+        description: "Elementos da natureza em estilo neo-tradicional",
+        image: "https://placehold.co/400x400/dc2626/FFFFFF?text=Neo-Tradicional+Natureza",
+        style: "Neo-Tradicional"
+      }
+    ],
+    contact: {
+      whatsapp: "(85) 99999-1212",
+      instagram: "@isabela_newwave",
+      email: "isabela@99tattoo.com.br"
+    },
+    studioQualification: {
+      teamSize: "6-10 tatuadores",
+      appointmentManagement: "Sistema online próprio",
+      marketingChannels: ["Instagram", "TikTok", "YouTube", "Twitch"],
+      financialControl: "ERP completo",
+      stockControl: "Sim, automatizado com RFID",
+      growthGoals: "Tornar-se referência nacional em neo-tradicional",
+      digitalizationInterest: "Muito Alto"
+    },
+    stats: {
+      experience: 8,
+      worksCompleted: 410,
+      rating: 4.9,
+      reviews: 93
     },
     isAvailable: true
   }

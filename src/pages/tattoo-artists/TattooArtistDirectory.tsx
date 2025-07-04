@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Star, Search, Filter, Users, Award } from "lucide-react";
+import { MapPin, Star, Search, Filter, Users, Award, Home, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
 import { getAllTattooArtists } from "@/data/mockTattooArtists";
 
 const TattooArtistDirectory = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedStyle, setSelectedStyle] = useState("all");
@@ -36,6 +38,30 @@ const TattooArtistDirectory = () => {
   return (
     <TattooArtistLayout>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        {/* Breadcrumbs */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="container mx-auto px-4 py-3">
+            <nav className="flex items-center space-x-2 text-sm text-gray-600">
+              <button 
+                onClick={() => navigate('/')}
+                className="hover:text-red-600 transition-colors flex items-center"
+              >
+                <Home className="h-4 w-4 mr-1" />
+                Home
+              </button>
+              <ChevronRight className="h-4 w-4" />
+              <button 
+                onClick={() => navigate('/tatuadores-da-nova-era')}
+                className="hover:text-red-600 transition-colors"
+              >
+                Tatuadores da Nova Era
+              </button>
+              <ChevronRight className="h-4 w-4" />
+              <span className="text-red-600 font-medium">Artistas</span>
+            </nav>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white py-12">
           <div className="container mx-auto px-4">
@@ -65,7 +91,7 @@ const TattooArtistDirectory = () => {
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Enhanced Filters */}
         <div className="container mx-auto px-4 py-8">
           <Card className="shadow-xl bg-gradient-to-br from-white to-gray-50 border-gray-200 mb-8">
             <CardHeader>
@@ -73,9 +99,12 @@ const TattooArtistDirectory = () => {
                 <Filter className="h-6 w-6 mr-2" />
                 Filtros de Busca
               </CardTitle>
+              <p className="text-gray-600">
+                Use os filtros abaixo para encontrar o tatuador ideal para seu projeto
+              </p>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
@@ -109,6 +138,27 @@ const TattooArtistDirectory = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Filter Summary */}
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div className="text-sm text-gray-600">
+                  Mostrando <span className="font-bold text-red-600">{filteredArtists.length}</span> de <span className="font-bold">{artists.length}</span> artistas
+                </div>
+                {(searchTerm || selectedCity !== "all" || selectedStyle !== "all") && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setSelectedCity("all");
+                      setSelectedStyle("all");
+                    }}
+                    className="text-red-600 border-red-300 hover:bg-red-50"
+                  >
+                    Limpar Filtros
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -190,7 +240,17 @@ const TattooArtistDirectory = () => {
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-2xl font-bold text-gray-600 mb-2">Nenhum artista encontrado</h3>
-              <p className="text-gray-500">Tente ajustar os filtros ou buscar por outros termos</p>
+              <p className="text-gray-500 mb-4">Tente ajustar os filtros ou buscar por outros termos</p>
+              <Button 
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCity("all");
+                  setSelectedStyle("all");
+                }}
+                className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900"
+              >
+                Limpar Filtros
+              </Button>
             </div>
           )}
         </div>
