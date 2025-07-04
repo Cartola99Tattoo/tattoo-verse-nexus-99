@@ -7,12 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Award, Share2, Minus, Plus, Package } from "lucide-react";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
 import { getProductById, mockProducts } from "@/data/mockProducts";
-import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/contexts/ShopCartContext";
 
 const TattooArtistsProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -36,10 +36,13 @@ const TattooArtistsProductDetail = () => {
   }
 
   const handleAddToCart = () => {
-    toast({
-      title: "Produto adicionado ao carrinho!",
-      description: `${quantity}x ${product.name} foi adicionado com sucesso.`,
-    });
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0],
+      category: product.category,
+    }, quantity);
   };
 
   const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : 0;
