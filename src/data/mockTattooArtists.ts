@@ -72,17 +72,17 @@ export const mockTattooArtists: TattooArtist[] = [
   {
     id: "1",
     name: "João Silva Santos",
-    bio: "Especialista em tatuagens realistas e blackwork com mais de 8 anos de experiência. Formado pela Academy of Tattoo Arts e com certificações internacionais.",
+    bio: "Especialista em tatuagens realistas e blackwork com mais de 8 anos de experiência. Formado pela Academy of Tattoo Arts e com certificações internacionais. Minha paixão pela arte da tatuagem começou ainda na adolescência, inspirado pelos grandes mestres do realismo. Hoje, busco transformar cada sessão em uma experiência única, criando peças que contam histórias e eternizam memórias.",
     experience: "8 anos",
     location: {
       city: "São Paulo",
       state: "SP",
       studio: "Black Art Studio"
     },
-    specialties: ["Realismo", "Blackwork", "Sombreado"],
+    specialties: ["Realismo", "Blackwork", "Sombreado", "Preto e Cinza", "Retratos"],
     rating: 4.9,
     reviews: 127,
-    avatar: "https://placehold.co/200x200/1a1a1a/ffffff?text=JS",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
     stats: {
       rating: 4.9,
       reviews: 127,
@@ -112,25 +112,49 @@ export const mockTattooArtists: TattooArtist[] = [
       {
         id: "1",
         title: "Retrato Realista",
-        image: "https://placehold.co/400x400/1a1a1a/ffffff?text=Retrato+Realista",
-        description: "Retrato realista em preto e cinza, técnica de sombreado avançada",
+        image: "https://images.unsplash.com/photo-1564131072-6c4d41e23ba6?w=400&h=400&fit=crop",
+        description: "Retrato realista em preto e cinza, técnica de sombreado avançada com 12 horas de trabalho",
         style: "Realismo",
         year: 2024
       },
       {
         id: "2",
         title: "Mandala Geométrica",
-        image: "https://placehold.co/400x400/dc2626/ffffff?text=Mandala+Blackwork",
-        description: "Mandala complexa em blackwork com detalhes geométricos precisos",
+        image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
+        description: "Mandala complexa em blackwork com detalhes geométricos precisos e simbolismo espiritual",
         style: "Blackwork",
         year: 2024
       },
       {
         id: "3",
         title: "Leão Sombreado",
-        image: "https://placehold.co/400x400/374151/ffffff?text=Leão+Realista",
-        description: "Leão em técnica de sombreado realista, trabalho de 8 horas",
+        image: "https://images.unsplash.com/photo-1562962230-16e4623d36e7?w=400&h=400&fit=crop",
+        description: "Leão em técnica de sombreado realista, trabalho de 8 horas representando força e coragem",
         style: "Realismo",
+        year: 2023
+      },
+      {
+        id: "4",
+        title: "Rosa Blackwork",
+        image: "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=400&h=400&fit=crop",
+        description: "Rosa em estilo blackwork com elementos ornamentais únicos",
+        style: "Blackwork",
+        year: 2023
+      },
+      {
+        id: "5",
+        title: "Olho Realista",
+        image: "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400&h=400&fit=crop",
+        description: "Olho hiper-realista com reflexos e detalhes impressionantes",
+        style: "Realismo",
+        year: 2024
+      },
+      {
+        id: "6",
+        title: "Tribal Moderno",
+        image: "https://images.unsplash.com/photo-1565058379802-bbe93b2b2a98?w=400&h=400&fit=crop",
+        description: "Interpretação moderna do estilo tribal com elementos contemporâneos",
+        style: "Blackwork",
         year: 2023
       }
     ],
@@ -154,17 +178,17 @@ export const mockTattooArtists: TattooArtist[] = [
   {
     id: "2",
     name: "Maria Fernanda Costa",
-    bio: "Artista especializada em tatuagens aquarela e fine line. Pioneira no Brasil em técnicas de aquarela realística.",
+    bio: "Artista especializada em tatuagens aquarela e fine line. Pioneira no Brasil em técnicas de aquarela realística. Formada em Artes Visuais pela UFRJ, trouxe para a tatuagem técnicas tradicionais de pintura, criando um estilo único que combina delicadeza e impacto visual. Cada trabalho é uma obra de arte pensada para durar toda a vida.",
     experience: "6 anos",
     location: {
       city: "Rio de Janeiro",
       state: "RJ",
       studio: "Aquarela Ink"
     },
-    specialties: ["Aquarela", "Fine Line", "Floral"],
+    specialties: ["Aquarela", "Fine Line", "Floral", "Minimalista", "Cores Vibrantes"],
     rating: 4.8,
     reviews: 98,
-    avatar: "https://placehold.co/200x200/dc2626/ffffff?text=MF",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c42c?w=200&h=200&fit=crop&crop=face",
     stats: {
       rating: 4.8,
       reviews: 98,
@@ -192,12 +216,36 @@ export const mockTattooArtists: TattooArtist[] = [
     },
     portfolio: [
       {
-        id: "4",
+        id: "7",
         title: "Flores Aquarela",
-        image: "https://placehold.co/400x400/dc2626/ffffff?text=Flores+Aquarela",
-        description: "Composição floral em técnica aquarela com degradês únicos",
+        image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=400&fit=crop",
+        description: "Composição floral em técnica aquarela com degradês únicos e cores vibrantes",
         style: "Aquarela",
         year: 2024
+      },
+      {
+        id: "8",
+        title: "Beija-flor Fine Line",
+        image: "https://images.unsplash.com/photo-1596730018434-f2b4a4e73e8c?w=400&h=400&fit=crop",
+        description: "Beija-flor delicado em traços finos com detalhes minimalistas",
+        style: "Fine Line",
+        year: 2024
+      },
+      {
+        id: "9",
+        title: "Borboleta Colorida",
+        image: "https://images.unsplash.com/photo-1606830713264-f1b9f00a0e4d?w=400&h=400&fit=crop",
+        description: "Borboleta em aquarela com explosão de cores e movimento",
+        style: "Aquarela",
+        year: 2023
+      },
+      {
+        id: "10",
+        title: "Mandala Fine Line",
+        image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
+        description: "Mandala delicada em traços finos com precisão milimétrica",
+        style: "Fine Line",
+        year: 2023
       }
     ],
     studioQualification: {

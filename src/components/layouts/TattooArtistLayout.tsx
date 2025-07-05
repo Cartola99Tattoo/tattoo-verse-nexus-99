@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Users, ShoppingCart, Calendar, Award } from "lucide-react";
+import { Menu, X, Home, Users, ShoppingCart, Calendar, Award, User } from "lucide-react";
 import { useState } from 'react';
 import ShopCartButton from "@/components/shop/ShopCartButton";
 
@@ -14,6 +14,10 @@ const TattooArtistLayout: React.FC<TattooArtistLayoutProps> = ({ children }) => 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
+  // Simulação de tatuador logado - na implementação real, viria do contexto de autenticação
+  const isLoggedIn = true; // Simula que há um tatuador logado
+  const loggedTattooArtistId = "1"; // ID do primeiro tatuador mock
+
   const navItems = [
     { path: '/tatuadores-da-nova-era', label: 'Início', icon: Home },
     { path: '/tatuadores-da-nova-era/artistas', label: 'Artistas', icon: Users },
@@ -21,6 +25,16 @@ const TattooArtistLayout: React.FC<TattooArtistLayoutProps> = ({ children }) => 
     { path: '/sobre', label: 'Sobre', icon: Award },
     { path: '/contato', label: 'Contato', icon: Calendar },
   ];
+
+  const handleProfileClick = () => {
+    if (isLoggedIn) {
+      // Redireciona para o perfil do tatuador logado
+      window.location.href = `/tatuadores-da-nova-era/perfil/${loggedTattooArtistId}`;
+    } else {
+      // Redireciona para login/cadastro (implementação futura)
+      window.location.href = '/auth';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-red-900">
@@ -55,6 +69,18 @@ const TattooArtistLayout: React.FC<TattooArtistLayoutProps> = ({ children }) => 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-4">
               <ShopCartButton />
+              
+              {/* Profile Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleProfileClick}
+                className="text-white hover:bg-red-600/20 hover:text-red-400 transition-colors"
+                title={isLoggedIn ? "Meu Perfil" : "Fazer Login"}
+              >
+                <User className="h-5 w-5" />
+              </Button>
+              
               <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white">
                 Entrar
               </Button>
@@ -63,6 +89,17 @@ const TattooArtistLayout: React.FC<TattooArtistLayoutProps> = ({ children }) => 
             {/* Mobile Menu Button */}
             <div className="md:hidden flex items-center space-x-2">
               <ShopCartButton />
+              
+              {/* Mobile Profile Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleProfileClick}
+                className="text-white hover:bg-red-600/20 hover:text-red-400 transition-colors"
+              >
+                <User className="h-5 w-5" />
+              </Button>
+              
               <Button
                 variant="ghost"
                 size="icon"
