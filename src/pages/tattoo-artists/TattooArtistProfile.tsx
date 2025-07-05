@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, MapPin, Star, Instagram, Facebook, Phone, Mail, Calendar, Award, Clock, User, Building2, TrendingUp, Target } from "lucide-react";
+import { ArrowLeft, MapPin, Star, Instagram, Facebook, Phone, Mail, Calendar, Award, Clock, User, Building2, TrendingUp, Target, CheckCircle, AlertCircle, HelpCircle, Lightbulb } from "lucide-react";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
 import { getTattooArtistById } from "@/data/mockTattooArtists";
 
@@ -111,15 +111,15 @@ const TattooArtistProfile = () => {
 
         {/* Tabs Content */}
         <Tabs defaultValue="portfolio" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-black/20">
+          <TabsList className="grid w-full grid-cols-5 bg-black/20">
             <TabsTrigger value="portfolio" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               Portfólio
             </TabsTrigger>
             <TabsTrigger value="about" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               Sobre
             </TabsTrigger>
-            <TabsTrigger value="studio" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
-              Estúdio
+            <TabsTrigger value="diagnostic" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
+              Diagnóstico
             </TabsTrigger>
             <TabsTrigger value="contact" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               Contato
@@ -207,59 +207,273 @@ const TattooArtistProfile = () => {
             </div>
           </TabsContent>
 
-          {/* Studio Qualification Tab */}
-          <TabsContent value="studio">
+          {/* SPIN Diagnostic Tab */}
+          <TabsContent value="diagnostic">
             <Card className="bg-white/95 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-xl font-bold text-gray-900">Qualificação do Estúdio</CardTitle>
+                <CardTitle className="text-2xl font-bold text-gray-900 flex items-center">
+                  <Target className="h-6 w-6 mr-3 text-red-600" />
+                  Diagnóstico do Estúdio e Objetivos
+                </CardTitle>
+                <p className="text-gray-600 mt-2">Análise detalhada baseada na metodologia SPIN Selling para identificar oportunidades de crescimento.</p>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-2">Tamanho do Estúdio</h4>
-                      <p className="text-gray-700">{artist.studioQualification.studioSize}</p>
-                    </div>
-                    
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-2">Faturamento Anual</h4>
-                      <p className="text-gray-700">{artist.studioQualification.yearlyRevenue}</p>
-                    </div>
-                    
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-2">Gestão de Clientes</h4>
-                      <p className="text-gray-700">{artist.studioQualification.clientManagement}</p>
-                    </div>
-                  </div>
+                <div className="space-y-8">
                   
+                  {/* Situação Atual */}
                   <div className="space-y-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-2">Marketing</h4>
-                      <p className="text-gray-700">{artist.studioQualification.marketingApproach}</p>
+                    <div className="flex items-center mb-4">
+                      <CheckCircle className="h-6 w-6 mr-3 text-blue-600" />
+                      <h3 className="text-xl font-bold text-gray-900">🔍 Situação Atual do Estúdio</h3>
                     </div>
                     
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-3">Interesse em Digitalização</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Nível de interesse</span>
-                          <span>90%</span>
-                        </div>
-                        <Progress value={90} className="h-2" />
-                      </div>
-                    </div>
-                    
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-2">Principais Desafios</h4>
-                      <div className="space-y-1">
-                        {artist.studioQualification.mainChallenges.map((challenge, index) => (
-                          <Badge key={index} variant="secondary" className="mr-2 mb-1">
-                            {challenge}
-                          </Badge>
-                        ))}
-                      </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-blue-900 mb-2">Tatuagens por semana:</p>
+                          <p className="text-blue-700">{artist.spinDiagnostic.situation.tattoosPerWeek}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-blue-900 mb-2">Método de agendamento:</p>
+                          <p className="text-blue-700">{artist.spinDiagnostic.situation.schedulingMethod}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-blue-900 mb-2">Possui site próprio:</p>
+                          <p className="text-blue-700">{artist.spinDiagnostic.situation.hasWebsite}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-blue-900 mb-2">Principal fonte de clientes:</p>
+                          <p className="text-blue-700">{artist.spinDiagnostic.situation.clientSource}</p>
+                          {artist.spinDiagnostic.situation.clientSourceOther && (
+                            <p className="text-blue-600 text-sm mt-1">Outros: {artist.spinDiagnostic.situation.clientSourceOther}</p>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-blue-900 mb-2">Processo de pós-venda:</p>
+                          <p className="text-blue-700">{artist.spinDiagnostic.situation.hasAfterSales}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-blue-900 mb-2">Como lida com orçamentos:</p>
+                          <p className="text-blue-700">{artist.spinDiagnostic.situation.budgetProcess}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-blue-900 mb-2">Configuração do estúdio:</p>
+                          <p className="text-blue-700">{artist.spinDiagnostic.situation.studioSetup}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-blue-900 mb-2">Localização do estúdio:</p>
+                          <p className="text-blue-700">{artist.spinDiagnostic.situation.studioLocation}</p>
+                        </CardContent>
+                      </Card>
                     </div>
                   </div>
+
+                  {/* Problemas Identificados */}
+                  <div className="space-y-4">
+                    <div className="flex items-center mb-4">
+                      <AlertCircle className="h-6 w-6 mr-3 text-orange-600" />
+                      <h3 className="text-xl font-bold text-gray-900">⚠️ Principais Desafios</h3>
+                    </div>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <Card className="bg-orange-50 border-orange-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-orange-900 mb-2">Perda de clientes por desorganização:</p>
+                          <p className="text-orange-700">{artist.spinDiagnostic.problems.lostClientsOrganization}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-orange-50 border-orange-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-orange-900 mb-2">Tempo perdido repetindo respostas:</p>
+                          <p className="text-orange-700">{artist.spinDiagnostic.problems.timeWastedRepeatingAnswers}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-orange-50 border-orange-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-orange-900 mb-2">Orçamentos sem retorno por semana:</p>
+                          <p className="text-orange-700">{artist.spinDiagnostic.problems.budgetWithoutReturn}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-orange-50 border-orange-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-orange-900 mb-2">Clientes focam em preço:</p>
+                          <p className="text-orange-700">{artist.spinDiagnostic.problems.clientsSeekingPrice}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-orange-50 border-orange-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-orange-900 mb-2">Dificuldade para aumentar preços:</p>
+                          <p className="text-orange-700">{artist.spinDiagnostic.problems.pricingDifficulty}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-orange-50 border-orange-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-orange-900 mb-2">Frustração com competição:</p>
+                          <p className="text-orange-700">{artist.spinDiagnostic.problems.frustratedWithCompetition}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-orange-50 border-orange-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-orange-900 mb-2">Dependência do Instagram:</p>
+                          <p className="text-orange-700">{artist.spinDiagnostic.problems.dependsOnInstagram}</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* Implicações */}
+                  <div className="space-y-4">
+                    <div className="flex items-center mb-4">
+                      <HelpCircle className="h-6 w-6 mr-3 text-red-600" />
+                      <h3 className="text-xl font-bold text-gray-900">💥 Impactos dos Desafios</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <Card className="bg-red-50 border-red-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-red-900 mb-2">Impacto de faltas não preenchidas:</p>
+                          <p className="text-red-700 italic">"{artist.spinDiagnostic.implications.clientAbsenceImpact}"</p>
+                        </CardContent>
+                      </Card>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <Card className="bg-red-50 border-red-200">
+                          <CardContent className="p-4">
+                            <p className="font-semibold text-red-900 mb-2">Horas perdidas por semana:</p>
+                            <p className="text-red-700">{artist.spinDiagnostic.implications.timeWastedPerWeek}</p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="bg-red-50 border-red-200">
+                          <CardContent className="p-4">
+                            <p className="font-semibold text-red-900 mb-2">Estimativa de dinheiro perdido:</p>
+                            <p className="text-red-700">{artist.spinDiagnostic.implications.moneyLostEstimate}</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      <Card className="bg-red-50 border-red-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-red-900 mb-2">Impacto na renda e energia:</p>
+                          <p className="text-red-700 italic">"{artist.spinDiagnostic.implications.incomeAndEnergyImpact}"</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-red-50 border-red-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-red-900 mb-2">Risco da dependência do Instagram:</p>
+                          <p className="text-red-700 italic">"{artist.spinDiagnostic.implications.instagramDependencyRisk}"</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-red-50 border-red-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-red-900 mb-2">Impacto na imagem profissional:</p>
+                          <p className="text-red-700 italic">"{artist.spinDiagnostic.implications.professionalImageImpact}"</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-red-50 border-red-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-red-900 mb-2">Já pensou em desistir:</p>
+                          <p className="text-red-700">{artist.spinDiagnostic.implications.thoughtAboutQuitting}</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* Necessidades e Objetivos */}
+                  <div className="space-y-4">
+                    <div className="flex items-center mb-4">
+                      <Lightbulb className="h-6 w-6 mr-3 text-green-600" />
+                      <h3 className="text-xl font-bold text-gray-900">✅ Visão de Futuro e Objetivos</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <Card className="bg-green-50 border-green-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-green-900 mb-2">Como um sistema automático mudaria sua rotina:</p>
+                          <p className="text-green-700 italic">"{artist.spinDiagnostic.needs.automaticSystemImpact}"</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-green-50 border-green-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-green-900 mb-2">O que significaria uma agenda sempre cheia:</p>
+                          <p className="text-green-700 italic">"{artist.spinDiagnostic.needs.fullAgendaValue}"</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-green-50 border-green-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-green-900 mb-2">O que um estúdio digitalizado representaria:</p>
+                          <p className="text-green-700 italic">"{artist.spinDiagnostic.needs.digitalizedStudioMeaning}"</p>
+                        </CardContent>
+                      </Card>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <Card className="bg-green-50 border-green-200">
+                          <CardContent className="p-4">
+                            <p className="font-semibold text-green-900 mb-2">Desejo de ser referência:</p>
+                            <p className="text-green-700">{artist.spinDiagnostic.needs.wantToBeReference}</p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="bg-green-50 border-green-200">
+                          <CardContent className="p-4">
+                            <p className="font-semibold text-green-900 mb-2">Suporte profissional 24h ajudaria:</p>
+                            <p className="text-green-700">{artist.spinDiagnostic.needs.professionalSupport24h}</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      <Card className="bg-green-50 border-green-200">
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-green-900 mb-2">Diferença de ter uma equipe dedicada:</p>
+                          <p className="text-green-700 italic">"{artist.spinDiagnostic.needs.dedicatedTeamDifference}"</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* CTA Section */}
+                  <Card className="bg-gradient-to-r from-red-600 to-red-700 text-white">
+                    <CardContent className="p-6 text-center">
+                      <h3 className="text-xl font-bold mb-3">Pronto para Transformar seu Estúdio?</h3>
+                      <p className="mb-4 opacity-90">Com base neste diagnóstico, podemos criar uma estratégia personalizada para seu crescimento.</p>
+                      <Button variant="outline" className="border-white text-red-600 hover:bg-white">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Agendar Consultoria Gratuita
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
               </CardContent>
             </Card>

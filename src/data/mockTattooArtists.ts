@@ -27,7 +27,7 @@ export interface TattooArtist {
     instagram: string;
     whatsapp: string;
   };
-  studioQualification: StudioQualification;
+  spinDiagnostic: SpinDiagnostic;
   address?: {
     fullName: string;
     email: string;
@@ -51,21 +51,44 @@ export interface PortfolioItem {
   year: number;
 }
 
-export interface StudioQualification {
-  studioSize: string;
-  yearlyRevenue: string;
-  clientManagement: string;
-  financialControl: string;
-  marketingApproach: string;
-  digitalizationInterest: string;
-  mainChallenges: string[];
-  technologyComfort: string;
-  growthGoals: string;
-  investmentCapacity: string;
-  teamSize: string;
-  appointmentManagement: string;
-  marketingChannels: string[];
-  stockControl: string;
+export interface SpinDiagnostic {
+  situation: {
+    tattoosPerWeek: string;
+    schedulingMethod: string;
+    hasWebsite: string;
+    clientSource: string;
+    clientSourceOther?: string;
+    hasAfterSales: string;
+    budgetProcess: string;
+    studioSetup: string;
+    studioLocation: string;
+  };
+  problems: {
+    lostClientsOrganization: string;
+    timeWastedRepeatingAnswers: string;
+    budgetWithoutReturn: string;
+    clientsSeekingPrice: string;
+    pricingDifficulty: string;
+    frustratedWithCompetition: string;
+    dependsOnInstagram: string;
+  };
+  implications: {
+    clientAbsenceImpact: string;
+    timeWastedPerWeek: string;
+    incomeAndEnergyImpact: string;
+    instagramDependencyRisk: string;
+    moneyLostEstimate: string;
+    professionalImageImpact: string;
+    thoughtAboutQuitting: string;
+  };
+  needs: {
+    automaticSystemImpact: string;
+    fullAgendaValue: string;
+    digitalizedStudioMeaning: string;
+    wantToBeReference: string;
+    professionalSupport24h: string;
+    dedicatedTeamDifference: string;
+  };
 }
 
 export const mockTattooArtists: TattooArtist[] = [
@@ -158,21 +181,43 @@ export const mockTattooArtists: TattooArtist[] = [
         year: 2023
       }
     ],
-    studioQualification: {
-      studioSize: "Médio (3-5 tatuadores)",
-      yearlyRevenue: "R$ 200.000 - R$ 500.000",
-      clientManagement: "Agenda física + WhatsApp",
-      financialControl: "Planilhas Excel",
-      marketingApproach: "Instagram + indicações",
-      digitalizationInterest: "Muito alto - Preciso modernizar urgentemente",
-      mainChallenges: ["Gestão de agenda", "Controle financeiro", "Marketing digital"],
-      technologyComfort: "Intermediário",
-      growthGoals: "Expandir para 2 unidades nos próximos 2 anos",
-      investmentCapacity: "R$ 10.000 - R$ 25.000",
-      teamSize: "Médio (3-5 tatuadores)",
-      appointmentManagement: "Agenda física + WhatsApp",
-      marketingChannels: ["Instagram", "Indicações", "Facebook"],
-      stockControl: "Não possui"
+    spinDiagnostic: {
+      situation: {
+        tattoosPerWeek: "6-10",
+        schedulingMethod: "WhatsApp",
+        hasWebsite: "Não",
+        clientSource: "Redes sociais",
+        hasAfterSales: "Sim, de forma esporádica",
+        budgetProcess: "Respondo pessoalmente via DM/WhatsApp",
+        studioSetup: "Divido estúdio com 3 outros tatuadores",
+        studioLocation: "Movimento moderado (galeria, rua secundária)"
+      },
+      problems: {
+        lostClientsOrganization: "Sim, ocasionalmente",
+        timeWastedRepeatingAnswers: "Sim, muito tempo",
+        budgetWithoutReturn: "Mais de 10 vezes",
+        clientsSeekingPrice: "Alguns buscam preço, outros valorizam a arte",
+        pricingDifficulty: "Sim, foi bem difícil",
+        frustratedWithCompetition: "Sim, muito frustrado",
+        dependsOnInstagram: "Sim, é a principal"
+      },
+      implications: {
+        clientAbsenceImpact: "Perco o dia de trabalho e a renda daquele horário, o que impacta o faturamento do mês.",
+        timeWastedPerWeek: "5-10 horas",
+        incomeAndEnergyImpact: "Minha renda fica instável e sinto que não tenho tempo para praticar novos estilos ou descansar.",
+        instagramDependencyRisk: "Minha captação de clientes despencaria e eu não saberia como encontrar novos, seria um caos.",
+        moneyLostEstimate: "Muito, acredito que mais de R$ 2.000",
+        professionalImageImpact: "Às vezes, parece que sou menos profissional. Gostaria de ser visto como referência na minha área, mas a falta de tempo atrapalha.",
+        thoughtAboutQuitting: "Já passou pela cabeça"
+      },
+      needs: {
+        automaticSystemImpact: "Seria um alívio enorme! Poderia focar mais na arte e menos na burocracia, além de atrair clientes mais alinhados.",
+        fullAgendaValue: "Seria a realização de um sonho. Significaria que meu trabalho está sendo verdadeiramente reconhecido e valorizado.",
+        digitalizedStudioMeaning: "Representaria um salto de nível profissional. Acredito que dobraria meu faturamento e eu teria muito mais controle sobre o negócio.",
+        wantToBeReference: "Sim, é meu maior desejo",
+        professionalSupport24h: "Ajudaria imensamente, resolveria muitos problemas",
+        dedicatedTeamDifference: "Seria um divisor de águas. Minha criatividade fluiria mais e eu poderia aceitar projetos maiores e mais desafiadores."
+      }
     }
   },
   {
@@ -248,21 +293,44 @@ export const mockTattooArtists: TattooArtist[] = [
         year: 2023
       }
     ],
-    studioQualification: {
-      studioSize: "Pequeno (1-2 tatuadores)",
-      yearlyRevenue: "R$ 100.000 - R$ 200.000",
-      clientManagement: "Aplicativo próprio básico",
-      financialControl: "Sistema ERP simples",
-      marketingApproach: "Instagram + TikTok + parcerias",
-      digitalizationInterest: "Alto - Quero melhorar o que já tenho",
-      mainChallenges: ["Expansão da clientela", "Precificação", "Gestão de tempo"],
-      technologyComfort: "Avançado",
-      growthGoals: "Tornar-se referência nacional em aquarela",
-      investmentCapacity: "R$ 5.000 - R$ 15.000",
-      teamSize: "Pequeno (1-2 tatuadores)",
-      appointmentManagement: "Aplicativo próprio básico",
-      marketingChannels: ["Instagram", "TikTok", "Parcerias"],
-      stockControl: "Planilha básica"
+    spinDiagnostic: {
+      situation: {
+        tattoosPerWeek: "11-15",
+        schedulingMethod: "Agenda digital (Google Calendar/etc.)",
+        hasWebsite: "Sim",
+        clientSource: "Indicação de amigos/clientes",
+        clientSourceOther: "Feiras de tatuagem",
+        hasAfterSales: "Sim, bem estruturado",
+        budgetProcess: "Tenho mensagens prontas",
+        studioSetup: "Trabalho sozinha (estúdio próprio)",
+        studioLocation: "Grande movimento (rua principal, shopping)"
+      },
+      problems: {
+        lostClientsOrganization: "Raramente",
+        timeWastedRepeatingAnswers: "Um pouco",
+        budgetWithoutReturn: "1-4 vezes",
+        clientsSeekingPrice: "Geralmente valorizam a arte",
+        pricingDifficulty: "Não tive dificuldade",
+        frustratedWithCompetition: "Um pouco",
+        dependsOnInstagram: "Não, tenho outras fontes"
+      },
+      implications: {
+        clientAbsenceImpact: "Consigo reagendar rapidamente, mas ainda assim afeta o planejamento do dia.",
+        timeWastedPerWeek: "1-4 horas",
+        incomeAndEnergyImpact: "Tenho conseguido manter uma renda estável, mas poderia ser mais eficiente.",
+        instagramDependencyRisk: "Não me preocupo tanto porque tenho várias fontes de clientes, mas seria um impacto considerável.",
+        moneyLostEstimate: "Alguns centenas de reais",
+        professionalImageImpact: "Me considero bem posicionada profissionalmente, mas sempre há espaço para melhorar.",
+        thoughtAboutQuitting: "Nunca, mas é desgastante"
+      },
+      needs: {
+        automaticSystemImpact: "Facilitaria muito minha organização e me daria mais tempo para criar novos designs e técnicas.",
+        fullAgendaValue: "É o que busco sempre - clientes que entendem e valorizam meu trabalho artístico.",
+        digitalizedStudioMeaning: "Seria o próximo passo para me tornar uma referência ainda maior no mercado de aquarela.",
+        wantToBeReference: "Sim, é um objetivo",
+        professionalSupport24h: "Ajudaria bastante",
+        dedicatedTeamDifference: "Me permitiria expandir para workshops e cursos, além de focar em projetos mais elaborados."
+      }
     }
   }
 ];
