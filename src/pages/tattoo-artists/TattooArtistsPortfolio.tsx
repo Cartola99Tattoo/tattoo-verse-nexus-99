@@ -3,239 +3,341 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Eye, Heart, Share2, Filter, Grid, List } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Eye, Heart, User, Calendar, Filter } from "lucide-react";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
 
 const mockPortfolioItems = [
   {
     id: 1,
-    title: "Realismo em Preto e Cinza",
-    artist: "Carlos Silva",
+    title: "Retrato Realista Feminino",
+    artist: "João Silva Santos",
+    artistId: "1",
     style: "Realismo",
-    category: "Retrato",
-    image: "https://images.unsplash.com/photo-1562962230-16e4623d36e7?w=400&h=400&fit=crop",
-    likes: 234,
-    views: 1456,
-    description: "Retrato realista executado com técnica de sombreamento avançada."
+    image: "https://images.unsplash.com/photo-1564131072-6c4d41e23ba6?w=400&h=500&fit=crop",
+    description: "Retrato realista em preto e cinza com técnica de sombreado avançada",
+    year: 2024,
+    views: 1250,
+    likes: 89,
+    bodyPart: "Braço",
+    timeSpent: "8 horas",
+    featured: true
   },
   {
     id: 2,
     title: "Mandala Geométrica",
-    artist: "Ana Costa",
-    style: "Geometric",
-    category: "Ornamental",
-    image: "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=400&h=400&fit=crop",
-    likes: 189,
-    views: 892,
-    description: "Design geométrico complexo com padrões mandálicos simétricos."
+    artist: "Maria Fernanda Costa",
+    artistId: "2",
+    style: "Blackwork",
+    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=500&fit=crop",
+    description: "Mandala complexa em blackwork com detalhes geométricos precisos",
+    year: 2024,
+    views: 980,
+    likes: 156,
+    bodyPart: "Costas",
+    timeSpent: "12 horas",
+    featured: false
   },
   {
     id: 3,
-    title: "Aquarela Floral",
-    artist: "Marina Santos",
+    title: "Flores Aquarela",
+    artist: "Ana Beatriz Silva",
+    artistId: "3",
     style: "Aquarela",
-    category: "Natureza",
-    image: "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400&h=400&fit=crop",
-    likes: 312,
-    views: 2134,
-    description: "Técnica de aquarela aplicada em motivos florais delicados."
+    image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=500&fit=crop",
+    description: "Composição floral em técnica aquarela com degradês únicos",
+    year: 2024,
+    views: 750,
+    likes: 234,
+    bodyPart: "Perna",
+    timeSpent: "6 horas",
+    featured: true
   },
   {
     id: 4,
-    title: "Old School Clássico",
-    artist: "Roberto Alves",
-    style: "Old School",
-    category: "Tradicional",
-    image: "https://images.unsplash.com/photo-1611024847487-e26177381a0f?w=400&h=400&fit=crop",
-    likes: 145,
-    views: 678,
-    description: "Tatuagem tradicional americana com cores vibrantes."
+    title: "Leão Minimalista",
+    artist: "Carlos Montenegro",
+    artistId: "4",
+    style: "Fine Line",
+    image: "https://images.unsplash.com/photo-1565058379802-bbe93b2b2a98?w=400&h=500&fit=crop",
+    description: "Leão em traços minimalistas com técnica fine line delicada",
+    year: 2024,
+    views: 850,
+    likes: 92,
+    bodyPart: "Antebraço",
+    timeSpent: "4 horas",
+    featured: false
   },
   {
     id: 5,
-    title: "Biomecânico Futurista",
-    artist: "Lucas Ferreira",
-    style: "Biomecânico",
-    category: "Futurista",
-    image: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=400&h=400&fit=crop",
-    likes: 456,
-    views: 3245,
-    description: "Design biomecânico com elementos futuristas integrados."
+    title: "Dragão Oriental",
+    artist: "Roberto Martins",
+    artistId: "5",
+    style: "Oriental",
+    image: "https://images.unsplash.com/photo-1596730018434-f2b4a4e73e8c?w=400&h=500&fit=crop",
+    description: "Dragão tradicional japonês com técnicas clássicas da tatuagem oriental",
+    year: 2023,
+    views: 1100,
+    likes: 178,
+    bodyPart: "Braço Completo",
+    timeSpent: "16 horas",
+    featured: false
   },
   {
     id: 6,
-    title: "Fine Line Minimalista",
-    artist: "Julia Mendes",
-    style: "Fine Line",
-    category: "Minimalista",
-    image: "https://images.unsplash.com/photo-1585652869062-2d5b45d7a5eb?w=400&h=400&fit=crop",
-    likes: 267,
-    views: 1543,
-    description: "Tatuagem delicada com traços finos e design minimalista."
+    title: "Rosas Sombreadas",
+    artist: "Patricia Lima",
+    artistId: "6",
+    style: "Sombreado",
+    image: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=500&fit=crop",
+    description: "Composição de rosas com sombreado realista em preto e cinza",
+    year: 2023,
+    views: 920,
+    likes: 145,
+    bodyPart: "Ombro",
+    timeSpent: "5 horas",
+    featured: false
   }
 ];
 
 const TattooArtistsPortfolio = () => {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [viewMode, setViewMode] = useState("grid");
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [styleFilter, setStyleFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
 
-  const categories = ["all", "Realismo", "Geometric", "Aquarela", "Old School", "Biomecânico", "Fine Line"];
-  
-  const filteredItems = selectedCategory === "all" 
-    ? mockPortfolioItems 
-    : mockPortfolioItems.filter(item => item.style === selectedCategory);
+  const filteredItems = mockPortfolioItems.filter(item => {
+    return styleFilter === 'all' || item.style === styleFilter;
+  });
+
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    switch (sortBy) {
+      case 'newest': return b.year - a.year;
+      case 'oldest': return a.year - b.year;
+      case 'popular': return b.likes - a.likes;
+      case 'views': return b.views - a.views;
+      default: return 0;
+    }
+  });
+
+  const getStyleColor = (style: string) => {
+    switch (style) {
+      case 'Realismo': return 'bg-blue-100 text-blue-800';
+      case 'Blackwork': return 'bg-gray-100 text-gray-800';
+      case 'Aquarela': return 'bg-purple-100 text-purple-800';
+      case 'Fine Line': return 'bg-green-100 text-green-800';
+      case 'Oriental': return 'bg-red-100 text-red-800';
+      case 'Sombreado': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const featuredItems = sortedItems.filter(item => item.featured);
+  const regularItems = sortedItems.filter(item => !item.featured);
 
   return (
     <TattooArtistLayout>
       <div className="container mx-auto px-4 py-16">
-        <div className="text-center text-white mb-16">
-          <h1 className="text-5xl font-bold mb-6">
-            Portfólio da
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-red-600"> Comunidade</span>
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-white mb-4">
+            Portfólio <span className="text-red-400">99Tattoo</span>
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Explore os melhores trabalhos dos tatuadores da nossa comunidade
+            Explore os melhores trabalhos dos tatuadores mais talentosos da nossa rede
           </p>
         </div>
 
-        {/* Filtros e Controles */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                  className={selectedCategory === category 
-                    ? "bg-red-600 hover:bg-red-700" 
-                    : "border-white/30 text-white hover:bg-white/20"
-                  }
-                >
-                  {category === "all" ? "Todos" : category}
-                </Button>
-              ))}
+        {/* Filtros */}
+        <Card className="mb-8 bg-white/95 backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-gray-500" />
+                <span className="text-gray-700 font-medium">Filtros:</span>
+              </div>
+              
+              <div className="flex gap-4">
+                <Select value={styleFilter} onValueChange={setStyleFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Estilo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Estilos</SelectItem>
+                    <SelectItem value="Realismo">Realismo</SelectItem>
+                    <SelectItem value="Blackwork">Blackwork</SelectItem>
+                    <SelectItem value="Aquarela">Aquarela</SelectItem>
+                    <SelectItem value="Fine Line">Fine Line</SelectItem>
+                    <SelectItem value="Oriental">Oriental</SelectItem>
+                    <SelectItem value="Sombreado">Sombreado</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest">Mais Antigos</SelectItem>
+                    <SelectItem value="popular">Mais Curtidos</SelectItem>
+                    <SelectItem value="views">Mais Visualizados</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("grid")}
-                className={`border-white/30 text-white hover:bg-white/20 ${viewMode === "grid" ? "bg-white/20" : ""}`}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className={`border-white/30 text-white hover:bg-white/20 ${viewMode === "list" ? "bg-white/20" : ""}`}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Portfolio Grid */}
-        <div className={viewMode === "grid" ? "grid md:grid-cols-2 lg:grid-cols-3 gap-8" : "space-y-6"}>
-          {filteredItems.map((item) => (
-            <Card key={item.id} className="bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:scale-105 group cursor-pointer">
-              <CardContent className="p-0">
-                <div className="relative">
-                  <img 
-                    src={item.image} 
-                    alt={item.title}
-                    className="w-full h-64 object-cover rounded-t-lg"
-                  />
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-red-600 text-white">
-                      {item.style}
-                    </Badge>
-                  </div>
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg flex items-center justify-center">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button size="sm" className="bg-white text-black hover:bg-gray-100">
-                          <Eye className="h-4 w-4 mr-2" />
-                          Ver Detalhes
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                          <DialogTitle>{item.title}</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <img src={item.image} alt={item.title} className="w-full h-96 object-cover rounded-lg" />
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-semibold">Artista: {item.artist}</p>
-                              <p className="text-sm text-gray-600">Categoria: {item.category}</p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Badge>{item.style}</Badge>
-                            </div>
+        {/* Trabalhos em Destaque */}
+        {featuredItems.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+              Trabalhos em Destaque
+              <Badge className="bg-red-500 text-white">Featured</Badge>
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredItems.map((item) => (
+                <Card key={item.id} className="bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:scale-105 overflow-hidden">
+                  <div className="relative h-80 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                    <img 
+                      src={item.image} 
+                      alt={item.title}
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-red-500 text-white shadow-lg">
+                        Destaque
+                      </Badge>
+                    </div>
+                    <div className="absolute top-4 right-4">
+                      <Badge className={getStyleColor(item.style)}>
+                        {item.style}
+                      </Badge>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg p-3">
+                      <div className="flex items-center justify-between text-white text-sm">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1">
+                            <Eye className="h-3 w-3" />
+                            {item.views}
                           </div>
-                          <p className="text-gray-700">{item.description}</p>
-                          <div className="flex justify-between items-center pt-4 border-t">
-                            <div className="flex gap-4 text-sm text-gray-600">
-                              <span className="flex items-center gap-1">
-                                <Heart className="h-4 w-4" />
-                                {item.likes}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Eye className="h-4 w-4" />
-                                {item.views}
-                              </span>
-                            </div>
-                            <Button size="sm" variant="outline">
-                              <Share2 className="h-4 w-4 mr-2" />
-                              Compartilhar
-                            </Button>
+                          <div className="flex items-center gap-1">
+                            <Heart className="h-3 w-3" />
+                            {item.likes}
                           </div>
                         </div>
-                      </DialogContent>
-                    </Dialog>
+                        <span>{item.timeSpent}</span>
+                      </div>
+                    </div>
                   </div>
+                  
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
+                    
+                    <div className="flex items-center gap-2 mb-3 text-sm text-gray-600">
+                      <User className="h-4 w-4" />
+                      <span>{item.artist}</span>
+                      <span>•</span>
+                      <Calendar className="h-4 w-4" />
+                      <span>{item.year}</span>
+                    </div>
+                    
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {item.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                      <span><strong>Local:</strong> {item.bodyPart}</span>
+                      <span><strong>Tempo:</strong> {item.timeSpent}</span>
+                    </div>
+                    
+                    <Button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white">
+                      Ver Detalhes
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Galeria Principal */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-white mb-6">Galeria Completa</h2>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {regularItems.map((item) => (
+            <Card key={item.id} className="bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:scale-105 overflow-hidden">
+              <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                <img 
+                  src={item.image} 
+                  alt={item.title}
+                  className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                />
+                <div className="absolute top-3 right-3">
+                  <Badge className={getStyleColor(item.style)}>
+                    {item.style}
+                  </Badge>
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 bg-black/70 backdrop-blur-sm rounded-lg p-2">
+                  <div className="flex items-center justify-between text-white text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        {item.views}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Heart className="h-3 w-3" />
+                        {item.likes}
+                      </div>
+                    </div>
+                    <span>{item.timeSpent}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <CardContent className="p-4">
+                <h3 className="font-bold text-gray-900 mb-2 line-clamp-1">{item.title}</h3>
+                
+                <div className="flex items-center gap-2 mb-2 text-xs text-gray-600">
+                  <User className="h-3 w-3" />
+                  <span>{item.artist}</span>
+                  <span>•</span>
+                  <span>{item.year}</span>
                 </div>
                 
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
-                  <p className="text-gray-600 mb-3">por {item.artist}</p>
-                  <p className="text-sm text-gray-500 mb-4 line-clamp-2">{item.description}</p>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-4 text-sm text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <Heart className="h-4 w-4" />
-                        {item.likes}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-4 w-4" />
-                        {item.views}
-                      </span>
-                    </div>
-                    <Badge variant="outline" className="text-red-600 border-red-300">
-                      {item.category}
-                    </Badge>
-                  </div>
+                <p className="text-gray-600 text-xs mb-3 line-clamp-2">
+                  {item.description}
+                </p>
+                
+                <div className="text-xs text-gray-500 mb-3">
+                  <span><strong>Local:</strong> {item.bodyPart}</span>
                 </div>
+                
+                <Button size="sm" variant="outline" className="w-full border-red-500 text-red-500 hover:bg-red-50">
+                  Ver Mais
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {filteredItems.length === 0 && (
-          <div className="text-center py-12">
-            <Filter className="h-16 w-16 mx-auto mb-4 text-white/50" />
-            <h3 className="text-xl font-semibold text-white mb-2">Nenhum trabalho encontrado</h3>
-            <p className="text-gray-300">Tente ajustar os filtros de categoria</p>
-          </div>
-        )}
+        {/* Call to Action */}
+        <div className="text-center mt-16">
+          <Card className="bg-gradient-to-r from-red-600/10 to-red-700/10 border-red-500/20 max-w-2xl mx-auto">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Quer exibir seu trabalho?
+              </h3>
+              <p className="text-gray-300 mb-6">
+                Junte-se à nossa comunidade e mostre suas criações para milhares de pessoas apaixonadas por tatuagem.
+              </p>
+              <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white">
+                Enviar Trabalho
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </TattooArtistLayout>
   );
