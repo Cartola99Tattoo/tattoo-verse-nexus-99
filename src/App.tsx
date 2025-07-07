@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { CartProvider } from './contexts/ShopCartContext';
@@ -45,8 +44,9 @@ import NaveMaeAnalytics from './pages/nave-mae/NaveMaeAnalytics';
 
 function App() {
   return (
-    <CartProvider>
-      <Router>
+    <Router>
+      <div className="App">
+        <Toaster />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/sobre" element={<About />} />
@@ -90,9 +90,17 @@ function App() {
           <Route path="/nave-mae-da-tatuagem/blog" element={<NaveMaeBlog />} />
           <Route path="/nave-mae-da-tatuagem/settings" element={<NaveMaeSettings />} />
           <Route path="/nave-mae-da-tatuagem/security" element={<NaveMaeSecurity />} />
+
+          {/* Blog routes */}
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+
+          {/* Tatuadores da Nova Era - Blog routes */}
+          <Route path="/tatuadores-da-nova-era/blog" element={<TattooArtistsBlog />} />
+          <Route path="/tatuadores-da-nova-era/blog/:articleId" element={<TattooArtistsBlogArticle />} />
         </Routes>
-      </Router>
-    </CartProvider>
+      </div>
+    </Router>
   );
 }
 
