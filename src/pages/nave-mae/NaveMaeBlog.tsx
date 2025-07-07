@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -533,7 +532,7 @@ const NaveMaeBlog = () => {
                           
                           <div className="flex items-center gap-6 text-sm text-gray-500 mb-4">
                             <div className="flex items-center gap-2">
-                              <User className="h-4 w-4" />
+                              <Users className="h-4 w-4" />
                               {post.author}
                             </div>
                             {post.publishDate && (

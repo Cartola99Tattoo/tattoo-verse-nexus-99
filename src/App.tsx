@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { CartProvider } from './contexts/ShopCartContext';
+import { Toaster } from './components/ui/toaster';
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
@@ -12,6 +14,7 @@ import TattooArtists from './pages/tattoo-artists/TattooArtists';
 import TattooArtistProfile from './pages/tattoo-artists/TattooArtistProfile';
 import TattooArtistDirectory from './pages/tattoo-artists/TattooArtistDirectory';
 import TattooArtistsBlog from './pages/tattoo-artists/TattooArtistsBlog';
+import TattooArtistsBlogArticle from './pages/tatuadores-da-nova-era/TattooArtistsBlogArticle';
 import TattooArtistsEvents from './pages/tattoo-artists/TattooArtistsEvents';
 import TattooArtistsPortfolio from './pages/tattoo-artists/TattooArtistsPortfolio';
 import TattooArtistsServices from './pages/tattoo-artists/TattooArtistsServices';
@@ -91,12 +94,7 @@ function App() {
           <Route path="/nave-mae-da-tatuagem/settings" element={<NaveMaeSettings />} />
           <Route path="/nave-mae-da-tatuagem/security" element={<NaveMaeSecurity />} />
 
-          {/* Blog routes */}
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
-
           {/* Tatuadores da Nova Era - Blog routes */}
-          <Route path="/tatuadores-da-nova-era/blog" element={<TattooArtistsBlog />} />
           <Route path="/tatuadores-da-nova-era/blog/:articleId" element={<TattooArtistsBlogArticle />} />
         </Routes>
       </div>
