@@ -201,7 +201,13 @@ const TattooArtistsBlog = () => {
                     </div>
                   </div>
                   
-                  <Button className="w-fit bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-3 text-lg font-bold rounded-xl">
+                  <Button 
+                    className="w-fit bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-3 text-lg font-bold rounded-xl"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePostClick(featuredPost);
+                    }}
+                  >
                     Ler Artigo Completo
                     <ArrowRight className="h-5 w-5 ml-3" />
                   </Button>
@@ -269,7 +275,15 @@ const TattooArtistsBlog = () => {
                     <span className="text-sm text-gray-500 font-medium">
                       {new Date(post.publishDate).toLocaleDateString('pt-BR')}
                     </span>
-                    <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400 font-semibold">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400 font-semibold"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePostClick(post);
+                      }}
+                    >
                       Ler mais
                       <ArrowRight className="h-3 w-3 ml-2" />
                     </Button>
