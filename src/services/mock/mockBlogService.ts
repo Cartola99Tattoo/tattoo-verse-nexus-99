@@ -71,6 +71,15 @@ export interface BlogArticle {
   events: Event[];
 }
 
+// Interface for blog service parameters
+export interface BlogServiceParams {
+  page?: number;
+  limit?: number;
+  category?: string;
+  search?: string;
+  sort?: string;
+}
+
 // Autores mock
 const mockAuthors: Author[] = [
   {
@@ -244,49 +253,49 @@ export const mockBlogArticles: BlogArticle[] = [
     slug: "tendencias-tatuagem-2024",
     excerpt: "Explore as principais tendências que estão moldando o mundo da tatuagem neste ano, desde o minimalismo até técnicas inovadoras que revolucionam a arte corporal.",
     content: `
-      <div class="article-content">
-        <p class="text-xl text-gray-700 leading-relaxed mb-8 font-medium">O mundo da tatuagem nunca parou de evoluir, e 2024 está sendo um ano revolucionário para nossa arte. Depois de anos observando o mercado e conversando com os principais tatuadores do Brasil e do mundo, compilamos as tendências mais marcantes que estão definindo este ano.</p>
+      <div className="article-content">
+        <p className="text-xl text-gray-700 leading-relaxed mb-8 font-medium">O mundo da tatuagem nunca parou de evoluir, e 2024 está sendo um ano revolucionário para nossa arte. Depois de anos observando o mercado e conversando com os principais tatuadores do Brasil e do mundo, compilamos as tendências mais marcantes que estão definindo este ano.</p>
 
-        <p class="mb-6 leading-relaxed text-gray-700 text-lg">A indústria da tatuagem movimentou mais de R$ 2 bilhões no Brasil em 2023, e as projeções para 2024 são ainda mais otimistas. O que temos visto é uma sofisticação sem precedentes tanto nas técnicas quanto na demanda dos clientes.</p>
+        <p className="mb-6 leading-relaxed text-gray-700 text-lg">A indústria da tatuagem movimentou mais de R$ 2 bilhões no Brasil em 2023, e as projeções para 2024 são ainda mais otimistas. O que temos visto é uma sofisticação sem precedentes tanto nas técnicas quanto na demanda dos clientes.</p>
 
-        <img src="https://placehold.co/800x400/FF0000/FFFFFF?text=Tendências+2024" alt="Tendências de Tatuagem 2024" class="w-full h-64 md:h-96 object-cover rounded-xl shadow-lg mb-8" />
+        <img src="https://placehold.co/800x400/FF0000/FFFFFF?text=Tendências+2024" alt="Tendências de Tatuagem 2024" className="w-full h-64 md:h-96 object-cover rounded-xl shadow-lg mb-8" />
 
-        <h2 class="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🎨 Minimalismo e Fine Line: A Beleza da Simplicidade</h2>
+        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🎨 Minimalismo e Fine Line: A Beleza da Simplicidade</h2>
         
-        <p class="mb-6 leading-relaxed text-gray-700 text-lg">O minimalismo continua sendo uma das tendências mais fortes de 2024, mas agora com uma abordagem ainda mais refinada. As tatuagens fine line não são apenas sobre traços finos - elas representam uma filosofia de design onde cada elemento tem um propósito específico.</p>
+        <p className="mb-6 leading-relaxed text-gray-700 text-lg">O minimalismo continua sendo uma das tendências mais fortes de 2024, mas agora com uma abordagem ainda mais refinada. As tatuagens fine line não são apenas sobre traços finos - elas representam uma filosofia de design onde cada elemento tem um propósito específico.</p>
         
-        <div class="bg-red-50 border-l-4 border-red-600 p-6 my-8 rounded-r-lg">
-          <h3 class="text-red-600 font-bold text-xl mb-4">✨ Características do Fine Line em 2024:</h3>
-          <ul class="list-disc ml-6 space-y-3">
-            <li class="leading-relaxed text-gray-700 text-lg">Designs geométricos com precisão matemática</li>
-            <li class="leading-relaxed text-gray-700 text-lg">Símbolos minimalistas carregados de significado</li>
-            <li class="leading-relaxed text-gray-700 text-lg">Lettering delicado com tipografias exclusivas</li>
-            <li class="leading-relaxed text-gray-700 text-lg">Ilustrações botânicas ultra-detalhadas</li>
-            <li class="leading-relaxed text-gray-700 text-lg">Micro-realismos impressionantes</li>
+        <div className="bg-red-50 border-l-4 border-red-600 p-6 my-8 rounded-r-lg">
+          <h3 className="text-red-600 font-bold text-xl mb-4">✨ Características do Fine Line em 2024:</h3>
+          <ul className="list-disc ml-6 space-y-3">
+            <li className="leading-relaxed text-gray-700 text-lg">Designs geométricos com precisão matemática</li>
+            <li className="leading-relaxed text-gray-700 text-lg">Símbolos minimalistas carregados de significado</li>
+            <li className="leading-relaxed text-gray-700 text-lg">Lettering delicado com tipografias exclusivas</li>
+            <li className="leading-relaxed text-gray-700 text-lg">Ilustrações botânicas ultra-detalhadas</li>
+            <li className="leading-relaxed text-gray-700 text-lg">Micro-realismos impressionantes</li>
           </ul>
         </div>
 
-        <p class="mb-8 leading-relaxed text-gray-700 text-lg">O que mais me impressiona é como os tatuadores estão dominando técnicas de <strong class="text-red-600">single needle</strong> para criar obras que parecem desenhos a lápis na pele. A demanda por esse estilo cresceu 340% no último ano, segundo dados da nossa plataforma.</p>
+        <p className="mb-8 leading-relaxed text-gray-700 text-lg">O que mais me impressiona é como os tatuadores estão dominando técnicas de <strong className="text-red-600">single needle</strong> para criar obras que parecem desenhos a lápis na pele. A demanda por esse estilo cresceu 340% no último ano, segundo dados da nossa plataforma.</p>
 
-        <img src="https://placehold.co/600x400/000000/FFFFFF?text=Fine+Line+Examples" alt="Exemplos de Fine Line" class="w-full h-64 object-cover rounded-xl shadow-lg mb-8" />
+        <img src="https://placehold.co/600x400/000000/FFFFFF?text=Fine+Line+Examples" alt="Exemplos de Fine Line" className="w-full h-64 object-cover rounded-xl shadow-lg mb-8" />
 
-        <h2 class="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🌈 Aquarela e Cores Vibrantes: Quando a Pele Vira Tela</h2>
+        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🌈 Aquarela e Cores Vibrantes: Quando a Pele Vira Tela</h2>
         
-        <p class="mb-6 leading-relaxed text-gray-700 text-lg">A técnica de aquarela evoluiu tremendamente em 2024. Não estamos mais falando apenas de cores que "escorrem" - os tatuadores estão criando verdadeiras pinturas na pele, com técnicas de sobreposição de cores que criam profundidade e movimento únicos.</p>
+        <p className="mb-6 leading-relaxed text-gray-700 text-lg">A técnica de aquarela evoluiu tremendamente em 2024. Não estamos mais falando apenas de cores que "escorrem" - os tatuadores estão criando verdadeiras pinturas na pele, com técnicas de sobreposição de cores que criam profundidade e movimento únicos.</p>
         
-        <div class="grid md:grid-cols-2 gap-6 my-8">
-          <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-200">
-            <h3 class="text-purple-600 font-bold text-xl mb-4">🎨 Técnicas Quentes</h3>
-            <ul class="space-y-2 text-gray-700">
+        <div className="grid md:grid-cols-2 gap-6 my-8">
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-200">
+            <h3 className="text-purple-600 font-bold text-xl mb-4">🎨 Técnicas Quentes</h3>
+            <ul className="space-y-2 text-gray-700">
               <li>• Splash de cores controlado</li>
               <li>• Degradês suaves e naturais</li>
               <li>• Sobreposições cromáticas</li>
               <li>• Efeitos de transparência</li>
             </ul>
           </div>
-          <div class="bg-gradient-to-br from-green-50 to-yellow-50 p-6 rounded-xl border border-green-200">
-            <h3 class="text-green-600 font-bold text-xl mb-4">🔥 Cores Trending</h3>
-            <ul class="space-y-2 text-gray-700">
+          <div className="bg-gradient-to-br from-green-50 to-yellow-50 p-6 rounded-xl border border-green-200">
+            <h3 className="text-green-600 font-bold text-xl mb-4">🔥 Cores Trending</h3>
+            <ul className="space-y-2 text-gray-700">
               <li>• Azuis oceânicos profundos</li>
               <li>• Rosas sunset vibrantes</li>
               <li>• Verdes jade luminosos</li>
@@ -295,23 +304,23 @@ export const mockBlogArticles: BlogArticle[] = [
           </div>
         </div>
 
-        <blockquote class="border-l-4 border-red-600 pl-6 py-4 my-8 bg-red-50 rounded-r-lg italic text-lg text-gray-800">
+        <blockquote className="border-l-4 border-red-600 pl-6 py-4 my-8 bg-red-50 rounded-r-lg italic text-lg text-gray-800">
           "A aquarela em tatuagem não é sobre imprecisão - é sobre controlar o caos e transformá-lo em arte. Cada gota de tinta tem que ser intencional." 
-          <cite class="block mt-2 text-red-600 font-semibold not-italic">- Marina Santos, tatuadora especialista em aquarela</cite>
+          <cite className="block mt-2 text-red-600 font-semibold not-italic">- Marina Santos, tatuadora especialista em aquarela</cite>
         </blockquote>
 
-        <img src="https://placehold.co/700x500/FF69B4/FFFFFF?text=Aquarela+Técnicas" alt="Técnicas de Aquarela" class="w-full h-64 object-cover rounded-xl shadow-lg mb-8" />
+        <img src="https://placehold.co/700x500/FF69B4/FFFFFF?text=Aquarela+Técnicas" alt="Técnicas de Aquarela" className="w-full h-64 object-cover rounded-xl shadow-lg mb-8" />
 
-        <h2 class="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">⚫ Blackwork Contemporâneo: Geometria e Misticismo</h2>
+        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">⚫ Blackwork Contemporâneo: Geometria e Misticismo</h2>
         
-        <p class="mb-6 leading-relaxed text-gray-700 text-lg">O blackwork de 2024 incorporou elementos que vão muito além do tradicional. Estamos vendo uma fusão entre geometria sagrada, elementos arquitetônicos e symbolism contemporâneo que cria peças verdadeiramente únicas.</p>
+        <p className="mb-6 leading-relaxed text-gray-700 text-lg">O blackwork de 2024 incorporou elementos que vão muito além do tradicional. Estamos vendo uma fusão entre geometria sagrada, elementos arquitetônicos e symbolism contemporâneo que cria peças verdadeiramente únicas.</p>
         
-        <div class="bg-gray-900 text-white p-8 rounded-xl my-8">
-          <h3 class="text-white font-bold text-2xl mb-6">🔥 Estilos Blackwork em Alta:</h3>
-          <div class="grid md:grid-cols-2 gap-6">
+        <div className="bg-gray-900 text-white p-8 rounded-xl my-8">
+          <h3 className="text-white font-bold text-2xl mb-6">🔥 Estilos Blackwork em Alta:</h3>
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h4 class="text-red-400 font-bold mb-3">Geométrico Avançado</h4>
-              <ul class="space-y-2 text-gray-300">
+              <h4 className="text-red-400 font-bold mb-3">Geométrico Avançado</h4>
+              <ul className="space-y-2 text-gray-300">
                 <li>→ Padrões fractais complexos</li>
                 <li>→ Mandalas tridimensionais</li>
                 <li>→ Optical illusions</li>
@@ -319,8 +328,8 @@ export const mockBlogArticles: BlogArticle[] = [
               </ul>
             </div>
             <div>
-              <h4 class="text-red-400 font-bold mb-3">Orgânico Abstrato</h4>
-              <ul class="space-y-2 text-gray-300">
+              <h4 className="text-red-400 font-bold mb-3">Orgânico Abstrato</h4>
+              <ul className="space-y-2 text-gray-300">
                 <li>→ Formas arquitetônicas fluidas</li>
                 <li>→ Elementos tribais modernos</li>
                 <li>→ Brush strokes estilizados</li>
@@ -330,76 +339,76 @@ export const mockBlogArticles: BlogArticle[] = [
           </div>
         </div>
 
-        <h2 class="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">📊 Dados do Mercado: O Que os Números Revelam</h2>
+        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">📊 Dados do Mercado: O Que os Números Revelam</h2>
         
-        <p class="mb-6 leading-relaxed text-gray-700 text-lg">Nossa análise de mais de 50.000 tatuagens realizadas em 2024 revelou insights fascinantes sobre as preferências do público:</p>
+        <p className="mb-6 leading-relaxed text-gray-700 text-lg">Nossa análise de mais de 50.000 tatuagens realizadas em 2024 revelou insights fascinantes sobre as preferências do público:</p>
         
-        <div class="grid md:grid-cols-3 gap-6 my-8">
-          <div class="text-center bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border-2 border-red-200">
-            <div class="text-4xl font-black text-red-600 mb-2">68%</div>
-            <div class="text-gray-700 font-semibold">Optam por designs minimalistas</div>
+        <div className="grid md:grid-cols-3 gap-6 my-8">
+          <div className="text-center bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border-2 border-red-200">
+            <div className="text-4xl font-black text-red-600 mb-2">68%</div>
+            <div className="text-gray-700 font-semibold">Optam por designs minimalistas</div>
           </div>
-          <div class="text-center bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200">
-            <div class="text-4xl font-black text-blue-600 mb-2">45%</div>
-            <div class="text-gray-700 font-semibold">Preferem cores vibrantes</div>
+          <div className="text-center bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200">
+            <div className="text-4xl font-black text-blue-600 mb-2">45%</div>
+            <div className="text-gray-700 font-semibold">Preferem cores vibrantes</div>
           </div>
-          <div class="text-center bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border-2 border-purple-200">
-            <div class="text-4xl font-black text-purple-600 mb-2">32%</div>
-            <div class="text-gray-700 font-semibold">Escolhem blackwork puro</div>
+          <div className="text-center bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border-2 border-purple-200">
+            <div className="text-4xl font-black text-purple-600 mb-2">32%</div>
+            <div className="text-gray-700 font-semibold">Escolhem blackwork puro</div>
           </div>
         </div>
 
-        <img src="https://placehold.co/800x300/4169E1/FFFFFF?text=Dados+Estatísticas" alt="Estatísticas do Mercado" class="w-full h-48 object-cover rounded-xl shadow-lg mb-8" />
+        <img src="https://placehold.co/800x300/4169E1/FFFFFF?text=Dados+Estatísticas" alt="Estatísticas do Mercado" className="w-full h-48 object-cover rounded-xl shadow-lg mb-8" />
 
-        <h2 class="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🔮 Previsões para o Segundo Semestre</h2>
+        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🔮 Previsões para o Segundo Semestre</h2>
         
-        <p class="mb-6 leading-relaxed text-gray-700 text-lg">Baseado nas tendências internacionais e no comportamento do mercado brasileiro, algumas previsões para os próximos meses:</p>
+        <p className="mb-6 leading-relaxed text-gray-700 text-lg">Baseado nas tendências internacionais e no comportamento do mercado brasileiro, algumas previsões para os próximos meses:</p>
         
-        <div class="space-y-4 mb-8">
-          <div class="flex items-start gap-4 p-4 bg-green-50 rounded-lg border border-green-200">
-            <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-              <span class="text-white font-bold text-sm">1</span>
+        <div className="space-y-4 mb-8">
+          <div className="flex items-start gap-4 p-4 bg-green-50 rounded-lg border border-green-200">
+            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+              <span className="text-white font-bold text-sm">1</span>
             </div>
             <div>
-              <h4 class="font-bold text-green-800 mb-2">Micro-Realismo Extremo</h4>
-              <p class="text-gray-700">Tatuagens hiper-realistas em escalas minúsculas, com detalhamento que desafia os limites da técnica.</p>
+              <h4 className="font-bold text-green-800 mb-2">Micro-Realismo Extremo</h4>
+              <p className="text-gray-700">Tatuagens hiper-realistas em escalas minúsculas, com detalhamento que desafia os limites da técnica.</p>
             </div>
           </div>
           
-          <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-              <span class="text-white font-bold text-sm">2</span>
+          <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+              <span className="text-white font-bold text-sm">2</span>
             </div>
             <div>
-              <h4 class="font-bold text-blue-800 mb-2">Neo-Traditional Brasileiro</h4>
-              <p class="text-gray-700">Fusão entre técnicas tradicionais e elementos da cultura brasileira contemporânea.</p>
+              <h4 className="font-bold text-blue-800 mb-2">Neo-Traditional Brasileiro</h4>
+              <p className="text-gray-700">Fusão entre técnicas tradicionais e elementos da cultura brasileira contemporânea.</p>
             </div>
           </div>
           
-          <div class="flex items-start gap-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
-            <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-              <span class="text-white font-bold text-sm">3</span>
+          <div className="flex items-start gap-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+              <span className="text-white font-bold text-sm">3</span>
             </div>
             <div>
-              <h4 class="font-bold text-purple-800 mb-2">Tatuagens Interativas</h4>
-              <p class="text-gray-700">Designs que mudam de perspectiva com o movimento do corpo, criando efeitos visuais dinâmicos.</p>
+              <h4 className="font-bold text-purple-800 mb-2">Tatuagens Interativas</h4>
+              <p className="text-gray-700">Designs que mudam de perspectiva com o movimento do corpo, criando efeitos visuais dinâmicos.</p>
             </div>
           </div>
         </div>
 
-        <div class="bg-gradient-to-r from-red-600 to-red-800 text-white p-8 rounded-xl my-12">
-          <h3 class="text-2xl font-black mb-4">💡 Dica de Ouro para Tatuadores</h3>
-          <p class="text-red-100 text-lg leading-relaxed">Não tente seguir todas as tendências ao mesmo tempo. Escolha 2-3 estilos que mais ressoam com sua personalidade artística e domine-os completamente. A especialização é o que diferencia bons tatuadores de tatuadores extraordinários em 2024.</p>
+        <div className="bg-gradient-to-r from-red-600 to-red-800 text-white p-8 rounded-xl my-12">
+          <h3 className="text-2xl font-black mb-4">💡 Dica de Ouro para Tatuadores</h3>
+          <p className="text-red-100 text-lg leading-relaxed">Não tente seguir todas as tendências ao mesmo tempo. Escolha 2-3 estilos que mais ressoam com sua personalidade artística e domine-os completamente. A especialização é o que diferencia bons tatuadores de tatuadores extraordinários em 2024.</p>
         </div>
 
-        <h2 class="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🎯 Conclusão: O Futuro é Agora</h2>
+        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🎯 Conclusão: O Futuro é Agora</h2>
         
-        <p class="mb-6 leading-relaxed text-gray-700 text-lg">As tendências de 2024 mostram que a tatuagem está se tornando cada vez mais uma forma de arte sofisticada e personalizada. Os clientes estão mais educados, exigentes e dispostos a investir em qualidade.</p>
+        <p className="mb-6 leading-relaxed text-gray-700 text-lg">As tendências de 2024 mostram que a tatuagem está se tornando cada vez mais uma forma de arte sofisticada e personalizada. Os clientes estão mais educados, exigentes e dispostos a investir em qualidade.</p>
         
-        <p class="mb-8 leading-relaxed text-gray-700 text-lg">Para nós, tatuadores, isso significa uma oportunidade única de elevar nosso craft e construir carreiras verdadeiramente sustentáveis. O mercado está aquecido, as oportunidades são infinitas, e a única limitação é nossa própria criatividade.</p>
+        <p className="mb-8 leading-relaxed text-gray-700 text-lg">Para nós, tatuadores, isso significa uma oportunidade única de elevar nosso craft e construir carreiras verdadeiramente sustentáveis. O mercado está aquecido, as oportunidades são infinitas, e a única limitação é nossa própria criatividade.</p>
         
-        <div class="bg-yellow-50 border-2 border-yellow-300 p-6 rounded-xl">
-          <p class="text-yellow-800 font-semibold text-lg">👉 <strong>E você, qual tendência mais te chamou atenção?</strong> Conta pra gente nos comentários qual estilo você pretende explorar nos próximos meses!</p>
+        <div className="bg-yellow-50 border-2 border-yellow-300 p-6 rounded-xl">
+          <p className="text-yellow-800 font-semibold text-lg">👉 <strong>E você, qual tendência mais te chamou atenção?</strong> Conta pra gente nos comentários qual estilo você pretende explorar nos próximos meses!</p>
         </div>
       </div>
     `,
@@ -432,7 +441,7 @@ export const mockBlogArticles: BlogArticle[] = [
 
 // Mock blog service implementation
 export const mockBlogService = {
-  fetchBlogPosts: async (params = {}) => {
+  fetchBlogPosts: async (params: BlogServiceParams = {}) => {
     const { page = 1, limit = 10, category, search, sort = 'latest' } = params;
     
     let filteredArticles = [...mockBlogArticles];
