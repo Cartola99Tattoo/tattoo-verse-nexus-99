@@ -432,13 +432,164 @@ export const mockBlogArticles: BlogArticle[] = [
 
 // Mock blog service implementation
 export const mockBlogService = {
-  getArticles: async () => mockBlogArticles,
-  getArticleBySlug: async (slug: string) => mockBlogArticles.find(article => article.slug === slug),
-  getArticlesByCategory: async (category: string) => {
-    if (category === "Todos") return mockBlogArticles;
-    return mockBlogArticles.filter(article => article.category === category);
+  fetchBlogPosts: async (params = {}) => {
+    const { page = 1, limit = 10, category, search, sort = 'latest' } = params;
+    
+    let filteredArticles = [...mockBlogArticles];
+    
+    // Filter by category
+    if (category && category !== 'Todos') {
+      filteredArticles = filteredArticles.filter(article => article.category === category);
+    }
+    
+    // Filter by search
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredArticles = filteredArticles.filter(article => 
+        article.title.toLowerCase().includes(searchLower) ||
+        article.excerpt.toLowerCase().includes(searchLower) ||
+        article.tags.some(tag => tag.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    // Sort articles
+    if (sort === 'popular') {
+      filteredArticles.sort((a, b) => b.stats.views - a.stats.views);
+    } else if (sort === 'oldest') {
+      filteredArticles.sort((a, b) => new Date(a.publishDate).getTime() - new Date(b.publishDate).getTime());
+    } else {
+      filteredArticles.sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+    }
+    
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedArticles = filteredArticles.slice(startIndex, endIndex);
+    
+    return {
+      posts: paginatedArticles.map(article => ({
+        id: article.id.toString(),
+        title: article.title,
+        slug: article.slug,
+        excerpt: article.excerpt,
+        cover_image: article.coverImage,
+        category: article.category,
+        author: article.author.name,
+        published_at: article.publishDate,
+        created_at: article.publishDate,
+        updated_at: article.publishDate,
+        status: article.status,
+        tags: article.tags,
+        views: article.stats.views,
+        likes: article.stats.likes,
+        comments_count: article.stats.comments
+      })),
+      totalPosts: filteredArticles.length,
+      totalPages: Math.ceil(filteredArticles.length / limit),
+      currentPage: page
+    };
   },
-  getFeaturedArticles: async () => mockBlogArticles.filter(article => article.featured)
+
+  fetchBlogCategories: async () => {
+    const categories = Array.from(new Set(mockBlogArticles.map(article => article.category)));
+    return categories.map(category => ({
+      id: category.toLowerCase().replace(/\s+/g, '-'),
+      name: category,
+      description: `Artigos sobre ${category}`,
+      created_at: new Date().toISOString()
+    }));
+  },
+
+  fetchBlogPost: async (idOrSlug: string) => {
+    const article = mockBlogArticles.find(article => 
+      article.id.toString() === idOrSlug || article.slug === idOrSlug
+    );
+    
+    if (!article) return null;
+    
+    return {
+      id: article.id.toString(),
+      title: article.title,
+      slug: article.slug,
+      content: article.content,
+      excerpt: article.excerpt,
+      cover_image: article.coverImage,
+      category: article.category,
+      author: article.author.name,
+      published_at: article.publishDate,
+      created_at: article.publishDate,
+      updated_at: article.publishDate,
+      status: article.status,
+      tags: article.tags,
+      views: article.stats.views,
+      likes: article.stats.likes,
+      comments_count: article.stats.comments,
+      meta_title: article.title,
+      meta_description: article.excerpt,
+      meta_keywords: article.tags.join(', ')
+    };
+  },
+
+  fetchRelatedPosts: async (postId: string, limit = 3) => {
+    const currentArticle = mockBlogArticles.find(article => article.id.toString() === postId);
+    if (!currentArticle) return [];
+    
+    const relatedArticles = mockBlogArticles
+      .filter(article => 
+        article.id.toString() !== postId && 
+        article.category === currentArticle.category
+      )
+      .slice(0, limit);
+    
+    return relatedArticles.map(article => ({
+      id: article.id.toString(),
+      title: article.title,
+      slug: article.slug,
+      excerpt: article.excerpt,
+      cover_image: article.coverImage,
+      category: article.category,
+      author: article.author.name,
+      published_at: article.publishDate,
+      created_at: article.publishDate,
+      updated_at: article.publishDate,
+      status: article.status,
+      tags: article.tags,
+      views: article.stats.views,
+      likes: article.stats.likes,
+      comments_count: article.stats.comments
+    }));
+  },
+
+  fetchTagsList: async () => {
+    const allTags = mockBlogArticles.flatMap(article => article.tags);
+    return Array.from(new Set(allTags));
+  },
+
+  searchBlogPosts: async (query: string) => {
+    const searchLower = query.toLowerCase();
+    const filteredArticles = mockBlogArticles.filter(article => 
+      article.title.toLowerCase().includes(searchLower) ||
+      article.excerpt.toLowerCase().includes(searchLower) ||
+      article.tags.some(tag => tag.toLowerCase().includes(searchLower))
+    );
+    
+    return filteredArticles.map(article => ({
+      id: article.id.toString(),
+      title: article.title,
+      slug: article.slug,
+      excerpt: article.excerpt,
+      cover_image: article.coverImage,
+      category: article.category,
+      author: article.author.name,
+      published_at: article.publishDate,
+      created_at: article.publishDate,
+      updated_at: article.publishDate,
+      status: article.status,
+      tags: article.tags,
+      views: article.stats.views,
+      likes: article.stats.likes,
+      comments_count: article.stats.comments
+    }));
+  }
 };
 
 // Function exports for compatibility
