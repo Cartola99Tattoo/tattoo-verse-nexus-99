@@ -5,131 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Clock, Search, ArrowRight, Eye, Filter, SlidersHorizontal } from "lucide-react";
-
-// Dados mock expandidos e mais abundantes
-const blogPosts = [
-  {
-    id: 1,
-    title: "Tendências de Tatuagem 2024: O Que Está Dominando o Mercado",
-    slug: "tendencias-tatuagem-2024",
-    excerpt: "Explore as principais tendências que estão moldando o mundo da tatuagem neste ano, desde o minimalismo até técnicas inovadoras que revolucionam a arte corporal.",
-    author: "Carolina Silva",
-    date: "2024-01-15",
-    category: "Tendências",
-    readTime: "8 min",
-    image: "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=800&auto=format&fit=crop&q=60",
-    featured: true,
-    views: 2450,
-    likes: 189,
-    tags: ["tendências", "2024", "estilos", "minimalismo"]
-  },
-  {
-    id: 2,
-    title: "Cuidados Pós-Tatuagem: Guia Completo para Cicatrização Perfeita",
-    slug: "cuidados-pos-tatuagem-guia-completo",
-    excerpt: "Um guia detalhado e científico sobre como cuidar adequadamente de uma tatuagem recém-feita para garantir a melhor cicatrização e preservar as cores.",
-    author: "Dr. Ricardo Mendes",
-    date: "2024-01-12",
-    category: "Cuidados",
-    readTime: "10 min",
-    image: "https://images.unsplash.com/photo-1542856391-010fb87dcfed?w=800&auto=format&fit=crop&q=60",
-    featured: false,
-    views: 1890,
-    likes: 234,
-    tags: ["cuidados", "cicatrização", "pomadas", "saúde"]
-  },
-  {
-    id: 3,
-    title: "Marketing Digital para Tatuadores: Construindo sua Marca Online",
-    slug: "marketing-digital-tatuadores",
-    excerpt: "Estratégias eficazes de marketing digital para tatuadores que querem expandir sua clientela, fortalecer sua marca pessoal e aumentar o faturamento do estúdio.",
-    author: "Ana Paula Costa",
-    date: "2024-01-10",
-    category: "Marketing",
-    readTime: "12 min",
-    image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&auto=format&fit=crop&q=60",
-    featured: false,
-    views: 1340,
-    likes: 98,
-    tags: ["marketing", "redes sociais", "instagram", "negócios"]
-  },
-  {
-    id: 4,
-    title: "Técnicas de Sombreamento: Dominando o Blackwork Contemporâneo",
-    slug: "tecnicas-sombreamento-blackwork",
-    excerpt: "Aprenda as técnicas fundamentais e avançadas de sombreamento no estilo blackwork. Domine as transições, contrastes e efeitos tridimensionais.",
-    author: "Marcos Oliveira",
-    date: "2024-01-08",
-    category: "Técnicas",
-    readTime: "15 min",
-    image: "https://images.unsplash.com/photo-1543767271-7c5f36dc5310?w=800&auto=format&fit=crop&q=60",
-    featured: false,
-    views: 890,
-    likes: 145,
-    tags: ["blackwork", "sombreamento", "técnicas", "tutorial"]
-  },
-  {
-    id: 5,
-    title: "História da Tatuagem: Das Origens Ancestrais aos Dias Atuais",
-    slug: "historia-tatuagem-origens",
-    excerpt: "Uma jornada fascinante através da rica história da tatuagem, desde suas origens ancestrais até as tendências modernas que moldaram esta arte milenar.",
-    author: "Prof. Helena Ribeiro",
-    date: "2024-01-05",
-    category: "História",
-    readTime: "18 min",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&auto=format&fit=crop&q=60",
-    featured: false,
-    views: 1230,
-    likes: 156,
-    tags: ["história", "cultura", "tradição", "ancestral"]
-  },
-  {
-    id: 6,
-    title: "Equipamentos Essenciais: O Kit Completo do Tatuador Profissional 2024",
-    slug: "equipamentos-essenciais-tatuador-2024",
-    excerpt: "Descubra quais são os equipamentos indispensáveis para qualquer tatuador profissional, desde máquinas até materiais de higiene e segurança.",
-    author: "Roberto Santos",
-    date: "2024-01-03",
-    category: "Equipamentos",
-    readTime: "14 min",
-    image: "https://images.unsplash.com/photo-1606830713264-f1b9f00a0e4d?w=800&auto=format&fit=crop&q=60",
-    featured: false,
-    views: 1100,
-    likes: 87,
-    tags: ["equipamentos", "máquinas", "materiais", "profissional"]
-  },
-  {
-    id: 7,
-    title: "Tatuagem Realista: Segredos dos Mestres da Arte Hiper-Realista",
-    slug: "tatuagem-realista-segredos-mestres",
-    excerpt: "Entre no universo da tatuagem realista e descubra as técnicas secretas dos grandes mestres para criar obras de arte que parecem fotografias na pele.",
-    author: "Luciana Ferreira",
-    date: "2024-01-01",
-    category: "Estilos",
-    readTime: "16 min",
-    image: "https://images.unsplash.com/photo-1564131072-6c4d41e23ba6?w=800&auto=format&fit=crop&q=60",
-    featured: false,
-    views: 980,
-    likes: 201,
-    tags: ["realismo", "técnicas", "mestres", "hiper-realista"]
-  },
-  {
-    id: 8,
-    title: "Precificação de Tatuagens: Como Cobrar o Valor Justo pelo seu Trabalho",
-    slug: "precificacao-tatuagens-valor-justo",
-    excerpt: "Aprenda a calcular corretamente o preço das suas tatuagens considerando tempo, materiais, experiência e valor de mercado. Valorize seu trabalho!",
-    author: "Fernando Almeida",
-    date: "2023-12-28",
-    category: "Negócios",
-    readTime: "11 min",
-    image: "https://images.unsplash.com/photo-1579952363873-27d3bfad9c0d?w=800&auto=format&fit=crop&q=60",
-    featured: false,
-    views: 1560,
-    likes: 312,
-    tags: ["precificação", "negócios", "valores", "estúdio"]
-  }
-];
+import { Calendar, User, Clock, Search, ArrowRight, Eye, SlidersHorizontal } from "lucide-react";
+import { getAllArticles, getArticlesByCategory, BlogArticle } from "@/services/mock/mockBlogService";
 
 const categories = [
   "Todos", 
@@ -146,10 +23,12 @@ const categories = [
 const TattooArtistsBlog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
-  const [sortBy, setSortBy] = useState("recent"); // recent, popular, alphabetical
+  const [sortBy, setSortBy] = useState("recent");
   const navigate = useNavigate();
 
-  const filteredPosts = blogPosts.filter(post => {
+  const allArticles = getAllArticles();
+  
+  const filteredPosts = allArticles.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -160,17 +39,17 @@ const TattooArtistsBlog = () => {
   // Ordenação dos posts
   const sortedPosts = [...filteredPosts].sort((a, b) => {
     switch (sortBy) {
-      case 'popular': return b.views - a.views;
+      case 'popular': return b.stats.views - a.stats.views;
       case 'alphabetical': return a.title.localeCompare(b.title);
       case 'recent':
-      default: return new Date(b.date).getTime() - new Date(a.date).getTime();
+      default: return new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime();
     }
   });
 
-  const featuredPost = blogPosts.find(post => post.featured);
+  const featuredPost = sortedPosts.find(post => post.featured);
   const regularPosts = sortedPosts.filter(post => !post.featured);
 
-  const handlePostClick = (post: any) => {
+  const handlePostClick = (post: BlogArticle) => {
     navigate(`/tatuadores-da-nova-era/blog/${post.slug}`);
   };
 
@@ -280,7 +159,7 @@ const TattooArtistsBlog = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                 <div className="h-64 lg:h-auto overflow-hidden rounded-l-2xl">
                   <img
-                    src={featuredPost.image}
+                    src={featuredPost.coverImage}
                     alt={featuredPost.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 shadow-2xl"
                   />
@@ -306,19 +185,19 @@ const TattooArtistsBlog = () => {
                   <div className="flex items-center gap-6 text-sm text-gray-600 mb-8">
                     <div className="flex items-center">
                       <User className="h-5 w-5 mr-2 text-red-500" />
-                      <span className="font-medium">{featuredPost.author}</span>
+                      <span className="font-medium">{featuredPost.author.name}</span>
                     </div>
                     <div className="flex items-center">
                       <Calendar className="h-5 w-5 mr-2 text-red-500" />
-                      <span>{new Date(featuredPost.date).toLocaleDateString('pt-BR')}</span>
+                      <span>{new Date(featuredPost.publishDate).toLocaleDateString('pt-BR')}</span>
                     </div>
                     <div className="flex items-center">
                       <Clock className="h-5 w-5 mr-2 text-red-500" />
-                      <span>{featuredPost.readTime} de leitura</span>
+                      <span>{featuredPost.stats.readTime} de leitura</span>
                     </div>
                     <div className="flex items-center">
                       <Eye className="h-5 w-5 mr-2 text-red-500" />
-                      <span>{featuredPost.views.toLocaleString()}</span>
+                      <span>{featuredPost.stats.views.toLocaleString()}</span>
                     </div>
                   </div>
                   
@@ -350,7 +229,7 @@ const TattooArtistsBlog = () => {
               >
                 <div className="h-48 overflow-hidden rounded-t-2xl">
                   <img
-                    src={post.image}
+                    src={post.coverImage}
                     alt={post.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 shadow-lg"
                   />
@@ -363,7 +242,7 @@ const TattooArtistsBlog = () => {
                     </Badge>
                     <div className="flex items-center text-xs text-gray-500">
                       <Eye className="h-3 w-3 mr-1" />
-                      {post.views}
+                      {post.stats.views}
                     </div>
                   </div>
                   
@@ -378,17 +257,17 @@ const TattooArtistsBlog = () => {
                   <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-1 text-red-500" />
-                      <span className="font-medium">{post.author}</span>
+                      <span className="font-medium">{post.author.name}</span>
                     </div>
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-1 text-red-500" />
-                      <span>{post.readTime}</span>
+                      <span>{post.stats.readTime}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500 font-medium">
-                      {new Date(post.date).toLocaleDateString('pt-BR')}
+                      {new Date(post.publishDate).toLocaleDateString('pt-BR')}
                     </span>
                     <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400 font-semibold">
                       Ler mais
