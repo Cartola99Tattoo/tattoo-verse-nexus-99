@@ -1,4 +1,3 @@
-
 // Serviço centralizado para dados mock do blog
 export interface Author {
   name: string;
@@ -431,12 +430,22 @@ export const mockBlogArticles: BlogArticle[] = [
   // Adicionar mais 14 artigos com conteúdo similarmente detalhado...
 ];
 
-// Função para obter artigo por slug
+// Mock blog service implementation
+export const mockBlogService = {
+  getArticles: async () => mockBlogArticles,
+  getArticleBySlug: async (slug: string) => mockBlogArticles.find(article => article.slug === slug),
+  getArticlesByCategory: async (category: string) => {
+    if (category === "Todos") return mockBlogArticles;
+    return mockBlogArticles.filter(article => article.category === category);
+  },
+  getFeaturedArticles: async () => mockBlogArticles.filter(article => article.featured)
+};
+
+// Function exports for compatibility
 export const getArticleBySlug = (slug: string): BlogArticle | undefined => {
   return mockBlogArticles.find(article => article.slug === slug);
 };
 
-// Função para obter artigos relacionados
 export const getRelatedArticles = (currentArticle: BlogArticle, limit: number = 3): BlogArticle[] => {
   return mockBlogArticles
     .filter(article => 
@@ -446,12 +455,10 @@ export const getRelatedArticles = (currentArticle: BlogArticle, limit: number = 
     .slice(0, limit);
 };
 
-// Função para obter todos os artigos
 export const getAllArticles = (): BlogArticle[] => {
   return mockBlogArticles;
 };
 
-// Função para obter artigos por categoria
 export const getArticlesByCategory = (category: string): BlogArticle[] => {
   if (category === "Todos") return mockBlogArticles;
   return mockBlogArticles.filter(article => article.category === category);

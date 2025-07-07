@@ -131,7 +131,7 @@ const TattooArtistsBlogArticle = () => {
         </div>
         <div>
           <h3 className="text-2xl font-bold text-orange-800 mb-3">{event.title}</h3>
-          <p class="text-gray-700 mb-4 leading-relaxed">{event.description}</p>
+          <p className="text-gray-700 mb-4 leading-relaxed">{event.description}</p>
           <div className="space-y-2 mb-4 text-gray-700">
             <div className="flex items-center">
               <CalendarIcon className="h-4 w-4 mr-2 text-orange-600" />
