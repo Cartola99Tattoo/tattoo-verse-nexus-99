@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Users, ShoppingCart, Calendar, Award, User } from "lucide-react";
+import { Menu, X, Home, Users, ShoppingCart, Calendar, Award, User, BookOpen } from "lucide-react";
 import { useState } from 'react';
 import ShopCartButton from "@/components/shop/ShopCartButton";
 
@@ -21,6 +21,7 @@ const TattooArtistLayout: React.FC<TattooArtistLayoutProps> = ({ children }) => 
   const navItems = [
     { path: '/tatuadores-da-nova-era', label: 'Início', icon: Home },
     { path: '/tatuadores-da-nova-era/artistas', label: 'Artistas', icon: Users },
+    { path: '/tatuadores-da-nova-era/blog', label: 'Blog', icon: BookOpen },
     { path: '/tatuadores-da-nova-era/shop', label: 'Loja', icon: ShoppingCart },
     { path: '/sobre', label: 'Sobre', icon: Award },
     { path: '/contato', label: 'Contato', icon: Calendar },
