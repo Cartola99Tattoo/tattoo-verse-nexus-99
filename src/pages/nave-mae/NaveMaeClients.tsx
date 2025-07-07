@@ -1,12 +1,12 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Search, Filter, Plus, Star, Calendar, Phone, Mail } from "lucide-react";
+import { Users, Search, Filter, Plus, Star, Calendar, Phone, Mail, Edit, Trash2, Eye } from "lucide-react";
 import NaveMaeLayout from "@/components/layouts/NaveMaeLayout";
+import ClientModal from "@/components/nave-mae/ClientModal";
 
 const mockClients = [
   {
@@ -57,14 +57,49 @@ const NaveMaeClients = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [tierFilter, setTierFilter] = useState("all");
+  const [clients, setClients] = useState(mockClients);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
 
-  const filteredClients = mockClients.filter(client => {
+  const filteredClients = clients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          client.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || client.status === statusFilter;
     const matchesTier = tierFilter === 'all' || client.loyaltyTier === tierFilter;
     return matchesSearch && matchesStatus && matchesTier;
   });
+
+  const handleSaveClient = (clientData) => {
+    if (clientData.id) {
+      // Update existing client
+      setClients(prev => prev.map(client => 
+        client.id === clientData.id ? { ...client, ...clientData } : client
+      ));
+    } else {
+      // Add new client
+      const newClient = {
+        ...clientData,
+        id: Math.max(...clients.map(c => c.id)) + 1,
+        totalSpent: 0,
+        appointments: 0,
+        lastVisit: new Date().toISOString().split('T')[0],
+        rating: 0
+      };
+      setClients(prev => [...prev, newClient]);
+    }
+    setSelectedClient(null);
+  };
+
+  const handleEditClient = (client) => {
+    setSelectedClient(client);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteClient = (clientId) => {
+    if (confirm('Tem certeza que deseja excluir este cliente?')) {
+      setClients(prev => prev.filter(client => client.id !== clientId));
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -84,9 +119,9 @@ const NaveMaeClients = () => {
     }
   };
 
-  const totalClients = mockClients.length;
-  const activeClients = mockClients.filter(c => c.status === 'active').length;
-  const totalRevenue = mockClients.reduce((acc, c) => acc + c.totalSpent, 0);
+  const totalClients = clients.length;
+  const activeClients = clients.filter(c => c.status === 'active').length;
+  const totalRevenue = clients.reduce((acc, c) => acc + c.totalSpent, 0);
 
   return (
     <NaveMaeLayout>
@@ -181,7 +216,13 @@ const NaveMaeClients = () => {
                   </SelectContent>
                 </Select>
                 
-                <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800">
+                <Button 
+                  onClick={() => {
+                    setSelectedClient(null);
+                    setIsModalOpen(true);
+                  }}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Novo Cliente
                 </Button>
@@ -249,10 +290,23 @@ const NaveMaeClients = () => {
                 
                 <div className="flex gap-2 mt-4">
                   <Button size="sm" variant="outline" className="flex-1">
-                    Ver Perfil
+                    <Eye className="h-3 w-3 mr-1" />
+                    Ver
                   </Button>
-                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
-                    Editar
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleEditClient(client)}
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => handleDeleteClient(client.id)}
+                  >
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </CardContent>
@@ -272,6 +326,16 @@ const NaveMaeClients = () => {
             </p>
           </div>
         )}
+
+        <ClientModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedClient(null);
+          }}
+          client={selectedClient}
+          onSave={handleSaveClient}
+        />
       </div>
     </NaveMaeLayout>
   );
