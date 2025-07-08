@@ -30,8 +30,8 @@ const TattooArtistLayout: React.FC<TattooArtistLayoutProps> = ({ children }) => 
 
   const handleProfileClick = () => {
     if (isLoggedIn) {
-      // Redireciona para o perfil do tatuador logado
-      window.location.href = `/tatuadores-da-nova-era/perfil/${loggedTattooArtistId}`;
+      // Redireciona para o perfil pessoal do tatuador logado
+      window.location.href = `/tatuadores-da-nova-era/perfil`;
     } else {
       // Redireciona para login/cadastro (implementação futura)
       window.location.href = '/auth';

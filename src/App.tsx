@@ -76,6 +76,7 @@ import TattooArtistsProductDetail from '@/pages/tattoo-artists/TattooArtistsProd
 import TattooArtistsCart from '@/pages/tattoo-artists/TattooArtistsCart';
 import TattooArtistsCheckout from '@/pages/tattoo-artists/TattooArtistsCheckout';
 import TattooArtistsProfile from '@/pages/tattoo-artists/TattooArtistsProfile';
+import TattooArtistsPersonalProfile from '@/pages/tattoo-artists/TattooArtistsPersonalProfile';
 import TattooArtistsCostCalculator from '@/pages/tattoo-artists/TattooArtistsCostCalculator';
 
 const queryClient = new QueryClient({
@@ -162,6 +163,7 @@ function App() {
                     <Route path="/tatuadores-da-nova-era/produto/:id" element={<TattooArtistsProductDetail />} />
                     <Route path="/tatuadores-da-nova-era/carrinho" element={<TattooArtistsCart />} />
                     <Route path="/tatuadores-da-nova-era/checkout" element={<TattooArtistsCheckout />} />
+                    <Route path="/tatuadores-da-nova-era/perfil" element={<TattooArtistsPersonalProfile />} />
                     <Route path="/tatuadores-da-nova-era/perfil/:id" element={<TattooArtistsProfile />} />
                     <Route path="/tatuadores-da-nova-era/blog" element={<TattooArtistsBlog />} />
                     <Route path="/tatuadores-da-nova-era/blog/:articleId" element={<TattooArtistsBlogArticle />} />
