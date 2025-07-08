@@ -71,6 +71,15 @@ export interface BlogArticle {
   events: Event[];
 }
 
+// Interface para parâmetros do serviço de blog
+export interface BlogServiceParams {
+  page?: number;
+  limit?: number;
+  category?: string;
+  search?: string;
+  sort?: 'latest' | 'popular' | 'oldest';
+}
+
 // Autores mock
 const mockAuthors: Author[] = [
   {
@@ -426,13 +435,141 @@ export const mockBlogArticles: BlogArticle[] = [
     products: [mockProducts[0], mockProducts[1]],
     services: [mockServices[0]],
     events: [mockEvents[0]]
+  },
+  {
+    id: 2,
+    title: "Cuidados Essenciais com Tatuagem Recém-Feita: Guia Completo",
+    slug: "cuidados-tatuagem-recem-feita-guia-completo",
+    excerpt: "Descubra todos os cuidados necessários para garantir uma cicatrização perfeita da sua nova tatuagem, desde os primeiros minutos até a cicatrização completa.",
+    content: `
+      <div class="article-content">
+        <p class="text-xl text-gray-700 leading-relaxed mb-8 font-medium">Uma tatuagem bem cuidada é uma tatuagem que durará toda a vida com as cores vibrantes e traços definidos. Aqui está tudo que você precisa saber sobre cuidados pós-tatuagem.</p>
+        
+        <h2 class="text-red-600 font-black text-3xl mt-12 mb-8">Primeiras 24 Horas: Críticas para o Sucesso</h2>
+        <p class="mb-6 leading-relaxed text-gray-700 text-lg">As primeiras horas após fazer a tatuagem são fundamentais para uma boa cicatrização. Neste período, sua pele está mais vulnerável e precisa de cuidados específicos.</p>
+        
+        <ul class="list-disc ml-6 space-y-3 mb-8">
+          <li>Mantenha o filme plástico por 2-4 horas</li>
+          <li>Lave com sabão neutro e água morna</li>
+          <li>Seque com papel toalha limpo</li>
+          <li>Aplique pomada cicatrizante em camada fina</li>
+        </ul>
+      </div>
+    `,
+    category: "Cuidados",
+    status: "published",
+    author: mockAuthors[1],
+    publishDate: "2024-01-10",
+    stats: {
+      views: 1890,
+      likes: 156,
+      comments: 28,
+      shares: 45,
+      readTime: "6 min"
+    },
+    featured: false,
+    coverImage: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=800&auto=format&fit=crop&q=60",
+    inlineImages: [],
+    tags: ["cuidados", "cicatrização", "saúde", "dicas"],
+    products: [mockProducts[2]],
+    services: [],
+    events: []
+  },
+  {
+    id: 3,
+    title: "Marketing Digital para Tatuadores: Como Atrair Mais Clientes",
+    slug: "marketing-digital-tatuadores-atrair-clientes",
+    excerpt: "Estratégias comprovadas de marketing digital específicas para tatuadores que querem expandir sua clientela e construir uma marca forte no mercado.",
+    content: `
+      <div class="article-content">
+        <p class="text-xl text-gray-700 leading-relaxed mb-8 font-medium">No mundo digital de hoje, ter talento não é suficiente. É preciso saber como mostrar seu trabalho para as pessoas certas. Vou compartilhar as estratégias que funcionam de verdade.</p>
+        
+        <h2 class="text-red-600 font-black text-3xl mt-12 mb-8">Instagram: Sua Vitrine Principal</h2>
+        <p class="mb-6 leading-relaxed text-gray-700 text-lg">O Instagram continua sendo a plataforma mais importante para tatuadores. Mas não basta apenas postar fotos - é preciso ter estratégia.</p>
+      </div>
+    `,
+    category: "Marketing",
+    status: "published",
+    author: mockAuthors[2],
+    publishDate: "2024-01-08",
+    stats: {
+      views: 2100,
+      likes: 187,
+      comments: 42,
+      shares: 89,
+      readTime: "7 min"
+    },
+    featured: false,
+    coverImage: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&auto=format&fit=crop&q=60",
+    inlineImages: [],
+    tags: ["marketing", "redes sociais", "negócios", "estratégia"],
+    products: [],
+    services: [mockServices[1]],
+    events: []
+  },
+  {
+    id: 4,
+    title: "Técnicas de Sombreamento: Dominando o Realismo",
+    slug: "tecnicas-sombreamento-dominando-realismo",
+    excerpt: "Aprenda as técnicas avançadas de sombreamento que separam tatuadores iniciantes dos mestres, com foco em realismo e profundidade.",
+    content: `
+      <div class="article-content">
+        <p class="text-xl text-gray-700 leading-relaxed mb-8 font-medium">O sombreamento é a alma do realismo em tatuagem. É o que transforma um desenho plano em uma obra tridimensional que ganha vida na pele.</p>
+      </div>
+    `,
+    category: "Técnicas",
+    status: "published",
+    author: mockAuthors[3],
+    publishDate: "2024-01-05",
+    stats: {
+      views: 1650,
+      likes: 142,
+      comments: 31,
+      shares: 38,
+      readTime: "9 min"
+    },
+    featured: false,
+    coverImage: "https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=800&auto=format&fit=crop&q=60",
+    inlineImages: [],
+    tags: ["técnicas", "realismo", "sombreamento", "avançado"],
+    products: [mockProducts[0]],
+    services: [],
+    events: [mockEvents[0]]
+  },
+  {
+    id: 5,
+    title: "História da Tatuagem: Das Origens aos Dias Atuais",
+    slug: "historia-tatuagem-origens-dias-atuais",
+    excerpt: "Uma jornada fascinante pela história milenar da tatuagem, desde as primeiras civilizações até as tendências contemporâneas.",
+    content: `
+      <div class="article-content">
+        <p class="text-xl text-gray-700 leading-relaxed mb-8 font-medium">A tatuagem é uma das formas de arte mais antigas da humanidade, com evidências que remontam a mais de 5.000 anos. Vamos explorar essa rica história.</p>
+      </div>
+    `,
+    category: "História",
+    status: "published",
+    author: mockAuthors[4],
+    publishDate: "2024-01-03",
+    stats: {
+      views: 1420,
+      likes: 98,
+      comments: 22,
+      shares: 31,
+      readTime: "12 min"
+    },
+    featured: false,
+    coverImage: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&auto=format&fit=crop&q=60",
+    inlineImages: [],
+    tags: ["história", "cultura", "antropologia", "tradições"],
+    products: [],
+    services: [],
+    events: []
   }
-  // Adicionar mais 14 artigos com conteúdo similarmente detalhado...
 ];
 
 // Mock blog service implementation
 export const mockBlogService = {
-  fetchBlogPosts: async (params = {}) => {
+  fetchBlogPosts: async (params: BlogServiceParams = {}) => {
     const { page = 1, limit = 10, category, search, sort = 'latest' } = params;
     
     let filteredArticles = [...mockBlogArticles];
