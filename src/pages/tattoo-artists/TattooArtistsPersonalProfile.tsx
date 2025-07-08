@@ -24,10 +24,12 @@ import {
   CheckCircle,
   Clock,
   Star,
-  Award
+  Award,
+  Package
 } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
+import StockManagementTool from "@/components/tattoo-artists/StockManagementTool";
 
 // Mock data for tattoo artist profile
 const mockProfile = {
@@ -484,6 +486,39 @@ const TattooArtistsPersonalProfile = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Stock Management Tool - Ferramenta Exclusiva */}
+        <Card className="border-2 border-red-200 bg-gradient-to-r from-red-50 to-red-100">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-700">
+              <Package className="h-5 w-5" />
+              Gestão de Estoque Pessoal
+              <Badge className="bg-red-600 text-white">Exclusivo</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-700 mb-4">
+              Ferramenta exclusiva para gerenciar o estoque do seu estúdio, receber alertas de reposição 
+              e gerar listas de compras inteligentes conectadas à nossa loja.
+            </p>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white">
+                  <Package className="h-4 w-4 mr-2" />
+                  Acessar Ferramenta
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-red-600">Gestão de Estoque Pessoal</DialogTitle>
+                </DialogHeader>
+                <StockManagementTool />
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
+
+        <Separator />
+
         {/* Filter */}
         <div className="flex gap-2">
           <Button 
