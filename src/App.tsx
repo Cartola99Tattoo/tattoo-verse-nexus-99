@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { CartProvider } from '@/contexts/CartContext';
-import { ShopCartProvider } from '@/contexts/ShopCartContext';
+import { CartProvider as LegacyCartProvider } from '@/contexts/CartContext';
+import { CartProvider } from '@/contexts/ShopCartContext';
 import { EcosistemaAuthProvider } from '@/contexts/EcosistemaAuthContext';
 
 // Main pages
@@ -48,18 +49,8 @@ import AdminSecurity from '@/pages/admin/Security';
 import AdminProjects from '@/pages/admin/Projects';
 
 // Tattoo Artists pages
-import TattooArtists from '@/pages/tatuadores-da-nova-era/TattooArtists';
 import TattooArtistsBlog from '@/pages/tatuadores-da-nova-era/TattooArtistsBlog';
 import TattooArtistsBlogArticle from '@/pages/tatuadores-da-nova-era/TattooArtistsBlogArticle';
-
-// Nave Mae routes
-import NaveMaeHome from '@/pages/nave-mae/NaveMaeHome';
-
-// Login routes
-import Login from '@/pages/Login';
-
-// Register routes
-import Register from '@/pages/Register';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,8 +66,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <EcosistemaAuthProvider>
         <AuthProvider>
-          <CartProvider>
-            <ShopCartProvider>
+          <LegacyCartProvider>
+            <CartProvider>
               <Router>
                 <div className="App">
                   <Routes>
@@ -120,18 +111,8 @@ function App() {
                     <Route path="/admin/projects" element={<AdminProjects />} />
 
                     {/* Tattoo Artists routes */}
-                    <Route path="/tatuadores-da-nova-era" element={<TattooArtists />} />
                     <Route path="/tatuadores-da-nova-era/blog" element={<TattooArtistsBlog />} />
                     <Route path="/tatuadores-da-nova-era/blog/:articleId" element={<TattooArtistsBlogArticle />} />
-
-                    {/* Nave Mae routes */}
-                    <Route path="/nave-mae" element={<NaveMaeHome />} />
-
-                    {/* Login routes */}
-                    <Route path="/login" element={<Login />} />
-
-                    {/* Register routes */}
-                    <Route path="/register" element={<Register />} />
 
                     {/* Catch all route */}
                     <Route path="*" element={<NotFound />} />
@@ -139,8 +120,8 @@ function App() {
                 </div>
               </Router>
               <Toaster />
-            </ShopCartProvider>
-          </CartProvider>
+            </CartProvider>
+          </LegacyCartProvider>
         </AuthProvider>
       </EcosistemaAuthProvider>
     </QueryClientProvider>
