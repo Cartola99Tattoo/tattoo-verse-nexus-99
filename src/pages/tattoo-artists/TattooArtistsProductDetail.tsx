@@ -1,59 +1,30 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Award, Share2, Minus, Plus } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Award, Share2, Minus, Plus, Package } from "lucide-react";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
-
-const mockProducts = [
-  {
-    id: 1,
-    name: "Máquina Rotativa Premium Dragon",
-    description: "Máquina rotativa profissional de alta precisão para tatuagem. Desenvolvida com tecnologia de ponta para garantir a melhor performance em seus trabalhos. Motor silencioso e durável, ideal para sessões longas.",
-    fullDescription: "Esta máquina rotativa representa o que há de mais avançado em tecnologia para tatuagem. Construída com materiais de primeira qualidade, oferece precisão milimétrica e controle total sobre o processo. O motor rotativo de alta performance garante movimentos suaves e consistentes, reduzindo a fadiga do tatuador e proporcionando maior conforto ao cliente. Seu design ergonômico foi pensado para longas sessões de trabalho, mantendo o equilíbrio perfeito entre peso e funcionalidade.",
-    price: 1200.00,
-    originalPrice: 1500.00,
-    category: "Equipamentos",
-    brand: "DragonTech",
-    rating: 4.9,
-    reviews: 156,
-    stock: 12,
-    images: [
-      "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=600&fit=crop"
-    ],
-    features: ["Motor silencioso de alta performance", "Ajuste de profundidade preciso", "Peso perfeitamente balanceado", "Garantia estendida de 2 anos", "Design ergonômico profissional", "Compatível com diversos tipos de agulhas"],
-    specifications: {
-      "Voltagem": "110V - 220V",
-      "Frequência": "50-60 Hz",
-      "Peso": "180g",
-      "Material": "Liga de alumínio aeronáutico",
-      "Stroke": "3.5mm ajustável",
-      "Conexão": "RCA padrão"
-    },
-    bestseller: true,
-    freeShipping: true,
-    discount: 20
-  }
-];
+import { getProductById, mockProducts } from "@/data/mockProducts";
+import { useCart } from "@/contexts/ShopCartContext";
 
 const TattooArtistsProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [quantity, setQuantity] = React.useState(1);
-  const [selectedImage, setSelectedImage] = React.useState(0);
+  const { addToCart } = useCart();
+  const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
 
-  // In a real app, this would fetch the product by ID
-  const product = mockProducts[0]; // Using mock data
+  const product = id ? getProductById(id) : undefined;
+  const relatedProducts = mockProducts.filter(p => p.id !== id && p.category === product?.category).slice(0, 4);
 
   if (!product) {
     return (
       <TattooArtistLayout>
         <div className="container mx-auto px-4 py-16">
           <div className="text-center text-white">
+            <Package className="h-16 w-16 mx-auto mb-4 text-white/50" />
             <h1 className="text-2xl font-bold mb-4">Produto não encontrado</h1>
             <Button onClick={() => navigate("/tatuadores-da-nova-era/shop")}>
               Voltar à Loja
@@ -63,6 +34,18 @@ const TattooArtistsProductDetail = () => {
       </TattooArtistLayout>
     );
   }
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0],
+      category: product.category,
+    }, quantity);
+  };
+
+  const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : 0;
 
   return (
     <TattooArtistLayout>
@@ -76,10 +59,10 @@ const TattooArtistsProductDetail = () => {
           Voltar à Loja
         </Button>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-12 mb-12">
           {/* Galeria de Imagens */}
           <div className="space-y-4">
-            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+            <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden">
               <img 
                 src={product.images[selectedImage]} 
                 alt={product.name}
@@ -92,8 +75,8 @@ const TattooArtistsProductDetail = () => {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border-2 ${
-                      selectedImage === index ? 'border-red-500' : 'border-transparent'
+                    className={`w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border-2 transition-colors ${
+                      selectedImage === index ? 'border-red-500' : 'border-transparent hover:border-gray-300'
                     }`}
                   >
                     <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
@@ -106,9 +89,23 @@ const TattooArtistsProductDetail = () => {
           {/* Informações do Produto */}
           <div className="space-y-6">
             <div>
-              <Badge className="mb-4 bg-gradient-to-r from-red-500 to-red-600 text-white">
-                {product.category}
-              </Badge>
+              <div className="flex items-center gap-2 mb-4">
+                <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white">
+                  {product.category}
+                </Badge>
+                {product.isBestseller && (
+                  <Badge className="bg-yellow-500 text-white">
+                    <Award className="h-3 w-3 mr-1" />
+                    Best Seller
+                  </Badge>
+                )}
+                {product.isNew && (
+                  <Badge className="bg-green-500 text-white">
+                    Novo
+                  </Badge>
+                )}
+              </div>
+              
               <h1 className="text-3xl font-bold text-white mb-2">{product.name}</h1>
               <p className="text-gray-300 mb-4">{product.brand}</p>
               
@@ -126,47 +123,33 @@ const TattooArtistsProductDetail = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <span className="text-4xl font-bold text-red-400">R$ {product.price.toFixed(2)}</span>
-                {product.originalPrice > product.price && (
+                {product.originalPrice && product.originalPrice > product.price && (
                   <>
                     <span className="text-xl text-gray-500 line-through">R$ {product.originalPrice.toFixed(2)}</span>
-                    <Badge className="bg-red-100 text-red-800">-{product.discount}%</Badge>
+                    <Badge className="bg-red-100 text-red-800">-{discount}%</Badge>
                   </>
                 )}
               </div>
               <p className="text-gray-300">em até 12x de R$ {(product.price / 12).toFixed(2)} sem juros</p>
               
-              {product.freeShipping && (
-                <div className="flex items-center gap-2 text-green-400">
-                  <Truck className="h-5 w-5" />
-                  <span>Frete Grátis para todo o Brasil</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2 text-green-400">
+                <Truck className="h-5 w-5" />
+                <span>Frete Grátis para todo o Brasil</span>
+              </div>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white">Descrição</h3>
-              <p className="text-gray-300 leading-relaxed">{product.fullDescription}</p>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white">Características Principais</h3>
-              <ul className="space-y-2">
-                {product.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-3 text-gray-300">
-                    <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
+              <p className="text-gray-300 leading-relaxed">{product.detailedDescription}</p>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white">Especificações Técnicas</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(product.specifications).map(([key, value]) => (
-                  <div key={key} className="text-sm">
+                  <div key={key} className="flex justify-between p-3 bg-white/10 rounded-lg">
                     <span className="text-gray-400">{key}:</span>
-                    <span className="text-white ml-2">{value}</span>
+                    <span className="text-white font-medium">{value}</span>
                   </div>
                 ))}
               </div>
@@ -195,13 +178,19 @@ const TattooArtistsProductDetail = () => {
                   </Button>
                 </div>
               </div>
-              <span className="text-gray-300">({product.stock} disponíveis)</span>
+              <span className="text-gray-300">
+                ({product.stockQuantity} disponíveis)
+              </span>
             </div>
 
             <div className="flex gap-4">
-              <Button className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white">
+              <Button 
+                className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
+                onClick={handleAddToCart}
+                disabled={!product.inStock}
+              >
                 <ShoppingCart className="h-5 w-5 mr-2" />
-                Adicionar ao Carrinho
+                {product.inStock ? 'Adicionar ao Carrinho' : 'Produto Esgotado'}
               </Button>
               <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
                 <Heart className="h-5 w-5" />
@@ -227,6 +216,44 @@ const TattooArtistsProductDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Produtos Relacionados */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold text-white mb-8">Produtos Relacionados</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((relatedProduct) => (
+                <Card 
+                  key={relatedProduct.id} 
+                  className="bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:scale-105 cursor-pointer"
+                  onClick={() => navigate(`/tatuadores-da-nova-era/shop/${relatedProduct.id}`)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden mb-3">
+                      <img 
+                        src={relatedProduct.images[0]} 
+                        alt={relatedProduct.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <CardTitle className="text-lg font-bold text-gray-900 line-clamp-2">
+                      {relatedProduct.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-bold text-red-600">R$ {relatedProduct.price.toFixed(2)}</span>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        <span className="text-xs text-gray-600">{relatedProduct.rating}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </TattooArtistLayout>
   );

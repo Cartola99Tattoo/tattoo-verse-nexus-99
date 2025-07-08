@@ -1,4 +1,11 @@
 
+// pages/admin/index.tsx
+import Dashboard from './Dashboard';
+
+export default function AdminHome() {
+  return <Dashboard />;
+}
+
 export { default as AdminArtists } from './AdminArtists';
 export { default as AdminAuth } from '../AdminAuth';
 export { default as AdminUserSetup } from '../AdminUserSetup';
