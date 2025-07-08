@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home, Users, ShoppingCart, Calendar, Award, User, BookOpen, Calculator } from "lucide-react";
 import { useState } from 'react';
-import ShopCartButton from "@/components/shop/ShopCartButton";
+import CartSidebar from "@/components/tattoo-artists/CartSidebar";
 
 interface TattooArtistLayoutProps {
   children: React.ReactNode;
@@ -70,7 +70,11 @@ const TattooArtistLayout: React.FC<TattooArtistLayoutProps> = ({ children }) => 
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-4">
-              <ShopCartButton />
+              <CartSidebar>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-red-600/20 hover:text-red-400 transition-colors">
+                  <ShoppingCart className="h-5 w-5" />
+                </Button>
+              </CartSidebar>
               
               {/* Profile Button */}
               <Button
@@ -90,7 +94,11 @@ const TattooArtistLayout: React.FC<TattooArtistLayoutProps> = ({ children }) => 
 
             {/* Mobile Menu Button */}
             <div className="md:hidden flex items-center space-x-2">
-              <ShopCartButton />
+              <CartSidebar>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-red-600/20 hover:text-red-400 transition-colors">
+                  <ShoppingCart className="h-5 w-5" />
+                </Button>
+              </CartSidebar>
               
               {/* Mobile Profile Button */}
               <Button

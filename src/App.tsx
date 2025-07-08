@@ -6,6 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider as LegacyCartProvider } from '@/contexts/CartContext';
 import { CartProvider } from '@/contexts/ShopCartContext';
 import { EcosistemaAuthProvider } from '@/contexts/EcosistemaAuthContext';
+import { TattooArtistShopProvider } from '@/contexts/TattooArtistShopContext';
 
 // Main pages
 import Home from '@/pages/Home';
@@ -71,6 +72,9 @@ import TattooArtistsBlog from '@/pages/tatuadores-da-nova-era/TattooArtistsBlog'
 import TattooArtistsBlogArticle from '@/pages/tatuadores-da-nova-era/TattooArtistsBlogArticle';
 import TattooArtistsLanding from '@/pages/tattoo-artists/TattooArtistsLanding';
 import TattooArtistsShop from '@/pages/tattoo-artists/TattooArtistsShop';
+import TattooArtistsProductDetail from '@/pages/tattoo-artists/TattooArtistsProductDetail';
+import TattooArtistsCart from '@/pages/tattoo-artists/TattooArtistsCart';
+import TattooArtistsCheckout from '@/pages/tattoo-artists/TattooArtistsCheckout';
 import TattooArtistsProfile from '@/pages/tattoo-artists/TattooArtistsProfile';
 import TattooArtistsCostCalculator from '@/pages/tattoo-artists/TattooArtistsCostCalculator';
 
@@ -90,9 +94,10 @@ function App() {
         <AuthProvider>
           <LegacyCartProvider>
             <CartProvider>
-              <Router>
-                <div className="App">
-                  <Routes>
+              <TattooArtistShopProvider>
+                <Router>
+                  <div className="App">
+                    <Routes>
                     {/* Main Routes */}
                     <Route path="/" element={<Home />} />
                     <Route path="/about" element={<About />} />
@@ -154,6 +159,9 @@ function App() {
                     {/* Tattoo Artists routes - RESTAURAÇÃO E EXPANSÃO */}
                     <Route path="/tatuadores-da-nova-era" element={<TattooArtistsLanding />} />
                     <Route path="/tatuadores-da-nova-era/shop" element={<TattooArtistsShop />} />
+                    <Route path="/tatuadores-da-nova-era/produto/:id" element={<TattooArtistsProductDetail />} />
+                    <Route path="/tatuadores-da-nova-era/carrinho" element={<TattooArtistsCart />} />
+                    <Route path="/tatuadores-da-nova-era/checkout" element={<TattooArtistsCheckout />} />
                     <Route path="/tatuadores-da-nova-era/perfil/:id" element={<TattooArtistsProfile />} />
                     <Route path="/tatuadores-da-nova-era/blog" element={<TattooArtistsBlog />} />
                     <Route path="/tatuadores-da-nova-era/blog/:articleId" element={<TattooArtistsBlogArticle />} />
@@ -161,10 +169,11 @@ function App() {
 
                     {/* Catch all route */}
                     <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </div>
-              </Router>
-              <Toaster />
+                    </Routes>
+                  </div>
+                </Router>
+                <Toaster />
+              </TattooArtistShopProvider>
             </CartProvider>
           </LegacyCartProvider>
         </AuthProvider>

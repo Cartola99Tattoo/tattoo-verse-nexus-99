@@ -16,111 +16,64 @@ import {
   Palette,
   Shirt,
   Coffee,
-  Bookmark
+  Bookmark,
+  Zap,
+  Brush,
+  Monitor,
+  BookOpen,
+  Headphones,
+  Wrench
 } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import { toast } from "@/hooks/use-toast";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
+import { useTattooArtistShop } from "@/contexts/TattooArtistShopContext";
+import CartSidebar from "@/components/tattoo-artists/CartSidebar";
 
 const TattooArtistsShop = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
+  const { products, addToCart, isInCart } = useTattooArtistShop();
+  const navigate = useNavigate();
 
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Desenho Personalizado - Realismo",
-      artist: "João Silva Santos",
-      price: 250.00,
-      originalPrice: 300.00,
-      category: "designs",
-      image: "/placeholder.svg",
-      rating: 4.9,
-      reviews: 47,
-      description: "Desenho personalizado em estilo realismo, desenvolvido exclusivamente para você",
-      badge: "Mais Vendido",
-      favorited: true
-    },
-    {
-      id: 2,
-      name: "Camiseta 99Tattoo - Edição Limitada",
-      artist: "Loja Oficial",
-      price: 89.90,
-      originalPrice: 120.00,
-      category: "clothing",
-      image: "/placeholder.svg",
-      rating: 4.7,
-      reviews: 123,
-      description: "Camiseta premium com design exclusivo da 99Tattoo",
-      badge: "Desconto",
-      favorited: false
-    },
-    {
-      id: 3,
-      name: "Flash Tattoo - Pack Oriental",
-      artist: "Maria dos Santos",
-      price: 180.00,
-      originalPrice: null,
-      category: "designs",
-      image: "/placeholder.svg",
-      rating: 4.8,
-      reviews: 89,
-      description: "Coleção de 12 designs orientais prontos para tatuar",
-      badge: "Novo",
-      favorited: true
-    },
-    {
-      id: 4,
-      name: "Tinta Premium - Set Completo",
-      artist: "Fornecedor Oficial",
-      price: 450.00,
-      originalPrice: 500.00,
-      category: "supplies",
-      image: "/placeholder.svg",
-      rating: 4.9,
-      reviews: 67,
-      description: "Kit completo de tintas profissionais para tatuagem",
-      badge: "Profissional",
-      favorited: false
-    },
-    {
-      id: 5,
-      name: "Caneca Personalizada - Arte Tattoo",
-      artist: "Carlos Mendes",
-      price: 45.00,
-      originalPrice: null,
-      category: "accessories",
-      image: "/placeholder.svg",
-      rating: 4.6,
-      reviews: 34,
-      description: "Caneca de porcelana com arte exclusiva de tatuagem",
-      badge: null,
-      favorited: false
-    },
-    {
-      id: 6,
-      name: "Stencil Pack - Biomecânico",
-      artist: "Ana Paula Oliveira",
-      price: 75.00,
-      originalPrice: 90.00,
-      category: "designs",
-      image: "/placeholder.svg",
-      rating: 4.8,
-      reviews: 56,
-      description: "Pacote com 8 stencils de tatuagem biomecânica",
-      badge: "Limitado",
-      favorited: true
+  // Função para adicionar produto ao carrinho
+  const handleAddToCart = (product: any) => {
+    try {
+      addToCart(product);
+      toast({
+        title: "Produto adicionado!",
+        description: `${product.name} foi adicionado ao seu carrinho.`,
+        duration: 2000,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o produto ao carrinho.",
+        variant: "destructive",
+      });
     }
-  ];
+  };
+
+  // Função para visualizar detalhes do produto
+  const handleViewProduct = (productId: number) => {
+    navigate(`/tatuadores-da-nova-era/produto/${productId}`);
+  };
 
   const categories = [
     { value: "all", label: "Todas as Categorias", icon: <Package className="h-4 w-4" /> },
-    { value: "designs", label: "Desenhos & Designs", icon: <Palette className="h-4 w-4" /> },
-    { value: "clothing", label: "Roupas & Acessórios", icon: <Shirt className="h-4 w-4" /> },
-    { value: "supplies", label: "Materiais & Suprimentos", icon: <Package className="h-4 w-4" /> },
-    { value: "accessories", label: "Acessórios", icon: <Coffee className="h-4 w-4" /> }
+    { value: "machines", label: "Máquinas", icon: <Zap className="h-4 w-4" /> },
+    { value: "inks", label: "Tintas", icon: <Palette className="h-4 w-4" /> },
+    { value: "needles", label: "Agulhas", icon: <Package className="h-4 w-4" /> },
+    { value: "courses", label: "Cursos", icon: <BookOpen className="h-4 w-4" /> },
+    { value: "software", label: "Software", icon: <Monitor className="h-4 w-4" /> },
+    { value: "designs", label: "Designs", icon: <Brush className="h-4 w-4" /> },
+    { value: "accessories", label: "Acessórios", icon: <Wrench className="h-4 w-4" /> },
+    { value: "clothing", label: "Roupas", icon: <Shirt className="h-4 w-4" /> },
+    { value: "services", label: "Serviços", icon: <Headphones className="h-4 w-4" /> }
   ];
 
-  const filteredProducts = mockProducts.filter(product => {
+  const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.artist.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
@@ -147,13 +100,22 @@ const TattooArtistsShop = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-red-50 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-8 text-center">
             <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
               Loja Tatuadores da Nova Era
             </h1>
-            <p className="text-gray-600 text-lg">
-              Produtos exclusivos criados por tatuadores profissionais para tatuadores profissionais
+            <p className="text-gray-600 text-lg max-w-3xl mx-auto">
+              Equipamentos profissionais, cursos especializados e produtos exclusivos para tatuadores que buscam excelência e inovação
             </p>
+            
+            {/* Mini Cart Button */}
+            <div className="fixed top-20 right-4 z-40 md:hidden">
+              <CartSidebar>
+                <Button size="icon" className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg">
+                  <ShoppingCart className="h-5 w-5" />
+                </Button>
+              </CartSidebar>
+            </div>
           </div>
 
           {/* Filters */}
@@ -202,6 +164,15 @@ const TattooArtistsShop = () => {
                   <Button variant="outline" size="icon">
                     <Filter className="h-4 w-4" />
                   </Button>
+                  
+                  {/* Desktop Cart Button */}
+                  <div className="hidden md:block">
+                    <CartSidebar>
+                      <Button variant="outline" size="icon" className="border-red-200 text-red-600 hover:bg-red-50">
+                        <ShoppingCart className="h-4 w-4" />
+                      </Button>
+                    </CartSidebar>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -232,7 +203,7 @@ const TattooArtistsShop = () => {
                     <Button size="sm" variant="secondary" className="p-2">
                       <Heart className={`h-4 w-4 ${product.favorited ? 'fill-red-500 text-red-500' : ''}`} />
                     </Button>
-                    <Button size="sm" variant="secondary" className="p-2">
+                    <Button size="sm" variant="secondary" className="p-2" onClick={() => handleViewProduct(product.id)}>
                       <Eye className="h-4 w-4" />
                     </Button>
                   </div>
@@ -279,12 +250,16 @@ const TattooArtistsShop = () => {
                   
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <Button className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800">
+                    <Button 
+                      className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+                      onClick={() => handleAddToCart(product)}
+                      disabled={isInCart(product.id)}
+                    >
                       <ShoppingCart className="h-4 w-4 mr-2" />
-                      Comprar
+                      {isInCart(product.id) ? 'No Carrinho' : 'Adicionar'}
                     </Button>
-                    <Button variant="outline" size="icon">
-                      <Bookmark className="h-4 w-4" />
+                    <Button variant="outline" size="icon" onClick={() => handleViewProduct(product.id)}>
+                      <Eye className="h-4 w-4" />
                     </Button>
                   </div>
                 </CardContent>
