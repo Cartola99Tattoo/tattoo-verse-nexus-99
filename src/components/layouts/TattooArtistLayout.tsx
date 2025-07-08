@@ -23,6 +23,7 @@ const TattooArtistLayout: React.FC<TattooArtistLayoutProps> = ({ children }) => 
     { path: '/tatuadores-da-nova-era/artistas', label: 'Artistas', icon: Users },
     { path: '/tatuadores-da-nova-era/blog', label: 'Blog', icon: BookOpen },
     { path: '/tatuadores-da-nova-era/shop', label: 'Loja', icon: ShoppingCart },
+    { path: '/tatuadores-da-nova-era/calculadora-de-custos', label: 'Calculadora', icon: Calculator },
     { path: '/sobre', label: 'Sobre', icon: Award },
     { path: '/contato', label: 'Contato', icon: Calendar },
   ];

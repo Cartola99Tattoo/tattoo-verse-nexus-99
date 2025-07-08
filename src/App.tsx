@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -73,6 +72,7 @@ import TattooArtistsBlogArticle from '@/pages/tatuadores-da-nova-era/TattooArtis
 import TattooArtistsLanding from '@/pages/tattoo-artists/TattooArtistsLanding';
 import TattooArtistsShop from '@/pages/tattoo-artists/TattooArtistsShop';
 import TattooArtistsProfile from '@/pages/tattoo-artists/TattooArtistsProfile';
+import TattooArtistsCostCalculator from '@/pages/tattoo-artists/TattooArtistsCostCalculator';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -157,6 +157,7 @@ function App() {
                     <Route path="/tatuadores-da-nova-era/perfil/:id" element={<TattooArtistsProfile />} />
                     <Route path="/tatuadores-da-nova-era/blog" element={<TattooArtistsBlog />} />
                     <Route path="/tatuadores-da-nova-era/blog/:articleId" element={<TattooArtistsBlogArticle />} />
+                    <Route path="/tatuadores-da-nova-era/calculadora-de-custos" element={<TattooArtistsCostCalculator />} />
 
                     {/* Catch all route */}
                     <Route path="*" element={<NotFound />} />
