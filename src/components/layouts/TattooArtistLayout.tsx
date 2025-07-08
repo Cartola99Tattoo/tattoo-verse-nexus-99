@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Users, ShoppingCart, Calendar, Award, User, BookOpen } from "lucide-react";
+import { Menu, X, Home, Users, ShoppingCart, Calendar, Award, User, BookOpen, Calculator } from "lucide-react";
 import { useState } from 'react';
 import ShopCartButton from "@/components/shop/ShopCartButton";
 
