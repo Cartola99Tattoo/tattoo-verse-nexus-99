@@ -6,14 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Gift, Star, Users, Trophy, Search, Filter, Plus, Crown, Award, Target, Calendar, Phone, Mail, User, UserPlus, Eye, Settings, Ticket, Zap, Edit, Trash2 } from "lucide-react";
+import { Gift, Star, Users, Trophy, Search, Filter, Plus, Crown, Award, Target, Calendar, Phone, Mail, User, UserPlus, Eye, Settings, Ticket, Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AddLoyaltyMemberModal from "@/components/admin/AddLoyaltyMemberModal";
-import PointsSystemModal from "@/components/admin/PointsSystemModal";
-import TierManagementModal from "@/components/admin/TierManagementModal";
-import BonusRulesModal from "@/components/admin/BonusRulesModal";
-import RewardModal from "@/components/admin/RewardModal";
-import CouponModal from "@/components/admin/CouponModal";
 
 interface LoyaltyMember {
   id: number;
@@ -167,13 +162,6 @@ const Loyalty = () => {
   const [tierFilter, setTierFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
-  const [showPointsSystemModal, setShowPointsSystemModal] = useState(false);
-  const [showTierManagementModal, setShowTierManagementModal] = useState(false);
-  const [showBonusRulesModal, setShowBonusRulesModal] = useState(false);
-  const [showRewardModal, setShowRewardModal] = useState(false);
-  const [showCouponModal, setShowCouponModal] = useState(false);
-  const [selectedReward, setSelectedReward] = useState(null);
-  const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [members, setMembers] = useState<LoyaltyMember[]>(mockLoyaltyMembers);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -248,23 +236,6 @@ const Loyalty = () => {
       title: "Membro adicionado com sucesso!",
       description: `${newMember.name} foi adicionado ao programa de fidelidade.`,
     });
-  };
-
-  const handleEditReward = (reward: any) => {
-    setSelectedReward(reward);
-    setShowRewardModal(true);
-  };
-
-  const handleDeleteReward = (rewardName: string) => {
-    toast({
-      title: "Recompensa Removida!",
-      description: `${rewardName} foi removida do catálogo.`,
-    });
-  };
-
-  const handleEditCoupon = (coupon: any) => {
-    setSelectedCoupon(coupon);
-    setShowCouponModal(true);
   };
 
   const totalMembers = members.length;
@@ -478,10 +449,7 @@ const Loyalty = () => {
                       <label className="text-sm font-bold text-blue-700">Conversão de Pontos</label>
                       <Input value="100 pontos = R$ 10" disabled className="bg-white/70" />
                     </div>
-                    <Button 
-                      onClick={() => setShowPointsSystemModal(true)}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold"
-                    >
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold">
                       Configurar Sistema de Pontos
                     </Button>
                   </CardContent>
@@ -510,10 +478,7 @@ const Loyalty = () => {
                         <span className="text-sm text-gray-600">3000+ pts</span>
                       </div>
                     </div>
-                    <Button 
-                      onClick={() => setShowTierManagementModal(true)}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold"
-                    >
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold">
                       Editar Níveis
                     </Button>
                   </CardContent>
@@ -539,10 +504,7 @@ const Loyalty = () => {
                       <p className="text-sm text-green-600">5% em créditos</p>
                     </div>
                   </div>
-                  <Button 
-                    onClick={() => setShowBonusRulesModal(true)}
-                    className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-bold"
-                  >
+                  <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-bold">
                     Configurar Bonificações
                   </Button>
                 </CardContent>
@@ -742,13 +704,7 @@ const Loyalty = () => {
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
                 <p className="text-gray-600">Gerencie as recompensas disponíveis no programa de fidelidade</p>
-                <Button 
-                  onClick={() => {
-                    setSelectedReward(null);
-                    setShowRewardModal(true);
-                  }}
-                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold"
-                >
+                <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold">
                   <Plus className="h-4 w-4 mr-2" />
                   Nova Recompensa
                 </Button>
@@ -774,25 +730,9 @@ const Loyalty = () => {
                         <Badge className="bg-green-600 text-white">Ativo</Badge>
                       </div>
                     </div>
-                    <div className="flex gap-2 mt-4">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleEditReward({ name: 'Desconto 10%', description: 'Desconto de 10% em qualquer tatuagem', pointsCost: 500, category: 'discount', status: 'active' })}
-                        className="flex-1 border-yellow-400 text-yellow-700 hover:bg-yellow-100"
-                      >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Editar
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleDeleteReward('Desconto 10%')}
-                        className="border-red-400 text-red-700 hover:bg-red-100"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+                    <Button size="sm" variant="outline" className="w-full mt-4 border-yellow-400 text-yellow-700 hover:bg-yellow-100">
+                      Editar
+                    </Button>
                   </CardContent>
                 </Card>
 
@@ -815,25 +755,9 @@ const Loyalty = () => {
                         <Badge className="bg-green-600 text-white">Ativo</Badge>
                       </div>
                     </div>
-                    <div className="flex gap-2 mt-4">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleEditReward({ name: 'Flash Grátis', description: 'Tatuagem flash grátis (até 5cm)', pointsCost: 1000, category: 'service', status: 'active' })}
-                        className="flex-1 border-blue-400 text-blue-700 hover:bg-blue-100"
-                      >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Editar
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleDeleteReward('Flash Grátis')}
-                        className="border-red-400 text-red-700 hover:bg-red-100"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+                    <Button size="sm" variant="outline" className="w-full mt-4 border-blue-400 text-blue-700 hover:bg-blue-100">
+                      Editar
+                    </Button>
                   </CardContent>
                 </Card>
 
@@ -856,25 +780,9 @@ const Loyalty = () => {
                         <Badge className="bg-green-600 text-white">Ativo</Badge>
                       </div>
                     </div>
-                    <div className="flex gap-2 mt-4">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleEditReward({ name: 'Sessão Prioritária', description: 'Agendamento com prioridade', pointsCost: 200, category: 'priority', status: 'active' })}
-                        className="flex-1 border-purple-400 text-purple-700 hover:bg-purple-100"
-                      >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Editar
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleDeleteReward('Sessão Prioritária')}
-                        className="border-red-400 text-red-700 hover:bg-red-100"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+                    <Button size="sm" variant="outline" className="w-full mt-4 border-purple-400 text-purple-700 hover:bg-purple-100">
+                      Editar
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
@@ -894,13 +802,7 @@ const Loyalty = () => {
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
                 <p className="text-gray-600">Gerencie cupons de desconto para eventos especiais</p>
-                <Button 
-                  onClick={() => {
-                    setSelectedCoupon(null);
-                    setShowCouponModal(true);
-                  }}
-                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold"
-                >
+                <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold">
                   <Plus className="h-4 w-4 mr-2" />
                   Novo Cupom
                 </Button>
@@ -920,13 +822,7 @@ const Loyalty = () => {
                       </div>
                       <div className="flex gap-2">
                         <Badge className="bg-green-600 text-white">Ativo</Badge>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => handleEditCoupon({ code: 'VERÃO2024', description: 'Desconto de 20% em tatuagens coloridas', discountType: 'percentage', discountValue: 20 })}
-                          className="border-green-400 text-green-700 hover:bg-green-100"
-                        >
-                          <Edit className="h-3 w-3 mr-1" />
+                        <Button size="sm" variant="outline" className="border-green-400 text-green-700 hover:bg-green-100">
                           Editar
                         </Button>
                       </div>
@@ -947,13 +843,7 @@ const Loyalty = () => {
                       </div>
                       <div className="flex gap-2">
                         <Badge className="bg-red-600 text-white">Ativo</Badge>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => handleEditCoupon({ code: 'FLASH15', description: '15% de desconto em flash tattoos', discountType: 'percentage', discountValue: 15 })}
-                          className="border-red-400 text-red-700 hover:bg-red-100"
-                        >
-                          <Edit className="h-3 w-3 mr-1" />
+                        <Button size="sm" variant="outline" className="border-red-400 text-red-700 hover:bg-red-100">
                           Editar
                         </Button>
                       </div>
@@ -974,12 +864,7 @@ const Loyalty = () => {
                       </div>
                       <div className="flex gap-2">
                         <Badge className="bg-gray-600 text-white">Expirado</Badge>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => handleEditCoupon({ code: 'FIRST50', description: '50% de desconto para primeira tatuagem', discountType: 'percentage', discountValue: 50 })}
-                          className="border-gray-400 text-gray-700 hover:bg-gray-100"
-                        >
+                        <Button size="sm" variant="outline" className="border-gray-400 text-gray-700 hover:bg-gray-100">
                           Renovar
                         </Button>
                       </div>
@@ -992,46 +877,11 @@ const Loyalty = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Modais */}
+      {/* Modal para Adicionar Novo Membro */}
       <AddLoyaltyMemberModal
         isOpen={showAddMemberModal}
         onClose={() => setShowAddMemberModal(false)}
         onAddMember={handleAddMember}
-      />
-
-      <PointsSystemModal
-        isOpen={showPointsSystemModal}
-        onClose={() => setShowPointsSystemModal(false)}
-      />
-
-      <TierManagementModal
-        isOpen={showTierManagementModal}
-        onClose={() => setShowTierManagementModal(false)}
-      />
-
-      <BonusRulesModal
-        isOpen={showBonusRulesModal}
-        onClose={() => setShowBonusRulesModal(false)}
-      />
-
-      <RewardModal
-        isOpen={showRewardModal}
-        onClose={() => {
-          setShowRewardModal(false);
-          setSelectedReward(null);
-        }}
-        reward={selectedReward}
-        isEdit={!!selectedReward}
-      />
-
-      <CouponModal
-        isOpen={showCouponModal}
-        onClose={() => {
-          setShowCouponModal(false);
-          setSelectedCoupon(null);
-        }}
-        coupon={selectedCoupon}
-        isEdit={!!selectedCoupon}
       />
     </div>
   );

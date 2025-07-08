@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brush, Search, Filter, Plus, Users, Star, Award, TrendingUp, Edit, Trash2, Eye } from "lucide-react";
+import { Brush, Search, Filter, Plus, Users, Star, Award, TrendingUp } from "lucide-react";
 import NaveMaeLayout from "@/components/layouts/NaveMaeLayout";
-import ArtistModal from "@/components/nave-mae/ArtistModal";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import { getArtistsService } from "@/services/serviceFactory";
 
@@ -15,8 +14,6 @@ const NaveMaeArtists = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [studioFilter, setStudioFilter] = useState("all");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedArtist, setSelectedArtist] = useState(null);
 
   const artistService = getArtistsService();
   const { data: artistsData, loading } = useDataQuery(
@@ -24,16 +21,10 @@ const NaveMaeArtists = () => {
     []
   );
 
+  // Extract artists array from the response data structure
   const artists = Array.isArray(artistsData) ? artistsData : (artistsData?.artists || []);
-  const [localArtists, setLocalArtists] = useState(artists);
 
-  React.useEffect(() => {
-    if (artists.length > 0) {
-      setLocalArtists(artists);
-    }
-  }, [artists]);
-
-  const filteredArtists = localArtists.filter(artist => {
+  const filteredArtists = artists.filter(artist => {
     const fullName = `${artist.first_name} ${artist.last_name}`;
     const matchesSearch = fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          artist.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -41,40 +32,11 @@ const NaveMaeArtists = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleSaveArtist = (artistData) => {
-    if (artistData.id) {
-      // Update existing artist
-      setLocalArtists(prev => prev.map(artist => 
-        artist.id === artistData.id ? { ...artist, ...artistData } : artist
-      ));
-    } else {
-      // Add new artist
-      const newArtist = {
-        ...artistData,
-        id: `artist_${Date.now()}`,
-        rating: 0,
-        created_at: new Date().toISOString()
-      };
-      setLocalArtists(prev => [...prev, newArtist]);
-    }
-    setSelectedArtist(null);
-  };
-
-  const handleEditArtist = (artist) => {
-    setSelectedArtist(artist);
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteArtist = (artistId) => {
-    if (confirm('Tem certeza que deseja excluir este tatuador?')) {
-      setLocalArtists(prev => prev.filter(artist => artist.id !== artistId));
-    }
-  };
-
-  const totalArtists = localArtists.length;
-  const activeArtists = localArtists.filter(a => a.status === 'active').length;
-  const inactiveArtists = localArtists.filter(a => a.status === 'inactive').length;
-  const featuredArtists = 0;
+  const totalArtists = artists.length;
+  const activeArtists = artists.filter(a => a.status === 'active').length;
+  const inactiveArtists = artists.filter(a => a.status === 'inactive').length;
+  // Since 'featured' doesn't exist in Artist interface, we'll use a placeholder or remove this metric
+  const featuredArtists = 0; // Placeholder since featured property doesn't exist
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -175,13 +137,7 @@ const NaveMaeArtists = () => {
                   </SelectContent>
                 </Select>
                 
-                <Button 
-                  onClick={() => {
-                    setSelectedArtist(null);
-                    setIsModalOpen(true);
-                  }}
-                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
-                >
+                <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800">
                   <Plus className="h-4 w-4 mr-2" />
                   Novo Tatuador
                 </Button>
@@ -235,25 +191,12 @@ const NaveMaeArtists = () => {
                     </p>
                   </div>
                   
-                  <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Eye className="h-3 w-3 mr-1" />
-                      Ver
+                  <div className="flex justify-between items-center mt-4">
+                    <Button variant="outline" size="sm">
+                      Ver Portfólio
                     </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleEditArtist(artist)}
-                    >
-                      <Edit className="h-3 w-3" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() => handleDeleteArtist(artist.id)}
-                    >
-                      <Trash2 className="h-3 w-3" />
+                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                      Editar
                     </Button>
                   </div>
                 </CardContent>
@@ -274,16 +217,6 @@ const NaveMaeArtists = () => {
             </p>
           </div>
         )}
-
-        <ArtistModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedArtist(null);
-          }}
-          artist={selectedArtist}
-          onSave={handleSaveArtist}
-        />
       </div>
     </NaveMaeLayout>
   );

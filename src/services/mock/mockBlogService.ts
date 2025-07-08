@@ -1,625 +1,429 @@
-// Serviço centralizado para dados mock do blog
-export interface Author {
-  name: string;
-  bio: string;
-  image: string;
-  specialties: string[];
-  experience: string;
-}
 
-export interface ArticleStats {
-  views: number;
-  likes: number;
-  comments: number;
-  shares: number;
-  readTime: string;
-}
+import { 
+  IBlogService, 
+  BlogQueryParams, 
+  BlogPaginatedResponse,
+  BlogCategory,
+  CreateBlogPostData,
+  UpdateBlogPostData
+} from '../interfaces/IBlogService';
+import { BlogPostSummary } from '@/components/blog/BlogCard';
+import { BlogPost } from '@/hooks/useBlogPost';
 
-export interface Product {
-  id: number;
-  name: string;
-  price: string;
-  originalPrice?: string;
-  image: string;
-  description: string;
-  badge?: string;
-  discount?: string;
-  category: string;
-}
-
-export interface Service {
-  id: number;
-  title: string;
-  description: string;
-  features: string[];
-  price: string;
-  image: string;
-  badge?: string;
-  cta: string;
-}
-
-export interface Event {
-  id: number;
-  title: string;
-  date: string;
-  location: string;
-  description: string;
-  image: string;
-  price: string;
-  originalPrice?: string;
-  badge?: string;
-  instructor: string;
-}
-
-export interface BlogArticle {
-  id: number;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  category: string;
-  status: 'published' | 'draft';
-  author: Author;
-  publishDate: string;
-  stats: ArticleStats;
-  featured: boolean;
-  coverImage: string;
-  inlineImages: string[];
-  tags: string[];
-  products: Product[];
-  services: Service[];
-  events: Event[];
-}
-
-// Interface for blog service parameters
-export interface BlogServiceParams {
-  page?: number;
-  limit?: number;
-  category?: string;
-  search?: string;
-  sort?: string;
-}
-
-// Autores mock
-const mockAuthors: Author[] = [
+// Mock data for categories
+const mockCategories: BlogCategory[] = [
   {
-    name: "Carolina Silva",
-    bio: "Tatuadora há 12 anos, especialista em Fine Line e fundadora do estúdio Ink Revolution. Palestrante em convenções internacionais.",
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b002?w=150&h=150&fit=crop&crop=face",
-    specialties: ["Fine Line", "Minimalismo", "Lettering"],
-    experience: "12 anos"
+    id: '1',
+    name: 'Cuidados Pós-Tatuagem',
+    description: 'Dicas e orientações para cuidar da sua tatuagem após a sessão',
+    created_at: '2024-01-01T00:00:00Z'
   },
   {
-    name: "Dr. Ricardo Mendes",
-    bio: "Dermatologista especializado em cuidados com tatuagens e saúde da pele. Autor de diversos artigos científicos sobre cicatrização.",
-    image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop&crop=face",
-    specialties: ["Dermatologia", "Cicatrização", "Cuidados"],
-    experience: "15 anos"
+    id: '2',
+    name: 'Estilos de Tatuagem',
+    description: 'Explorando diferentes estilos e técnicas de tatuagem',
+    created_at: '2024-01-02T00:00:00Z'
   },
   {
-    name: "Ana Paula Costa",
-    bio: "Consultora de marketing digital especializada em nichos criativos. Ajuda tatuadores a crescerem online há 8 anos.",
-    image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
-    specialties: ["Marketing Digital", "Redes Sociais", "Branding"],
-    experience: "8 anos"
+    id: '3',
+    name: 'Notícias do Estúdio',
+    description: 'Novidades e atualizações do estúdio 99Tattoo',
+    created_at: '2024-01-03T00:00:00Z'
   },
   {
-    name: "Marcos Oliveira",
-    bio: "Mestre em Blackwork e Realismo. Referência nacional em técnicas de sombreamento. Instrutor em workshops pelo Brasil.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    specialties: ["Blackwork", "Realismo", "Sombreamento"],
-    experience: "18 anos"
-  },
-  {
-    name: "Prof. Helena Ribeiro",
-    bio: "Historiadora especializada em arte corporal e simbolismo. Autora do livro 'Tatuagem: Arte Milenar'.",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    specialties: ["História", "Simbolismo", "Antropologia"],
-    experience: "20 anos"
+    id: '4',
+    name: 'Dicas de Design',
+    description: 'Inspiração e orientações para design de tatuagens',
+    created_at: '2024-01-04T00:00:00Z'
   }
 ];
 
-// Produtos mock expandidos
-const mockProducts: Product[] = [
+// Enhanced mock posts with more fields
+const mockBlogPosts: BlogPost[] = [
   {
-    id: 1,
-    name: "Máquina Rotativa Bishop V6",
-    price: "R$ 2.899,99",
-    originalPrice: "R$ 3.499,99",
-    image: "https://placehold.co/400x300/FF0000/FFFFFF?text=Máquina+Bishop+V6",
-    description: "A máquina mais avançada do mercado. Motor japonês silencioso, precisão extrema e durabilidade comprovada por profissionais do mundo todo.",
-    badge: "LANÇAMENTO",
-    discount: "17% OFF",
-    category: "máquinas"
-  },
-  {
-    id: 2,
-    name: "Kit Agulhas Cheyenne Premium",
-    price: "R$ 449,99",
-    originalPrice: "R$ 649,99",
-    image: "https://placehold.co/400x300/000000/FFFFFF?text=Kit+Agulhas+Cheyenne",
-    description: "Kit completo com 25 agulhas Cheyenne de diferentes calibres. Qualidade hospitalar, esterilizadas individualmente.",
-    badge: "MAIS VENDIDO",
-    discount: "31% OFF",
-    category: "agulhas"
-  },
-  {
-    id: 3,
-    name: "Tintas Eternal Ink Set Completo",
-    price: "R$ 1.299,99",
-    image: "https://placehold.co/400x300/8B0000/FFFFFF?text=Tintas+Eternal",
-    description: "Set completo com 30 cores das famosas tintas Eternal Ink. Pigmentação vegana, aprovada pela FDA e ANVISA.",
-    badge: "PROFISSIONAL",
-    category: "tintas"
-  },
-  {
-    id: 4,
-    name: "Mesa Cirúrgica Ajustável Pro",
-    price: "R$ 3.999,99",
-    originalPrice: "R$ 4.899,99",
-    image: "https://placehold.co/400x300/2F4F4F/FFFFFF?text=Mesa+Cirúrgica",
-    description: "Mesa cirúrgica com 8 posições de ajuste, estofado em couro sintético e estrutura em aço inox.",
-    badge: "PREMIUM",
-    discount: "18% OFF",
-    category: "móveis"
-  },
-  {
-    id: 5,
-    name: "Fonte Digital Power Supply X1",
-    price: "R$ 899,99",
-    image: "https://placehold.co/400x300/4169E1/FFFFFF?text=Fonte+Digital",
-    description: "Fonte digital com display LED, controle preciso de voltagem e proteção contra sobrecarga.",
-    category: "fontes"
-  }
-];
-
-// Serviços mock expandidos
-const mockServices: Service[] = [
-  {
-    id: 1,
-    title: "Mentoria Completa para Iniciantes",
-    description: "Programa de 3 meses com acompanhamento individual para quem está começando na tatuagem.",
-    features: ["12 sessões 1:1", "Material didático exclusivo", "Acesso vitalício ao grupo", "Certificado"],
-    price: "3x de R$ 497,00",
-    image: "https://placehold.co/400x300/228B22/FFFFFF?text=Mentoria+Iniciantes",
-    badge: "RESULTADO GARANTIDO",
-    cta: "Quero Começar Agora"
-  },
-  {
-    id: 2,
-    title: "Consultoria de Marketing Digital",
-    description: "Estratégia completa para crescer seu estúdio online e atrair clientes de alto valor.",
-    features: ["Auditoria completa", "Estratégia personalizada", "Templates prontos", "3 meses de suporte"],
-    price: "R$ 1.997,00",
-    image: "https://placehold.co/400x300/FF6347/FFFFFF?text=Marketing+Digital",
-    badge: "MAIS PROCURADO",
-    cta: "Quero Crescer Online"
-  },
-  {
-    id: 3,
-    title: "Gestão Financeira para Estúdios",
-    description: "Sistema completo para organizar as finanças do seu estúdio e aumentar a lucratividade.",
-    features: ["Planilhas personalizadas", "Treinamento completo", "Suporte por 6 meses", "Grupo exclusivo"],
-    price: "R$ 797,00",
-    image: "https://placehold.co/400x300/DAA520/FFFFFF?text=Gestão+Financeira",
-    cta: "Organizar Finanças"
-  }
-];
-
-// Eventos mock expandidos
-const mockEvents: Event[] = [
-  {
-    id: 1,
-    title: "Workshop Intensivo: Realismo Extremo",
-    date: "15-17 de Março, 2024",
-    location: "São Paulo - SP",
-    description: "3 dias intensivos com os maiores mestres do realismo no Brasil. Aprenda técnicas secretas que levaram anos para dominar.",
-    image: "https://placehold.co/400x300/8B008B/FFFFFF?text=Workshop+Realismo",
-    price: "R$ 1.497,00",
-    originalPrice: "R$ 1.997,00",
-    badge: "EARLY BIRD",
-    instructor: "Carlos Montenegro"
-  },
-  {
-    id: 2,
-    title: "Convenção 99Tattoo 2024",
-    date: "22-24 de Junho, 2024",
-    location: "Rio de Janeiro - RJ",
-    description: "O maior evento de tatuagem do Brasil! 3 dias de competições, workshops e networking com os melhores profissionais.",
-    image: "https://placehold.co/400x300/DC143C/FFFFFF?text=Convenção+2024",
-    price: "R$ 299,00",
-    originalPrice: "R$ 499,00",
-    badge: "SUPER EARLY BIRD",
-    instructor: "Vários especialistas"
-  },
-  {
-    id: 3,
-    title: "Curso Online: Fine Line Mastery",
-    date: "Turma de Abril 2024",
-    location: "Online - Ao Vivo",
-    description: "Curso completo de Fine Line com certificação internacional. 40 horas de conteúdo prático.",
-    image: "https://placehold.co/400x300/00CED1/FFFFFF?text=Fine+Line+Course",
-    price: "6x de R$ 197,00",
-    badge: "CERTIFICAÇÃO INTERNACIONAL",
-    instructor: "Marina Santos"
-  }
-];
-
-// Artigos mock expandidos (15+ artigos)
-export const mockBlogArticles: BlogArticle[] = [
-  {
-    id: 1,
-    title: "Tendências de Tatuagem 2024: O Que Está Dominando o Mercado",
-    slug: "tendencias-tatuagem-2024",
-    excerpt: "Explore as principais tendências que estão moldando o mundo da tatuagem neste ano, desde o minimalismo até técnicas inovadoras que revolucionam a arte corporal.",
+    id: '1',
+    title: 'Como cuidar da sua tatuagem nos primeiros dias',
+    slug: 'como-cuidar-da-sua-tatuagem-nos-primeiros-dias',
     content: `
-      <div className="article-content">
-        <p className="text-xl text-gray-700 leading-relaxed mb-8 font-medium">O mundo da tatuagem nunca parou de evoluir, e 2024 está sendo um ano revolucionário para nossa arte. Depois de anos observando o mercado e conversando com os principais tatuadores do Brasil e do mundo, compilamos as tendências mais marcantes que estão definindo este ano.</p>
+# Como cuidar da sua tatuagem nos primeiros dias
 
-        <p className="mb-6 leading-relaxed text-gray-700 text-lg">A indústria da tatuagem movimentou mais de R$ 2 bilhões no Brasil em 2023, e as projeções para 2024 são ainda mais otimistas. O que temos visto é uma sofisticação sem precedentes tanto nas técnicas quanto na demanda dos clientes.</p>
+Os primeiros dias após fazer uma tatuagem são **cruciais** para a cicatrização adequada. Aqui estão algumas dicas importantes:
 
-        <img src="https://placehold.co/800x400/FF0000/FFFFFF?text=Tendências+2024" alt="Tendências de Tatuagem 2024" className="w-full h-64 md:h-96 object-cover rounded-xl shadow-lg mb-8" />
+## Primeiras 24 horas
+- Mantenha o filme protetor por 2-4 horas
+- Lave suavemente com sabão neutro
+- Aplique pomada cicatrizante
 
-        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🎨 Minimalismo e Fine Line: A Beleza da Simplicidade</h2>
-        
-        <p className="mb-6 leading-relaxed text-gray-700 text-lg">O minimalismo continua sendo uma das tendências mais fortes de 2024, mas agora com uma abordagem ainda mais refinada. As tatuagens fine line não são apenas sobre traços finos - elas representam uma filosofia de design onde cada elemento tem um propósito específico.</p>
-        
-        <div className="bg-red-50 border-l-4 border-red-600 p-6 my-8 rounded-r-lg">
-          <h3 className="text-red-600 font-bold text-xl mb-4">✨ Características do Fine Line em 2024:</h3>
-          <ul className="list-disc ml-6 space-y-3">
-            <li className="leading-relaxed text-gray-700 text-lg">Designs geométricos com precisão matemática</li>
-            <li className="leading-relaxed text-gray-700 text-lg">Símbolos minimalistas carregados de significado</li>
-            <li className="leading-relaxed text-gray-700 text-lg">Lettering delicado com tipografias exclusivas</li>
-            <li className="leading-relaxed text-gray-700 text-lg">Ilustrações botânicas ultra-detalhadas</li>
-            <li className="leading-relaxed text-gray-700 text-lg">Micro-realismos impressionantes</li>
-          </ul>
-        </div>
+## Dias 2-7
+- Continue lavando 2-3 vezes ao dia
+- Use pomada específica para tatuagem
+- Evite exposição solar direta
 
-        <p className="mb-8 leading-relaxed text-gray-700 text-lg">O que mais me impressiona é como os tatuadores estão dominando técnicas de <strong className="text-red-600">single needle</strong> para criar obras que parecem desenhos a lápis na pele. A demanda por esse estilo cresceu 340% no último ano, segundo dados da nossa plataforma.</p>
+## O que evitar
+- Não coce ou esfregue a tatuagem
+- Evite piscinas e mar
+- Não use produtos com álcool
 
-        <img src="https://placehold.co/600x400/000000/FFFFFF?text=Fine+Line+Examples" alt="Exemplos de Fine Line" className="w-full h-64 object-cover rounded-xl shadow-lg mb-8" />
-
-        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🌈 Aquarela e Cores Vibrantes: Quando a Pele Vira Tela</h2>
-        
-        <p className="mb-6 leading-relaxed text-gray-700 text-lg">A técnica de aquarela evoluiu tremendamente em 2024. Não estamos mais falando apenas de cores que "escorrem" - os tatuadores estão criando verdadeiras pinturas na pele, com técnicas de sobreposição de cores que criam profundidade e movimento únicos.</p>
-        
-        <div className="grid md:grid-cols-2 gap-6 my-8">
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-200">
-            <h3 className="text-purple-600 font-bold text-xl mb-4">🎨 Técnicas Quentes</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li>• Splash de cores controlado</li>
-              <li>• Degradês suaves e naturais</li>
-              <li>• Sobreposições cromáticas</li>
-              <li>• Efeitos de transparência</li>
-            </ul>
-          </div>
-          <div className="bg-gradient-to-br from-green-50 to-yellow-50 p-6 rounded-xl border border-green-200">
-            <h3 className="text-green-600 font-bold text-xl mb-4">🔥 Cores Trending</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li>• Azuis oceânicos profundos</li>
-              <li>• Rosas sunset vibrantes</li>
-              <li>• Verdes jade luminosos</li>
-              <li>• Laranjas terracota</li>
-            </ul>
-          </div>
-        </div>
-
-        <blockquote className="border-l-4 border-red-600 pl-6 py-4 my-8 bg-red-50 rounded-r-lg italic text-lg text-gray-800">
-          "A aquarela em tatuagem não é sobre imprecisão - é sobre controlar o caos e transformá-lo em arte. Cada gota de tinta tem que ser intencional." 
-          <cite className="block mt-2 text-red-600 font-semibold not-italic">- Marina Santos, tatuadora especialista em aquarela</cite>
-        </blockquote>
-
-        <img src="https://placehold.co/700x500/FF69B4/FFFFFF?text=Aquarela+Técnicas" alt="Técnicas de Aquarela" className="w-full h-64 object-cover rounded-xl shadow-lg mb-8" />
-
-        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">⚫ Blackwork Contemporâneo: Geometria e Misticismo</h2>
-        
-        <p className="mb-6 leading-relaxed text-gray-700 text-lg">O blackwork de 2024 incorporou elementos que vão muito além do tradicional. Estamos vendo uma fusão entre geometria sagrada, elementos arquitetônicos e symbolism contemporâneo que cria peças verdadeiramente únicas.</p>
-        
-        <div className="bg-gray-900 text-white p-8 rounded-xl my-8">
-          <h3 className="text-white font-bold text-2xl mb-6">🔥 Estilos Blackwork em Alta:</h3>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="text-red-400 font-bold mb-3">Geométrico Avançado</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li>→ Padrões fractais complexos</li>
-                <li>→ Mandalas tridimensionais</li>
-                <li>→ Optical illusions</li>
-                <li>→ Sacred geometry moderna</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-red-400 font-bold mb-3">Orgânico Abstrato</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li>→ Formas arquitetônicas fluidas</li>
-                <li>→ Elementos tribais modernos</li>
-                <li>→ Brush strokes estilizados</li>
-                <li>→ Negative space criativo</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">📊 Dados do Mercado: O Que os Números Revelam</h2>
-        
-        <p className="mb-6 leading-relaxed text-gray-700 text-lg">Nossa análise de mais de 50.000 tatuagens realizadas em 2024 revelou insights fascinantes sobre as preferências do público:</p>
-        
-        <div className="grid md:grid-cols-3 gap-6 my-8">
-          <div className="text-center bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border-2 border-red-200">
-            <div className="text-4xl font-black text-red-600 mb-2">68%</div>
-            <div className="text-gray-700 font-semibold">Optam por designs minimalistas</div>
-          </div>
-          <div className="text-center bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200">
-            <div className="text-4xl font-black text-blue-600 mb-2">45%</div>
-            <div className="text-gray-700 font-semibold">Preferem cores vibrantes</div>
-          </div>
-          <div className="text-center bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border-2 border-purple-200">
-            <div className="text-4xl font-black text-purple-600 mb-2">32%</div>
-            <div className="text-gray-700 font-semibold">Escolhem blackwork puro</div>
-          </div>
-        </div>
-
-        <img src="https://placehold.co/800x300/4169E1/FFFFFF?text=Dados+Estatísticas" alt="Estatísticas do Mercado" className="w-full h-48 object-cover rounded-xl shadow-lg mb-8" />
-
-        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🔮 Previsões para o Segundo Semestre</h2>
-        
-        <p className="mb-6 leading-relaxed text-gray-700 text-lg">Baseado nas tendências internacionais e no comportamento do mercado brasileiro, algumas previsões para os próximos meses:</p>
-        
-        <div className="space-y-4 mb-8">
-          <div className="flex items-start gap-4 p-4 bg-green-50 rounded-lg border border-green-200">
-            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-              <span className="text-white font-bold text-sm">1</span>
-            </div>
-            <div>
-              <h4 className="font-bold text-green-800 mb-2">Micro-Realismo Extremo</h4>
-              <p className="text-gray-700">Tatuagens hiper-realistas em escalas minúsculas, com detalhamento que desafia os limites da técnica.</p>
-            </div>
-          </div>
-          
-          <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-              <span className="text-white font-bold text-sm">2</span>
-            </div>
-            <div>
-              <h4 className="font-bold text-blue-800 mb-2">Neo-Traditional Brasileiro</h4>
-              <p className="text-gray-700">Fusão entre técnicas tradicionais e elementos da cultura brasileira contemporânea.</p>
-            </div>
-          </div>
-          
-          <div className="flex items-start gap-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
-            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-              <span className="text-white font-bold text-sm">3</span>
-            </div>
-            <div>
-              <h4 className="font-bold text-purple-800 mb-2">Tatuagens Interativas</h4>
-              <p className="text-gray-700">Designs que mudam de perspectiva com o movimento do corpo, criando efeitos visuais dinâmicos.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-red-600 to-red-800 text-white p-8 rounded-xl my-12">
-          <h3 className="text-2xl font-black mb-4">💡 Dica de Ouro para Tatuadores</h3>
-          <p className="text-red-100 text-lg leading-relaxed">Não tente seguir todas as tendências ao mesmo tempo. Escolha 2-3 estilos que mais ressoam com sua personalidade artística e domine-os completamente. A especialização é o que diferencia bons tatuadores de tatuadores extraordinários em 2024.</p>
-        </div>
-
-        <h2 className="text-red-600 font-black text-3xl mt-12 mb-8 border-b-4 border-red-200 pb-4">🎯 Conclusão: O Futuro é Agora</h2>
-        
-        <p className="mb-6 leading-relaxed text-gray-700 text-lg">As tendências de 2024 mostram que a tatuagem está se tornando cada vez mais uma forma de arte sofisticada e personalizada. Os clientes estão mais educados, exigentes e dispostos a investir em qualidade.</p>
-        
-        <p className="mb-8 leading-relaxed text-gray-700 text-lg">Para nós, tatuadores, isso significa uma oportunidade única de elevar nosso craft e construir carreiras verdadeiramente sustentáveis. O mercado está aquecido, as oportunidades são infinitas, e a única limitação é nossa própria criatividade.</p>
-        
-        <div className="bg-yellow-50 border-2 border-yellow-300 p-6 rounded-xl">
-          <p className="text-yellow-800 font-semibold text-lg">👉 <strong>E você, qual tendência mais te chamou atenção?</strong> Conta pra gente nos comentários qual estilo você pretende explorar nos próximos meses!</p>
-        </div>
-      </div>
+Lembre-se: uma boa cicatrização garante que sua tatuagem ficará linda por muitos anos!
     `,
-    category: "Tendências",
-    status: "published",
-    author: mockAuthors[0],
-    publishDate: "2024-01-15",
-    stats: {
-      views: 2450,
-      likes: 189,
-      comments: 34,
-      shares: 67,
-      readTime: "8 min"
+    excerpt: 'Aprenda os cuidados essenciais para garantir uma cicatrização perfeita da sua nova tatuagem.',
+    cover_image: 'https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=2148&auto=format&fit=crop',
+    published_at: '2024-01-15T10:00:00Z',
+    category_id: '1',
+    author_id: 'admin',
+    reading_time: 5,
+    tags: ['cuidados', 'cicatrização', 'pós-tatuagem'],
+    view_count: 1250,
+    meta_description: 'Guia completo de cuidados pós-tatuagem para uma cicatrização perfeita',
+    meta_keywords: 'tatuagem, cuidados, cicatrização, pós-tatuagem',
+    profiles: {
+      first_name: 'Equipe',
+      last_name: '99Tattoo',
+      avatar_url: null
     },
-    featured: true,
-    coverImage: "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=800&auto=format&fit=crop&q=60",
-    inlineImages: [
-      "https://placehold.co/800x400/FF0000/FFFFFF?text=Tendências+2024",
-      "https://placehold.co/600x400/000000/FFFFFF?text=Fine+Line+Examples",
-      "https://placehold.co/700x500/FF69B4/FFFFFF?text=Aquarela+Técnicas",
-      "https://placehold.co/800x300/4169E1/FFFFFF?text=Dados+Estatísticas"
-    ],
-    tags: ["tendências", "2024", "estilos", "técnicas"],
-    products: [mockProducts[0], mockProducts[1]],
-    services: [mockServices[0]],
-    events: [mockEvents[0]]
+    blog_categories: {
+      id: '1',
+      name: 'Cuidados Pós-Tatuagem',
+      description: 'Dicas e orientações para cuidar da sua tatuagem após a sessão'
+    }
+  },
+  {
+    id: '2',
+    title: 'Tendências de tatuagem para 2024',
+    slug: 'tendencias-de-tatuagem-para-2024',
+    content: `
+# Tendências de tatuagem para 2024
+
+Este ano promete trazer **novidades incríveis** no mundo da tatuagem. Confira as principais tendências:
+
+## Fine Line
+Traços finos e delicados continuam em alta, especialmente para:
+- Desenhos minimalistas
+- Elementos florais
+- Símbolos geométricos
+
+## Aquarela
+O estilo aquarela ganhou força com:
+- Cores vibrantes
+- Efeitos de tinta escorrida
+- Combinação com elementos realistas
+
+## Blackwork
+O preto absoluto domina com:
+- Preenchimentos sólidos
+- Contrastes marcantes
+- Designs abstratos
+
+Qual estilo mais combina com você?
+    `,
+    excerpt: 'Descubra as principais tendências de tatuagem que dominarão 2024 e inspire-se para sua próxima tattoo.',
+    cover_image: 'https://images.unsplash.com/photo-1590246815107-56d48602592f?w=800&auto=format&fit=crop&q=60',
+    published_at: '2024-01-10T14:30:00Z',
+    category_id: '2',
+    author_id: 'admin',
+    reading_time: 7,
+    tags: ['tendências', '2024', 'estilos', 'fine-line', 'aquarela'],
+    view_count: 890,
+    meta_description: 'Conheça as principais tendências de tatuagem para 2024',
+    meta_keywords: 'tendências tatuagem, 2024, estilos, fine line, aquarela',
+    profiles: {
+      first_name: 'Carlos',
+      last_name: 'Silva',
+      avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+    },
+    blog_categories: {
+      id: '2',
+      name: 'Estilos de Tatuagem',
+      description: 'Explorando diferentes estilos e técnicas de tatuagem'
+    }
+  },
+  {
+    id: '3',
+    title: 'Novidade no estúdio: Equipamentos de última geração',
+    slug: 'novidade-no-studio-equipamentos-de-ultima-geracao',
+    content: `
+# Novidade no estúdio: Equipamentos de última geração
+
+Estamos **super empolgados** em anunciar que acabamos de adquirir novos equipamentos para oferecer ainda mais qualidade nos nossos trabalhos!
+
+## Novas máquinas
+- Máquinas rotativas de última geração
+- Menor vibração = mais conforto
+- Precisão milimétrica nos traços
+
+## Agulhas premium
+- Agulhas esterilizadas individuais
+- Diversos tipos para cada técnica
+- Qualidade internacional
+
+## Tintas de alta qualidade
+- Pigmentos premium importados
+- Cores mais vivas e duradouras
+- Segurança e qualidade garantidas
+
+Venha conhecer nosso estúdio renovado!
+    `,
+    excerpt: 'Conheça os novos equipamentos de última geração que adquirimos para oferecer ainda mais qualidade.',
+    cover_image: 'https://images.unsplash.com/photo-1565058398932-9a36a1a3c2b9?w=800&auto=format&fit=crop&q=60',
+    published_at: '2024-01-05T09:00:00Z',
+    category_id: '3',
+    author_id: 'admin',
+    reading_time: 3,
+    tags: ['novidades', 'equipamentos', 'qualidade', 'estúdio'],
+    view_count: 456,
+    meta_description: 'Conheça os novos equipamentos de última geração do nosso estúdio',
+    meta_keywords: 'equipamentos tatuagem, máquinas, qualidade, estúdio',
+    profiles: {
+      first_name: 'Ana',
+      last_name: 'Costa',
+      avatar_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
+    },
+    blog_categories: {
+      id: '3',
+      name: 'Notícias do Estúdio',
+      description: 'Novidades e atualizações do estúdio 99Tattoo'
+    }
   }
-  // Adicionar mais 14 artigos com conteúdo similarmente detalhado...
 ];
 
-// Mock blog service implementation
-export const mockBlogService = {
-  fetchBlogPosts: async (params: BlogServiceParams = {}) => {
-    const { page = 1, limit = 10, category, search, sort = 'latest' } = params;
+// Simple slug generator
+const generateSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+};
+
+export const mockBlogService: IBlogService = {
+  async fetchBlogPosts(params: BlogQueryParams = {}): Promise<BlogPaginatedResponse> {
+    console.log('MockBlogService: fetchBlogPosts called with params:', params);
     
-    let filteredArticles = [...mockBlogArticles];
-    
-    // Filter by category
-    if (category && category !== 'Todos') {
-      filteredArticles = filteredArticles.filter(article => article.category === category);
-    }
-    
-    // Filter by search
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filteredArticles = filteredArticles.filter(article => 
-        article.title.toLowerCase().includes(searchLower) ||
-        article.excerpt.toLowerCase().includes(searchLower) ||
-        article.tags.some(tag => tag.toLowerCase().includes(searchLower))
+    let filteredPosts = [...mockBlogPosts];
+
+    // Apply filters
+    if (params.search) {
+      const searchLower = params.search.toLowerCase();
+      filteredPosts = filteredPosts.filter(post => 
+        post.title.toLowerCase().includes(searchLower) ||
+        post.content.toLowerCase().includes(searchLower) ||
+        post.excerpt?.toLowerCase().includes(searchLower)
       );
     }
-    
-    // Sort articles
-    if (sort === 'popular') {
-      filteredArticles.sort((a, b) => b.stats.views - a.stats.views);
-    } else if (sort === 'oldest') {
-      filteredArticles.sort((a, b) => new Date(a.publishDate).getTime() - new Date(b.publishDate).getTime());
-    } else {
-      filteredArticles.sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+
+    if (params.category) {
+      filteredPosts = filteredPosts.filter(post => post.category_id === params.category);
     }
-    
+
+    if (params.status && params.status !== 'all') {
+      // For mock, we'll assume all posts are published
+      if (params.status !== 'published') {
+        filteredPosts = [];
+      }
+    }
+
+    if (params.author_id) {
+      filteredPosts = filteredPosts.filter(post => post.author_id === params.author_id);
+    }
+
+    if (params.tag) {
+      filteredPosts = filteredPosts.filter(post => 
+        post.tags?.includes(params.tag!)
+      );
+    }
+
+    // Apply sorting
+    if (params.sort === 'oldest') {
+      filteredPosts.sort((a, b) => new Date(a.published_at || 0).getTime() - new Date(b.published_at || 0).getTime());
+    } else {
+      filteredPosts.sort((a, b) => new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime());
+    }
+
+    // Apply pagination
+    const page = params.page || 1;
+    const limit = params.limit || 10;
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    const paginatedArticles = filteredArticles.slice(startIndex, endIndex);
-    
+    const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+
+    // Convert to BlogPostSummary format
+    const posts: BlogPostSummary[] = paginatedPosts.map(post => ({
+      id: post.id,
+      title: post.title,
+      excerpt: post.excerpt,
+      cover_image: post.cover_image,
+      published_at: post.published_at,
+      slug: post.slug,
+      profiles: post.profiles,
+      blog_categories: post.blog_categories
+    }));
+
     return {
-      posts: paginatedArticles.map(article => ({
-        id: article.id.toString(),
-        title: article.title,
-        slug: article.slug,
-        excerpt: article.excerpt,
-        cover_image: article.coverImage,
-        category: article.category,
-        author: article.author.name,
-        published_at: article.publishDate,
-        created_at: article.publishDate,
-        updated_at: article.publishDate,
-        status: article.status,
-        tags: article.tags,
-        views: article.stats.views,
-        likes: article.stats.likes,
-        comments_count: article.stats.comments
-      })),
-      totalPosts: filteredArticles.length,
-      totalPages: Math.ceil(filteredArticles.length / limit),
+      posts,
+      totalPosts: filteredPosts.length,
+      totalPages: Math.ceil(filteredPosts.length / limit),
       currentPage: page
     };
   },
 
-  fetchBlogCategories: async () => {
-    const categories = Array.from(new Set(mockBlogArticles.map(article => article.category)));
-    return categories.map(category => ({
-      id: category.toLowerCase().replace(/\s+/g, '-'),
-      name: category,
-      description: `Artigos sobre ${category}`,
-      created_at: new Date().toISOString()
-    }));
+  async fetchBlogCategories(): Promise<BlogCategory[]> {
+    console.log('MockBlogService: fetchBlogCategories called');
+    return [...mockCategories];
   },
 
-  fetchBlogPost: async (idOrSlug: string) => {
-    const article = mockBlogArticles.find(article => 
-      article.id.toString() === idOrSlug || article.slug === idOrSlug
-    );
+  async fetchBlogPost(idOrSlug: string): Promise<BlogPost | null> {
+    console.log('MockBlogService: fetchBlogPost called with:', idOrSlug);
     
-    if (!article) return null;
-    
-    return {
-      id: article.id.toString(),
-      title: article.title,
-      slug: article.slug,
-      content: article.content,
-      excerpt: article.excerpt,
-      cover_image: article.coverImage,
-      category: article.category,
-      author: article.author.name,
-      published_at: article.publishDate,
-      created_at: article.publishDate,
-      updated_at: article.publishDate,
-      status: article.status,
-      tags: article.tags,
-      views: article.stats.views,
-      likes: article.stats.likes,
-      comments_count: article.stats.comments,
-      meta_title: article.title,
-      meta_description: article.excerpt,
-      meta_keywords: article.tags.join(', ')
-    };
+    const post = mockBlogPosts.find(p => p.id === idOrSlug || p.slug === idOrSlug);
+    return post || null;
   },
 
-  fetchRelatedPosts: async (postId: string, limit = 3) => {
-    const currentArticle = mockBlogArticles.find(article => article.id.toString() === postId);
-    if (!currentArticle) return [];
+  async fetchRelatedPosts(postId: string, limit: number = 3): Promise<BlogPostSummary[]> {
+    console.log('MockBlogService: fetchRelatedPosts called with postId:', postId, 'limit:', limit);
     
-    const relatedArticles = mockBlogArticles
-      .filter(article => 
-        article.id.toString() !== postId && 
-        article.category === currentArticle.category
-      )
+    const currentPost = mockBlogPosts.find(p => p.id === postId);
+    if (!currentPost) return [];
+
+    // Get posts from same category, excluding current post
+    const relatedPosts = mockBlogPosts
+      .filter(p => p.id !== postId && p.category_id === currentPost.category_id)
       .slice(0, limit);
-    
-    return relatedArticles.map(article => ({
-      id: article.id.toString(),
-      title: article.title,
-      slug: article.slug,
-      excerpt: article.excerpt,
-      cover_image: article.coverImage,
-      category: article.category,
-      author: article.author.name,
-      published_at: article.publishDate,
-      created_at: article.publishDate,
-      updated_at: article.publishDate,
-      status: article.status,
-      tags: article.tags,
-      views: article.stats.views,
-      likes: article.stats.likes,
-      comments_count: article.stats.comments
+
+    return relatedPosts.map(post => ({
+      id: post.id,
+      title: post.title,
+      excerpt: post.excerpt,
+      cover_image: post.cover_image,
+      published_at: post.published_at,
+      slug: post.slug,
+      profiles: post.profiles,
+      blog_categories: post.blog_categories
     }));
   },
 
-  fetchTagsList: async () => {
-    const allTags = mockBlogArticles.flatMap(article => article.tags);
-    return Array.from(new Set(allTags));
+  async fetchTagsList(): Promise<string[]> {
+    console.log('MockBlogService: fetchTagsList called');
+    
+    const allTags = mockBlogPosts.flatMap(post => post.tags || []);
+    return [...new Set(allTags)].sort();
   },
 
-  searchBlogPosts: async (query: string) => {
-    const searchLower = query.toLowerCase();
-    const filteredArticles = mockBlogArticles.filter(article => 
-      article.title.toLowerCase().includes(searchLower) ||
-      article.excerpt.toLowerCase().includes(searchLower) ||
-      article.tags.some(tag => tag.toLowerCase().includes(searchLower))
-    );
+  async searchBlogPosts(query: string): Promise<BlogPostSummary[]> {
+    console.log('MockBlogService: searchBlogPosts called with query:', query);
     
-    return filteredArticles.map(article => ({
-      id: article.id.toString(),
-      title: article.title,
-      slug: article.slug,
-      excerpt: article.excerpt,
-      cover_image: article.coverImage,
-      category: article.category,
-      author: article.author.name,
-      published_at: article.publishDate,
-      created_at: article.publishDate,
-      updated_at: article.publishDate,
-      status: article.status,
-      tags: article.tags,
-      views: article.stats.views,
-      likes: article.stats.likes,
-      comments_count: article.stats.comments
-    }));
+    const result = await this.fetchBlogPosts({ search: query, limit: 10 });
+    return result.posts;
+  },
+
+  // Admin methods
+  async createBlogPost(data: CreateBlogPostData): Promise<BlogPost> {
+    console.log('MockBlogService: createBlogPost called with data:', data);
+    
+    const newPost: BlogPost = {
+      id: Date.now().toString(),
+      title: data.title,
+      slug: data.slug || generateSlug(data.title),
+      content: data.content,
+      excerpt: data.excerpt || '',
+      cover_image: data.cover_image || null,
+      published_at: data.published_at || new Date().toISOString(),
+      category_id: data.category_id,
+      author_id: data.author_id,
+      reading_time: Math.ceil(data.content.length / 1000), // Rough estimate
+      tags: data.tags || [],
+      view_count: 0,
+      meta_description: data.meta_description || '',
+      meta_keywords: data.meta_keywords || '',
+      profiles: {
+        first_name: 'Equipe',
+        last_name: '99Tattoo',
+        avatar_url: null
+      },
+      blog_categories: mockCategories.find(c => c.id === data.category_id) || null
+    };
+
+    mockBlogPosts.unshift(newPost);
+    return newPost;
+  },
+
+  async updateBlogPost(data: UpdateBlogPostData): Promise<BlogPost> {
+    console.log('MockBlogService: updateBlogPost called with data:', data);
+    
+    const index = mockBlogPosts.findIndex(p => p.id === data.id);
+    if (index === -1) {
+      throw new Error('Post not found');
+    }
+
+    const updatedPost = {
+      ...mockBlogPosts[index],
+      ...data,
+      slug: data.slug || mockBlogPosts[index].slug
+    };
+
+    mockBlogPosts[index] = updatedPost;
+    return updatedPost;
+  },
+
+  async deleteBlogPost(id: string): Promise<boolean> {
+    console.log('MockBlogService: deleteBlogPost called with id:', id);
+    
+    const index = mockBlogPosts.findIndex(p => p.id === id);
+    if (index === -1) {
+      return false;
+    }
+
+    mockBlogPosts.splice(index, 1);
+    return true;
+  },
+
+  async createBlogCategory(data: { name: string; description?: string }): Promise<BlogCategory> {
+    console.log('MockBlogService: createBlogCategory called with data:', data);
+    
+    const newCategory: BlogCategory = {
+      id: Date.now().toString(),
+      name: data.name,
+      description: data.description || null,
+      created_at: new Date().toISOString()
+    };
+
+    mockCategories.push(newCategory);
+    return newCategory;
+  },
+
+  async updateBlogCategory(id: string, data: { name: string; description?: string }): Promise<BlogCategory> {
+    console.log('MockBlogService: updateBlogCategory called with id:', id, 'data:', data);
+    
+    const index = mockCategories.findIndex(c => c.id === id);
+    if (index === -1) {
+      throw new Error('Category not found');
+    }
+
+    const updatedCategory = {
+      ...mockCategories[index],
+      ...data,
+      description: data.description || null
+    };
+
+    mockCategories[index] = updatedCategory;
+    return updatedCategory;
+  },
+
+  async deleteBlogCategory(id: string): Promise<boolean> {
+    console.log('MockBlogService: deleteBlogCategory called with id:', id);
+    
+    const index = mockCategories.findIndex(c => c.id === id);
+    if (index === -1) {
+      return false;
+    }
+
+    mockCategories.splice(index, 1);
+    return true;
+  },
+
+  generateSlug(title: string): string {
+    return generateSlug(title);
   }
-};
-
-// Function exports for compatibility
-export const getArticleBySlug = (slug: string): BlogArticle | undefined => {
-  return mockBlogArticles.find(article => article.slug === slug);
-};
-
-export const getRelatedArticles = (currentArticle: BlogArticle, limit: number = 3): BlogArticle[] => {
-  return mockBlogArticles
-    .filter(article => 
-      article.id !== currentArticle.id && 
-      article.category === currentArticle.category
-    )
-    .slice(0, limit);
-};
-
-export const getAllArticles = (): BlogArticle[] => {
-  return mockBlogArticles;
-};
-
-export const getArticlesByCategory = (category: string): BlogArticle[] => {
-  if (category === "Todos") return mockBlogArticles;
-  return mockBlogArticles.filter(article => article.category === category);
 };

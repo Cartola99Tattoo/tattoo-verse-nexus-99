@@ -3,287 +3,299 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DollarSign, TrendingUp, TrendingDown, Calculator, CreditCard, PieChart } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Calendar, Search, Filter, Plus, CreditCard, Banknote } from "lucide-react";
 import NaveMaeLayout from "@/components/layouts/NaveMaeLayout";
 
-const mockFinancialData = {
-  revenue: {
-    current: 2850000,
-    previous: 2420000,
-    growth: 17.8
+const mockTransactions = [
+  {
+    id: 1,
+    description: "Pagamento - Tatuagem Realista",
+    amount: 800.00,
+    type: "income",
+    category: "Serviços",
+    date: "2024-07-19",
+    client: "Maria Silva",
+    artist: "Carlos Mendes",
+    studio: "Estúdio Principal",
+    paymentMethod: "PIX"
   },
-  expenses: {
-    current: 1890000,
-    previous: 1650000,
-    growth: 14.5
+  {
+    id: 2,
+    description: "Compra de Tintas",
+    amount: -320.00,
+    type: "expense",
+    category: "Material",
+    date: "2024-07-18",
+    supplier: "Color Ink Pro",
+    studio: "Estúdio Principal",
+    paymentMethod: "Cartão"
   },
-  profit: {
-    current: 960000,
-    previous: 770000,
-    growth: 24.7
-  },
-  transactions: [
-    {
-      id: 1,
-      type: "revenue",
-      description: "Vendas Loja Online",
-      amount: 45000,
-      date: "2024-07-19",
-      status: "completed"
-    },
-    {
-      id: 2,
-      type: "expense",
-      description: "Compra de Estoque",
-      amount: -12500,
-      date: "2024-07-18",
-      status: "completed"
-    },
-    {
-      id: 3,
-      type: "revenue",
-      description: "Comissões de Estúdios",
-      amount: 28500,
-      date: "2024-07-17",
-      status: "pending"
-    }
-  ],
-  breakdown: {
-    revenue: [
-      { category: "Vendas Produtos", amount: 1250000, percentage: 43.9 },
-      { category: "Comissões Estúdios", amount: 980000, percentage: 34.4 },
-      { category: "Taxas de Transação", amount: 420000, percentage: 14.7 },
-      { category: "Programa Fidelidade", amount: 200000, percentage: 7.0 }
-    ],
-    expenses: [
-      { category: "Estoque", amount: 650000, percentage: 34.4 },
-      { category: "Folha de Pagamento", amount: 520000, percentage: 27.5 },
-      { category: "Marketing", amount: 350000, percentage: 18.5 },
-      { category: "Operacional", amount: 370000, percentage: 19.6 }
-    ]
+  {
+    id: 3,
+    description: "Pagamento - Workshop Sombreamento",
+    amount: 180.00,
+    type: "income",
+    category: "Cursos",
+    date: "2024-07-17",
+    client: "João Santos",
+    studio: "Estúdio Filial",
+    paymentMethod: "Transferência"
   }
-};
+];
 
 const NaveMaeFinancial = () => {
-  const [periodFilter, setPeriodFilter] = useState("current_month");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("month");
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+  const filteredTransactions = mockTransactions.filter(transaction => {
+    const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.client?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.artist?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = typeFilter === 'all' || transaction.type === typeFilter;
+    const matchesCategory = categoryFilter === 'all' || transaction.category === categoryFilter;
+    return matchesSearch && matchesType && matchesCategory;
+  });
+
+  const totalRevenue = mockTransactions
+    .filter(t => t.type === 'income')
+    .reduce((acc, t) => acc + t.amount, 0);
+
+  const totalExpenses = Math.abs(mockTransactions
+    .filter(t => t.type === 'expense')
+    .reduce((acc, t) => acc + t.amount, 0));
+
+  const netProfit = totalRevenue - totalExpenses;
+  const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'income': return 'bg-green-100 text-green-800';
+      case 'expense': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const getGrowthColor = (growth: number) => {
-    return growth >= 0 ? 'text-green-600' : 'text-red-600';
-  };
-
-  const getGrowthIcon = (growth: number) => {
-    return growth >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />;
+  const getPaymentMethodIcon = (method: string) => {
+    switch (method) {
+      case 'PIX': return <Banknote className="h-4 w-4" />;
+      case 'Cartão': return <CreditCard className="h-4 w-4" />;
+      case 'Transferência': return <TrendingUp className="h-4 w-4" />;
+      default: return <DollarSign className="h-4 w-4" />;
+    }
   };
 
   return (
     <NaveMaeLayout>
       <div className="space-y-6">
-        {/* Filtro de Período */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Relatório Financeiro</h2>
-              <Select value={periodFilter} onValueChange={setPeriodFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="current_month">Mês Atual</SelectItem>
-                  <SelectItem value="last_month">Mês Anterior</SelectItem>
-                  <SelectItem value="quarter">Trimestre</SelectItem>
-                  <SelectItem value="year">Ano</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Métricas Principais */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Métricas Financeiras */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-600 text-sm font-medium">Receita Total</p>
-                  <p className="text-3xl font-bold text-green-800">
-                    {formatCurrency(mockFinancialData.revenue.current)}
-                  </p>
+                  <p className="text-3xl font-bold text-green-800">R$ {totalRevenue.toLocaleString()}</p>
                 </div>
-                <DollarSign className="h-8 w-8 text-green-600" />
-              </div>
-              <div className={`flex items-center gap-2 ${getGrowthColor(mockFinancialData.revenue.growth)}`}>
-                {getGrowthIcon(mockFinancialData.revenue.growth)}
-                <span className="text-sm font-medium">
-                  +{mockFinancialData.revenue.growth}% vs período anterior
-                </span>
+                <TrendingUp className="h-8 w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-red-600 text-sm font-medium">Despesas</p>
-                  <p className="text-3xl font-bold text-red-800">
-                    {formatCurrency(mockFinancialData.expenses.current)}
-                  </p>
+                  <p className="text-red-600 text-sm font-medium">Despesas Total</p>
+                  <p className="text-3xl font-bold text-red-800">R$ {totalExpenses.toLocaleString()}</p>
                 </div>
-                <CreditCard className="h-8 w-8 text-red-600" />
+                <TrendingDown className="h-8 w-8 text-red-600" />
               </div>
-              <div className={`flex items-center gap-2 ${getGrowthColor(mockFinancialData.expenses.growth)}`}>
-                {getGrowthIcon(mockFinancialData.expenses.growth)}
-                <span className="text-sm font-medium">
-                  +{mockFinancialData.expenses.growth}% vs período anterior
-                </span>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-600 text-sm font-medium">Lucro Líquido</p>
+                  <p className="text-3xl font-bold text-purple-800">R$ {netProfit.toLocaleString()}</p>
+                </div>
+                <DollarSign className="h-8 w-8 text-purple-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-600 text-sm font-medium">Lucro Líquido</p>
-                  <p className="text-3xl font-bold text-blue-800">
-                    {formatCurrency(mockFinancialData.profit.current)}
-                  </p>
+                  <p className="text-blue-600 text-sm font-medium">Margem de Lucro</p>
+                  <p className="text-3xl font-bold text-blue-800">{profitMargin.toFixed(1)}%</p>
                 </div>
-                <Calculator className="h-8 w-8 text-blue-600" />
-              </div>
-              <div className={`flex items-center gap-2 ${getGrowthColor(mockFinancialData.profit.growth)}`}>
-                {getGrowthIcon(mockFinancialData.profit.growth)}
-                <span className="text-sm font-medium">
-                  +{mockFinancialData.profit.growth}% vs período anterior
-                </span>
+                <Calendar className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Breakdown de Receitas e Despesas */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <PieChart className="h-5 w-5 text-green-600" />
-                Breakdown de Receitas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockFinancialData.breakdown.revenue.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-medium">{item.category}</span>
-                        <span className="text-sm text-gray-500">{item.percentage}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-500 h-2 rounded-full"
-                          style={{ width: `${item.percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="ml-4 text-right">
-                      <span className="text-sm font-bold text-green-600">
-                        {formatCurrency(item.amount)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <PieChart className="h-5 w-5 text-red-600" />
-                Breakdown de Despesas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockFinancialData.breakdown.expenses.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-medium">{item.category}</span>
-                        <span className="text-sm text-gray-500">{item.percentage}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-red-500 h-2 rounded-full"
-                          style={{ width: `${item.percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="ml-4 text-right">
-                      <span className="text-sm font-bold text-red-600">
-                        {formatCurrency(item.amount)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Transações Recentes */}
+        {/* Filtros */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Transações Recentes</CardTitle>
-            <Button variant="outline">Ver Todas</Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockFinancialData.transactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-full ${
-                      transaction.type === 'revenue' 
-                        ? 'bg-green-100 text-green-600' 
-                        : 'bg-red-100 text-red-600'
-                    }`}>
-                      {transaction.type === 'revenue' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                    </div>
-                    <div>
-                      <p className="font-medium">{transaction.description}</p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(transaction.date).toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-bold ${
-                      transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {formatCurrency(Math.abs(transaction.amount))}
-                    </p>
-                    <Badge className={
-                      transaction.status === 'completed' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }>
-                      {transaction.status === 'completed' ? 'Concluído' : 'Pendente'}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div className="w-full md:w-96 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Buscar transações..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <div className="flex gap-4 items-center">
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Tipos</SelectItem>
+                    <SelectItem value="income">Receitas</SelectItem>
+                    <SelectItem value="expense">Despesas</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as Categorias</SelectItem>
+                    <SelectItem value="Serviços">Serviços</SelectItem>
+                    <SelectItem value="Material">Material</SelectItem>
+                    <SelectItem value="Cursos">Cursos</SelectItem>
+                    <SelectItem value="Aluguel">Aluguel</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={dateFilter} onValueChange={setDateFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="today">Hoje</SelectItem>
+                    <SelectItem value="week">Esta Semana</SelectItem>
+                    <SelectItem value="month">Este Mês</SelectItem>
+                    <SelectItem value="year">Este Ano</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Transação
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Lista de Transações */}
+        <div className="grid gap-6">
+          {filteredTransactions.map((transaction) => (
+            <Card key={transaction.id} className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className={`p-2 rounded-full ${transaction.type === 'income' ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+                      {transaction.type === 'income' ? 
+                        <TrendingUp className="h-5 w-5 text-green-600" /> : 
+                        <TrendingDown className="h-5 w-5 text-red-600" />
+                      }
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">{transaction.description}</h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span>{transaction.category}</span>
+                        <span>•</span>
+                        <span>{new Date(transaction.date).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right flex items-center gap-4">
+                    <div>
+                      <div className={`text-2xl font-bold ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                        {transaction.type === 'income' ? '+' : ''}R$ {Math.abs(transaction.amount).toLocaleString()}
+                      </div>
+                      <Badge className={`${getTypeColor(transaction.type)} text-xs`}>
+                        {transaction.type === 'income' ? 'Receita' : 'Despesa'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                  {transaction.client && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 mb-1">Cliente</p>
+                      <p className="text-sm text-gray-600">{transaction.client}</p>
+                    </div>
+                  )}
+                  {transaction.artist && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 mb-1">Artista</p>
+                      <p className="text-sm text-gray-600">{transaction.artist}</p>
+                    </div>
+                  )}
+                  {transaction.supplier && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 mb-1">Fornecedor</p>
+                      <p className="text-sm text-gray-600">{transaction.supplier}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-1">Estúdio</p>
+                    <p className="text-sm text-gray-600">{transaction.studio}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</p>
+                    <div className="flex items-center gap-2">
+                      {getPaymentMethodIcon(transaction.paymentMethod)}
+                      <span className="text-sm text-gray-600">{transaction.paymentMethod}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline">
+                    Ver Detalhes
+                  </Button>
+                  <Button size="sm" variant="outline">
+                    Editar
+                  </Button>
+                  <Button size="sm" variant="outline">
+                    Imprimir Recibo
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {filteredTransactions.length === 0 && (
+          <div className="text-center py-12">
+            <DollarSign className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Nenhuma transação encontrada</h3>
+            <p className="text-gray-500">
+              {searchTerm || typeFilter !== 'all' || categoryFilter !== 'all'
+                ? 'Tente ajustar os filtros de busca' 
+                : 'Adicione a primeira transação financeira'
+              }
+            </p>
+          </div>
+        )}
       </div>
     </NaveMaeLayout>
   );
