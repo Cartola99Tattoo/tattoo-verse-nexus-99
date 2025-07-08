@@ -48,9 +48,31 @@ import AdminLoyalty from '@/pages/admin/Loyalty';
 import AdminSecurity from '@/pages/admin/Security';
 import AdminProjects from '@/pages/admin/Projects';
 
+// Nave-Mãe pages - RESTAURAÇÃO COMPLETA
+import NaveMaeLanding from '@/pages/nave-mae/NaveMaeLanding';
+import NaveMaeDashboard from '@/pages/nave-mae/NaveMaeDashboard';
+import NaveMaeStudios from '@/pages/nave-mae/NaveMaeStudios';
+import NaveMaeAnalytics from '@/pages/nave-mae/NaveMaeAnalytics';
+import NaveMaeArtists from '@/pages/nave-mae/NaveMaeArtists';
+import NaveMaeClients from '@/pages/nave-mae/NaveMaeClients';
+import NaveMaeAppointments from '@/pages/nave-mae/NaveMaeAppointments';
+import NaveMaeProjects from '@/pages/nave-mae/NaveMaeProjects';
+import NaveMaeLoyalty from '@/pages/nave-mae/NaveMaeLoyalty';
+import NaveMaeProducts from '@/pages/nave-mae/NaveMaeProducts';
+import NaveMaeStock from '@/pages/nave-mae/NaveMaeStock';
+import NaveMaeFinancial from '@/pages/nave-mae/NaveMaeFinancial';
+import NaveMaeReports from '@/pages/nave-mae/NaveMaeReports';
+import NaveMaeEvents from '@/pages/nave-mae/NaveMaeEvents';
+import NaveMaeBlog from '@/pages/nave-mae/NaveMaeBlog';
+import NaveMaeSettings from '@/pages/nave-mae/NaveMaeSettings';
+import NaveMaeSecurity from '@/pages/nave-mae/NaveMaeSecurity';
+
 // Tattoo Artists pages
 import TattooArtistsBlog from '@/pages/tatuadores-da-nova-era/TattooArtistsBlog';
 import TattooArtistsBlogArticle from '@/pages/tatuadores-da-nova-era/TattooArtistsBlogArticle';
+import TattooArtistsLanding from '@/pages/tattoo-artists/TattooArtistsLanding';
+import TattooArtistsShop from '@/pages/tattoo-artists/TattooArtistsShop';
+import TattooArtistsProfile from '@/pages/tattoo-artists/TattooArtistsProfile';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -110,7 +132,29 @@ function App() {
                     <Route path="/admin/security" element={<AdminSecurity />} />
                     <Route path="/admin/projects" element={<AdminProjects />} />
 
-                    {/* Tattoo Artists routes */}
+                    {/* NAVE-MÃE ROUTES - RESTAURAÇÃO COMPLETA */}
+                    <Route path="/nave-mae-da-tatuagem" element={<NaveMaeLanding />} />
+                    <Route path="/nave-mae-da-tatuagem/dashboard" element={<NaveMaeDashboard />} />
+                    <Route path="/nave-mae-da-tatuagem/studios" element={<NaveMaeStudios />} />
+                    <Route path="/nave-mae-da-tatuagem/analytics" element={<NaveMaeAnalytics />} />
+                    <Route path="/nave-mae-da-tatuagem/artists" element={<NaveMaeArtists />} />
+                    <Route path="/nave-mae-da-tatuagem/clients" element={<NaveMaeClients />} />
+                    <Route path="/nave-mae-da-tatuagem/appointments" element={<NaveMaeAppointments />} />
+                    <Route path="/nave-mae-da-tatuagem/projects" element={<NaveMaeProjects />} />
+                    <Route path="/nave-mae-da-tatuagem/loyalty" element={<NaveMaeLoyalty />} />
+                    <Route path="/nave-mae-da-tatuagem/products" element={<NaveMaeProducts />} />
+                    <Route path="/nave-mae-da-tatuagem/stock" element={<NaveMaeStock />} />
+                    <Route path="/nave-mae-da-tatuagem/financial" element={<NaveMaeFinancial />} />
+                    <Route path="/nave-mae-da-tatuagem/reports" element={<NaveMaeReports />} />
+                    <Route path="/nave-mae-da-tatuagem/events" element={<NaveMaeEvents />} />
+                    <Route path="/nave-mae-da-tatuagem/blog" element={<NaveMaeBlog />} />
+                    <Route path="/nave-mae-da-tatuagem/settings" element={<NaveMaeSettings />} />
+                    <Route path="/nave-mae-da-tatuagem/security" element={<NaveMaeSecurity />} />
+
+                    {/* Tattoo Artists routes - RESTAURAÇÃO E EXPANSÃO */}
+                    <Route path="/tatuadores-da-nova-era" element={<TattooArtistsLanding />} />
+                    <Route path="/tatuadores-da-nova-era/shop" element={<TattooArtistsShop />} />
+                    <Route path="/tatuadores-da-nova-era/perfil/:id" element={<TattooArtistsProfile />} />
                     <Route path="/tatuadores-da-nova-era/blog" element={<TattooArtistsBlog />} />
                     <Route path="/tatuadores-da-nova-era/blog/:articleId" element={<TattooArtistsBlogArticle />} />
 
