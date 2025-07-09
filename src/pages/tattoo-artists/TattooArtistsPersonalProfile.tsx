@@ -19,9 +19,10 @@ import {
   Star,
   CheckCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  Calculator
 } from 'lucide-react';
-import TattooArtistsLayout from "@/components/layouts/TattooArtistsLayout";
+import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
 import SPINQuestionnaire from "@/components/tattoo-artists/SPINQuestionnaire";
 import MonthlyMetricsManager from "@/components/tattoo-artists/MonthlyMetricsManager";
 import { useFirestoreIntegration } from "@/hooks/useFirestoreIntegration";
@@ -37,7 +38,7 @@ const TattooArtistsPersonalProfile = () => {
     loadUserData
   } = useFirestoreIntegration();
 
-  const [localSPINResponses, setLocalSPINResponses] = useState({});
+  const [localSPINResponses, setLocalSPINResponses] = useState<Record<string, string>>({});
   const [isLoadingAction, setIsLoadingAction] = useState(false);
 
   // Carregar dados ao inicializar
@@ -126,7 +127,7 @@ const TattooArtistsPersonalProfile = () => {
       for (const section of sections) {
         const sectionAnswers: Record<string, string> = {};
         Object.entries(localSPINResponses).forEach(([questionId, answer]) => {
-          if (questionId.startsWith(section) && answer.trim()) {
+          if (questionId.startsWith(section) && typeof answer === 'string' && answer.trim()) {
             sectionAnswers[questionId] = answer;
           }
         });
@@ -169,32 +170,32 @@ const TattooArtistsPersonalProfile = () => {
 
   if (loading) {
     return (
-      <TattooArtistsLayout>
+      <TattooArtistLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-red-600" />
             <p className="text-gray-600">Carregando seus dados...</p>
           </div>
         </div>
-      </TattooArtistsLayout>
+      </TattooArtistLayout>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <TattooArtistsLayout>
+      <TattooArtistLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="flex flex-col items-center gap-4">
             <AlertCircle className="h-8 w-8 text-red-600" />
             <p className="text-gray-600">Erro de autenticação. Recarregue a página.</p>
           </div>
         </div>
-      </TattooArtistsLayout>
+      </TattooArtistLayout>
     );
   }
 
   return (
-    <TattooArtistsLayout>
+    <TattooArtistLayout>
       <div className="space-y-8">
         {/* Header do Perfil */}
         <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl p-6">
@@ -304,7 +305,7 @@ const TattooArtistsPersonalProfile = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </TattooArtistsLayout>
+    </TattooArtistLayout>
   );
 };
 
