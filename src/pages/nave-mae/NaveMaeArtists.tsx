@@ -5,45 +5,40 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Brush, 
   Search, 
-  Filter, 
   Plus, 
   Users, 
   Star, 
-  Award, 
-  TrendingUp, 
-  Edit, 
-  Trash2, 
-  Eye,
   BarChart3,
   Target,
   Calendar,
   DollarSign,
   Clock,
-  TrendingDown,
-  AlertTriangle,
   CheckCircle,
   Loader2,
-  Download
+  Download,
+  UserPlus,
+  Sparkles
 } from "lucide-react";
 import NaveMaeLayout from "@/components/layouts/NaveMaeLayout";
-import ArtistModal from "@/components/nave-mae/ArtistModal";
+import TattooArtistDetailModal from "@/components/tattoo-artists/TattooArtistDetailModal";
+import PopulateArtistModal from "@/components/tattoo-artists/PopulateArtistModal";
+import ExportDataModal from "@/components/tattoo-artists/ExportDataModal";
 import { useCRMData } from "@/hooks/useFirestoreIntegration";
 import { TattooArtistData } from "@/services/FirestoreService";
 
 const NaveMaeArtists = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [diagnosticFilter, setDiagnosticFilter] = useState("all");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedArtist, setSelectedArtist] = useState<TattooArtistData | null>(null);
   const [viewingArtist, setViewingArtist] = useState<TattooArtistData | null>(null);
+  const [exportingArtist, setExportingArtist] = useState<TattooArtistData | null>(null);
+  const [showPopulateModal, setShowPopulateModal] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Usar hook do CRM para dados em tempo real
-  const { artists, loading } = useCRMData();
+  const { artists, loading, generateNewArtist } = useCRMData();
 
   // Filtrar artistas baseado nos critérios
   const filteredArtists = artists.filter(artist => {
@@ -74,51 +69,6 @@ const NaveMaeArtists = () => {
     a.metricasMensais && Object.values(a.metricasMensais).some(m => m.compartilhadoComunidade)
   ).length;
 
-  // Função para calcular métricas derivadas
-  const calculateMonthlyStats = (artist: TattooArtistData) => {
-    if (!artist.metricasMensais) return null;
-    
-    const metrics = Object.entries(artist.metricasMensais)
-      .sort(([a], [b]) => b.localeCompare(a)) // Mais recente primeiro
-      .slice(0, 2); // Últimos 2 meses
-    
-    if (metrics.length === 0) return null;
-    
-    const [currentMonth, current] = metrics[0];
-    const previous = metrics[1] ? metrics[1][1] : null;
-    
-    const avgPerTattoo = current.tatuagensRealizadas > 0 
-      ? current.valorTotalRecebido / current.tatuagensRealizadas 
-      : 0;
-    
-    const avgPerHour = current.horasTrabalhadas > 0 
-      ? current.valorTotalRecebido / current.horasTrabalhadas 
-      : 0;
-    
-    // Calcular tendências se houver mês anterior
-    let trends = null;
-    if (previous) {
-      const prevAvgPerTattoo = previous.tatuagensRealizadas > 0 
-        ? previous.valorTotalRecebido / previous.tatuagensRealizadas 
-        : 0;
-      
-      trends = {
-        tattoos: current.tatuagensRealizadas - previous.tatuagensRealizadas,
-        revenue: current.valorTotalRecebido - previous.valorTotalRecebido,
-        avgPerTattoo: avgPerTattoo - prevAvgPerTattoo
-      };
-    }
-    
-    return {
-      currentMonth,
-      current,
-      avgPerTattoo,
-      avgPerHour,
-      trends,
-      totalMonths: Object.keys(artist.metricasMensais).length
-    };
-  };
-
   // Função para obter status do diagnóstico
   const getDiagnosticStatus = (artist: TattooArtistData) => {
     if (!artist.diagnostico) {
@@ -139,6 +89,41 @@ const NaveMaeArtists = () => {
     }
   };
 
+  // Função para calcular métricas de um artista
+  const calculateArtistStats = (artist: TattooArtistData) => {
+    if (!artist.metricasMensais) return null;
+    
+    const metrics = Object.entries(artist.metricasMensais)
+      .sort(([a], [b]) => b.localeCompare(a)) // Mais recente primeiro
+      .slice(0, 1)[0]; // Último mês apenas
+    
+    if (!metrics) return null;
+    
+    const [monthYear, data] = metrics;
+    const avgPerTattoo = data.tatuagensRealizadas > 0 
+      ? data.valorTotalRecebido / data.tatuagensRealizadas 
+      : 0;
+    
+    return {
+      lastMonth: monthYear,
+      lastData: data,
+      avgPerTattoo,
+      totalMonths: Object.keys(artist.metricasMensais).length
+    };
+  };
+
+  // Função para gerar novo tatuador
+  const handleGenerateArtist = async (config: any) => {
+    setIsGenerating(true);
+    try {
+      await generateNewArtist(config);
+    } catch (error) {
+      console.error('Erro ao gerar tatuador:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   // Função para formatar moeda
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -147,26 +132,31 @@ const NaveMaeArtists = () => {
     }).format(value);
   };
 
-  // Função para exportar dados (simulada)
-  const handleExportData = (artist?: TattooArtistData) => {
-    const dataToExport = artist ? [artist] : filteredArtists;
-    
-    const exportData = dataToExport.map(a => ({
-      userId: a.userId,
-      diagnosticoCompleto: getDiagnosticStatus(a).status === 'complete',
-      totalMesesComMetricas: a.metricasMensais ? Object.keys(a.metricasMensais).length : 0,
-      compartilhouMetricas: a.metricasMensais ? Object.values(a.metricasMensais).some(m => m.compartilhadoComunidade) : false
-    }));
-
-    // Simular exportação
-    console.log('Dados exportados:', exportData);
-    // Aqui você poderia implementar a exportação real para CSV/JSON
-  };
-
   return (
     <NaveMaeLayout>
       <div className="space-y-6">
-        {/* Métricas Principais */}
+        {/* Header com métricas principais */}
+        <div className="flex flex-col lg:flex-row gap-6 items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-purple-800 mb-2">
+              Tatuadores da Rede
+            </h1>
+            <p className="text-gray-600">
+              Gerencie todos os tatuadores parceiros da 99Tattoo em tempo real
+            </p>
+          </div>
+          
+          {/* Botão para popular novo tatuador */}
+          <Button
+            onClick={() => setShowPopulateModal(true)}
+            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 flex items-center gap-2 shadow-lg"
+          >
+            <UserPlus className="h-5 w-5" />
+            Gerar Novo Tatuador
+          </Button>
+        </div>
+
+        {/* Cards de métricas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
             <CardContent className="p-6">
@@ -217,7 +207,7 @@ const NaveMaeArtists = () => {
           </Card>
         </div>
 
-        {/* Filtros e Busca */}
+        {/* Filtros e busca */}
         <Card>
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -243,22 +233,13 @@ const NaveMaeArtists = () => {
                     <SelectItem value="empty">Não Iniciado</SelectItem>
                   </SelectContent>
                 </Select>
-                
-                <Button
-                  onClick={() => handleExportData()}
-                  variant="outline"
-                  className="border-purple-200 text-purple-600 hover:bg-purple-50"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Exportar
-                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Lista de Tatuadores */}
-        <div className="grid md:grid-cols-1 lg:grid-cols-1 gap-6">
+        {/* Lista de tatuadores */}
+        <div className="grid gap-6">
           {loading ? (
             [...Array(3)].map((_, index) => (
               <Card key={index} className="animate-pulse">
@@ -272,163 +253,84 @@ const NaveMaeArtists = () => {
           ) : (
             filteredArtists.map((artist) => {
               const diagnosticStatus = getDiagnosticStatus(artist);
-              const monthlyStats = calculateMonthlyStats(artist);
+              const artistStats = calculateArtistStats(artist);
 
               return (
-                <Card key={artist.userId} className="hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <Card key={artist.userId} className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      {/* Informações básicas */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
                           <Users className="h-5 w-5 text-purple-600" />
-                          {artist.userId}
-                        </CardTitle>
-                        <p className="text-sm text-gray-500 mt-1">Tatuador da Comunidade 99Tattoo</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Badge className={diagnosticStatus.color}>
-                          {diagnosticStatus.label}
-                        </Badge>
-                        {monthlyStats && (
-                          <Badge className="bg-blue-100 text-blue-800">
-                            {monthlyStats.totalMonths} {monthlyStats.totalMonths === 1 ? 'Mês' : 'Meses'}
+                          <h3 className="text-lg font-bold text-gray-900">{artist.userId}</h3>
+                          <Badge className={diagnosticStatus.color}>
+                            {diagnosticStatus.label}
                           </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      {/* Diagnóstico SPIN */}
-                      <div className="space-y-3">
-                        <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                          <Target className="h-4 w-4 text-red-600" />
-                          Diagnóstico Estratégico
-                        </h4>
+                        </div>
                         
-                        {artist.diagnostico ? (
-                          <div className="space-y-2">
-                            {[
-                              { key: 'situacao', label: 'Situação', icon: BarChart3 },
-                              { key: 'problemas', label: 'Problemas', icon: AlertTriangle },
-                              { key: 'implicacoes', label: 'Implicações', icon: TrendingDown },
-                              { key: 'necessidades', label: 'Necessidades', icon: Target }
-                            ].map(section => {
-                              const hasSection = artist.diagnostico![section.key as keyof typeof artist.diagnostico];
-                              return (
-                                <div key={section.key} className="flex items-center justify-between text-sm">
-                                  <div className="flex items-center gap-2">
-                                    <section.icon className="h-3 w-3 text-gray-500" />
-                                    <span>{section.label}</span>
-                                  </div>
-                                  {hasSection ? (
-                                    <CheckCircle className="h-4 w-4 text-green-600" />
-                                  ) : (
-                                    <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <p className="text-sm text-gray-500 italic">Diagnóstico não iniciado</p>
-                        )}
-                      </div>
-
-                      {/* Métricas Mensais */}
-                      <div className="space-y-3">
-                        <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                          <BarChart3 className="h-4 w-4 text-blue-600" />
-                          Métricas Mensais
-                        </h4>
-                        
-                        {monthlyStats ? (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="flex items-center gap-2">
-                                <Calendar className="h-3 w-3 text-gray-500" />
-                                Último Mês
-                              </span>
-                              <span className="font-medium">{monthlyStats.currentMonth}</span>
-                            </div>
-                            
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="flex items-center gap-2">
-                                <Brush className="h-3 w-3 text-purple-500" />
-                                Tatuagens
-                              </span>
-                              <div className="flex items-center gap-1">
-                                <span className="font-medium">{monthlyStats.current.tatuagensRealizadas}</span>
-                                {monthlyStats.trends && monthlyStats.trends.tattoos !== 0 && (
-                                  <Badge className={`text-xs ${
-                                    monthlyStats.trends.tattoos > 0 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : 'bg-red-100 text-red-800'
-                                  }`}>
-                                    {monthlyStats.trends.tattoos > 0 ? '+' : ''}{monthlyStats.trends.tattoos}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="flex items-center gap-2">
-                                <DollarSign className="h-3 w-3 text-green-500" />
-                                Faturamento
-                              </span>
-                              <div className="flex items-center gap-1">
-                                <span className="font-medium">{formatCurrency(monthlyStats.current.valorTotalRecebido)}</span>
-                                {monthlyStats.trends && monthlyStats.trends.revenue !== 0 && (
-                                  <Badge className={`text-xs ${
-                                    monthlyStats.trends.revenue > 0 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : 'bg-red-100 text-red-800'
-                                  }`}>
-                                    {formatCurrency(Math.abs(monthlyStats.trends.revenue))}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="flex items-center gap-2">
-                                <Clock className="h-3 w-3 text-orange-500" />
-                                Valor/Tatuagem
-                              </span>
-                              <span className="font-medium">{formatCurrency(monthlyStats.avgPerTattoo)}</span>
-                            </div>
-                            
-                            {monthlyStats.current.compartilhadoComunidade && (
+                        {artistStats && (
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              Último: {artistStats.lastMonth}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <BarChart3 className="h-3 w-3" />
+                              {artistStats.totalMonths} meses
+                            </span>
+                            {artistStats.lastData.compartilhadoComunidade && (
                               <Badge className="bg-blue-100 text-blue-800 text-xs">
                                 <Star className="h-3 w-3 mr-1" />
-                                Compartilhado na Comunidade
+                                Público
                               </Badge>
                             )}
                           </div>
-                        ) : (
-                          <p className="text-sm text-gray-500 italic">Nenhuma métrica registrada</p>
                         )}
                       </div>
-                    </div>
-                    
-                    <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() => setViewingArtist(artist)}
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        Ver Detalhes
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleExportData(artist)}
-                      >
-                        <Download className="h-3 w-3" />
-                      </Button>
+
+                      {/* Métricas rápidas */}
+                      {artistStats && (
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <div className="text-lg font-bold text-purple-700">
+                              {artistStats.lastData.tatuagensRealizadas}
+                            </div>
+                            <div className="text-xs text-gray-600">Tatuagens</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-green-700">
+                              {formatCurrency(artistStats.lastData.valorTotalRecebido)}
+                            </div>
+                            <div className="text-xs text-gray-600">Faturamento</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-indigo-700">
+                              {formatCurrency(artistStats.avgPerTattoo)}
+                            </div>
+                            <div className="text-xs text-gray-600">Valor/Tatuagem</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Botões de ação */}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setViewingArtist(artist)}
+                          className="hover:bg-purple-50 hover:border-purple-300"
+                        >
+                          Ver Detalhes
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setExportingArtist(artist)}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -437,137 +339,50 @@ const NaveMaeArtists = () => {
           )}
         </div>
 
+        {/* Estado vazio */}
         {filteredArtists.length === 0 && !loading && (
           <div className="text-center py-12">
             <Brush className="h-16 w-16 mx-auto mb-4 text-gray-400" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Nenhum tatuador encontrado</h3>
-            <p className="text-gray-500">
+            <p className="text-gray-500 mb-6">
               {searchTerm || diagnosticFilter !== 'all' 
                 ? 'Tente ajustar os filtros de busca' 
                 : 'Os tatuadores aparecerão aqui conforme preenchem seus perfis'
               }
             </p>
+            <Button
+              onClick={() => setShowPopulateModal(true)}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Gerar Primeiro Tatuador
+            </Button>
           </div>
         )}
 
-        {/* Modal de Detalhes do Tatuador */}
-        {viewingArtist && (
-          <Dialog open={!!viewingArtist} onOpenChange={() => setViewingArtist(null)}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-purple-600" />
-                  Detalhes do Tatuador: {viewingArtist.userId}
-                </DialogTitle>
-              </DialogHeader>
-              
-              <div className="space-y-6">
-                {/* Diagnóstico Detalhado */}
-                {viewingArtist.diagnostico && (
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <Target className="h-5 w-5 text-red-600" />
-                      Diagnóstico SPIN Selling
-                    </h3>
-                    
-                    {[
-                      { key: 'situacao', title: '📊 Situação Atual', color: 'bg-blue-50 border-blue-200' },
-                      { key: 'problemas', title: '❗ Problemas e Desafios', color: 'bg-orange-50 border-orange-200' },
-                      { key: 'implicacoes', title: '⚠️ Impactos e Consequências', color: 'bg-red-50 border-red-200' },
-                      { key: 'necessidades', title: '💡 Necessidades e Soluções', color: 'bg-green-50 border-green-200' }
-                    ].map(section => {
-                      const sectionData = viewingArtist.diagnostico![section.key as keyof typeof viewingArtist.diagnostico];
-                      if (!sectionData) return null;
-                      
-                      return (
-                        <Card key={section.key} className={section.color}>
-                          <CardHeader>
-                            <CardTitle className="text-base">{section.title}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
-                              {Object.entries(sectionData as Record<string, string>).map(([questionId, answer], idx) => (
-                                <div key={questionId} className="bg-white p-3 rounded border">
-                                  <p className="text-sm font-medium text-gray-700 mb-1">
-                                    Pergunta {idx + 1}:
-                                  </p>
-                                  <p className="text-sm text-gray-600">{answer}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
+        {/* Modais */}
+        <TattooArtistDetailModal
+          artist={viewingArtist}
+          isOpen={!!viewingArtist}
+          onClose={() => setViewingArtist(null)}
+          onExport={(artist) => {
+            setExportingArtist(artist);
+            setViewingArtist(null);
+          }}
+        />
 
-                {/* Métricas Detalhadas */}
-                {viewingArtist.metricasMensais && Object.keys(viewingArtist.metricasMensais).length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-blue-600" />
-                      Histórico de Métricas
-                    </h3>
-                    
-                    <div className="grid gap-4">
-                      {Object.entries(viewingArtist.metricasMensais)
-                        .sort(([a], [b]) => b.localeCompare(a))
-                        .map(([monthYear, metrics]) => {
-                          const avgPerTattoo = metrics.tatuagensRealizadas > 0 
-                            ? metrics.valorTotalRecebido / metrics.tatuagensRealizadas 
-                            : 0;
-                          const avgPerHour = metrics.horasTrabalhadas > 0 
-                            ? metrics.valorTotalRecebido / metrics.horasTrabalhadas 
-                            : 0;
-                          
-                          return (
-                            <Card key={monthYear} className="border-blue-200">
-                              <CardHeader>
-                                <div className="flex items-center justify-between">
-                                  <CardTitle className="text-base">{monthYear}</CardTitle>
-                                  {metrics.compartilhadoComunidade && (
-                                    <Badge className="bg-blue-100 text-blue-800">
-                                      <Star className="h-3 w-3 mr-1" />
-                                      Público
-                                    </Badge>
-                                  )}
-                                </div>
-                              </CardHeader>
-                              <CardContent>
-                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-                                  <div>
-                                    <div className="text-2xl font-bold text-purple-700">{metrics.tatuagensRealizadas}</div>
-                                    <div className="text-xs text-gray-600">Tatuagens</div>
-                                  </div>
-                                  <div>
-                                    <div className="text-2xl font-bold text-orange-700">{metrics.horasTrabalhadas}h</div>
-                                    <div className="text-xs text-gray-600">Horas</div>
-                                  </div>
-                                  <div>
-                                    <div className="text-2xl font-bold text-green-700">{formatCurrency(metrics.valorTotalRecebido)}</div>
-                                    <div className="text-xs text-gray-600">Faturamento</div>
-                                  </div>
-                                  <div>
-                                    <div className="text-2xl font-bold text-indigo-700">{formatCurrency(avgPerTattoo)}</div>
-                                    <div className="text-xs text-gray-600">Valor/Tatuagem</div>
-                                  </div>
-                                  <div>
-                                    <div className="text-2xl font-bold text-teal-700">{formatCurrency(avgPerHour)}</div>
-                                    <div className="text-xs text-gray-600">Valor/Hora</div>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+        <ExportDataModal
+          artist={exportingArtist}
+          isOpen={!!exportingArtist}
+          onClose={() => setExportingArtist(null)}
+        />
+
+        <PopulateArtistModal
+          isOpen={showPopulateModal}
+          onClose={() => setShowPopulateModal(false)}
+          onGenerate={handleGenerateArtist}
+          isGenerating={isGenerating}
+        />
       </div>
     </NaveMaeLayout>
   );

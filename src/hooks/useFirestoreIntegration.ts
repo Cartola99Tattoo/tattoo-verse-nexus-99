@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { firestoreService, SPINAnswers, MonthlyMetrics, TattooArtistData } from '@/services/FirestoreService';
 import { toast } from '@/hooks/use-toast';
@@ -125,17 +124,44 @@ export const useFirestoreIntegration = () => {
   };
 };
 
-// Hook específico para o CRM
+// Hook específico para o CRM com funcionalidade de geração
 export const useCRMData = () => {
   const [artists, setArtists] = useState<TattooArtistData[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Função para gerar novo tatuador
+  const generateNewArtist = useCallback(async (config: {
+    artistType: 'beginner' | 'intermediate' | 'expert';
+    completeDiagnostic: boolean;
+    monthsOfMetrics: number;
+    mixedSharing: boolean;
+  }) => {
+    try {
+      const newUserId = await firestoreService.generateMockArtist(config);
+      
+      toast({
+        title: "Novo tatuador gerado!",
+        description: `Tatuador ${newUserId} foi adicionado com sucesso ao sistema.`,
+      });
+
+      return newUserId;
+    } catch (error) {
+      console.error('Erro ao gerar novo tatuador:', error);
+      toast({
+        title: "Erro ao gerar tatuador",
+        description: "Não foi possível criar o novo tatuador. Tente novamente.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }, []);
 
   useEffect(() => {
     const loadCRMData = async () => {
       try {
         setLoading(true);
         
-        // Popular dados mock se necessário
+        // Popular dados mock iniciais se necessário
         await firestoreService.populateMockData();
         
         // Configurar listener em tempo real
@@ -162,5 +188,9 @@ export const useCRMData = () => {
     };
   }, []);
 
-  return { artists, loading };
+  return { 
+    artists, 
+    loading, 
+    generateNewArtist 
+  };
 };
