@@ -33,6 +33,8 @@ import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
 import StockManagementTool from "@/components/tattoo-artists/StockManagementTool";
 import ProfileProgressBar from "@/components/tattoo-artists/ProfileProgressBar";
 import ExpandedProfileForm from "@/components/tattoo-artists/ExpandedProfileForm";
+import SmartGoalForm from "@/components/tattoo-artists/SmartGoalForm";
+import SmartGoalDisplay from "@/components/tattoo-artists/SmartGoalDisplay";
 import { useProfileProgress } from "@/hooks/useProfileProgress";
 
 // Mock data expandido para o perfil
@@ -60,39 +62,20 @@ const mockProfileExpanded = {
   artistBio: "" // Vazio
 };
 
-// Mock data para metas
-const mockGoals = [
-  {
-    id: 1,
-    title: "Aumentar faturamento mensal",
-    specific: "Aumentar faturamento mensal em 30%",
-    measurable: "30%",
-    achievable: "Sim, através de otimização de preços e marketing",
-    relevant: "Essencial para crescimento sustentável do negócio",
-    timebound: "2024-12-31",
-    status: "Em Andamento"
-  },
-  {
-    id: 2,
-    title: "Concluir curso de realismo",
-    specific: "Finalizar curso avançado de tatuagem realista",
-    measurable: "100% do conteúdo",
-    achievable: "Sim, com dedicação de 2h por semana",
-    relevant: "Ampliar expertise e atrair novos clientes",
-    timebound: "2024-10-15",
-    status: "Concluída"
-  },
-  {
-    id: 3,
-    title: "Implementar sistema de agendamento",
-    specific: "Implementar software de agendamento online",
-    measurable: "Sistema completo funcionando",
-    achievable: "Sim, com investimento planejado",
-    relevant: "Melhorar experiência do cliente e organização",
-    timebound: "2024-11-30",
-    status: "Em Andamento"
-  }
-];
+// Mock data para meta SMART única (plano gratuito)
+const mockSmartGoal = {
+  id: "goal_1",
+  title: "Aumento de Clientes de Realismo",
+  specific: "Aumentar o número de clientes que buscam tatuagens de realismo através de campanhas direcionadas e melhoria da qualidade do portfólio",
+  measurable: "Novos clientes de realismo por mês",
+  measurableValue: 15,
+  achievable: "Sim, através de campanhas focadas no Instagram, parcerias com estúdios de fotografia e aprimoramento contínuo das técnicas de realismo",
+  relevant: "Essencial para consolidar minha reputação como especialista em realismo e expandir a base de clientes de alto valor, aumentando significativamente o faturamento mensal",
+  timebound: "2025-09-30",
+  status: "Em Andamento" as const,
+  isPublic: true,
+  createdAt: "2024-11-15"
+};
 
 // Mock data para diagnóstico SPIN
 const spinQuestions = {
@@ -191,17 +174,17 @@ const exclusiveContent = [
 const TattooArtistsPersonalProfile = () => {
   const [activeSection, setActiveSection] = useState('profile');
   const [profile, setProfile] = useState(mockProfileExpanded);
-  const [goals, setGoals] = useState(mockGoals);
+  const [smartGoal, setSmartGoal] = useState(mockSmartGoal); // Meta única
+  const [isGoalFormOpen, setIsGoalFormOpen] = useState(false);
   const [spinResponses, setSpinResponses] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingGoal, setEditingGoal] = useState(null);
   const [contentFilter, setContentFilter] = useState('all');
 
   // Usar o hook de progresso
   const { progress, sectionProgress, completedMilestones, unlockedContent } = useProfileProgress(profile);
 
   // Atualizar conteúdo exclusivo baseado no progresso
-  const exclusiveContent = [
+  const updatedExclusiveContent = [
     {
       id: 1,
       title: "Guia Completo de Biossegurança",
@@ -272,7 +255,7 @@ const TattooArtistsPersonalProfile = () => {
 
   const menuItems = [
     { id: 'profile', label: 'Perfil do Tatuador', icon: User },
-    { id: 'goals', label: 'Metas para o Estúdio', icon: Target },
+    { id: 'goals', label: 'Meta SMART do Estúdio', icon: Target },
     { id: 'diagnosis', label: 'Diagnóstico Estratégico', icon: BarChart3 },
     { id: 'content', label: 'Conteúdos Exclusivos', icon: BookOpen }
   ];
@@ -308,16 +291,6 @@ const TattooArtistsPersonalProfile = () => {
           description: `Você alcançou ${milestone}% de progresso e desbloqueou conteúdos exclusivos!`,
         });
       }, 1000);
-    });
-  };
-
-  const handleGoalStatusChange = (goalId, newStatus) => {
-    setGoals(prev => prev.map(goal => 
-      goal.id === goalId ? { ...goal, status: newStatus } : goal
-    ));
-    toast({
-      title: "Status atualizado!",
-      description: `Meta marcada como ${newStatus}`,
     });
   };
 
@@ -357,6 +330,48 @@ const TattooArtistsPersonalProfile = () => {
     } else if (content.type === 'Ferramenta') {
       // Abrir ferramenta específica
       setIsModalOpen(true);
+    }
+  };
+
+  // Funções para gerenciar meta SMART
+  const handleSaveGoal = (goalData: typeof mockSmartGoal) => {
+    if (smartGoal) {
+      // Editando meta existente
+      setSmartGoal({ ...goalData, id: smartGoal.id, createdAt: smartGoal.createdAt });
+      toast({
+        title: "Meta atualizada com sucesso!",
+        description: "Sua meta SMART foi atualizada e salva.",
+      });
+    } else {
+      // Criando nova meta
+      setSmartGoal({ ...goalData, id: `goal_${Date.now()}`, createdAt: new Date().toISOString() });
+      toast({
+        title: "Meta criada com sucesso!",
+        description: "Sua meta SMART foi criada e salva.",
+      });
+    }
+    setIsGoalFormOpen(false);
+  };
+
+  const handleDeleteGoal = () => {
+    // Mostrar confirmação via modal (não alert)
+    const confirmDelete = window.confirm("Tem certeza que deseja excluir sua meta? Esta ação não pode ser desfeita.");
+    if (confirmDelete) {
+      setSmartGoal(null);
+      toast({
+        title: "Meta excluída",
+        description: "Sua meta foi removida com sucesso.",
+      });
+    }
+  };
+
+  const handleGoalStatusChange = (newStatus: typeof mockSmartGoal.status) => {
+    if (smartGoal) {
+      setSmartGoal(prev => prev ? { ...prev, status: newStatus } : null);
+      toast({
+        title: "Status atualizado!",
+        description: `Meta marcada como ${newStatus}`,
+      });
     }
   };
 
@@ -404,74 +419,132 @@ const TattooArtistsPersonalProfile = () => {
   );
 
   const renderGoalsSection = () => (
-    <Card className="border-red-100">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-red-600">
-          <Target className="h-5 w-5" />
-          Metas para o Estúdio
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="bg-red-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-red-800 mb-2">Metodologia SMART</h3>
-          <p className="text-red-700 text-sm">
-            Defina metas <strong>Específicas</strong>, <strong>Mensuráveis</strong>, 
-            <strong>Atingíveis</strong>, <strong>Relevantes</strong> e <strong>Temporais</strong> 
-            para o sucesso do seu estúdio.
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          {goals.map(goal => (
-            <div key={goal.id} className="bg-white border border-red-100 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-gray-900">{goal.title}</h4>
-                <div className="flex items-center gap-2">
-                  <Badge 
-                    variant={goal.status === 'Concluída' ? 'default' : 'secondary'}
-                    className={goal.status === 'Concluída' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
-                  >
-                    {goal.status === 'Concluída' ? <CheckCircle className="h-3 w-3 mr-1" /> : <Clock className="h-3 w-3 mr-1" />}
-                    {goal.status}
-                  </Badge>
-                  <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 mb-3">{goal.specific}</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                <div>
-                  <span className="font-medium">Mensurável:</span> {goal.measurable}
-                </div>
-                <div>
-                  <span className="font-medium">Prazo:</span> {new Date(goal.timebound).toLocaleDateString()}
-                </div>
-                <div className="col-span-2">
-                  <span className="font-medium">Relevância:</span> {goal.relevant}
-                </div>
-              </div>
-              {goal.status === 'Em Andamento' && (
-                <div className="mt-3">
-                  <Button 
-                    size="sm" 
-                    onClick={() => handleGoalStatusChange(goal.id, 'Concluída')}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    Marcar como Concluída
-                  </Button>
-                </div>
-              )}
+    <div className="space-y-6">
+      {/* Header da Seção */}
+      <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold text-red-700 mb-2">Meta SMART do Estúdio</h2>
+              <p className="text-red-600">
+                Crie uma meta estruturada seguindo a metodologia SMART para o crescimento do seu estúdio
+              </p>
             </div>
-          ))}
-        </div>
+            <div className="text-right">
+              <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+                Plano Gratuito: 1 Meta
+              </Badge>
+            </div>
+          </div>
 
-        <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg">
-          <Plus className="h-4 w-4 mr-2" />
-          Adicionar Nova Meta
-        </Button>
-      </CardContent>
-    </Card>
+          {/* Explicação SMART */}
+          <div className="bg-white p-4 rounded-lg border border-red-200">
+            <h3 className="font-semibold text-red-800 mb-3 flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Metodologia SMART
+            </h3>
+            <div className="grid md:grid-cols-5 gap-2 text-sm">
+              <div className="text-center">
+                <div className="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mx-auto mb-1">S</div>
+                <strong className="text-red-700">Específica</strong>
+                <p className="text-gray-600">Clara e bem definida</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mx-auto mb-1">M</div>
+                <strong className="text-blue-700">Mensurável</strong>
+                <p className="text-gray-600">Com métricas claras</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mx-auto mb-1">A</div>
+                <strong className="text-green-700">Atingível</strong>
+                <p className="text-gray-600">Realista e possível</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mx-auto mb-1">R</div>
+                <strong className="text-orange-700">Relevante</strong>
+                <p className="text-gray-600">Importante e alinhada</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mx-auto mb-1">T</div>
+                <strong className="text-purple-700">Temporal</strong>
+                <p className="text-gray-600">Com prazo definido</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Controle de Meta Única */}
+      {!smartGoal && !isGoalFormOpen && (
+        <Card className="border-red-100">
+          <CardContent className="p-8 text-center">
+            <div className="mb-4">
+              <Target className="h-16 w-16 text-red-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Crie sua primeira meta SMART
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Defina um objetivo claro e estruturado para o crescimento do seu estúdio usando a metodologia SMART
+              </p>
+            </div>
+            <Button
+              onClick={() => setIsGoalFormOpen(true)}
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg"
+              size="lg"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Criar Meta SMART
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Formulário de Meta */}
+      {isGoalFormOpen && (
+        <SmartGoalForm
+          goal={smartGoal}
+          onSave={handleSaveGoal}
+          onCancel={() => setIsGoalFormOpen(false)}
+        />
+      )}
+
+      {/* Exibição da Meta */}
+      {smartGoal && !isGoalFormOpen && (
+        <SmartGoalDisplay
+          goal={smartGoal}
+          onEdit={() => setIsGoalFormOpen(true)}
+          onDelete={handleDeleteGoal}
+          onStatusChange={handleGoalStatusChange}
+        />
+      )}
+
+      {/* Informações do Plano Gratuito */}
+      {smartGoal && (
+        <Card className="bg-orange-50 border-orange-200">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="bg-orange-100 p-2 rounded-lg">
+                <Award className="h-5 w-5 text-orange-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-orange-800 mb-1">Plano Gratuito</h4>
+                <p className="text-orange-700 text-sm mb-2">
+                  Você está usando o plano gratuito e pode ter apenas 1 meta ativa. 
+                  Para criar mais metas e desbloquear recursos avançados, considere fazer upgrade.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                >
+                  Conhecer Planos Premium
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 
   const renderDiagnosisSection = () => (
@@ -532,14 +605,14 @@ const TattooArtistsPersonalProfile = () => {
           <BookOpen className="h-5 w-5" />
           Conteúdos Exclusivos
           <Badge className="bg-red-600 text-white">
-            {exclusiveContent.filter(c => c.unlocked).length}/{exclusiveContent.length} Desbloqueados
+            {updatedExclusiveContent.filter(c => c.unlocked).length}/{updatedExclusiveContent.length} Desbloqueados
           </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Ferramentas Especiais */}
         <div className="space-y-4">
-          {exclusiveContent.filter(c => c.isSpecial).map(content => (
+          {updatedExclusiveContent.filter(c => c.isSpecial).map(content => (
             <Card 
               key={content.id} 
               className={`border-2 ${
@@ -644,7 +717,7 @@ const TattooArtistsPersonalProfile = () => {
 
         {/* Grid de Conteúdos */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {exclusiveContent
+          {updatedExclusiveContent
             .filter(content => !content.isSpecial)
             .filter(content => {
               if (contentFilter === 'unlocked') return content.unlocked;
