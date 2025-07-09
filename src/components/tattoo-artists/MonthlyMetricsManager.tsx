@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,9 +25,10 @@ import {
   Target,
   Zap,
   Calculator,
-  Coins
+  Coins,
+  Loader2
 } from 'lucide-react';
-import { toast } from "@/hooks/use-toast";
+import { MonthlyMetrics } from '@/services/FirestoreService';
 
 interface MonthlyMetric {
   id: string;
@@ -41,8 +42,8 @@ interface MonthlyMetric {
 }
 
 interface MonthlyMetricsManagerProps {
-  metrics: MonthlyMetric[];
-  onUpdate: (metrics: MonthlyMetric[]) => void;
+  metrics: Record<string, MonthlyMetrics>;
+  onUpdate: (monthYear: string, metrics: Omit<MonthlyMetrics, 'dataRegistro'>) => Promise<boolean>;
 }
 
 const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, onUpdate }) => {
@@ -55,6 +56,22 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
     hoursWorked: 0,
     monthlyRevenue: 0,
     isShared: false
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Converter dados do Firestore para o formato local
+  const localMetrics: MonthlyMetric[] = Object.entries(metrics).map(([monthYear, data]) => {
+    const [year, month] = monthYear.split('-').map(Number);
+    return {
+      id: monthYear,
+      month,
+      year,
+      tattoosCompleted: data.tatuagensRealizadas,
+      hoursWorked: data.horasTrabalhadas,
+      monthlyRevenue: data.valorTotalRecebido,
+      isShared: data.compartilhadoComunidade,
+      createdAt: data.dataRegistro?.toDate?.()?.toISOString() || new Date().toISOString()
+    };
   });
 
   const months = [
@@ -75,17 +92,15 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
   const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
   // Ordenar métricas por data (mais recente primeiro)
-  const sortedMetrics = [...metrics].sort((a, b) => {
+  const sortedMetrics = [...localMetrics].sort((a, b) => {
     if (a.year !== b.year) return b.year - a.year;
     return b.month - a.month;
   });
 
-  // Verificar se já existe registro para o mês/ano
   const isMonthYearExists = (month: number, year: number, excludeId?: string) => {
-    return metrics.some(m => m.month === month && m.year === year && m.id !== excludeId);
+    return localMetrics.some(m => m.month === month && m.year === year && m.id !== excludeId);
   };
 
-  // Calcular métricas derivadas
   const calculateDerivedMetrics = (metric: MonthlyMetric) => {
     const avgPerTattoo = metric.tattoosCompleted > 0 
       ? metric.monthlyRevenue / metric.tattoosCompleted 
@@ -101,7 +116,6 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
     };
   };
 
-  // Calcular comparativo com mês anterior
   const getComparison = (currentMetric: MonthlyMetric) => {
     const currentIndex = sortedMetrics.findIndex(m => m.id === currentMetric.id);
     if (currentIndex === -1 || currentIndex === sortedMetrics.length - 1) return null;
@@ -154,7 +168,7 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
     };
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (isMonthYearExists(formData.month, formData.year)) {
       toast({
         title: "Registro já existe",
@@ -164,20 +178,32 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
       return;
     }
 
-    const newMetric: MonthlyMetric = {
-      id: `metric_${Date.now()}`,
-      ...formData,
-      createdAt: new Date().toISOString()
-    };
-
-    onUpdate([...metrics, newMetric]);
-    setIsAddModalOpen(false);
-    resetForm();
+    setIsLoading(true);
     
-    toast({
-      title: "Registro adicionado!",
-      description: "Suas métricas mensais foram salvas com sucesso.",
+    const monthYear = `${formData.year}-${formData.month.toString().padStart(2, '0')}`;
+    const success = await onUpdate(monthYear, {
+      tatuagensRealizadas: formData.tattoosCompleted,
+      horasTrabalhadas: formData.hoursWorked,
+      valorTotalRecebido: formData.monthlyRevenue,
+      compartilhadoComunidade: formData.isShared
     });
+
+    if (success) {
+      setIsAddModalOpen(false);
+      resetForm();
+      toast({
+        title: "Registro adicionado!",
+        description: "Suas métricas mensais foram salvas com sucesso.",
+      });
+    } else {
+      toast({
+        title: "Erro ao salvar",
+        description: "Ocorreu um erro ao salvar as métricas. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+    
+    setIsLoading(false);
   };
 
   const handleEdit = (metric: MonthlyMetric) => {
@@ -192,7 +218,7 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
     });
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingMetric) return;
 
     if (isMonthYearExists(formData.month, formData.year, editingMetric.id)) {
@@ -204,51 +230,72 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
       return;
     }
 
-    const updatedMetrics = metrics.map(m => 
-      m.id === editingMetric.id 
-        ? { ...m, ...formData }
-        : m
-    );
-
-    onUpdate(updatedMetrics);
-    setEditingMetric(null);
-    resetForm();
+    setIsLoading(true);
     
-    toast({
-      title: "Registro atualizado!",
-      description: "Suas métricas foram atualizadas com sucesso.",
+    const monthYear = `${formData.year}-${formData.month.toString().padStart(2, '0')}`;
+    const success = await onUpdate(monthYear, {
+      tatuagensRealizadas: formData.tattoosCompleted,
+      horasTrabalhadas: formData.hoursWorked,
+      valorTotalRecebido: formData.monthlyRevenue,
+      compartilhadoComunidade: formData.isShared
     });
+
+    if (success) {
+      setEditingMetric(null);
+      resetForm();
+      toast({
+        title: "Registro atualizado!",
+        description: "Suas métricas foram atualizadas com sucesso.",
+      });
+    } else {
+      toast({
+        title: "Erro ao atualizar",
+        description: "Ocorreu um erro ao atualizar as métricas. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+    
+    setIsLoading(false);
   };
 
   const handleDelete = (metricId: string) => {
     const confirmDelete = window.confirm("Tem certeza que deseja excluir este registro?");
     if (confirmDelete) {
-      onUpdate(metrics.filter(m => m.id !== metricId));
+      // onUpdate(metrics.filter(m => m.id !== metricId));
       toast({
-        title: "Registro excluído",
-        description: "O registro foi removido com sucesso.",
+        title: "Não implementado",
+        description: "Ainda não é possível excluir registros.",
       });
     }
   };
 
-  const handleToggleShare = (metricId: string) => {
-    const updatedMetrics = metrics.map(m => 
-      m.id === metricId 
-        ? { ...m, isShared: !m.isShared }
-        : m
-    );
+  const handleToggleShare = async (metricId: string) => {
+    const metric = localMetrics.find(m => m.id === metricId);
+    if (!metric) return;
 
-    onUpdate(updatedMetrics);
-    
-    const metric = metrics.find(m => m.id === metricId);
-    const monthName = months.find(m => m.value === metric?.month)?.label;
-    
-    toast({
-      title: metric?.isShared ? "Compartilhamento removido" : "Compartilhado na comunidade!",
-      description: metric?.isShared 
-        ? `O registro de ${monthName} não é mais público`
-        : `Seu progresso de ${monthName} agora é visível para a comunidade`,
+    const success = await onUpdate(metricId, {
+      tatuagensRealizadas: metric.tattoosCompleted,
+      horasTrabalhadas: metric.hoursWorked,
+      valorTotalRecebido: metric.monthlyRevenue,
+      compartilhadoComunidade: !metric.isShared
     });
+
+    if (success) {
+      const monthName = months.find(m => m.value === metric?.month)?.label;
+    
+      toast({
+        title: metric?.isShared ? "Compartilhamento removido" : "Compartilhado na comunidade!",
+        description: metric?.isShared 
+          ? `O registro de ${monthName} não é mais público`
+          : `Seu progresso de ${monthName} agora é visível para a comunidade`,
+      });
+    } else {
+      toast({
+        title: "Erro ao compartilhar",
+        description: "Ocorreu um erro ao alterar o status de compartilhamento. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   const resetForm = () => {
@@ -320,40 +367,40 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
             </div>
             <div className="text-right">
               <Badge className="bg-blue-600 text-white">
-                {metrics.length} {metrics.length === 1 ? 'Registro' : 'Registros'}
+                {localMetrics.length} {localMetrics.length === 1 ? 'Registro' : 'Registros'}
               </Badge>
             </div>
           </div>
 
-          {metrics.length > 0 && (
+          {localMetrics.length > 0 && (
             <div className="bg-white p-4 rounded-lg border border-blue-200">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
                 <div>
                   <Trophy className="h-6 w-6 text-blue-600 mx-auto mb-1" />
                   <div className="text-sm text-gray-600">Melhor Mês (Tatuagens)</div>
                   <div className="font-bold text-blue-700">
-                    {Math.max(...metrics.map(m => m.tattoosCompleted))}
+                    {Math.max(...localMetrics.map(m => m.tattoosCompleted))}
                   </div>
                 </div>
                 <div>
                   <Clock className="h-6 w-6 text-blue-600 mx-auto mb-1" />
                   <div className="text-sm text-gray-600">Melhor Mês (Horas)</div>
                   <div className="font-bold text-blue-700">
-                    {Math.max(...metrics.map(m => m.hoursWorked))}h
+                    {Math.max(...localMetrics.map(m => m.hoursWorked))}h
                   </div>
                 </div>
                 <div>
                   <DollarSign className="h-6 w-6 text-blue-600 mx-auto mb-1" />
                   <div className="text-sm text-gray-600">Melhor Faturamento</div>
                   <div className="font-bold text-blue-700">
-                    {formatCurrency(Math.max(...metrics.map(m => m.monthlyRevenue)))}
+                    {formatCurrency(Math.max(...localMetrics.map(m => m.monthlyRevenue)))}
                   </div>
                 </div>
                 <div>
                   <Calculator className="h-6 w-6 text-blue-600 mx-auto mb-1" />
                   <div className="text-sm text-gray-600">Melhor Valor/Tatuagem</div>
                   <div className="font-bold text-blue-700">
-                    {formatCurrency(Math.max(...metrics.map(m => {
+                    {formatCurrency(Math.max(...localMetrics.map(m => {
                       const derived = calculateDerivedMetrics(m);
                       return derived.avgPerTattoo;
                     })))}
@@ -455,8 +502,19 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button onClick={handleAdd} className="flex-1 bg-blue-600 hover:bg-blue-700">
-                  Adicionar
+                <Button 
+                  onClick={handleAdd} 
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    'Adicionar'
+                  )}
                 </Button>
                 <Button variant="outline" onClick={() => setIsAddModalOpen(false)} className="border-blue-200">
                   Cancelar
@@ -468,7 +526,7 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
       </div>
 
       {/* Lista de Métricas */}
-      {metrics.length === 0 ? (
+      {localMetrics.length === 0 ? (
         <Card className="border-blue-100">
           <CardContent className="p-8 text-center">
             <BarChart3 className="h-16 w-16 text-blue-400 mx-auto mb-4" />
@@ -736,8 +794,19 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button onClick={handleUpdate} className="flex-1 bg-blue-600 hover:bg-blue-700">
-                  Atualizar
+                <Button 
+                  onClick={handleUpdate} 
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Atualizando...
+                    </>
+                  ) : (
+                    'Atualizar'
+                  )}
                 </Button>
                 <Button variant="outline" onClick={() => setEditingMetric(null)} className="border-blue-200">
                   Cancelar

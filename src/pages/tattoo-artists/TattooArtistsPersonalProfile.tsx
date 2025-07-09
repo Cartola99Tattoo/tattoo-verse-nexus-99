@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from "react";
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,8 @@ import {
   Package,
   Lock,
   Trophy,
-  Sparkles
+  Sparkles,
+  Image
 } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
@@ -38,6 +40,8 @@ import SmartGoalDisplay from "@/components/tattoo-artists/SmartGoalDisplay";
 import SPINQuestionnaire from "@/components/tattoo-artists/SPINQuestionnaire";
 import MonthlyMetricsManager from "@/components/tattoo-artists/MonthlyMetricsManager";
 import { useProfileProgress } from "@/hooks/useProfileProgress";
+import { useFirestoreIntegration } from "@/hooks/useFirestoreIntegration";
+import { useNavigate } from "react-router-dom";
 
 // Mock data expandido para o perfil
 const mockProfileExpanded = {
@@ -240,6 +244,20 @@ const exclusiveContent = [
 ];
 
 const TattooArtistsPersonalProfile = () => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("overview");
+  
+  // Integração Firebase
+  const {
+    isAuthenticated,
+    loading: firestoreLoading,
+    spinAnswers,
+    monthlyMetrics,
+    saveSPINSection,
+    saveMonthlyMetrics,
+    loadUserData
+  } = useFirestoreIntegration();
+
   const [activeSection, setActiveSection] = useState('profile');
   const [profile, setProfile] = useState(mockProfileExpanded);
   const [smartGoal, setSmartGoal] = useState(mockSmartGoal); // Meta única
@@ -248,6 +266,68 @@ const TattooArtistsPersonalProfile = () => {
   const [monthlyMetrics, setMonthlyMetrics] = useState(mockMonthlyMetrics);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [contentFilter, setContentFilter] = useState('all');
+
+  // Estados locais para compatibilidade com componentes existentes
+  const [localSPINResponses, setLocalSPINResponses] = useState({});
+  const [isLoadingSPIN, setIsLoadingSPIN] = useState(false);
+
+  // Atualizar respostas locais quando dados do Firestore mudarem
+  useEffect(() => {
+    if (spinAnswers) {
+      const flattenedResponses: Record<string, string> = {};
+      
+      // Converter estrutura do Firestore para formato local
+      Object.entries(spinAnswers).forEach(([section, answers]) => {
+        if (typeof answers === 'object' && answers !== null) {
+          Object.entries(answers as Record<string, string>).forEach(([questionId, answer]) => {
+            flattenedResponses[questionId] = answer;
+          });
+        }
+      });
+      
+      setLocalSPINResponses(flattenedResponses);
+    }
+  }, [spinAnswers]);
+
+  // Handlers para integração Firebase
+  const handleSPINUpdate = (responses: Record<string, string>) => {
+    setLocalSPINResponses(responses);
+  };
+
+  const handleSPINSave = async () => {
+    setIsLoadingSPIN(true);
+    try {
+      // Salvar todas as seções
+      const sections = ['situacao', 'problemas', 'implicacoes', 'necessidades'];
+      
+      for (const section of sections) {
+        const sectionQuestions = Object.keys(localSPINResponses).filter(key => 
+          key.startsWith(section)
+        );
+        
+        if (sectionQuestions.length > 0) {
+          const sectionAnswers: Record<string, string> = {};
+          sectionQuestions.forEach(key => {
+            sectionAnswers[key] = localSPINResponses[key];
+          });
+          
+          await saveSPINSection(section, sectionAnswers);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao salvar diagnóstico completo:', error);
+    } finally {
+      setIsLoadingSPIN(false);
+    }
+  };
+
+  const handleSPINSaveSection = async (section: string, answers: Record<string, string>) => {
+    return await saveSPINSection(section, answers);
+  };
+
+  const handleMonthlyMetricsUpdate = async (monthYear: string, metrics: any) => {
+    return await saveMonthlyMetrics(monthYear, metrics);
+  };
 
   // Usar o hook de progresso
   const { progress, sectionProgress, completedMilestones, unlockedContent } = useProfileProgress(profile);
@@ -638,9 +718,11 @@ const TattooArtistsPersonalProfile = () => {
     <div className="space-y-8">
       {/* Seção SPIN Questionnaire */}
       <SPINQuestionnaire
-        responses={spinResponses}
-        onUpdate={handleUpdateSpinResponses}
-        onSave={handleSaveSpinDiagnosis}
+        responses={localSPINResponses}
+        onUpdate={handleSPINUpdate}
+        onSave={handleSPINSave}
+        onSaveSection={handleSPINSaveSection}
+        isLoading={isLoadingSPIN}
       />
 
       <Separator className="my-8" />
@@ -648,7 +730,7 @@ const TattooArtistsPersonalProfile = () => {
       {/* Seção Monthly Metrics */}
       <MonthlyMetricsManager
         metrics={monthlyMetrics}
-        onUpdate={handleUpdateMonthlyMetrics}
+        onUpdate={handleMonthlyMetricsUpdate}
       />
     </div>
   );
@@ -856,60 +938,113 @@ const TattooArtistsPersonalProfile = () => {
     </Card>
   );
 
+  if (firestoreLoading) {
+    return (
+      <TattooArtistLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto mb-4"></div>
+              <p className="text-white text-lg">Carregando perfil...</p>
+            </div>
+          </div>
+        </div>
+      </TattooArtistLayout>
+    );
+  }
+
   return (
     <TattooArtistLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-red-50">
-        <div className="max-w-7xl mx-auto p-6">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Meu Perfil 
-              {unlockedContent.verifiedBadge && (
-                <Badge className="ml-2 bg-green-600 text-white">
-                  <Trophy className="h-3 w-3 mr-1" />
-                  Verificado
-                </Badge>
-              )}
-            </h1>
-            <p className="text-gray-600">
-              Complete seu perfil para desbloquear conteúdos exclusivos e ferramentas profissionais
-            </p>
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Meu Perfil Profissional</h1>
+            <p className="text-red-200">Gerencie seu perfil, acompanhe métricas e faça seu diagnóstico estratégico</p>
           </div>
+          <Badge className={`px-4 py-2 text-sm font-semibold ${
+            isAuthenticated 
+              ? 'bg-green-100 text-green-800 border-green-200' 
+              : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+          }`}>
+            {isAuthenticated ? '🟢 Conectado' : '🟡 Conectando...'}
+          </Badge>
+        </div>
 
-          <div className="grid lg:grid-cols-4 gap-6">
-            {/* Sidebar Menu */}
-            <div className="lg:col-span-1">
-              <Card className="border-red-100 sticky top-6">
-                <CardContent className="p-4">
-                  <nav className="space-y-2">
-                    {menuItems.map(item => (
-                      <Button
-                        key={item.id}
-                        variant={activeSection === item.id ? 'default' : 'ghost'}
-                        className={`w-full justify-start rounded-lg ${
-                          activeSection === item.id 
-                            ? 'bg-gradient-to-r from-red-600 to-red-700 text-white' 
-                            : 'text-gray-700 hover:bg-red-50'
-                        }`}
-                        onClick={() => setActiveSection(item.id)}
-                      >
-                        <item.icon className="h-4 w-4 mr-2" />
-                        {item.label}
-                      </Button>
-                    ))}
-                  </nav>
-                </CardContent>
-              </Card>
+        {/* Navigation Tabs */}
+        <Card className="bg-white/95 backdrop-blur-sm mb-8">
+          <CardContent className="p-0">
+            <div className="flex overflow-x-auto">
+              {[
+                { key: "overview", label: "Visão Geral", icon: User },
+                { key: "diagnostico", label: "Diagnóstico", icon: Target },
+                { key: "metricas", label: "Métricas", icon: BarChart3 },
+                { key: "portfolio", label: "Portfólio", icon: Image },
+                { key: "configuracoes", label: "Configurações", icon: Settings }
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex items-center gap-2 px-6 py-4 font-medium whitespace-nowrap transition-colors border-b-2 ${
+                    activeTab === tab.key
+                      ? 'text-red-600 border-red-600 bg-red-50'
+                      : 'text-gray-600 border-transparent hover:text-red-500 hover:bg-red-50'
+                  }`}
+                >
+                  <tab.icon className="h-5 w-5" />
+                  {tab.label}
+                </button>
+              ))}
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Main Content */}
-            <div className="lg:col-span-3">
-              {activeSection === 'profile' && renderProfileSection()}
-              {activeSection === 'goals' && renderGoalsSection()}
-              {activeSection === 'diagnosis' && renderDiagnosisSection()}
-              {activeSection === 'content' && renderContentSection()}
+        {/* Tab Content */}
+        <div className="space-y-8">
+          {/* Visão Geral Tab */}
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {renderProfileSection()}
+              {renderGoalsSection()}
             </div>
-          </div>
+          )}
+
+          {/* Diagnóstico Estratégico Tab */}
+          {activeTab === "diagnostico" && (
+            <div className="space-y-6">
+              <SPINQuestionnaire
+                responses={localSPINResponses}
+                onUpdate={handleSPINUpdate}
+                onSave={handleSPINSave}
+                onSaveSection={handleSPINSaveSection}
+                isLoading={isLoadingSPIN}
+              />
+            </div>
+          )}
+
+          {/* Métricas Tab */}
+          {activeTab === "metricas" && (
+            <div className="space-y-6">
+              <MonthlyMetricsManager
+                metrics={monthlyMetrics}
+                onUpdate={handleMonthlyMetricsUpdate}
+              />
+            </div>
+          )}
+
+          {/* Portfolio Tab */}
+          {activeTab === "portfolio" && (
+            <div className="space-y-6">
+              {/* Conteúdo do Portfolio */}
+            </div>
+          )}
+
+          {/* Configurações Tab */}
+          {activeTab === "configuracoes" && (
+            <div className="space-y-6">
+              {/* Configurações */}
+            </div>
+          )}
         </div>
       </div>
     </TattooArtistLayout>

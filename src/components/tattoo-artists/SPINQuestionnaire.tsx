@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -17,10 +16,10 @@ import {
   Save,
   Edit,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { toast } from "@/hooks/use-toast";
 
 interface SPINResponses {
   [key: string]: string;
@@ -34,11 +33,12 @@ interface SPINQuestionnaireProps {
   responses: SPINResponses;
   onUpdate: (responses: SPINResponses) => void;
   onSave: () => void;
+  onSaveSection: (section: string, answers: Record<string, string>) => Promise<boolean>;
   isLoading?: boolean;
 }
 
 const spinSections = {
-  situation: {
+  situacao: {
     title: "📊 Situação Atual",
     description: "Vamos entender sua situação atual no mercado",
     color: "bg-blue-50 border-blue-200",
@@ -46,26 +46,26 @@ const spinSections = {
     icon: BarChart3,
     questions: [
       {
-        id: "situation_1",
+        id: "situacao_1",
         question: "Quantas tatuagens você realiza em média por mês atualmente?",
         placeholder: "Ex: Realizo entre 15 a 20 tatuagens por mês, dependendo da complexidade...",
         tooltip: "Esta informação nos ajuda a entender seu volume atual de trabalho"
       },
       {
-        id: "situation_2", 
+        id: "situacao_2", 
         question: "Qual é o seu principal estilo de tatuagem e há quanto tempo atua profissionalmente?",
         placeholder: "Ex: Especializo-me em realismo há 8 anos, também faço blackwork...",
         tooltip: "Queremos conhecer sua especialização e experiência"
       },
       {
-        id: "situation_3",
+        id: "situacao_3",
         question: "Como você atualmente divulga seu trabalho e atrai novos clientes?",
         placeholder: "Ex: Uso principalmente Instagram, indicações de clientes, parcerias...",
         tooltip: "Entender seus canais de marketing atuais"
       }
     ]
   },
-  problem: {
+  problemas: {
     title: "❗ Problemas e Desafios",
     description: "Identifique os principais obstáculos que você enfrenta",
     color: "bg-orange-50 border-orange-200",
@@ -73,26 +73,26 @@ const spinSections = {
     icon: AlertTriangle,
     questions: [
       {
-        id: "problem_1",
+        id: "problemas_1",
         question: "Quais são os maiores desafios que você enfrenta para atrair novos clientes?",
         placeholder: "Ex: Dificuldade em alcançar meu público-alvo, concorrência alta...",
         tooltip: "Identificar obstáculos na aquisição de clientes"
       },
       {
-        id: "problem_2",
+        id: "problemas_2",
         question: "Você sente que está aproveitando todo o seu potencial de faturamento?",
         placeholder: "Ex: Às vezes aceito valores baixos para não perder cliente...",
         tooltip: "Entender desafios na precificação e aproveitamento do potencial"
       },
       {
-        id: "problem_3",
+        id: "problemas_3",
         question: "Há alguma área do seu trabalho que você gostaria de melhorar?",
         placeholder: "Ex: Gestão de tempo, técnicas específicas, relacionamento com clientes...",
         tooltip: "Identificar oportunidades de melhoria"
       }
     ]
   },
-  implication: {
+  implicacoes: {
     title: "⚠️ Impactos e Consequências",
     description: "Como esses problemas afetam seu crescimento",
     color: "bg-red-50 border-red-200",
@@ -100,20 +100,20 @@ const spinSections = {
     icon: TrendingDown,
     questions: [
       {
-        id: "implication_1",
+        id: "implicacoes_1",
         question: "Se esses desafios persistirem, qual o impacto no crescimento do seu estúdio a longo prazo?",
         placeholder: "Ex: Pode limitar meu crescimento, perder clientes para concorrência...",
         tooltip: "Avaliar consequências futuras dos problemas atuais"
       },
       {
-        id: "implication_2",
+        id: "implicacoes_2",
         question: "Como a falta de tempo para aprimoramento técnico afeta sua satisfação profissional?",
         placeholder: "Ex: Me sinto estagnado, não consigo evoluir minha arte...",
         tooltip: "Entender impacto pessoal e profissional"
       }
     ]
   },
-  need: {
+  necessidades: {
     title: "💡 Necessidades e Soluções",
     description: "Defina o cenário ideal para seu estúdio",
     color: "bg-green-50 border-green-200",
@@ -121,13 +121,13 @@ const spinSections = {
     icon: Target,
     questions: [
       {
-        id: "need_1",
+        id: "necessidades_1",
         question: "Se você pudesse resolver seus principais problemas, como isso impactaria seu dia a dia e seus resultados?",
         placeholder: "Ex: Teria mais tempo para me dedicar à arte, aumentaria meu faturamento...",
         tooltip: "Visualizar benefícios da solução"
       },
       {
-        id: "need_2",
+        id: "necessidades_2",
         question: "Qual seria o benefício de ter mais clientes que valorizam seu estilo artístico?",
         placeholder: "Ex: Maior satisfação no trabalho, melhor reconhecimento, preços justos...",
         tooltip: "Identificar valor da qualificação de clientes"
@@ -140,19 +140,23 @@ const SPINQuestionnaire: React.FC<SPINQuestionnaireProps> = ({
   responses, 
   onUpdate, 
   onSave, 
+  onSaveSection,
   isLoading = false 
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [localResponses, setLocalResponses] = useState<SPINResponses>(responses);
   const [expandedSections, setExpandedSections] = useState<SPINSectionState>({
-    situation: true, // Primeira seção expandida por padrão
-    problem: false,
-    implication: false,
-    need: false
+    situacao: true,
+    problemas: false,
+    implicacoes: false,
+    necessidades: false
   });
-  const [savingSection, setSavingSection] = useState<string | null>(null);
+  const [savingSections, setSavingSections] = useState<Record<string, boolean>>({});
 
-  // Calcular progresso de preenchimento
+  useEffect(() => {
+    setLocalResponses(responses);
+  }, [responses]);
+
   const totalQuestions = Object.values(spinSections).reduce((acc, section) => acc + section.questions.length, 0);
   const answeredQuestions = Object.keys(localResponses).filter(key => localResponses[key]?.trim()).length;
   const progressPercentage = Math.round((answeredQuestions / totalQuestions) * 100);
@@ -164,30 +168,25 @@ const SPINQuestionnaire: React.FC<SPINQuestionnaireProps> = ({
   };
 
   const handleSaveSection = async (sectionKey: string) => {
-    setSavingSection(sectionKey);
+    setSavingSections(prev => ({ ...prev, [sectionKey]: true }));
     
-    // Simular operação assíncrona
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const section = spinSections[sectionKey as keyof typeof spinSections];
+      const sectionAnswers: Record<string, string> = {};
       
-      toast({
-        title: "Seção salva com sucesso!",
-        description: `As respostas da seção "${spinSections[sectionKey as keyof typeof spinSections].title}" foram salvas.`,
+      section.questions.forEach(q => {
+        if (localResponses[q.id]) {
+          sectionAnswers[q.id] = localResponses[q.id];
+        }
       });
-    } catch (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: "Ocorreu um erro ao salvar as respostas. Tente novamente.",
-        variant: "destructive"
-      });
-    } finally {
-      setSavingSection(null);
-    }
-  };
 
-  const handleSaveAll = () => {
-    onSave();
-    setIsEditing(false);
+      const success = await onSaveSection(sectionKey, sectionAnswers);
+      
+    } catch (error) {
+      console.error('Erro ao salvar seção:', error);
+    } finally {
+      setSavingSections(prev => ({ ...prev, [sectionKey]: false }));
+    }
   };
 
   const toggleSection = (sectionKey: string) => {
@@ -222,7 +221,6 @@ const SPINQuestionnaire: React.FC<SPINQuestionnaireProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header com Progresso */}
       <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -249,7 +247,6 @@ const SPINQuestionnaire: React.FC<SPINQuestionnaireProps> = ({
             </div>
           </div>
 
-          {/* Barra de Progresso */}
           <div className="bg-white p-4 rounded-lg border border-red-200">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium text-red-700">Progresso do Diagnóstico</span>
@@ -265,7 +262,6 @@ const SPINQuestionnaire: React.FC<SPINQuestionnaireProps> = ({
         </CardContent>
       </Card>
 
-      {/* Controles de Edição */}
       {hasAnyResponses && !isEditing && (
         <div className="flex justify-between items-center">
           <p className="text-gray-600">
@@ -283,13 +279,13 @@ const SPINQuestionnaire: React.FC<SPINQuestionnaireProps> = ({
         </div>
       )}
 
-      {/* Seções SPIN Expansíveis */}
       {(!hasAnyResponses || isEditing) && (
         <div className="space-y-4">
           {Object.entries(spinSections).map(([sectionKey, section]) => {
             const sectionProgress = getSectionProgress(sectionKey);
             const isExpanded = expandedSections[sectionKey];
             const sectionHasResponses = section.questions.some(q => localResponses[q.id]?.trim());
+            const isSaving = savingSections[sectionKey];
 
             return (
               <Card key={sectionKey} className={`${section.color} shadow-lg transition-all duration-300`}>
@@ -349,15 +345,17 @@ const SPINQuestionnaire: React.FC<SPINQuestionnaireProps> = ({
                         </div>
                       ))}
                       
-                      {/* Botão de Salvar Seção */}
                       <div className="flex justify-center pt-4">
                         <Button
                           onClick={() => handleSaveSection(sectionKey)}
-                          disabled={savingSection === sectionKey}
+                          disabled={isSaving}
                           className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 rounded-lg"
                         >
-                          {savingSection === sectionKey ? (
-                            "Salvando..."
+                          {isSaving ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Salvando...
+                            </>
                           ) : (
                             <>
                               <Save className="h-4 w-4 mr-2" />
@@ -373,20 +371,25 @@ const SPINQuestionnaire: React.FC<SPINQuestionnaireProps> = ({
             );
           })}
 
-          {/* Botão de Salvar Tudo */}
           <div className="flex justify-center pt-4">
             <Button
-              onClick={handleSaveAll}
+              onClick={() => {
+                onSave();
+                setIsEditing(false);
+              }}
               disabled={isLoading}
               className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 rounded-lg"
               size="lg"
             >
               {isLoading ? (
-                "Salvando..."
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Salvar Diagnóstico Completo
+                  Finalizar Diagnóstico
                 </>
               )}
             </Button>
@@ -394,7 +397,6 @@ const SPINQuestionnaire: React.FC<SPINQuestionnaireProps> = ({
         </div>
       )}
 
-      {/* Resumo das Respostas (Modo Visualização) */}
       {hasAnyResponses && !isEditing && (
         <div className="space-y-4">
           {Object.entries(spinSections).map(([sectionKey, section]) => {
