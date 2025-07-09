@@ -1,4 +1,3 @@
-
 import { 
   collection, 
   doc, 
@@ -296,17 +295,27 @@ class FirestoreService {
       // Salvar diagnóstico se existir
       if (artist.diagnostico) {
         for (const [section, answers] of Object.entries(artist.diagnostico)) {
-          await this.saveSPINAnswers(section, answers);
+          const docRef = doc(db, `${this.getBasePath()}/${artist.userId}/diagnostico/spin_answers`);
+          const updateData: Partial<SPINAnswers> = {
+            [section]: answers,
+            ultimaAtualizacao: Timestamp.now()
+          };
+          await setDoc(docRef, updateData, { merge: true });
         }
       }
 
       // Salvar métricas mensais se existirem
       if (artist.metricasMensais) {
         for (const [monthYear, metrics] of Object.entries(artist.metricasMensais)) {
-          await this.saveMonthlyMetrics(monthYear, {
-            ...metrics,
+          const docRef = doc(db, `${this.getBasePath()}/${artist.userId}/metricasMensais/${monthYear}`);
+          const metricsData: MonthlyMetrics = {
+            tatuagensRealizadas: metrics.tatuagensRealizadas,
+            horasTrabalhadas: metrics.horasTrabalhadas,
+            valorTotalRecebido: metrics.valorTotalRecebido,
+            compartilhadoComunidade: metrics.compartilhadoComunidade,
             dataRegistro: Timestamp.now()
-          });
+          };
+          await setDoc(docRef, metricsData);
         }
       }
     }
