@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,9 @@ import {
   EyeOff,
   Trophy,
   Target,
-  Zap
+  Zap,
+  Calculator,
+  Coins
 } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 
@@ -84,12 +85,30 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
     return metrics.some(m => m.month === month && m.year === year && m.id !== excludeId);
   };
 
+  // Calcular métricas derivadas
+  const calculateDerivedMetrics = (metric: MonthlyMetric) => {
+    const avgPerTattoo = metric.tattoosCompleted > 0 
+      ? metric.monthlyRevenue / metric.tattoosCompleted 
+      : 0;
+    
+    const avgPerHour = metric.hoursWorked > 0 
+      ? metric.monthlyRevenue / metric.hoursWorked 
+      : 0;
+
+    return {
+      avgPerTattoo,
+      avgPerHour
+    };
+  };
+
   // Calcular comparativo com mês anterior
   const getComparison = (currentMetric: MonthlyMetric) => {
     const currentIndex = sortedMetrics.findIndex(m => m.id === currentMetric.id);
     if (currentIndex === -1 || currentIndex === sortedMetrics.length - 1) return null;
     
     const previousMetric = sortedMetrics[currentIndex + 1];
+    const currentDerived = calculateDerivedMetrics(currentMetric);
+    const previousDerived = calculateDerivedMetrics(previousMetric);
     
     return {
       tattoos: {
@@ -114,6 +133,22 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
         diff: currentMetric.monthlyRevenue - previousMetric.monthlyRevenue,
         percentage: previousMetric.monthlyRevenue > 0 
           ? Math.round(((currentMetric.monthlyRevenue - previousMetric.monthlyRevenue) / previousMetric.monthlyRevenue) * 100)
+          : 0
+      },
+      avgPerTattoo: {
+        current: currentDerived.avgPerTattoo,
+        previous: previousDerived.avgPerTattoo,
+        diff: currentDerived.avgPerTattoo - previousDerived.avgPerTattoo,
+        percentage: previousDerived.avgPerTattoo > 0 
+          ? Math.round(((currentDerived.avgPerTattoo - previousDerived.avgPerTattoo) / previousDerived.avgPerTattoo) * 100)
+          : 0
+      },
+      avgPerHour: {
+        current: currentDerived.avgPerHour,
+        previous: previousDerived.avgPerHour,
+        diff: currentDerived.avgPerHour - previousDerived.avgPerHour,
+        percentage: previousDerived.avgPerHour > 0 
+          ? Math.round(((currentDerived.avgPerHour - previousDerived.avgPerHour) / previousDerived.avgPerHour) * 100)
           : 0
       }
     };
@@ -240,11 +275,21 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
     return <div className={`${className} border border-gray-300 rounded-full`} />;
   };
 
-  const TrendBadge = ({ value, showPercentage = false }: { value: number; showPercentage?: boolean }) => {
+  const TrendBadge = ({ value, showPercentage = false, isCurrency = false }: { 
+    value: number; 
+    showPercentage?: boolean; 
+    isCurrency?: boolean;
+  }) => {
     const isPositive = value > 0;
     const isNegative = value < 0;
     
     if (value === 0) return null;
+
+    const displayValue = showPercentage 
+      ? `${Math.abs(value)}%` 
+      : isCurrency 
+        ? formatCurrency(Math.abs(value))
+        : `${value > 0 ? '+' : ''}${value}`;
 
     return (
       <Badge className={`ml-2 ${
@@ -253,7 +298,7 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
         'bg-gray-100 text-gray-800 border-gray-200'
       }`}>
         <TrendIcon value={value} className="h-3 w-3 mr-1" />
-        {showPercentage ? `${Math.abs(value)}%` : `${value > 0 ? '+' : ''}${value}`}
+        {displayValue}
       </Badge>
     );
   };
@@ -305,10 +350,13 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
                   </div>
                 </div>
                 <div>
-                  <Share2 className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                  <div className="text-sm text-gray-600">Compartilhados</div>
+                  <Calculator className="h-6 w-6 text-blue-600 mx-auto mb-1" />
+                  <div className="text-sm text-gray-600">Melhor Valor/Tatuagem</div>
                   <div className="font-bold text-blue-700">
-                    {metrics.filter(m => m.isShared).length}
+                    {formatCurrency(Math.max(...metrics.map(m => {
+                      const derived = calculateDerivedMetrics(m);
+                      return derived.avgPerTattoo;
+                    })))}
                   </div>
                 </div>
               </div>
@@ -387,7 +435,7 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
               </div>
 
               <div>
-                <Label>Faturamento Mensal (R$)</Label>
+                <Label>Faturamento Total (R$)</Label>
                 <Input
                   type="number"
                   min="0"
@@ -437,6 +485,7 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
           {sortedMetrics.map((metric, index) => {
             const monthName = months.find(m => m.value === metric.month)?.label;
             const comparison = getComparison(metric);
+            const derived = calculateDerivedMetrics(metric);
             const isCurrentMonth = index === 0;
 
             return (
@@ -493,7 +542,8 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    {/* Métricas Principais */}
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -550,6 +600,47 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
                       {comparison && (
                         <div className="text-xs text-gray-500 mt-1">
                           vs {formatCurrency(comparison.revenue.previous)} no mês anterior
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Novas Métricas Calculadas */}
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Calculator className="h-4 w-4 text-indigo-600" />
+                          <span className="text-sm text-gray-600">Valor/Tatuagem</span>
+                        </div>
+                        {comparison && (
+                          <TrendBadge value={comparison.avgPerTattoo.diff} isCurrency />
+                        )}
+                      </div>
+                      <div className="text-2xl font-bold text-indigo-700">
+                        {derived.avgPerTattoo > 0 ? formatCurrency(derived.avgPerTattoo) : 'N/A'}
+                      </div>
+                      {comparison && comparison.avgPerTattoo.previous > 0 && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          vs {formatCurrency(comparison.avgPerTattoo.previous)} no mês anterior
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Coins className="h-4 w-4 text-teal-600" />
+                          <span className="text-sm text-gray-600">Valor/Hora</span>
+                        </div>
+                        {comparison && (
+                          <TrendBadge value={comparison.avgPerHour.diff} isCurrency />
+                        )}
+                      </div>
+                      <div className="text-2xl font-bold text-teal-700">
+                        {derived.avgPerHour > 0 ? formatCurrency(derived.avgPerHour) : 'N/A'}
+                      </div>
+                      {comparison && comparison.avgPerHour.previous > 0 && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          vs {formatCurrency(comparison.avgPerHour.previous)} no mês anterior
                         </div>
                       )}
                     </div>
@@ -625,7 +716,7 @@ const MonthlyMetricsManager: React.FC<MonthlyMetricsManagerProps> = ({ metrics, 
               </div>
 
               <div>
-                <Label>Faturamento Mensal (R$)</Label>
+                <Label>Faturamento Total (R$)</Label>
                 <Input
                   type="number"
                   min="0"

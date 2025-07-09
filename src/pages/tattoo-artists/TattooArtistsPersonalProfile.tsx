@@ -79,33 +79,27 @@ const mockSmartGoal = {
   createdAt: "2024-11-15"
 };
 
-// Mock data para respostas SPIN expandidas
+// Mock data para respostas SPIN expandidas com salvamento por seção
 const mockSpinResponses = {
   // Situação
   situation_1: "Atualmente realizo entre 18 a 22 tatuagens por mês, variando conforme a complexidade. Nos meses de alta temporada consigo chegar a 25 tatuagens.",
   situation_2: "Sou especialista em realismo há 8 anos, também trabalho com blackwork e pontilhismo. Comecei como aprendiz e hoje tenho meu próprio estúdio.",
   situation_3: "Uso principalmente Instagram (@carlos.ink - 12k seguidores), indicações de clientes (60% dos novos clientes) e parcerias com outros estúdios da região.",
-  situation_4: "Meus valores variam de R$ 300 a R$ 1.200 por sessão, baseado no tempo estimado, complexidade e tamanho. Tenho tabela fixa para alguns estilos.",
   
-  // Problemas
+  // Problemas (parcialmente preenchidos para demonstrar salvamento por seção)
   problem_1: "Tenho dificuldade em alcançar clientes que realmente valorizam trabalho de qualidade. Muitos procuram pelo preço mais baixo, não pela qualidade.",
-  problem_2: "Às vezes aceito valores menores do que deveria para não perder o cliente, principalmente em épocas mais fracas do ano.",
-  problem_3: "Gestão de agenda é meu maior desafio. Ainda uso papel e WhatsApp, o que gera confusão e às vezes duplo agendamento.",
-  problem_4: "Gostaria de participar de mais convenções e cursos, mas é difícil conciliar com a agenda cheia e o investimento necessário.",
+  problem_2: "", // Vazio para demonstrar seção não completa
+  problem_3: "", // Vazio para demonstrar seção não completa
   
-  // Implicações
-  implication_1: "Se não conseguir atrair clientes que valorizam qualidade, posso ficar preso em um ciclo de baixa margem e muito volume, me desgastando fisicamente.",
-  implication_2: "Trabalhar por valores baixos não só afeta minha motivação, como também desvaloriza meu trabalho no mercado e compromete investimentos em equipamentos.",
-  implication_3: "A desorganização me faz perder tempo que poderia usar para tatuar ou me aperfeiçoar, além de dar impressão não profissional para os clientes.",
+  // Implicações (não preenchido para demonstrar seção colapsada)
+  // Vazio para demonstrar seção não salva
   
-  // Necessidades
+  // Necessidades (parcialmente preenchido)
   need_1: "Ideal seria ter agenda sempre cheia com clientes que procuram especificamente meu estilo, pagando o valor justo. Quero ser referência em realismo na região.",
-  need_2: "Preciso de um sistema de gestão de agenda, ferramentas de marketing digital mais eficazes e acesso a cursos online de técnicas avançadas.",
-  need_3: "Minha prioridade é aprender gestão empresarial, ter um sistema organizado e networking com outros profissionais para trocar experiências.",
-  need_4: "Uma comunidade me ajudaria com networking, troca de técnicas, indicações mútuas e apoio para participar de eventos juntos para dividir custos."
+  need_2: "" // Parcialmente preenchido
 };
 
-// Mock data para métricas mensais
+// Mock data para métricas mensais com novos cálculos
 const mockMonthlyMetrics = [
   {
     id: "metric_1",
@@ -116,6 +110,7 @@ const mockMonthlyMetrics = [
     monthlyRevenue: 8500,
     isShared: true,
     createdAt: "2024-12-01"
+    // Valor Médio/Tatuagem: R$ 386,36 | Valor/Hora: R$ 51,52
   },
   {
     id: "metric_2", 
@@ -126,6 +121,7 @@ const mockMonthlyMetrics = [
     monthlyRevenue: 7800,
     isShared: true,
     createdAt: "2024-11-01"
+    // Valor Médio/Tatuagem: R$ 390,00 | Valor/Hora: R$ 52,00
   },
   {
     id: "metric_3",
@@ -136,6 +132,7 @@ const mockMonthlyMetrics = [
     monthlyRevenue: 7200,
     isShared: false,
     createdAt: "2024-10-01"
+    // Valor Médio/Tatuagem: R$ 400,00 | Valor/Hora: R$ 51,43
   },
   {
     id: "metric_4",
@@ -146,6 +143,7 @@ const mockMonthlyMetrics = [
     monthlyRevenue: 9200,
     isShared: true,
     createdAt: "2024-09-01"
+    // Valor Médio/Tatuagem: R$ 368,00 | Valor/Hora: R$ 51,11
   },
   {
     id: "metric_5",
@@ -156,6 +154,18 @@ const mockMonthlyMetrics = [
     monthlyRevenue: 6400,
     isShared: false,
     createdAt: "2024-08-01"
+    // Valor Médio/Tatuagem: R$ 400,00 | Valor/Hora: R$ 53,33
+  },
+  {
+    id: "metric_6",
+    month: 7,
+    year: 2024,
+    tattoosCompleted: 24,
+    hoursWorked: 170,
+    monthlyRevenue: 8800,
+    isShared: true,
+    createdAt: "2024-07-01"
+    // Valor Médio/Tatuagem: R$ 366,67 | Valor/Hora: R$ 51,76
   }
 ];
 
