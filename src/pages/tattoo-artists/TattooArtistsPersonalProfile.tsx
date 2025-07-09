@@ -35,6 +35,8 @@ import ProfileProgressBar from "@/components/tattoo-artists/ProfileProgressBar";
 import ExpandedProfileForm from "@/components/tattoo-artists/ExpandedProfileForm";
 import SmartGoalForm from "@/components/tattoo-artists/SmartGoalForm";
 import SmartGoalDisplay from "@/components/tattoo-artists/SmartGoalDisplay";
+import SPINQuestionnaire from "@/components/tattoo-artists/SPINQuestionnaire";
+import MonthlyMetricsManager from "@/components/tattoo-artists/MonthlyMetricsManager";
 import { useProfileProgress } from "@/hooks/useProfileProgress";
 
 // Mock data expandido para o perfil
@@ -77,29 +79,85 @@ const mockSmartGoal = {
   createdAt: "2024-11-15"
 };
 
-// Mock data para diagnóstico SPIN
-const spinQuestions = {
-  situation: [
-    "Qual o volume médio de clientes que você atende por mês?",
-    "Quais ferramentas você utiliza atualmente para gerenciar seus agendamentos?",
-    "Como você atualmente divulga seu trabalho?"
-  ],
-  problem: [
-    "Quais são os maiores desafios que você enfrenta para atrair novos clientes?",
-    "Você tem dificuldades em precificar seu trabalho de forma justa?",
-    "Qual é a sua maior dificuldade no dia a dia do estúdio?"
-  ],
-  implication: [
-    "Como esses desafios impactam seu faturamento ou sua capacidade de crescer?",
-    "O que acontece se você não conseguir resolver esses problemas?",
-    "Qual o impacto da falta de organização no seu trabalho?"
-  ],
-  need: [
-    "Como seria o cenário ideal para o seu estúdio?",
-    "Quais recursos ou ferramentas poderiam te ajudar a superar esses desafios?",
-    "O que você mais precisa para atingir seus objetivos profissionais?"
-  ]
+// Mock data para respostas SPIN expandidas
+const mockSpinResponses = {
+  // Situação
+  situation_1: "Atualmente realizo entre 18 a 22 tatuagens por mês, variando conforme a complexidade. Nos meses de alta temporada consigo chegar a 25 tatuagens.",
+  situation_2: "Sou especialista em realismo há 8 anos, também trabalho com blackwork e pontilhismo. Comecei como aprendiz e hoje tenho meu próprio estúdio.",
+  situation_3: "Uso principalmente Instagram (@carlos.ink - 12k seguidores), indicações de clientes (60% dos novos clientes) e parcerias com outros estúdios da região.",
+  situation_4: "Meus valores variam de R$ 300 a R$ 1.200 por sessão, baseado no tempo estimado, complexidade e tamanho. Tenho tabela fixa para alguns estilos.",
+  
+  // Problemas
+  problem_1: "Tenho dificuldade em alcançar clientes que realmente valorizam trabalho de qualidade. Muitos procuram pelo preço mais baixo, não pela qualidade.",
+  problem_2: "Às vezes aceito valores menores do que deveria para não perder o cliente, principalmente em épocas mais fracas do ano.",
+  problem_3: "Gestão de agenda é meu maior desafio. Ainda uso papel e WhatsApp, o que gera confusão e às vezes duplo agendamento.",
+  problem_4: "Gostaria de participar de mais convenções e cursos, mas é difícil conciliar com a agenda cheia e o investimento necessário.",
+  
+  // Implicações
+  implication_1: "Se não conseguir atrair clientes que valorizam qualidade, posso ficar preso em um ciclo de baixa margem e muito volume, me desgastando fisicamente.",
+  implication_2: "Trabalhar por valores baixos não só afeta minha motivação, como também desvaloriza meu trabalho no mercado e compromete investimentos em equipamentos.",
+  implication_3: "A desorganização me faz perder tempo que poderia usar para tatuar ou me aperfeiçoar, além de dar impressão não profissional para os clientes.",
+  
+  // Necessidades
+  need_1: "Ideal seria ter agenda sempre cheia com clientes que procuram especificamente meu estilo, pagando o valor justo. Quero ser referência em realismo na região.",
+  need_2: "Preciso de um sistema de gestão de agenda, ferramentas de marketing digital mais eficazes e acesso a cursos online de técnicas avançadas.",
+  need_3: "Minha prioridade é aprender gestão empresarial, ter um sistema organizado e networking com outros profissionais para trocar experiências.",
+  need_4: "Uma comunidade me ajudaria com networking, troca de técnicas, indicações mútuas e apoio para participar de eventos juntos para dividir custos."
 };
+
+// Mock data para métricas mensais
+const mockMonthlyMetrics = [
+  {
+    id: "metric_1",
+    month: 12,
+    year: 2024,
+    tattoosCompleted: 22,
+    hoursWorked: 165,
+    monthlyRevenue: 8500,
+    isShared: true,
+    createdAt: "2024-12-01"
+  },
+  {
+    id: "metric_2", 
+    month: 11,
+    year: 2024,
+    tattoosCompleted: 20,
+    hoursWorked: 150,
+    monthlyRevenue: 7800,
+    isShared: true,
+    createdAt: "2024-11-01"
+  },
+  {
+    id: "metric_3",
+    month: 10,
+    year: 2024,
+    tattoosCompleted: 18,
+    hoursWorked: 140,
+    monthlyRevenue: 7200,
+    isShared: false,
+    createdAt: "2024-10-01"
+  },
+  {
+    id: "metric_4",
+    month: 9,
+    year: 2024,
+    tattoosCompleted: 25,
+    hoursWorked: 180,
+    monthlyRevenue: 9200,
+    isShared: true,
+    createdAt: "2024-09-01"
+  },
+  {
+    id: "metric_5",
+    month: 8,
+    year: 2024,
+    tattoosCompleted: 16,
+    hoursWorked: 120,
+    monthlyRevenue: 6400,
+    isShared: false,
+    createdAt: "2024-08-01"
+  }
+];
 
 // Mock data para conteúdo exclusivo
 const exclusiveContent = [
@@ -176,7 +234,8 @@ const TattooArtistsPersonalProfile = () => {
   const [profile, setProfile] = useState(mockProfileExpanded);
   const [smartGoal, setSmartGoal] = useState(mockSmartGoal); // Meta única
   const [isGoalFormOpen, setIsGoalFormOpen] = useState(false);
-  const [spinResponses, setSpinResponses] = useState({});
+  const [spinResponses, setSpinResponses] = useState(mockSpinResponses);
+  const [monthlyMetrics, setMonthlyMetrics] = useState(mockMonthlyMetrics);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [contentFilter, setContentFilter] = useState('all');
 
@@ -375,6 +434,24 @@ const TattooArtistsPersonalProfile = () => {
     }
   };
 
+  // Funções para gerenciar diagnóstico SPIN
+  const handleUpdateSpinResponses = (responses: typeof spinResponses) => {
+    setSpinResponses(responses);
+  };
+
+  const handleSaveSpinDiagnosis = () => {
+    // Simular salvamento
+    toast({
+      title: "Diagnóstico salvo com sucesso!",
+      description: "Suas respostas foram registradas e nossa equipe analisará suas necessidades.",
+    });
+  };
+
+  // Funções para gerenciar métricas mensais
+  const handleUpdateMonthlyMetrics = (metrics: typeof monthlyMetrics) => {
+    setMonthlyMetrics(metrics);
+  };
+
   const renderProfileSection = () => (
     <div className="space-y-6">
       {/* Barra de Progresso */}
@@ -548,54 +625,22 @@ const TattooArtistsPersonalProfile = () => {
   );
 
   const renderDiagnosisSection = () => (
-    <Card className="border-red-100">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-red-600">
-          <BarChart3 className="h-5 w-5" />
-          Diagnóstico Estratégico
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="bg-red-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-red-800 mb-2">SPIN Selling</h3>
-          <p className="text-red-700 text-sm">
-            Responda às perguntas abaixo para identificar oportunidades de crescimento 
-            e desenvolver estratégias personalizadas para seu estúdio.
-          </p>
-        </div>
+    <div className="space-y-8">
+      {/* Seção SPIN Questionnaire */}
+      <SPINQuestionnaire
+        responses={spinResponses}
+        onUpdate={handleUpdateSpinResponses}
+        onSave={handleSaveSpinDiagnosis}
+      />
 
-        {Object.entries(spinQuestions).map(([category, questions]) => (
-          <div key={category} className="space-y-4">
-            <h3 className="font-semibold text-gray-900 capitalize border-b border-red-100 pb-2">
-              {category === 'situation' && '📊 Situação'}
-              {category === 'problem' && '❗ Problema'}
-              {category === 'implication' && '⚠️ Implicação'}
-              {category === 'need' && '💡 Necessidade'}
-            </h3>
-            {questions.map((question, index) => (
-              <div key={index} className="space-y-2">
-                <Label className="text-sm font-medium">{question}</Label>
-                <Textarea
-                  placeholder="Sua resposta..."
-                  value={spinResponses[`${category}_${index}`] || ''}
-                  onChange={(e) => handleSpinResponse(category, index, e.target.value)}
-                  className="rounded-lg"
-                  rows={3}
-                />
-              </div>
-            ))}
-          </div>
-        ))}
+      <Separator className="my-8" />
 
-        <Button 
-          onClick={generateDiagnosisReport}
-          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg"
-        >
-          <Award className="h-4 w-4 mr-2" />
-          Gerar Relatório de Diagnóstico
-        </Button>
-      </CardContent>
-    </Card>
+      {/* Seção Monthly Metrics */}
+      <MonthlyMetricsManager
+        metrics={monthlyMetrics}
+        onUpdate={handleUpdateMonthlyMetrics}
+      />
+    </div>
   );
 
   const renderContentSection = () => (
