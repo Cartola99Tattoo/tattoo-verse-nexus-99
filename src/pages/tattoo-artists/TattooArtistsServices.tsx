@@ -1,174 +1,277 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users, BookOpen, Building, ArrowRight, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Star, Clock, Users, Shield, Zap, Award, CheckCircle, ArrowRight } from "lucide-react";
 import TattooArtistLayout from "@/components/layouts/TattooArtistLayout";
-import { useDataQuery } from "@/hooks/useDataQuery";
-import { getTattooArtistService } from "@/services/serviceFactory";
+
+const mockServices = [
+  {
+    id: 1,
+    name: "Tatuagem Realista",
+    description: "Técnica avançada de realismo com sombreados perfeitos e detalhes impressionantes",
+    price: "A partir de R$ 350",
+    duration: "4-8 horas",
+    difficulty: "Avançado",
+    popularity: 95,
+    image: "https://images.unsplash.com/photo-1564131072-6c4d41e23ba6?w=300&h=200&fit=crop",
+    features: [
+      "Consulta prévia gratuita",
+      "Desenho personalizado",
+      "Acompanhamento pós-tatuagem",
+      "Retoque gratuito em 30 dias"
+    ]
+  },
+  {
+    id: 2,
+    name: "Tatuagem Aquarela",
+    description: "Estilo único com cores vibrantes e efeitos de tinta aquarela",
+    price: "A partir de R$ 280",
+    duration: "3-6 horas",
+    difficulty: "Intermediário",
+    popularity: 87,
+    image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=300&h=200&fit=crop",
+    features: [
+      "Cores exclusivas importadas",
+      "Técnica especializada",
+      "Certificado de autenticidade",
+      "Garantia de qualidade"
+    ]
+  },
+  {
+    id: 3,
+    name: "Blackwork",
+    description: "Tatuagens em preto sólido com padrões geométricos e ornamentais",
+    price: "A partir de R$ 200",
+    duration: "2-5 horas",
+    difficulty: "Intermediário",
+    popularity: 82,
+    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop",
+    features: [
+      "Padrões únicos",
+      "Tinta premium",
+      "Desenho sob medida",
+      "Acabamento perfeito"
+    ]
+  },
+  {
+    id: 4,
+    name: "Fine Line",
+    description: "Tatuagens delicadas com traços finos e detalhes minimalistas",
+    price: "A partir de R$ 150",
+    duration: "1-3 horas",
+    difficulty: "Especializado",
+    popularity: 78,
+    image: "https://images.unsplash.com/photo-1565058379802-bbe93b2b2a98?w=300&h=200&fit=crop",
+    features: [
+      "Precisão milimétrica",
+      "Agulhas especiais",
+      "Cicatrização rápida",
+      "Estilo minimalista"
+    ]
+  }
+];
+
+const additionalServices = [
+  {
+    name: "Consultoria de Design",
+    description: "Criação de desenhos personalizados",
+    price: "R$ 100",
+    icon: <Award className="h-6 w-6" />
+  },
+  {
+    name: "Cobertura de Tatuagem",
+    description: "Renovação de tatuagens antigas",
+    price: "A partir de R$ 250",
+    icon: <Shield className="h-6 w-6" />
+  },
+  {
+    name: "Sessão de Retoque",
+    description: "Manutenção e ajustes",
+    price: "R$ 80",
+    icon: <Zap className="h-6 w-6" />
+  }
+];
 
 const TattooArtistsServices = () => {
-  const { data: services = [], loading } = useDataQuery(
-    () => getTattooArtistService().getConsultingServices(),
-    []
-  );
-
-  const serviceIcons = {
-    consultoria: Building,
-    treinamento: Users,
-    workshop: BookOpen,
-    digitalizacao: Building
-  };
-
-  const serviceColors = {
-    consultoria: 'from-blue-500 to-blue-600',
-    treinamento: 'from-green-500 to-green-600',
-    workshop: 'from-purple-500 to-purple-600',
-    digitalizacao: 'from-orange-500 to-orange-600'
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Iniciante': return 'bg-green-100 text-green-800';
+      case 'Intermediário': return 'bg-yellow-100 text-yellow-800';
+      case 'Avançado': return 'bg-red-100 text-red-800';
+      case 'Especializado': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
     <TattooArtistLayout>
       <div className="container mx-auto px-4 py-16">
-        <div className="text-center text-white mb-16">
-          <h1 className="text-5xl font-bold mb-6">
-            Nossos
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-red-600"> Serviços</span>
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-white mb-4">
+            Nossos <span className="text-red-400">Serviços</span>
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Consultoria especializada, treinamentos e workshops para elevar seu negócio na tatuagem
+            Descubra os serviços de tatuagem oferecidos pelos melhores profissionais da rede 99Tattoo
           </p>
         </div>
 
-        {loading ? (
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {[...Array(4)].map((_, index) => (
-              <Card key={index} className="bg-white/95 backdrop-blur-sm animate-pulse">
-                <CardContent className="p-8">
-                  <div className="h-12 w-12 bg-gray-200 rounded-lg mb-4"></div>
-                  <div className="h-6 bg-gray-200 rounded mb-4"></div>
-                  <div className="h-16 bg-gray-200 rounded mb-6"></div>
-                  <div className="h-10 bg-gray-200 rounded"></div>
+        {/* Serviços Principais */}
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
+          {mockServices.map((service) => (
+            <Card key={service.id} className="bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:scale-105">
+              <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-t-lg overflow-hidden">
+                <img 
+                  src={service.image} 
+                  alt={service.name}
+                  className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                />
+              </div>
+              
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <CardTitle className="text-xl font-bold text-gray-900">
+                    {service.name}
+                  </CardTitle>
+                  <Badge className={getDifficultyColor(service.difficulty)}>
+                    {service.difficulty}
+                  </Badge>
+                </div>
+                
+                <p className="text-gray-600 mb-4">
+                  {service.description}
+                </p>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="font-semibold text-red-600">{service.price}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock className="h-4 w-4" />
+                    {service.duration}
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Popularidade</span>
+                    <span className="text-sm font-medium">{service.popularity}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-red-600 to-red-700 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${service.popularity}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-2">Incluso no serviço:</h4>
+                  <ul className="space-y-2">
+                    {service.features.map((feature, index) => (
+                      <li key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <Button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white">
+                  Agendar Consulta
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Serviços Adicionais */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-white mb-8 text-center">Serviços Adicionais</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {additionalServices.map((service, index) => (
+              <Card key={index} className="bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:scale-105">
+                <CardContent className="p-6 text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="p-3 bg-red-100 text-red-600 rounded-full">
+                      {service.icon}
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{service.name}</h3>
+                  <p className="text-gray-600 text-sm mb-4">{service.description}</p>
+                  <div className="text-xl font-bold text-red-600 mb-4">{service.price}</div>
+                  <Button variant="outline" className="w-full border-red-500 text-red-500 hover:bg-red-50">
+                    Solicitar
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-16">
-            {services.map((service) => {
-              const IconComponent = serviceIcons[service.type as keyof typeof serviceIcons];
-              const colorClass = serviceColors[service.type as keyof typeof serviceColors];
-              
-              return (
-                <Card key={service.id} className="bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:scale-105 group">
-                  <CardHeader className="pb-4">
-                    <div className={`w-12 h-12 bg-gradient-to-r ${colorClass} rounded-lg flex items-center justify-center mb-4`}>
-                      <IconComponent className="h-6 w-6 text-white" />
-                    </div>
-                    <CardTitle className="text-2xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
-                      {service.title}
-                    </CardTitle>
-                    <Badge className={`w-fit bg-gradient-to-r ${colorClass} text-white text-sm font-medium`}>
-                      {service.type.charAt(0).toUpperCase() + service.type.slice(1)}
-                    </Badge>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 mb-6 leading-relaxed">{service.description}</p>
-                    
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center text-gray-600">
-                        <Clock className="h-4 w-4 mr-2 text-red-500" />
-                        <span className="font-medium">Duração:</span>
-                        <span className="ml-2">{service.duration}</span>
-                      </div>
-                      
-                      {service.requirements && service.requirements.length > 0 && (
-                        <div>
-                          <div className="font-medium text-gray-700 mb-2">Requisitos:</div>
-                          <ul className="space-y-1">
-                            {service.requirements.map((req, index) => (
-                              <li key={index} className="flex items-start text-sm text-gray-600">
-                                <CheckCircle className="h-4 w-4 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
-                                {req}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="border-t pt-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <div className="text-2xl font-bold text-red-600">R$ {service.price}</div>
-                          <div className="text-sm text-gray-500">Investimento</div>
-                        </div>
-                        <Badge variant="outline" className="text-green-600 border-green-300">
-                          {service.available_slots?.length || 0} vagas disponíveis
-                        </Badge>
-                      </div>
-                      
-                      <Button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold">
-                        Solicitar Consultoria
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Seção de Benefícios */}
-        <div className="mb-16">
-          <Card className="bg-red-600/10 border-red-500/30">
-            <CardContent className="p-8">
-              <h2 className="text-3xl font-bold text-white mb-8 text-center">Por que Escolher Nossos Serviços?</h2>
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">Experiência Comprovada</h3>
-                  <p className="text-gray-300">Mais de 10 anos ajudando tatuadores a crescerem no mercado</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <BookOpen className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">Metodologia Exclusiva</h3>
-                  <p className="text-gray-300">Abordagem personalizada para cada perfil profissional</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">Resultados Garantidos</h3>
-                  <p className="text-gray-300">Acompanhamento contínuo e suporte pós-consultoria</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
+
+        {/* Diferenciais */}
+        <Card className="mb-16 bg-gradient-to-r from-red-600/10 to-red-700/10 border-red-500/20">
+          <CardContent className="p-8">
+            <h2 className="text-3xl font-bold text-white mb-8 text-center">Por que escolher a 99Tattoo?</h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-4 bg-red-100 text-red-600 rounded-full">
+                    <Users className="h-8 w-8" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Profissionais Certificados</h3>
+                <p className="text-gray-300">
+                  Todos os nossos tatuadores possuem certificação e anos de experiência comprovada
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-4 bg-red-100 text-red-600 rounded-full">
+                    <Shield className="h-8 w-8" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Segurança Total</h3>
+                <p className="text-gray-300">
+                  Materiais esterilizados, ambiente higienizado e protocolos de segurança rigorosos
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-4 bg-red-100 text-red-600 rounded-full">
+                    <Star className="h-8 w-8" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Qualidade Garantida</h3>
+                <p className="text-gray-300">
+                  Garantia em todos os trabalhos e acompanhamento completo do processo de cicatrização
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Call to Action */}
         <div className="text-center">
-          <Card className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 border-none max-w-4xl mx-auto">
-            <CardContent className="p-12">
-              <h2 className="text-4xl font-bold text-white mb-6">Pronto para Transformar Seu Negócio?</h2>
-              <p className="text-xl text-red-100 mb-8 max-w-2xl mx-auto">
-                Entre em contato conosco e descubra como podemos ajudar você a alcançar seus objetivos profissionais
+          <Card className="bg-gradient-to-r from-red-600/10 to-red-700/10 border-red-500/20 max-w-2xl mx-auto">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Pronto para sua próxima tatuagem?
+              </h3>
+              <p className="text-gray-300 mb-6">
+                Entre em contato conosco e agende uma consulta gratuita para discutir seu projeto
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-white text-red-600 hover:bg-red-50 font-bold">
-                  <Users className="h-5 w-5 mr-2" />
-                  Agendar Conversa
+              <div className="flex gap-4 justify-center">
+                <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white">
+                  Agendar Consulta
                 </Button>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                  Ver Depoimentos
-                  <ArrowRight className="h-5 w-5 ml-2" />
+                <Button variant="outline" className="border-white text-white hover:bg-white/10">
+                  Ver Portfólio
                 </Button>
               </div>
             </CardContent>
