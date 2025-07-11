@@ -1,0 +1,105 @@
+
+/* 99Tattoo Visual Identity Patterns */
+
+/* Section Background Alternating Pattern */
+.section-pattern-white {
+  @apply bg-gradient-to-b from-white to-gray-50;
+}
+
+.section-pattern-red {
+  @apply bg-gradient-to-b from-red-50 to-red-100;
+}
+
+.section-pattern-dark {
+  @apply bg-gradient-to-b from-gray-900 to-black;
+}
+
+.section-pattern-red-intense {
+  @apply bg-gradient-to-br from-red-600 via-red-700 to-red-800;
+}
+
+/* Section Separators with Red Gradients */
+.section-separator-red {
+  @apply h-4 bg-gradient-to-r from-red-600 to-red-800 shadow-lg;
+}
+
+.section-separator-red-thick {
+  @apply h-8 bg-gradient-to-r from-red-600 to-red-800 shadow-xl;
+}
+
+.section-separator-red-gradient {
+  @apply h-6 bg-gradient-to-r from-red-600 via-red-700 to-red-800 shadow-lg;
+}
+
+/* Enhanced Interactive Elements */
+.tattoo-button-primary {
+  @apply bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 
+         text-white shadow-lg hover:shadow-xl transition-all duration-300 
+         transform hover:scale-105 hover:shadow-red-glow;
+}
+
+.tattoo-button-secondary {
+  @apply bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 
+         text-white shadow-lg hover:shadow-xl transition-all duration-300 
+         transform hover:scale-105;
+}
+
+.tattoo-card-enhanced {
+  @apply bg-gradient-to-br from-white to-red-50 border-red-200 shadow-xl 
+         hover:shadow-2xl hover:shadow-red-glow transition-all duration-300 
+         transform hover:scale-[1.02] hover:-translate-y-1;
+}
+
+.tattoo-card-dark {
+  @apply bg-gradient-to-br from-gray-900 to-black border-gray-800 text-white
+         shadow-xl hover:shadow-2xl transition-all duration-300 
+         transform hover:scale-[1.02];
+}
+
+.tattoo-input-enhanced {
+  @apply border-red-200 focus:border-red-600 focus:ring-2 focus:ring-red-200 
+         focus:shadow-lg transition-all duration-300 bg-white/90;
+}
+
+/* Title Styling */
+.tattoo-title-red {
+  @apply text-red-600 font-bold bg-gradient-to-r from-red-600 to-red-800 
+         bg-clip-text text-transparent;
+}
+
+.tattoo-title-gradient {
+  background: linear-gradient(135deg, #dc2626, #ef4444, #f87171);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  @apply font-bold;
+}
+
+/* Animated Elements */
+.tattoo-fade-in {
+  @apply animate-fade-in;
+}
+
+.tattoo-hover-lift {
+  @apply transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-xl;
+}
+
+.tattoo-hover-glow {
+  @apply transition-all duration-300 hover:shadow-red-glow;
+}
+
+/* Loading States */
+.tattoo-loading {
+  @apply animate-pulse bg-gradient-to-r from-red-200 via-red-300 to-red-200 
+         bg-[length:200%_100%] animate-shimmer;
+}
+
+/* Navigation Elements */
+.tattoo-nav-link {
+  @apply text-white hover:text-red-300 transition-all duration-300 
+         hover:bg-red-600/20 px-3 py-2 rounded-md;
+}
+
+.tattoo-nav-active {
+  @apply text-red-300 bg-red-600/20 font-medium;
+}
