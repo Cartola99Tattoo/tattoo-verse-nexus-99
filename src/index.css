@@ -1,0 +1,8 @@
+
+/* Import modular CSS files for better organization */
+@import './styles/base.css';
+@import './styles/utilities.css';
+@import './styles/gradients.css';
+@import './styles/components.css';
+@import './styles/interactive.css';
+@import './styles/tattoo-patterns.css';

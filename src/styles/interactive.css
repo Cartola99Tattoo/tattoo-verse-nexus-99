@@ -1,0 +1,67 @@
+
+/* Interactive Elements with 99Tattoo styling */
+.interactive-element {
+  @apply transition-all duration-300 cursor-pointer;
+}
+
+.interactive-element:hover {
+  @apply transform scale-105 shadow-xl;
+}
+
+.artist-card {
+  @apply card-enhanced hover:shadow-red-glow;
+}
+
+.product-card {
+  @apply card-elevated hover:shadow-red-glow;
+}
+
+.blog-card {
+  @apply card-enhanced hover:shadow-2xl;
+}
+
+.event-card {
+  @apply card-red-accent hover:shadow-2xl;
+}
+
+/* Form Enhancements */
+.form-input-enhanced {
+  @apply border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:shadow-lg transition-all duration-300;
+}
+
+.form-textarea-enhanced {
+  @apply border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:shadow-lg transition-all duration-300 resize-none;
+}
+
+/* Text Gradient Effects */
+.text-gradient-red {
+  background: linear-gradient(135deg, #dc2626, #ef4444, #f87171);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-dark {
+  background: linear-gradient(135deg, #000000, #374151, #6b7280);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hero Section Specific Styles */
+.hero-gradient {
+  @apply bg-gradient-to-br from-black via-gray-900 to-red-900;
+}
+
+.hero-overlay {
+  @apply bg-gradient-to-t from-black/70 via-transparent to-black/30;
+}
+
+/* Section Dividers */
+.section-divider {
+  @apply bg-gradient-to-r from-transparent via-red-500 to-transparent h-px;
+}
+
+.section-divider-dark {
+  @apply bg-gradient-to-r from-transparent via-gray-600 to-transparent h-px;
+}
